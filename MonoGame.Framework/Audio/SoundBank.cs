@@ -33,9 +33,11 @@ namespace Microsoft.Xna.Framework.Audio
 {
     public class SoundBank : IDisposable
     {
+        internal AudioEngine audioengine;
+        
         string name;
 		string filename;
-		AudioEngine audioengine;
+        
 		WaveBank[] waveBanks;
 		Dictionary<string, Cue> cues = new Dictionary<string, Cue>();
         
@@ -74,7 +76,7 @@ namespace Microsoft.Xna.Framework.Audio
 					
 					uint toolVersion = soundbankreader.ReadUInt16 ();
 					uint formatVersion = soundbankreader.ReadUInt16 ();
-					if (formatVersion != 46) {
+					if (toolVersion != 46) {
 #if DEBUG
 						Console.WriteLine ("Warning: SoundBank format not supported");
 #endif
@@ -127,9 +129,13 @@ namespace Microsoft.Xna.Framework.Audio
 						uint soundOffset = soundbankreader.ReadUInt32 ();
 						XactSound sound = new XactSound(this, soundbankreader, soundOffset);
 						Cue cue = new Cue(audioengine, cueNames[i], sound);
+                        
+                        audioengine.categories[sound.category].categoryCues.Add(cue);
 						
 						cues.Add(cue.Name, cue);
 					}
+                    
+                    // FIXME: AudioCategories for ComplexCues.
 					
 					soundbankstream.Seek (complexCuesOffset, SeekOrigin.Begin);
 					for (int i=0; i<numComplexCues; i++) {
@@ -196,7 +202,7 @@ namespace Microsoft.Xna.Framework.Audio
 							
 							soundbankstream.Seek (savepos, SeekOrigin.Begin);
 							
-							cue = new Cue(cueNames[numSimpleCues+i], cueSounds, probs);
+							cue = new Cue(audioengine, cueNames[numSimpleCues+i], cueSounds, probs);
 						}
 						
 						//Instance Limit
@@ -208,6 +214,8 @@ namespace Microsoft.Xna.Framework.Audio
 					}
 				}
 			}
+            
+            audioengine.SoundBanks.Add(this);
 			
 			loaded = true;
         }
@@ -232,8 +240,18 @@ namespace Microsoft.Xna.Framework.Audio
 		
 		public void PlayCue (string name, AudioListener listener, AudioEmitter emitter)
 		{
-			throw new NotImplementedException();
+            var musicCue = GetCue(name);
+            musicCue.Apply3D(listener, emitter);
+            musicCue.Play();
 		}
+        
+        internal void Update()
+        {
+            foreach(KeyValuePair<string, Cue> curCue in cues)
+            {
+                curCue.Value.Update();
+            }
+        }
 
 		#region IDisposable implementation
 		public void Dispose ()

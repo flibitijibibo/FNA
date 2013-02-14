@@ -60,6 +60,9 @@ namespace Microsoft.Xna.Framework.Audio
 		private OALSoundBuffer soundBuffer;
 		private OpenALSoundController controller;
 		private SoundEffect soundEffect;
+        
+        // Used to prevent outdated positional audio data from being used
+        private bool positionalAudio;
 
 		float _volume = 1.0f;
 		bool _looped = false;
@@ -92,6 +95,8 @@ namespace Microsoft.Xna.Framework.Audio
 			soundBuffer = new OALSoundBuffer ();			
 			soundBuffer.Reserved += HandleSoundBufferReserved;
 			soundBuffer.Recycled += HandleSoundBufferRecycled;                        
+            
+            positionalAudio = false;
 		}
 
         protected void BindDataBuffer(byte[] data, ALFormat format, int size, int rate)
@@ -150,11 +155,17 @@ namespace Microsoft.Xna.Framework.Audio
 				finalPos = Vector3.Transform(finalPos, orientation);
 				Vector3 finalVel = emitter.Velocity;
 				finalVel = Vector3.Transform(finalVel, orientation);
+             
+                // FIXME: This is totally arbitrary. I dunno the exact ratio here.
+                finalPos /= 100.0f;
+                finalVel /= 100.0f;
 				
 				// set the position based on relative positon
 				AL.Source(sourceId, ALSource3f.Position, finalPos.X, finalPos.Y, finalPos.Z);
 				AL.Source(sourceId, ALSource3f.Velocity, finalVel.X, finalVel.Y, finalVel.Z);
 			}
+            
+            positionalAudio = true;
 		}
 
 		public void Pause ()
@@ -180,8 +191,15 @@ namespace Microsoft.Xna.Framework.Audio
 			// Distance Model
 			AL.DistanceModel (ALDistanceModel.InverseDistanceClamped);
 			// Listener
-			// Pan
-			AL.Source (sourceId, ALSource3f.Position, _pan, 0, 0.1f);
+			// Pan/Position
+            if (positionalAudio)
+            {
+			    positionalAudio = false;
+            }
+            else
+            {
+                AL.Source (sourceId, ALSource3f.Position, _pan, 0, 0.1f);
+            }
 			// Volume
 			AL.Source (sourceId, ALSourcef.Gain, _volume * SoundEffect.MasterVolume);
 			// Looping

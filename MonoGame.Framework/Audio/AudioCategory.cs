@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Microsoft.Xna.Framework.Audio
@@ -14,6 +15,8 @@ namespace Microsoft.Xna.Framework.Audio
 
 		internal bool instanceLimit;
 		internal int maxInstances;
+        
+        internal List<Cue> categoryCues;
 
 		//insatnce limiting behaviour
 		internal enum MaxInstanceBehaviour {
@@ -39,6 +42,8 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			this.name = name;
 			engine = audioengine;
+            
+            categoryCues = new List<Cue>();
 
 			maxInstances = reader.ReadByte ();
 			instanceLimit = maxInstances != 0xff;
@@ -77,27 +82,48 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public void Pause ()
 		{
-			throw new NotImplementedException ();
+			foreach(Cue curCue in categoryCues)
+            {
+                curCue.Pause();
+            }
 		}
 
 		public void Resume ()
 		{
-			throw new NotImplementedException ();
+            foreach(Cue curCue in categoryCues)
+            {
+                curCue.Resume();
+            }
 		}
 
 		public void Stop ()
 		{
-			throw new NotImplementedException ();
+            foreach(Cue curCue in categoryCues)
+            {
+                curCue.Stop(AudioStopOptions.AsAuthored);
+            }
 		}
 
-		public void SetVolume(float volume) {
-			throw new NotImplementedException();
+		public void Stop (AudioStopOptions option)
+		{
+            foreach(Cue curCue in categoryCues)
+            {
+                curCue.Stop(option);
+            }
+		}
+		public void SetVolume(float volume)
+        {
+            foreach(Cue curCue in categoryCues)
+            {
+                curCue.SetVariable("CategoryVolume", volume);
+            }
 		}
 
 		
 		public bool Equals(AudioCategory other)
 		{
-			throw new NotImplementedException();
+            // FIXME: Not actually thorough!
+            return name == other.name;
 		}
 		
 	}

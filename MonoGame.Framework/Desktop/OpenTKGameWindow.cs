@@ -261,8 +261,10 @@ namespace Microsoft.Xna.Framework
             window.Keyboard.KeyDown += new EventHandler<OpenTK.Input.KeyboardKeyEventArgs>(Keyboard_KeyDown);
             window.Keyboard.KeyUp += new EventHandler<OpenTK.Input.KeyboardKeyEventArgs>(Keyboard_KeyUp);                        
             
+            // FIXME: Window icon. Do we really need libgdiplus?
+            
             // Set the window icon.
-            window.Icon = Icon.ExtractAssociatedIcon(Assembly.GetEntryAssembly().Location);
+            // window.Icon = Icon.ExtractAssociatedIcon(Assembly.GetEntryAssembly().Location);
 
             updateClientBounds = false;
             clientBounds = new Rectangle(window.ClientRectangle.X, window.ClientRectangle.Y,
@@ -318,10 +320,21 @@ namespace Microsoft.Xna.Framework
 
         internal void ChangeClientBounds(Rectangle clientBounds)
         {
-            if (!updateClientBounds)
+            // FIXME: This entire function is probably a hack. -flibit
+            //if (!updateClientBounds)
             {
+                // Unlock the window...
+                AllowUserResizing = true;
+                
+                // Set the variables...
                 updateClientBounds = true;
                 this.clientBounds = clientBounds;
+                
+                // Actually change the window size...
+                window.ClientSize = new Size(clientBounds.Width, clientBounds.Height);
+                
+                // ... and lock again. We out.
+                AllowUserResizing = false;
             }
         }
 

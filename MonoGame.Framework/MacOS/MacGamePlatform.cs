@@ -112,6 +112,9 @@ namespace Microsoft.Xna.Framework
                 // We set the current directory to the ResourcePath on Mac
                 Directory.SetCurrentDirectory(NSBundle.MainBundle.ResourcePath);
             }
+            
+            Tao.Sdl.Sdl.SDL_InitSubSystem(Tao.Sdl.Sdl.SDL_INIT_AUDIO);
+            Tao.Sdl.SdlMixer.Mix_OpenAudio(44100, (short) Tao.Sdl.Sdl.AUDIO_S16SYS, 2, 1024);
         }
 
         private void InitializeMainWindow()
@@ -238,6 +241,8 @@ namespace Microsoft.Xna.Framework
                 var windowController = (NSWindowController)_mainWindow.WindowController;
                 windowController.Close();
             }
+            
+            Tao.Sdl.SdlMixer.Mix_CloseAudio();
         }
 
         public override void StartRunLoop()
@@ -300,7 +305,10 @@ namespace Microsoft.Xna.Framework
                 if (oldTitle != null)
                     _gameWindow.Title = oldTitle;
 
-                _mainWindow.IsVisible = false;
+                // FIXME: Uh, what the hell was this line? -flibit
+                // _mainWindow.IsVisible = false;
+
+
                 // FIXME: EnterFullScreen gets called very early and interferes
                 //        with Synchronous mode, so disabling this for now.
                 //        Hopefully this does not cause excessive havoc.
@@ -310,6 +318,9 @@ namespace Microsoft.Xna.Framework
                 Mouse.State.LeftButton = ButtonState.Released;
                 Mouse.State.RightButton = ButtonState.Released;
                 Mouse.State.MiddleButton = ButtonState.Released;
+
+                // We need to keep mouse focus!
+                Window.Window.MakeFirstResponder(Window);
             }
             finally { ResumeUpdatingAndDrawing(); }
         }
@@ -343,7 +354,9 @@ namespace Microsoft.Xna.Framework
                 // Set the level here to normal
                 _mainWindow.Level = NSWindowLevel.Normal;
 
-                _mainWindow.IsVisible = false;
+                // FIXME: Uh, what the hell was this line? -flibit
+                // _mainWindow.IsVisible = false;
+
                 // FIXME: EnterFullScreen gets called very early and interferes
                 //        with Synchronous mode, so disabling this for now.
                 //        Hopefully this does not cause excessive havoc.
@@ -353,6 +366,9 @@ namespace Microsoft.Xna.Framework
                 Mouse.State.LeftButton = ButtonState.Released;
                 Mouse.State.RightButton = ButtonState.Released;
                 Mouse.State.MiddleButton = ButtonState.Released;
+
+                // We need to keep mouse focus!
+                Window.Window.MakeFirstResponder(Window);
             }
             finally { ResumeUpdatingAndDrawing(); }
         }

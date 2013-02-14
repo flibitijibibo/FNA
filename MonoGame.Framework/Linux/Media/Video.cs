@@ -49,12 +49,16 @@ namespace Microsoft.Xna.Framework.Media
     {
 		private string _fileName;
 		private Color _backColor = Color.Black;
-		// TODO private MPMoviePlayerViewController _view;
 		
 		internal Video(string FileName)
 		{
+#if MONOMAC
 			_fileName = FileName;
-			Prepare();
+#else
+			// FIXME: Force .ogv extension
+			_fileName = FileName.Substring(0, FileName.LastIndexOf('.'));
+			_fileName += ".ogv";
+#endif
 		}
 				
 		public Color BackgroundColor
@@ -80,8 +84,10 @@ namespace Microsoft.Xna.Framework.Media
 		internal static string Normalize(string FileName)
 		{
 			if (File.Exists(FileName))
+            {
 				return FileName;
-			
+			}
+            
 			// Check the file extension
 			if (!string.IsNullOrEmpty(Path.GetExtension(FileName)))
 			{
@@ -89,45 +95,16 @@ namespace Microsoft.Xna.Framework.Media
 			}
 			
 			// Concat the file name with valid extensions
-			if (File.Exists(FileName+".mp4"))
-				return FileName+".mp4";
-			if (File.Exists(FileName+".mov"))
-				return FileName+".mov";
-			if (File.Exists(FileName+".avi"))
-				return FileName+".avi";
-			if (File.Exists(FileName+".m4v"))
-				return FileName+".m4v";
-			
+			if (File.Exists(FileName + ".ogv"))
+				return FileName + ".ogv";
+			if (File.Exists(FileName + ".ogg"))
+				return FileName + ".ogg";
 			
 			return null;
 		}
 		
-		internal void Prepare()
-		{
-			/* TODO _view = new MPMoviePlayerViewController(new NSUrl(FileName));
-			_view.MoviePlayer.ScalingMode = MPMovieScalingMode.AspectFill;
-			_view.MoviePlayer.MovieControlMode = MPMovieControlMode.Hidden;
-			_view.MoviePlayer.PrepareToPlay();
-			
-			Vector4 color = BackgroundColor.ToVector4();
-			_view.MoviePlayer.BackgroundColor = new MonoTouch.UIKit.UIColor(color.X,color.Y,color.Z,color.W); */
-		}
-		
-		/* TODO internal MPMoviePlayerViewController MovieView
-		{
-			get
-			{
-				return _view;
-			}
-		} */
-		
 		public void Dispose()
 		{
-			/* TODO if (_view != null)
-			{
-				_view.Dispose();
-				_view = null;
-			} */
 		}
     }
 }

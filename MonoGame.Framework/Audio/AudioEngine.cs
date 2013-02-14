@@ -51,11 +51,13 @@ namespace Microsoft.Xna.Framework.Audio
 		public const int ContentVersion = 46;
 		
 		internal Dictionary<string, WaveBank> Wavebanks = new Dictionary<string, WaveBank>();
+        
+        internal List<SoundBank> SoundBanks = new List<SoundBank>();
 
-		AudioCategory[] categories;
+		internal AudioCategory[] categories;
 		Dictionary<string, int> categoryLookup = new Dictionary<string, int>();
 
-		struct Variable {
+		internal struct Variable {
 			public string name;
 			public float value;
 
@@ -68,35 +70,35 @@ namespace Microsoft.Xna.Framework.Audio
 			public float maxValue;
 			public float minValue;
 		}
-		Variable[] variables;
+		internal Variable[] variables;
 		Dictionary<string, int> variableLookup = new Dictionary<string, int>();
 
 
-		enum RpcPointType {
+		internal enum RpcPointType {
 			Linear,
 			Fast,
 			Slow,
 			SinCos
 		}
-		struct RpcPoint {
+		internal struct RpcPoint {
 			public float x, y;
 			public RpcPointType type;
 		}
 
-		enum RpcParameter {
+		internal enum RpcParameter {
 			Volume,
 			Pitch,
 			ReverbSend,
 			FilterFrequency,
 			FilterQFactor
 		}
-		struct RpcCurve {
+		internal struct RpcCurve {
 			public int variable;
 			public RpcParameter parameter;
 			public RpcPoint[] points;
 		}
 
-		RpcCurve[] rpcCurves;
+		internal RpcCurve[] rpcCurves;
 
 
 
@@ -231,7 +233,10 @@ namespace Microsoft.Xna.Framework.Audio
 		
 		public void Update ()
 		{
-			// TODO throw new NotImplementedException ();
+			foreach (SoundBank curBank in SoundBanks)
+            {
+                curBank.Update();
+            }
 		}
 		
 		public AudioCategory GetCategory (string name)
@@ -246,7 +251,8 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public void SetGlobalVariable (string name, float value)
 		{
-			variables [variableLookup [name]].value = value;
+            if (variableLookup.ContainsKey(name))
+			    variables [variableLookup [name]].value = value;
 		}
 		
 		#region IDisposable implementation

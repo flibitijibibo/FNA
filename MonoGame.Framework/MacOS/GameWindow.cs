@@ -640,6 +640,14 @@ namespace Microsoft.Xna.Framework
 			
 			switch (theEvent.Type) {
 				case NSEventType.ScrollWheel:
+					if (theEvent.RespondsToSelector(new Selector("hasPreciseScrollingDeltas"))) {
+						if (theEvent.HasPreciseScrollingDeltas) {
+							if (	theEvent.Phase != NSEventPhase.Began &&
+								theEvent.Phase != NSEventPhase.Changed	) {
+								break; // All of this just to ignore gestures. %&#@%@^
+							}
+						}
+					}
 					if (theEvent.DeltaY > 0) {
 						Mouse.ScrollWheelValue += (theEvent.DeltaY*0.1f+0.09f)*1200;
 					} else {

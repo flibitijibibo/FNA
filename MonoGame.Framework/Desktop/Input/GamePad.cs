@@ -47,6 +47,42 @@ using System.Xml.Serialization;
 
 namespace Microsoft.Xna.Framework.Input
 {
+    // FIXME: Uhhh, these structs really shouldn't be public.
+    
+    [Serializable]
+    public struct MonoGameJoystickValue
+    {
+        public InputType INPUT_TYPE;
+        public int INPUT_ID;
+        public bool INPUT_INVERT;
+    }
+    
+    [Serializable]
+    public struct MonoGameJoystickConfig
+    {
+        // public MonoGameJoystickValue BUTTON_GUIDE;
+        public MonoGameJoystickValue BUTTON_START;
+        public MonoGameJoystickValue BUTTON_BACK;
+        public MonoGameJoystickValue BUTTON_A;
+        public MonoGameJoystickValue BUTTON_B;
+        public MonoGameJoystickValue BUTTON_X;
+        public MonoGameJoystickValue BUTTON_Y;
+        public MonoGameJoystickValue SHOULDER_LB;
+        public MonoGameJoystickValue SHOULDER_RB;
+        public MonoGameJoystickValue TRIGGER_RT;
+        public MonoGameJoystickValue TRIGGER_LT;
+        public MonoGameJoystickValue BUTTON_LSTICK;
+        public MonoGameJoystickValue BUTTON_RSTICK;
+        public MonoGameJoystickValue DPAD_UP;
+        public MonoGameJoystickValue DPAD_DOWN;
+        public MonoGameJoystickValue DPAD_LEFT;
+        public MonoGameJoystickValue DPAD_RIGHT;
+        public MonoGameJoystickValue AXIS_LX;
+        public MonoGameJoystickValue AXIS_LY;
+        public MonoGameJoystickValue AXIS_RX;
+        public MonoGameJoystickValue AXIS_RY;
+    }
+    
     //
     // Summary:
     //     Allows retrieval of user interaction with an Xbox 360 Controller and setting
@@ -65,103 +101,314 @@ namespace Microsoft.Xna.Framework.Input
                 return PrepSettings();
             }
         }
+        
+        // Where we will load our config file into.
+        static MonoGameJoystickConfig joystickConfig;
 
 		static void AutoConfig()
 		{
 			Init();
 			if (!sdl) return;
+            
+            // Get the intended config file path.
+            string osConfigFile = "";
+#if MONOMAC
+            osConfigFile += Environment.GetEnvironmentVariable("HOME");
+            if (osConfigFile.Length == 0)
+            {
+                osConfigFile += "MonoGameJoystick.cfg"; // Oh well.
+            }
+            else
+            {
+                osConfigFile += "/Library/Application Support/MonoGame/MonoGameJoystick.cfg";
+            }
+#elif LINUX
+            osConfigFile += Environment.GetEnvironmentVariable("XDG_CONFIG_HOME");
+            if (osConfigFile.Length == 0)
+            {
+                osConfigFile += Environment.GetEnvironmentVariable("HOME");
+                if (osConfigFile.Length == 0)
+                {
+                    System.Console.WriteLine("Couldn't find XDG_CONFIG_HOME or HOME.");
+                    System.Console.WriteLine("Fall back to '.'");
+                    osConfigFile += "MonoGameJoystick.cfg"; // Oh well.
+                }
+                else
+                {
+                    System.Console.WriteLine("Couldn't find XDG_CONFIG_HOME.");
+                    System.Console.WriteLine("Fall back to hardcoded ~/.config/MonoGame/.");
+                    osConfigFile += "/.config/MonoGame/MonoGameJoystick.cfg";
+                }
+            }
+            else
+            {
+                osConfigFile += "/MonoGame/MonoGameJoystick.cfg";
+            }
+#else
+#warning Apologies, but I need you to implement a joystick config directory for your platform!
+            osConfigFile = "MonoGameJoystick.cfg"; // Oh well.
+#endif
+            
+            // Check to see if we've already got a config...
+            if (File.Exists(osConfigFile))
+            {
+                // Load the file.
+                FileStream fileIn = File.OpenRead(osConfigFile);
+                
+                // Load the data into our config struct.
+                XmlSerializer serializer = new XmlSerializer(typeof(MonoGameJoystickConfig));
+                joystickConfig = (MonoGameJoystickConfig) serializer.Deserialize(fileIn);
+                
+                // We out.
+                fileIn.Close();
+            }
+            else
+            {
+                // First of all, just set our config to default values.
+                
+                // NOTE: These are based on flibit's Wii Classic Controller Pro.
+                
+                // Start
+                joystickConfig.BUTTON_START.INPUT_TYPE = InputType.Button;
+                joystickConfig.BUTTON_START.INPUT_ID = 9;
+                joystickConfig.BUTTON_START.INPUT_INVERT = false;
+                
+                // Back
+                joystickConfig.BUTTON_BACK.INPUT_TYPE = InputType.Button;
+                joystickConfig.BUTTON_BACK.INPUT_ID = 8;
+                joystickConfig.BUTTON_BACK.INPUT_INVERT = false;
+                
+                // A
+                joystickConfig.BUTTON_A.INPUT_TYPE = InputType.Button;
+                joystickConfig.BUTTON_A.INPUT_ID = 1;
+                joystickConfig.BUTTON_A.INPUT_INVERT = false;
+                
+                // B
+                joystickConfig.BUTTON_B.INPUT_TYPE = InputType.Button;
+                joystickConfig.BUTTON_B.INPUT_ID = 0;
+                joystickConfig.BUTTON_B.INPUT_INVERT = false;
+                
+                // X
+                joystickConfig.BUTTON_X.INPUT_TYPE = InputType.Button;
+                joystickConfig.BUTTON_X.INPUT_ID = 3;
+                joystickConfig.BUTTON_X.INPUT_INVERT = false;
+                
+                // Y
+                joystickConfig.BUTTON_Y.INPUT_TYPE = InputType.Button;
+                joystickConfig.BUTTON_Y.INPUT_ID = 2;
+                joystickConfig.BUTTON_Y.INPUT_INVERT = false;
+                
+                // LB
+                joystickConfig.SHOULDER_LB.INPUT_TYPE = InputType.Button;
+                joystickConfig.SHOULDER_LB.INPUT_ID = 4;
+                joystickConfig.SHOULDER_LB.INPUT_INVERT = false;
+                
+                // RB
+                joystickConfig.SHOULDER_RB.INPUT_TYPE = InputType.Button;
+                joystickConfig.SHOULDER_RB.INPUT_ID = 5;
+                joystickConfig.SHOULDER_RB.INPUT_INVERT = false;
+                
+                // LT
+                joystickConfig.TRIGGER_LT.INPUT_TYPE = InputType.Button;
+                joystickConfig.TRIGGER_LT.INPUT_ID = 6;
+                joystickConfig.TRIGGER_LT.INPUT_INVERT = false;
+                
+                // RT
+                joystickConfig.TRIGGER_RT.INPUT_TYPE = InputType.Button;
+                joystickConfig.TRIGGER_RT.INPUT_ID = 7;
+                joystickConfig.TRIGGER_RT.INPUT_INVERT = false;
+                
+                // LStick
+                joystickConfig.BUTTON_LSTICK.INPUT_TYPE = InputType.Button;
+                joystickConfig.BUTTON_LSTICK.INPUT_ID = -1;
+                joystickConfig.BUTTON_LSTICK.INPUT_INVERT = false;
+                
+                // RStick
+                joystickConfig.BUTTON_RSTICK.INPUT_TYPE = InputType.Button;
+                joystickConfig.BUTTON_RSTICK.INPUT_ID = -1;
+                joystickConfig.BUTTON_RSTICK.INPUT_INVERT = false;
+                
+                // DPad Up
+                joystickConfig.DPAD_UP.INPUT_TYPE = InputType.PovUp;
+                joystickConfig.DPAD_UP.INPUT_ID = 0;
+                joystickConfig.DPAD_UP.INPUT_INVERT = false;
+                
+                // DPad Down
+                joystickConfig.DPAD_DOWN.INPUT_TYPE = InputType.PovDown;
+                joystickConfig.DPAD_DOWN.INPUT_ID = 0;
+                joystickConfig.DPAD_DOWN.INPUT_INVERT = false;
+                
+                // DPad Left
+                joystickConfig.DPAD_LEFT.INPUT_TYPE = InputType.PovLeft;
+                joystickConfig.DPAD_LEFT.INPUT_ID = 0;
+                joystickConfig.DPAD_LEFT.INPUT_INVERT = false;
+                
+                // DPad Right
+                joystickConfig.DPAD_RIGHT.INPUT_TYPE = InputType.PovRight;
+                joystickConfig.DPAD_RIGHT.INPUT_ID = 0;
+                joystickConfig.DPAD_RIGHT.INPUT_INVERT = false;
+                
+                // LX
+                joystickConfig.AXIS_LX.INPUT_TYPE = InputType.Axis;
+                joystickConfig.AXIS_LX.INPUT_ID = 0;
+                joystickConfig.AXIS_LX.INPUT_INVERT = false;
+                
+                // LY
+                joystickConfig.AXIS_LY.INPUT_TYPE = InputType.Axis;
+                joystickConfig.AXIS_LY.INPUT_ID = 1;
+                joystickConfig.AXIS_LY.INPUT_INVERT = true;
+                
+                // RX
+                joystickConfig.AXIS_RX.INPUT_TYPE = InputType.Axis;
+                joystickConfig.AXIS_RX.INPUT_ID = 2;
+                joystickConfig.AXIS_RX.INPUT_INVERT = false;
+                
+                // RY
+                joystickConfig.AXIS_RY.INPUT_TYPE = InputType.Axis;
+                joystickConfig.AXIS_RY.INPUT_ID = 3;
+                joystickConfig.AXIS_RY.INPUT_INVERT = true;
+                
+                
+                // Since it doesn't exist, we need to generate the default config.
+                
+                // ... but is our directory even there?
+                string osConfigDir = osConfigFile.Substring(0, osConfigFile.IndexOf("MonoGameJoystick.cfg"));
+                if (!Directory.Exists(osConfigDir))
+                {
+                    // Okay, jeez, we're really starting fresh.
+                    Directory.CreateDirectory(osConfigDir);
+                }
+                
+                // So, create the file.
+                FileStream fileOut = File.Open(osConfigFile, FileMode.OpenOrCreate);
+                XmlSerializer serializer = new XmlSerializer(typeof(MonoGameJoystickConfig));
+                serializer.Serialize(fileOut, joystickConfig);
+                
+                // We out.
+                fileOut.Close();
+            }
+            
 #if DEBUG
 			Console.WriteLine("Number of joysticks: " + Sdl.SDL_NumJoysticks());
-#endif			
+#endif
 			// Limit to the first 4 sticks to avoid crashes
-			int numSticks = Math.Min (4,Sdl.SDL_NumJoysticks());
+			int numSticks = Math.Min(4, Sdl.SDL_NumJoysticks());
 			for (int x = 0; x < numSticks; x++)
 			{
-
 				PadConfig pc = new PadConfig(Sdl.SDL_JoystickName(x), x);
 				devices[x] = Sdl.SDL_JoystickOpen(pc.Index);
-
-				pc.Button_A.ID = 0;
-				pc.Button_A.Type = InputType.Button;
-
-				pc.Button_B.ID = 1;
-				pc.Button_B.Type = InputType.Button;
-
-				pc.Button_X.ID = 2;
-				pc.Button_X.Type = InputType.Button;
-
-				pc.Button_Y.ID = 3;
-				pc.Button_Y.Type = InputType.Button;
-
-				pc.Button_LB.ID = 4;
-				pc.Button_LB.Type = InputType.Button;
-
-				pc.Button_RB.ID = 5;
-				pc.Button_RB.Type = InputType.Button;
-
-				pc.Button_Back.ID = 6;
-				pc.Button_Back.Type = InputType.Button;
-
-				pc.Button_Start.ID = 7;
-				pc.Button_Start.Type = InputType.Button;
-
-				pc.LeftStick.Press.ID = 8;
-				pc.LeftStick.Press.Type = InputType.Button;
-
-				pc.RightStick.Press.ID = 9;
-				pc.RightStick.Press.Type = InputType.Button;
-
-				pc.LeftStick.X.Negative.ID = 0;
-				pc.LeftStick.X.Negative.Type = InputType.Axis;
-				pc.LeftStick.X.Negative.Negative = true;
-
-				pc.LeftStick.X.Positive.ID = 0;
-				pc.LeftStick.X.Positive.Type = InputType.Axis;
-				pc.LeftStick.X.Positive.Negative = false;
-
-				pc.LeftStick.Y.Negative.ID = 1;
-				pc.LeftStick.Y.Negative.Type = InputType.Axis;
-				pc.LeftStick.Y.Negative.Negative = true;
-
-				pc.LeftStick.Y.Positive.ID = 1;
-				pc.LeftStick.Y.Positive.Type = InputType.Axis;
-				pc.LeftStick.Y.Positive.Negative = false;
-
-				pc.RightStick.Y.Negative.ID = 3;
-				pc.RightStick.Y.Negative.Type = InputType.Axis;
-				pc.RightStick.Y.Negative.Negative = true;
-
-				pc.RightStick.Y.Positive.ID = 3;
-				pc.RightStick.Y.Positive.Type = InputType.Axis;
-				pc.RightStick.Y.Positive.Negative = false;
-
-				pc.RightStick.X.Negative.ID = 4;
-				pc.RightStick.X.Negative.Type = InputType.Axis;
-				pc.RightStick.X.Negative.Negative = true;
-
-				pc.RightStick.X.Positive.ID = 4;
-				pc.RightStick.X.Positive.Type = InputType.Axis;
-				pc.RightStick.X.Positive.Negative = false;
-
-				pc.Dpad.Up.ID = 0;
-				pc.Dpad.Up.Type = InputType.PovUp;
-
-				pc.Dpad.Down.ID = 0;
-				pc.Dpad.Down.Type = InputType.PovDown;
-
-				pc.Dpad.Left.ID = 0;
-				pc.Dpad.Left.Type = InputType.PovLeft;
-
-				pc.Dpad.Right.ID = 0;
-				pc.Dpad.Right.Type = InputType.PovRight;
-
-				pc.LeftTrigger.ID = 2;
-				pc.LeftTrigger.Type = InputType.Axis;
-				pc.LeftTrigger.Negative = false;
-
-				pc.RightTrigger.ID = 2;
-				pc.RightTrigger.Type = InputType.Axis;
-				pc.RightTrigger.Negative = true;
+    
+                // Start
+                pc.Button_Start.ID = joystickConfig.BUTTON_START.INPUT_ID;
+                pc.Button_Start.Type = joystickConfig.BUTTON_START.INPUT_TYPE;
+                pc.Button_Start.Negative = joystickConfig.BUTTON_START.INPUT_INVERT;
+    
+                // Back
+                pc.Button_Back.ID = joystickConfig.BUTTON_BACK.INPUT_ID;
+                pc.Button_Back.Type = joystickConfig.BUTTON_BACK.INPUT_TYPE;
+                pc.Button_Back.Negative = joystickConfig.BUTTON_BACK.INPUT_INVERT;
+    
+                // A
+                pc.Button_A.ID = joystickConfig.BUTTON_A.INPUT_ID;
+                pc.Button_A.Type = joystickConfig.BUTTON_A.INPUT_TYPE;
+                pc.Button_A.Negative = joystickConfig.BUTTON_A.INPUT_INVERT;
+    
+                // B
+                pc.Button_B.ID = joystickConfig.BUTTON_B.INPUT_ID;
+                pc.Button_B.Type = joystickConfig.BUTTON_B.INPUT_TYPE;
+                pc.Button_B.Negative = joystickConfig.BUTTON_B.INPUT_INVERT;
+    
+                // X
+                pc.Button_X.ID = joystickConfig.BUTTON_X.INPUT_ID;
+                pc.Button_X.Type = joystickConfig.BUTTON_X.INPUT_TYPE;
+                pc.Button_X.Negative = joystickConfig.BUTTON_X.INPUT_INVERT;
+    
+                // Y
+                pc.Button_Y.ID = joystickConfig.BUTTON_Y.INPUT_ID;
+                pc.Button_Y.Type = joystickConfig.BUTTON_Y.INPUT_TYPE;
+                pc.Button_Y.Negative = joystickConfig.BUTTON_Y.INPUT_INVERT;
+    
+                // LB
+                pc.Button_LB.ID = joystickConfig.SHOULDER_LB.INPUT_ID;
+                pc.Button_LB.Type = joystickConfig.SHOULDER_LB.INPUT_TYPE;
+                pc.Button_LB.Negative = joystickConfig.SHOULDER_LB.INPUT_INVERT;
+    
+                // RB
+                pc.Button_RB.ID = joystickConfig.SHOULDER_RB.INPUT_ID;
+                pc.Button_RB.Type = joystickConfig.SHOULDER_RB.INPUT_TYPE;
+                pc.Button_RB.Negative = joystickConfig.SHOULDER_RB.INPUT_INVERT;
+                
+                // LT
+                pc.LeftTrigger.ID = joystickConfig.TRIGGER_LT.INPUT_ID;
+                pc.LeftTrigger.Type = joystickConfig.TRIGGER_LT.INPUT_TYPE;
+                pc.LeftTrigger.Negative = joystickConfig.TRIGGER_LT.INPUT_INVERT;
+                
+                // RT
+                pc.RightTrigger.ID = joystickConfig.TRIGGER_RT.INPUT_ID;
+                pc.RightTrigger.Type = joystickConfig.TRIGGER_RT.INPUT_TYPE;
+                pc.RightTrigger.Negative = joystickConfig.TRIGGER_RT.INPUT_INVERT;
+    
+                // LStick
+                pc.LeftStick.Press.ID = joystickConfig.BUTTON_LSTICK.INPUT_ID;
+                pc.LeftStick.Press.Type = joystickConfig.BUTTON_LSTICK.INPUT_TYPE;
+                pc.LeftStick.Press.Negative = joystickConfig.BUTTON_LSTICK.INPUT_INVERT;
+    
+                // RStick
+                pc.RightStick.Press.ID = joystickConfig.BUTTON_RSTICK.INPUT_ID;
+                pc.RightStick.Press.Type = joystickConfig.BUTTON_RSTICK.INPUT_TYPE;
+                pc.RightStick.Press.Negative = joystickConfig.BUTTON_RSTICK.INPUT_INVERT;
+                
+                // DPad Up
+                pc.Dpad.Up.ID = joystickConfig.DPAD_UP.INPUT_ID;
+                pc.Dpad.Up.Type = joystickConfig.DPAD_UP.INPUT_TYPE;
+                pc.Dpad.Up.Negative = joystickConfig.DPAD_UP.INPUT_INVERT;
+                
+                // DPad Down
+                pc.Dpad.Down.ID = joystickConfig.DPAD_DOWN.INPUT_ID;
+                pc.Dpad.Down.Type = joystickConfig.DPAD_DOWN.INPUT_TYPE;
+                pc.Dpad.Down.Negative = joystickConfig.DPAD_DOWN.INPUT_INVERT;
+                
+                // DPad Left
+                pc.Dpad.Left.ID = joystickConfig.DPAD_LEFT.INPUT_ID;
+                pc.Dpad.Left.Type = joystickConfig.DPAD_LEFT.INPUT_TYPE;
+                pc.Dpad.Left.Negative = joystickConfig.DPAD_LEFT.INPUT_INVERT;
+                
+                // DPad Right
+                pc.Dpad.Right.ID = joystickConfig.DPAD_RIGHT.INPUT_ID;
+                pc.Dpad.Right.Type = joystickConfig.DPAD_RIGHT.INPUT_TYPE;
+                pc.Dpad.Right.Negative = joystickConfig.DPAD_RIGHT.INPUT_INVERT;
+    
+                // LX
+                pc.LeftStick.X.Negative.ID = joystickConfig.AXIS_LX.INPUT_ID;
+                pc.LeftStick.X.Negative.Type = joystickConfig.AXIS_LX.INPUT_TYPE;
+                pc.LeftStick.X.Negative.Negative = !joystickConfig.AXIS_LX.INPUT_INVERT;
+                pc.LeftStick.X.Positive.ID = joystickConfig.AXIS_LX.INPUT_ID;
+                pc.LeftStick.X.Positive.Type = joystickConfig.AXIS_LX.INPUT_TYPE;
+                pc.LeftStick.X.Positive.Negative = joystickConfig.AXIS_LX.INPUT_INVERT;
+    
+                // LY
+                pc.LeftStick.Y.Negative.ID = joystickConfig.AXIS_LY.INPUT_ID;
+                pc.LeftStick.Y.Negative.Type = joystickConfig.AXIS_LY.INPUT_TYPE;
+                pc.LeftStick.Y.Negative.Negative = !joystickConfig.AXIS_LY.INPUT_INVERT;
+                pc.LeftStick.Y.Positive.ID = joystickConfig.AXIS_LY.INPUT_ID;
+                pc.LeftStick.Y.Positive.Type = joystickConfig.AXIS_LY.INPUT_TYPE;
+                pc.LeftStick.Y.Positive.Negative = joystickConfig.AXIS_LY.INPUT_INVERT;
+    
+                // RX
+                pc.RightStick.X.Negative.ID = joystickConfig.AXIS_RX.INPUT_ID;
+                pc.RightStick.X.Negative.Type = joystickConfig.AXIS_RX.INPUT_TYPE;
+                pc.RightStick.X.Negative.Negative = !joystickConfig.AXIS_RX.INPUT_INVERT;
+                pc.RightStick.X.Positive.ID = joystickConfig.AXIS_RX.INPUT_ID;
+                pc.RightStick.X.Positive.Type = joystickConfig.AXIS_RX.INPUT_TYPE;
+                pc.RightStick.X.Positive.Negative = joystickConfig.AXIS_RX.INPUT_INVERT;
+    
+                // RY
+                pc.RightStick.Y.Negative.ID = joystickConfig.AXIS_RY.INPUT_ID;
+                pc.RightStick.Y.Negative.Type = joystickConfig.AXIS_RY.INPUT_TYPE;
+                pc.RightStick.Y.Negative.Negative = !joystickConfig.AXIS_RY.INPUT_INVERT;
+                pc.RightStick.Y.Positive.ID = joystickConfig.AXIS_RY.INPUT_ID;
+                pc.RightStick.Y.Positive.Type = joystickConfig.AXIS_RY.INPUT_TYPE;
+                pc.RightStick.Y.Positive.Negative = joystickConfig.AXIS_RY.INPUT_INVERT;
 
 				// Suggestion: Xbox Guide button <=> BigButton
 				//pc.BigButton.ID = 8;
