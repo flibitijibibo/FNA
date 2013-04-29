@@ -283,6 +283,20 @@ namespace Microsoft.Xna.Framework
                             keys.Remove(key);
                         }
                     }
+
+                    // Active window
+                    else if (evt.type == SDL.SDL_EventType.SDL_WINDOWEVENT)
+                    {
+                        if (evt.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_GAINED)
+                        {
+                            // If we alt-tab away, we lose the 'fullscreen desktop' flag on some WMs
+                            SDL.SDL_SetWindowFullscreen(INTERNAL_sdlWindow, (uint) INTERNAL_sdlWindowFlags_Next);
+                        }
+                        else if (evt.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_LOST)
+                        {
+                            SDL.SDL_SetWindowFullscreen (INTERNAL_sdlWindow, 0);
+                        }
+                    }
                     
                     // Mouse Wheel
                     else if (evt.type == SDL.SDL_EventType.SDL_MOUSEWHEEL)
