@@ -296,6 +296,12 @@ namespace Microsoft.Xna.Framework
                         {
                             SDL.SDL_SetWindowFullscreen (INTERNAL_sdlWindow, 0);
                         }
+                        else if (evt.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_RESIZED ||
+                                 evt.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_SIZE_CHANGED)
+                        {
+                            Mouse.INTERNAL_WindowWidth = evt.window.data1;
+                            Mouse.INTERNAL_WindowHeight = evt.window.data2;
+                        }
                     }
                     
                     // Mouse Wheel
@@ -421,6 +427,8 @@ namespace Microsoft.Xna.Framework
             GL.BindTexture(TextureTarget.Texture2D, 0);
             INTERNAL_glFramebufferWidth = 800;
             INTERNAL_glFramebufferHeight = 600;
+            Mouse.INTERNAL_BackbufferWidth = 800;
+            Mouse.INTERNAL_BackbufferHeight = 600;
         }
         
         #endregion
@@ -491,6 +499,8 @@ namespace Microsoft.Xna.Framework
             );
             INTERNAL_glFramebufferWidth = clientWidth;
             INTERNAL_glFramebufferHeight = clientHeight;
+            Mouse.INTERNAL_BackbufferWidth = clientWidth;
+            Mouse.INTERNAL_BackbufferHeight = clientHeight;
         }
         
         #endregion

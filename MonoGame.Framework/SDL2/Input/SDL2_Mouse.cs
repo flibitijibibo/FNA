@@ -68,7 +68,12 @@ namespace Microsoft.Xna.Framework.Input
             get;
             set;
         }
-        
+
+        internal static int INTERNAL_BackbufferWidth = 800;
+        internal static int INTERNAL_BackbufferHeight = 600;
+        internal static int INTERNAL_WindowWidth = 800;
+        internal static int INTERNAL_WindowHeight = 600;
+
         #endregion
 
         #region Public interface
@@ -81,7 +86,10 @@ namespace Microsoft.Xna.Framework.Input
         {
             int x, y;
 			uint flags = SDL.SDL_GetMouseState(out x, out y);
-   
+  
+            x = (int)((double)x * INTERNAL_BackbufferWidth / INTERNAL_WindowWidth);
+            y = (int)((double)y * INTERNAL_BackbufferHeight / INTERNAL_WindowHeight);
+
             State.X = x;
             State.Y = y;
             
@@ -101,6 +109,8 @@ namespace Microsoft.Xna.Framework.Input
         /// <param name="y">Relative vertical position of the cursor.</param>
         public static void SetPosition(int x, int y)
         {
+            x = (int)((double)x * INTERNAL_WindowWidth / INTERNAL_BackbufferWidth);
+            y = (int)((double)y * INTERNAL_WindowHeight / INTERNAL_BackbufferHeight);
             State.X = x;
             State.Y = y;
             
