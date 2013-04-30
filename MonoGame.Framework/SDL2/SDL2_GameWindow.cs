@@ -208,7 +208,7 @@ namespace Microsoft.Xna.Framework
             get
             {
                 int result = -1;
-                SDL.SDL_GL_GetAttribute(SDL.SDL_GLattr.SDL_GL_DOUBLEBUFFER, ref result);
+                result = SDL.SDL_GL_GetSwapInterval();
                 if (result == 1)
                 {
                     return true;
@@ -217,15 +217,14 @@ namespace Microsoft.Xna.Framework
             }
             set
             {
-                // Note: This can only be used BEFORE window creation!
+                // NOTE: We can get EXT_swap_control_tear by using -1 here
                 if (value)
                 {
-                    // FIXME: EXT_swap_control_tear?
-                    SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_DOUBLEBUFFER, 1);
+                    SDL.SDL_GL_SetSwapInterval(1);
                 }
                 else
                 {
-                    SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_DOUBLEBUFFER, 0);
+                    SDL.SDL_GL_SetSwapInterval(0);
                 }
             }
         }
