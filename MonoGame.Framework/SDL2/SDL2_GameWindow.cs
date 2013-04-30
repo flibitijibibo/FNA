@@ -405,9 +405,15 @@ namespace Microsoft.Xna.Framework
             INTERNAL_GLContext = SDL.SDL_GL_CreateContext(INTERNAL_sdlWindow);
             OpenTK.Graphics.GraphicsContext.CurrentContext = INTERNAL_GLContext;
             OpenTK.Graphics.OpenGL.GL.LoadAll();
-            
-            // FIXME: This is idiotic.
+
+            // Create a background context
+            SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
             Threading.WindowInfo = INTERNAL_sdlWindow;
+            Threading.BackgroundContext = SDL.SDL_GL_CreateContext(INTERNAL_sdlWindow);
+
+            // Make the foreground context current.
+            SDL.SDL_GL_MakeCurrent(INTERNAL_sdlWindow, INTERNAL_GLContext);
+
             
             // Create an FBO, use this as our "backbuffer".
             GL.GenFramebuffers(1, out INTERNAL_glFramebuffer);
