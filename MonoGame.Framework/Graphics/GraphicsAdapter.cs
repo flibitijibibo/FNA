@@ -241,7 +241,7 @@ namespace Microsoft.Xna.Framework.Graphics
                 {
                     List<DisplayMode> modes = new List<DisplayMode>(new DisplayMode[] { CurrentDisplayMode, });
 #if SDL2
-                    SDL2.SDL.SDL_DisplayMode filler;
+                    SDL2.SDL.SDL_DisplayMode filler = new SDL2.SDL.SDL_DisplayMode();
                     int numModes = SDL2.SDL.SDL_GetNumDisplayModes(0);
                     for (int i = 0; i < numModes; i++)
                     {
