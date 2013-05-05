@@ -22,7 +22,7 @@ namespace MonoGameContentProcessors
                 return MonoGamePlatform.None;
 
             // Else return the right platform identifer.
-            switch (platform.ToUpper())
+            switch (platform.ToUpper(System.Globalization.CultureInfo.InvariantCulture))
             {
                 case "WINDOWS":
                     return MonoGamePlatform.Windows;

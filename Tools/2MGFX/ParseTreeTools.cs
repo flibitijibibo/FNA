@@ -7,7 +7,7 @@ namespace TwoMGFX
 	{
         public static FillMode ParseFillMode(string value)
         {
-            switch (value.ToLower())
+            switch (value.ToLower(System.Globalization.CultureInfo.InvariantCulture))
             {
                 case "solid":
                     return FillMode.Solid;
@@ -20,7 +20,7 @@ namespace TwoMGFX
 
         public static CullMode ParseCullMode(string value)
         {
-            switch (value.ToLower())
+            switch (value.ToLower(System.Globalization.CultureInfo.InvariantCulture))
             {
                 case "none":
                     return CullMode.None;
@@ -35,7 +35,7 @@ namespace TwoMGFX
 
 		public static TextureAddressMode ParseAddressMode(string value)
 		{
-			switch (value.ToLower())
+			switch (value.ToLower(System.Globalization.CultureInfo.InvariantCulture))
 			{
 				case "clamp":
 					return TextureAddressMode.Clamp;
@@ -50,7 +50,7 @@ namespace TwoMGFX
 
 		public static TextureFilterType ParseTextureFilterType(string value)
 		{
-			switch (value.ToLower())
+			switch (value.ToLower(System.Globalization.CultureInfo.InvariantCulture))
 			{
 				case "linear":
 					return TextureFilterType.Linear;
@@ -65,9 +65,9 @@ namespace TwoMGFX
 
 		public static bool ParseBool(string value)
 		{
-			if (value.ToLower() == "true" || value == "1")
+			if (value.ToLower(System.Globalization.CultureInfo.InvariantCulture) == "true" || value == "1")
 				return true;
-            else if (value.ToLower() == "false" || value == "0")
+            else if (value.ToLower(System.Globalization.CultureInfo.InvariantCulture) == "false" || value == "0")
 				return false;
 			else
 				throw new Exception("Invalid boolean value '" + value + "'");
@@ -75,7 +75,7 @@ namespace TwoMGFX
 
 		public static BlendFunction ParseBlendFunction(string value)
 		{
-			switch (value.ToLower())
+			switch (value.ToLower(System.Globalization.CultureInfo.InvariantCulture))
 			{
 				case "add":
 					return BlendFunction.Add;
@@ -94,7 +94,7 @@ namespace TwoMGFX
 
 		public static Blend ParseBlend(string value)
 		{
-			switch (value.ToLower())
+			switch (value.ToLower(System.Globalization.CultureInfo.InvariantCulture))
 			{
 				case "zero":
 					return Blend.Zero;

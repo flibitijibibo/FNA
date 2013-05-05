@@ -126,7 +126,8 @@ namespace Microsoft.Xna.Framework.Audio
 
         public void Stop(bool immediate = false)
         {
-            if (isDisposed) throw new ObjectDisposedException("SoundEffectInstance (" + soundEffect.Name + ")");
+            if (isDisposed)
+                return;
             if (sourceId == -1 || soundState == SoundState.Stopped)
                 return;
 
@@ -156,7 +157,9 @@ namespace Microsoft.Xna.Framework.Audio
             get { return looped; }
             set
             {
-                if (isDisposed) throw new ObjectDisposedException("SoundEffectInstance (" + soundEffect.Name + ")");
+                if (isDisposed)
+                    return;
+
                 if (sourceId == -1) return;
                 looped = value;
                 AL.Source(sourceId, ALSourceb.Looping, looped);
@@ -169,7 +172,9 @@ namespace Microsoft.Xna.Framework.Audio
             get { return pan; }
             set
             {
-                if (isDisposed) throw new ObjectDisposedException("SoundEffectInstance (" + soundEffect.Name + ")");
+                if (isDisposed)
+                    return;
+
                 if (sourceId == -1) return;
                 pan = value;
                 AL.Source(sourceId, ALSource3f.Position, pan / 5f, 0.0f, 0.1f);
@@ -182,7 +187,9 @@ namespace Microsoft.Xna.Framework.Audio
             get { return pitch; }
             set
             {
-                if (isDisposed) throw new ObjectDisposedException("SoundEffectInstance (" + soundEffect.Name + ")");
+                if (isDisposed)
+                    return;
+
                 if (sourceId == -1) return;
                 pitch = value;
                 AL.Source(sourceId, ALSourcef.Pitch, XnaPitchToAlPitch(pitch));
@@ -219,7 +226,9 @@ namespace Microsoft.Xna.Framework.Audio
             get { return volume; }
             set
             {
-                if (isDisposed) throw new ObjectDisposedException("SoundEffectInstance (" + soundEffect.Name + ")");
+                if (isDisposed)
+                    return;
+
                 if (sourceId == -1) return;
                 volume = value;
                 AL.Source(sourceId, ALSourcef.Gain, volume * SoundEffect.MasterVolume);

@@ -79,7 +79,7 @@ namespace TwoMGFX
         {
             Blend blend;
 
-            switch (name.ToLower())
+            switch (name.ToLower(System.Globalization.CultureInfo.InvariantCulture))
             {
                 case "alphablendenable":
                     if (!ParseTreeTools.ParseBool(value))
@@ -298,7 +298,7 @@ namespace TwoMGFX
 
         public void Parse(string name, string value)
         {
-            switch (name.ToLower())
+            switch (name.ToLower(System.Globalization.CultureInfo.InvariantCulture))
             {
                 case "texture":
                     TextureName = value;

@@ -90,7 +90,7 @@ namespace Microsoft.Xna.Framework.Audio
                 reader.ReadBytes(format_chunk_size - 16);
 
             var data_signature = new string(reader.ReadChars(4));
-            while (data_signature.ToLower() != "data")
+            while (data_signature.ToLower(System.Globalization.CultureInfo.InvariantCulture) != "data")
             {
                 reader.ReadBytes(reader.ReadInt32());                
                 data_signature = new string(reader.ReadChars(4));

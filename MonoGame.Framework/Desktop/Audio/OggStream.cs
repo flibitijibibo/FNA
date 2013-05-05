@@ -428,7 +428,7 @@ namespace Microsoft.Xna.Framework.Audio
                 singletonLock.ExitUpgradeableReadLock();
             }
 
-            underlyingThread = new Thread(EnsureBuffersFilled) { Priority = ThreadPriority.BelowNormal, Name = "Ogg Streamer" };
+            underlyingThread = new Thread(EnsureBuffersFilled) { Priority = ThreadPriority.Normal, Name = "Ogg Streamer" };
             underlyingThread.Start();
 
             UpdateRate = updateRate;

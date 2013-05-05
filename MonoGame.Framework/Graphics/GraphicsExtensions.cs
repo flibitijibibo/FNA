@@ -756,7 +756,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     using (var writer = new StreamWriter(stream))
                     {
                         writer.WriteLine("({0}) [{1}] {2} : {3}", 
-                            DateTime.Now.ToString(TimeFormat), "MonoGame", severity.ToString().ToUpper(), message);
+                            DateTime.Now.ToString(TimeFormat), "MonoGame", severity.ToString().ToUpper(System.Globalization.CultureInfo.InvariantCulture), message);
                     }
                 };
             }

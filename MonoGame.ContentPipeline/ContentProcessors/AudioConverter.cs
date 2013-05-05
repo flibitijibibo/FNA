@@ -26,7 +26,7 @@ namespace MonoGameContentProcessors
         /// <returns>The WaveFormat object of the converted wav</returns>
         private static WaveFormat wmaToWav(string pathToWma, Stream outputStream, int sampleRate, int bitDepth, int numChannels)
         {
-            if (!Path.GetExtension(pathToWma).ToLower().Contains("wma"))
+            if (!Path.GetExtension(pathToWma).ToLower(System.Globalization.CultureInfo.InvariantCulture).Contains("wma"))
                 throw new ArgumentException("Must be a .wma file!");
 
             using (var reader = new WMAFileReader(pathToWma))
@@ -58,7 +58,7 @@ namespace MonoGameContentProcessors
             if (targetFileType == AudioFileType.Wma)
                 throw new ArgumentException("WMA is not a vaid output type.");
 
-            string sourceFileType = pathToFile.Substring(pathToFile.Length - 3).ToLower();
+            string sourceFileType = pathToFile.Substring(pathToFile.Length - 3).ToLower(System.Globalization.CultureInfo.InvariantCulture);
             switch (sourceFileType)
             {
                 case "mp3":
