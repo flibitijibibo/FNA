@@ -75,6 +75,7 @@ using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input.Touch;
 using Microsoft.Xna.Framework.Input;
+using OpenTK;
 
 namespace Microsoft.Xna.Framework
 {
@@ -209,10 +210,19 @@ namespace Microsoft.Xna.Framework
                 if (OpenTK.DisplayDevice.Default.Width != graphicsDeviceManager.PreferredBackBufferWidth ||
                     OpenTK.DisplayDevice.Default.Height != graphicsDeviceManager.PreferredBackBufferHeight)
                 {
-                    OpenTK.DisplayDevice.Default.ChangeResolution(graphicsDeviceManager.PreferredBackBufferWidth,
-                            graphicsDeviceManager.PreferredBackBufferHeight,
-                            OpenTK.DisplayDevice.Default.BitsPerPixel,
-                            OpenTK.DisplayDevice.Default.RefreshRate);
+                    // choose resolution with highest refresh rate and bit rate on that monitor for that resolution
+                    DisplayResolution chosenResolution = null;
+                    foreach (var r in OpenTK.DisplayDevice.Default.AvailableResolutions)
+                        if (r.Width == graphicsDeviceManager.PreferredBackBufferWidth &&
+                            r.Height == graphicsDeviceManager.PreferredBackBufferHeight &&
+                            r.BitsPerPixel == 32)
+                        {
+                            if (chosenResolution == null) chosenResolution = r;
+                            if (r.RefreshRate > chosenResolution.RefreshRate)
+                                chosenResolution = r;
+                        }
+
+                    OpenTK.DisplayDevice.Default.ChangeResolution(chosenResolution);
                 }
             }
             else

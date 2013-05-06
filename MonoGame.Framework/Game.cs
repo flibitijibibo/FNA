@@ -437,6 +437,8 @@ namespace Microsoft.Xna.Framework
         private readonly GameTime _gameTime = new GameTime();
         private Stopwatch _gameTimer = Stopwatch.StartNew();
 
+        public bool AssumeTargetElapsedTime;
+
         public void Tick()
         {
             // NOTE: This code is very sensitive and can break very badly
@@ -447,7 +449,9 @@ namespace Microsoft.Xna.Framework
         RetryTick:
 
             // Advance the accumulated elapsed time.
-            _accumulatedElapsedTime += _gameTimer.Elapsed;
+            if (AssumeTargetElapsedTime)    _accumulatedElapsedTime += _targetElapsedTime;
+            else                            _accumulatedElapsedTime += _gameTimer.Elapsed;
+            
             _gameTimer.Reset();
             _gameTimer.Start();
 

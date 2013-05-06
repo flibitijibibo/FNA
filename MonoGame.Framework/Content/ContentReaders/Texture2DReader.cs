@@ -25,9 +25,12 @@ SOFTWARE.
 */
 #endregion License
 
+//#define EXTREME_LOGGING
+
 using System;
 using Microsoft.Xna;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -54,6 +57,10 @@ namespace Microsoft.Xna.Framework.Content
         protected internal override Texture2D Read(ContentReader reader, Texture2D existingInstance)
 		{
 			Texture2D texture = null;
+
+#if EXTREME_LOGGING
+            ALHelper.Log("Texture Read start!", "Texture2DReader");
+#endif
 			
 			SurfaceFormat surfaceFormat;
 			if (reader.version < 5) {
@@ -85,12 +92,19 @@ namespace Microsoft.Xna.Framework.Content
 			int levelCount = (reader.ReadInt32 ());
             int levelCountOutput = levelCount;
 
+#if EXTREME_LOGGING
+            ALHelper.Log(string.Format("Fmt={0}, Size=({1}x{2}), {3} levels", surfaceFormat, width, height, levelCount), "Texture2DReader");
+#endif
+
             // If the system does not fully support Power of Two textures,
             // skip any mip maps supplied with any non PoT textures.
             if (levelCount > 1 && !GraphicsCapabilities.NonPowerOfTwo &&
                 (!MathHelper.IsPowerOfTwo(width) || !MathHelper.IsPowerOfTwo(height)))
             {
                 levelCountOutput = 1;
+#if EXTREME_LOGGING
+                ALHelper.Log("No NPoT support, skipping mipmaps", "Texture2DReader");
+#endif
                 System.Diagnostics.Debug.WriteLine(
                     "Device does not support non Power of Two textures. Skipping mipmaps.");
             }
@@ -127,13 +141,17 @@ namespace Microsoft.Xna.Framework.Content
                         break;
                 }
             }
-			
+
             if (existingInstance == null)
                 texture = new Texture2D(reader.GraphicsDevice, width, height, levelCountOutput > 1, convertedFormat);
             else
                 texture = existingInstance;
 
-			for (int level=0; level<levelCount; level++)
+#if EXTREME_LOGGING
+            ALHelper.Log("Texture created", "Texture2DReader");
+#endif
+
+            for (int level=0; level<levelCount; level++)
 			{
 				int levelDataSizeInBytes = (reader.ReadInt32 ());
 				byte[] levelData = reader.ReadBytes (levelDataSizeInBytes);
@@ -239,7 +257,15 @@ namespace Microsoft.Xna.Framework.Content
 						break;
 				}
 
-				texture.SetData(level, null, levelData, 0, levelData.Length);	
+#if EXTREME_LOGGING
+                ALHelper.Log("Setting data...", "Texture2DReader");
+#endif
+
+				texture.SetData(level, null, levelData, 0, levelData.Length);
+
+#if EXTREME_LOGGING
+                ALHelper.Log("Done!", "Texture2DReader");
+#endif
 			}
 			
 			return texture;

@@ -60,7 +60,7 @@ namespace Microsoft.Xna.Framework.Audio
             try
             {
                 Console.WriteLine("({0}) [{1}] {2}", DateTime.Now.ToString("HH:mm:ss.fff"), "OpenAL", message);
-                using (var stream = File.Open("Debug Log.txt", FileMode.Append))
+                using (var stream = File.Open(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\FEZ\\Debug Log.txt", FileMode.Append))
                 {
                     using (var writer = new StreamWriter(stream))
                     {
@@ -77,76 +77,21 @@ namespace Microsoft.Xna.Framework.Audio
 
         private OpenALSoundController()
         {
-            if (File.Exists("openal32.dll"))
-                try
-                {
-                    File.SetAttributes("openal32.dll", FileAttributes.Normal);
-                    File.Delete("openal32.dll");
-                }
-                catch (Exception ex)
-                {
-                    // no big deal, we either already have the right openal32.dll file, or we're about to create it
-                    Log("Exception while deleting openal32.dll, ignored : " + ex);
-                }
-
-            if (!File.Exists("openal32.dll"))
-            {
-                try
-                {
-                    AlcSoft32.CrashTest();
-                    File.Copy("soft_oal_32.dll", "openal32.dll");
-                    Log("32-bit OpenAL-Soft will be used");
-                }
-                catch (AccessViolationException)
-                {
-                    MessageBox.Show("Error initializing audio subsystem. Game will now exit.\n" +
-                                    "(see debug log for more details)", "OpenAL Error",
-                                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    throw;
-                }
-                catch (BadImageFormatException)
-                {
-                    try
-                    {
-                        AlcSoft64.CrashTest();
-                        File.Copy("soft_oal_64.dll", "openal32.dll");
-                        Log("64-bit OpenAL-Soft will be used");
-                    }
-                    catch (AccessViolationException)
-                    {
-                        MessageBox.Show("Error initializing audio subsystem. Game will now exit.\n" +
-                                        "(see debug log for more details)", "OpenAL Error",
-                                        MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        throw;
-                    }
-                    catch (BadImageFormatException)
-                    {
-                        MessageBox.Show("Error initializing audio subsystem. Game will now exit.\n" +
-                                        "(see debug log for more details)", "OpenAL Error",
-                                        MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        throw;
-                    }
-                }
-            }
-
             try
             {
                 context = new AudioContext();
             }
             catch (Exception ex)
             {
-                if (ex is DllNotFoundException || (
-                        (ex is TypeInitializationException) &&
-                        (ex as TypeInitializationException).InnerException is DllNotFoundException))
-                {
-                    Log("Last error in enumerator is " + AudioDeviceEnumerator.LastError);
-                }
+                Log("Last error in enumerator is " + AudioDeviceEnumerator.LastError);
 
                 MessageBox.Show("Error initializing audio subsystem. Game will now exit.\n" +
                                 "(see debug log for more details)", "OpenAL Error",
                                 MessageBoxButtons.OK, MessageBoxIcon.Error);
                 throw;
             }
+
+            Log("Sound manager initialized!");
 
             // log how many sources we have access to
             var attributesSize = new int[1];

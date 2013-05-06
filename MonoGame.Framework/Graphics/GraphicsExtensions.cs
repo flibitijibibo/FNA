@@ -751,7 +751,7 @@ namespace Microsoft.Xna.Framework.Graphics
             const string TimeFormat = "HH:mm:ss.fff";
             try 
             {
-                using (var stream = File.Open("Debug Log.txt", FileMode.Append))
+                using (var stream = File.Open(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\FEZ\\Debug Log.txt", FileMode.Append))
                 {
                     using (var writer = new StreamWriter(stream))
                     {

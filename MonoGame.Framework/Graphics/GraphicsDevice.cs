@@ -376,10 +376,18 @@ namespace Microsoft.Xna.Framework.Graphics
         {
             // Check version
             var versionString = GL.GetString(StringName.Version);
-            var majorVersion = int.Parse(versionString.Substring(0, 1));
-
-            GraphicsExtensions.LogToFile(GraphicsExtensions.LogSeverity.Information, "OpenGL version " + versionString);
             GraphicsExtensions.CheckGLError();
+
+            var majorVersion = int.Parse(versionString.Substring(0, 1));
+            GraphicsExtensions.LogToFile(GraphicsExtensions.LogSeverity.Information, "OpenGL version " + versionString);
+
+            var vendorString = GL.GetString(StringName.Vendor);
+            GraphicsExtensions.CheckGLError();
+            GraphicsExtensions.LogToFile(GraphicsExtensions.LogSeverity.Information, "Vendor is " + vendorString);
+
+            var shaderVersionString = GL.GetString(StringName.ShadingLanguageVersion);
+            GraphicsExtensions.CheckGLError();
+            GraphicsExtensions.LogToFile(GraphicsExtensions.LogSeverity.Information, "GLSL version " + shaderVersionString);
 
             // Setup extensions
             if (majorVersion >= 3)
@@ -1489,6 +1497,9 @@ namespace Microsoft.Xna.Framework.Graphics
             set
             {
                 _viewport = value;
+
+                if (!Threading.IsOnUIThread())
+                    return;
 #if DIRECTX
                 if (_d3dContext != null)
                 {
