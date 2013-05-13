@@ -118,6 +118,7 @@ namespace Microsoft.Xna.Framework.Audio
                 {
                     case ALSourceState.Playing:
                     case ALSourceState.Paused:
+                        StoppingLock.ExitReadLock();
                         return;
                 }
 

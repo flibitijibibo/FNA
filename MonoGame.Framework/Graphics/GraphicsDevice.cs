@@ -420,11 +420,33 @@ namespace Microsoft.Xna.Framework.Graphics
 
             GraphicsExtensions.FboMultisampleSupported = (_extensions.Contains("GL_EXT_framebuffer_multisample") || _extensions.Contains("ARB_framebuffer_multisample")) &&
                                                          _extensions.Contains("GL_EXT_framebuffer_blit");
+
+            if (!_extensions.Contains("GL_EXT_packed_depth_stencil"))
+                GraphicsExtensions.LogToFile(GraphicsExtensions.LogSeverity.Warning, "Packed depth-stencil is NOT supported");
+
 //            if (!GraphicsExtensions.FboMultisampleSupported)
 //                GraphicsExtensions.LogToFile(GraphicsExtensions.LogSeverity.Information, "Framebuffer multisampling not supported, Polytron logo might look chunky!");
 
             GraphicsExtensions.UseDxtCompression = int.Parse(versionString.Substring(0, 1)) > 2 && // Don't trust OpenGL 2's texture compression, crashed on at least one driver
                                                    _extensions.Contains("GL_EXT_texture_compression_s3tc");
+
+            // Intel card driver detection
+            /*if (vendorString.Contains("Intel") && versionString.Contains("Build"))
+            {
+                var buildNumber = versionString.Substring(versionString.IndexOf("Build") + 6).Trim();
+                int minorBuildVersion;
+                if (buildNumber.StartsWith("8.15.10") && int.TryParse(buildNumber.Substring(8), out minorBuildVersion) && minorBuildVersion < 2993)
+                {
+                    MessageBox.Show(
+                        "An essential rendering feature is unsupported in your current drivers or graphics card." +
+                        "\nTry updating your drivers to the latest version." +
+                        "\n\nIf you are using the latest available drivers, your video card might not be able to run FEZ.",
+                        "FEZ - Fatal Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                    throw new InvalidOperationException("Framebuffer objects are not supported by the current OpenGL driver, please update your drivers and try again!");
+                }
+            }*/
+
 #if ANDROID || PSM
             GraphicsExtensions.UseDxtCompression = false;
 #endif
@@ -1697,7 +1719,6 @@ namespace Microsoft.Xna.Framework.Graphics
                     GraphicsExtensions.CheckGLError();
                 }
 
-                // TODO : This prevented the "incomplete" bug but doesn't solve the visual glitch
                 Threading.BlockOnUIThread(() =>
                 {
                     GraphicsExtensions.BindFramebuffer(GLFramebuffer, this.glRenderTargetFrameBuffer);
@@ -1722,7 +1743,11 @@ namespace Microsoft.Xna.Framework.Graphics
                         	// below.  If we check for GLError here we could be catching errors from previous commands and not this.                            
                             //GraphicsExtensions.CheckGLError();
                         }
+                        else
+                            GraphicsExtensions.FramebufferRenderbuffer(GLFramebuffer, GLStencilAttachment, GLRenderbuffer, 0);
 				    }
+                    else
+                        GraphicsExtensions.FramebufferRenderbuffer(GLFramebuffer, GLDepthAttachment, GLRenderbuffer, 0);
 #if !GLES
 //					for (int i = 0; i < _currentRenderTargetBindings.Length; i++)
 //					{
@@ -1737,7 +1762,7 @@ namespace Microsoft.Xna.Framework.Graphics
 #endif
 
 				    var status = GraphicsExtensions.CheckFramebufferStatus(GLFramebuffer);
-				    if (status != GLFramebufferComplete)
+                    if (status != GLFramebufferComplete)
 				    {
 					    string message = "Framebuffer Incomplete (" + status + ") : ";
 					    switch (status)
