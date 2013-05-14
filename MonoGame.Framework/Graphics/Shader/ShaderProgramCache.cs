@@ -114,7 +114,7 @@ namespace Microsoft.Xna.Framework.Graphics
             {
 #if !GLES
                 var log = GL.GetProgramInfoLog(program);
-                Console.WriteLine(log);
+                GraphicsExtensions.LogToFile(log);
 #endif
                 throw new InvalidOperationException("Unable to link effect program");
             }
