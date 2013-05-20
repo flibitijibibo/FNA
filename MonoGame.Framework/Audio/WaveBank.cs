@@ -104,7 +104,7 @@ namespace Microsoft.Xna.Framework.Audio
             nonStreamingWaveBankFilename = nonStreamingWaveBankFilename.Replace('\\',Path.DirectorySeparatorChar);
 
 #if !ANDROID
-            BinaryReader reader = new BinaryReader(new FileStream(nonStreamingWaveBankFilename, FileMode.Open));
+            BinaryReader reader = new BinaryReader(new FileStream(nonStreamingWaveBankFilename, FileMode.Open, FileAccess.Read));
 #else 
 			Stream stream = Game.Activity.Assets.Open(nonStreamingWaveBankFilename);
 			MemoryStream ms = new MemoryStream();

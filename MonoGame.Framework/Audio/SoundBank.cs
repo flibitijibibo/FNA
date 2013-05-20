@@ -54,7 +54,7 @@ namespace Microsoft.Xna.Framework.Audio
 		private void Load ()
 		{	
 #if !ANDROID
-			using (FileStream soundbankstream = new FileStream (filename, FileMode.Open))
+            using (FileStream soundbankstream = new FileStream (filename, FileMode.Open, FileAccess.Read))
 			{
 #else
 				using (var fileStream = Game.Activity.Assets.Open(filename))
