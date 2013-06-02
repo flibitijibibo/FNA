@@ -468,8 +468,6 @@ namespace Microsoft.Xna.Framework.Media
             
             // Initialize private members.
             timer = new Stopwatch();
-            playerThread = new Thread(new ThreadStart(this.RunVideo));
-            audioDecoderThread = new Thread(new ThreadStart(this.DecodeAudio));
             frameLocked = false;
             
             // Initialize this here to prevent null GetTexture returns.
@@ -671,10 +669,13 @@ namespace Microsoft.Xna.Framework.Media
             }
             
             // In rare cases, the thread might still be going. Wait until it's done.
-            if (playerThread.IsAlive)
+            if (playerThread != null && playerThread.IsAlive)
             {
                 Stop();
             }
+
+            playerThread = new Thread(new ThreadStart(this.RunVideo));
+            audioDecoderThread = new Thread(new ThreadStart(this.DecodeAudio));
             
             // Update the player state now, for the thread we're about to make.
             State = MediaState.Playing;
