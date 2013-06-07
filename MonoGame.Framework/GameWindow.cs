@@ -139,7 +139,7 @@ namespace Microsoft.Xna.Framework {
 		/// http://msdn.microsoft.com/en-AU/library/system.windows.forms.control.keypress.aspx
 		/// </summary>
 		/// <remarks>
-		/// This event is only supported on the Windows DirectX, Windows OpenGL and Linux platforms.
+		/// This event is only supported on the Windows DirectX, Windows OpenGL, Linux and SDL2 platforms.
 		/// </remarks>
 		public event EventHandler<TextInputEventArgs> TextInput;
 #endif
