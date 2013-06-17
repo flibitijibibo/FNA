@@ -461,6 +461,15 @@ namespace Microsoft.Xna.Framework.Graphics
 #endif
             if (!GraphicsExtensions.UseDxtCompression)
                 GraphicsExtensions.LogToFile(GraphicsExtensions.LogSeverity.Warning, "No S3TC/DXT support : will decompress DXT textures at load time.");
+
+            // Some more caps!
+            int maxVertexUniforms, maxFragmentUniforms;
+            GL.GetInteger(GetPName.MaxVertexUniformVectors, out maxVertexUniforms);
+            GL.GetInteger(GetPName.MaxFragmentUniformVectors, out maxFragmentUniforms);
+
+            GraphicsExtensions.LogToFile(GraphicsExtensions.LogSeverity.Information,
+                                         string.Format("Max uniforms : {0} in vertex, {1} in fragment",
+                                                       maxVertexUniforms, maxFragmentUniforms));
         }
 #endif // OPENGL
 

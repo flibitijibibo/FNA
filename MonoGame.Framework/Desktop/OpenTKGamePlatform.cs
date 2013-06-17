@@ -109,6 +109,7 @@ namespace Microsoft.Xna.Framework
             this.Window = _view;
 			
 			// Setup our OpenALSoundController to handle our SoundBuffer pools
+            OpenALSoundController.Initialize();
 			soundControllerInstance = OpenALSoundController.Instance;
             
 #if LINUX

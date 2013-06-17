@@ -31,7 +31,19 @@ namespace Microsoft.Xna.Framework.Audio
             public float SinceUnused;
         }
 
-        static OpenALSoundController instance = new OpenALSoundController();
+        public static void Initialize()
+        {
+            //Log("Initializing locks");
+
+            ActiveLock = new ReaderWriterLockSlim();
+            FilteringLock = new ReaderWriterLockSlim();
+            AllocationsLock = new ReaderWriterLockSlim();
+
+            //Log("Initializing controller");
+
+            instance = new OpenALSoundController();
+        }
+        static OpenALSoundController instance;
         public static OpenALSoundController Instance
         {
             get { return instance; }
@@ -46,9 +58,9 @@ namespace Microsoft.Xna.Framework.Audio
         readonly HashSet<int> filteredSources;
         readonly List<SoundEffectInstance> activeSoundEffects;
 
-        static readonly ReaderWriterLockSlim ActiveLock = new ReaderWriterLockSlim();
-        static readonly ReaderWriterLockSlim FilteringLock = new ReaderWriterLockSlim();
-        static readonly ReaderWriterLockSlim AllocationsLock = new ReaderWriterLockSlim();
+        static ReaderWriterLockSlim ActiveLock;
+        static ReaderWriterLockSlim FilteringLock;
+        static ReaderWriterLockSlim AllocationsLock;
 
         readonly int filterId;
 
@@ -71,6 +83,7 @@ namespace Microsoft.Xna.Framework.Audio
             }
             catch (Exception ex)
             {
+                //MessageBox.Show("Error writing log (" + ex.ToString() + "), wanted to write : " + message);
                 // NOT THAT BIG A DEAL GUYS
             }
         }
@@ -83,6 +96,7 @@ namespace Microsoft.Xna.Framework.Audio
             }
             catch (Exception ex)
             {
+                Log(ex.ToString());
                 Log("Last error in enumerator is " + AudioDeviceEnumerator.LastError);
 
                 MessageBox.Show("Error initializing audio subsystem. Game will now exit.\n" +
@@ -91,7 +105,7 @@ namespace Microsoft.Xna.Framework.Audio
                 throw;
             }
 
-            Log("Sound manager initialized!");
+            Log("Context created");
 
             // log how many sources we have access to
             var attributesSize = new int[1];
@@ -125,6 +139,8 @@ namespace Microsoft.Xna.Framework.Audio
             activeSoundEffects = new List<SoundEffectInstance>();
             freeSources = new ConcurrentStack<int>();
             ExpandSources(PreallocatedSources);
+
+            Log("Sound manager initialized!");
         }
 
         public int RegisterSfxInstance(SoundEffectInstance instance, bool forceNoFilter = false)
@@ -280,12 +296,12 @@ namespace Microsoft.Xna.Framework.Audio
         {
             BufferAllocation allocation;
             AllocationsLock.EnterReadLock();
-            if (!allocatedBuffers.TryGetValue(soundEffect, out allocation))
-                throw new InvalidOperationException(soundEffect.Name + " not found");
-
-            allocation.SourceCount--;
-            if (allocation.SourceCount == 0) allocation.SinceUnused = 0;
-            Debug.Assert(allocation.SourceCount >= 0);
+            if (allocatedBuffers.TryGetValue(soundEffect, out allocation))
+            {
+                allocation.SourceCount--;
+                if (allocation.SourceCount == 0) allocation.SinceUnused = 0;
+                Debug.Assert(allocation.SourceCount >= 0);
+            }
             AllocationsLock.ExitReadLock();
 
             ReturnSource(sourceId);
