@@ -392,9 +392,9 @@ namespace Microsoft.Xna.Framework
                     {
                         string text;
                         unsafe { text = new string(evt.text.text); }
-                        for (int i = 0; i < text.Length; i++)
+                        if (text.Length > 0)
                         {
-                            OnTextInput(evt, new TextInputEventArgs(text[i]));
+                            OnTextInput(evt, new TextInputEventArgs(text[0]));
                         }
                     }
 
