@@ -79,6 +79,8 @@ namespace Microsoft.Xna.Framework.Media
 
 		private IntPtr INTERNAL_mixMusic;
 
+		SDL_mixer.MusicFinishedDelegate musicFinishedDelegate;
+
 		#endregion
 
 		#region Internal Member Data
@@ -223,7 +225,8 @@ namespace Microsoft.Xna.Framework.Media
 			{
 				return;
 			}
-			SDL_mixer.Mix_HookMusicFinished(OnFinishedPlaying);
+			musicFinishedDelegate = OnFinishedPlaying;
+			SDL_mixer.Mix_HookMusicFinished(musicFinishedDelegate);
 			SDL_mixer.Mix_PlayMusic(INTERNAL_mixMusic, 0);
 			PlayCount += 1;
 		}
