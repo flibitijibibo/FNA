@@ -419,6 +419,18 @@ namespace Microsoft.Xna.Framework
                         }
                     }
 
+                    // Game pad connect/disconnect
+                    else if (evt.type == SDL.SDL_EventType.SDL_CONTROLLERDEVICEADDED)
+                    {
+                        GamePad.InitControllerIndex( evt.cdevice.which );
+                    }
+                    else if (evt.type == SDL.SDL_EventType.SDL_CONTROLLERDEVICEREMOVED)
+                    {
+                        // Clean up the controller and remove any reference to the game controller
+                        // so that we don't get memory errors on the next polling.
+                        GamePad.DisconnectControllerIndex( evt.cdevice.which );
+                    }
+
                     // Quit
                     else if (evt.type == SDL.SDL_EventType.SDL_QUIT)
                     {
