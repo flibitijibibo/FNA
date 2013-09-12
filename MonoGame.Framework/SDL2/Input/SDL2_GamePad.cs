@@ -439,11 +439,35 @@ namespace Microsoft.Xna.Framework.Input
             // Give SDL a chance to shut down the controller.
             IntPtr device = INTERNAL_devices[index];
             SDL.SDL_GameControllerClose(device);
-            //SDL.SDL_GameControllerClose(index);
 
             // Forget the pointer to the old device.
             INTERNAL_devices[index] = IntPtr.Zero;
             INTERNAL_haptics[index] = IntPtr.Zero;
+        }
+
+        /// <summary>
+        /// This will disconnect and re-init each controller (only listens to first 4, like the other
+        /// code in this file).  When we get controller disconnection info, sometimes it disagrees
+        /// with the index that is actually being disconnected.
+        /// </summary>
+        public static void ReinitAllControllers()
+        {
+            // Limit to the first 4 sticks to avoid crashes.
+            const int MAX_STICKS = 4;
+
+            // Disconnect all sticks that could have been connected.
+            for (int x = 0; x < MAX_STICKS; x++)
+            {
+                DisconnectControllerIndex(x);
+            }
+
+            // Reconnect any sticks that are present.
+            int numSticksPluggedIn = Math.Min(MAX_STICKS, SDL.SDL_NumJoysticks());
+            for (int x = 0; x < numSticksPluggedIn; x++)
+            {
+                
+                InitControllerIndex(x);
+            }
         }
 
         #endregion
