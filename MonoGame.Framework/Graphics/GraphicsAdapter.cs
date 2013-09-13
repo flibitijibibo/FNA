@@ -87,10 +87,13 @@ namespace Microsoft.Xna.Framework.Graphics
             get
             {
 #if SDL2
+                SDL2.SDL.SDL_DisplayMode dm;
+                SDL2.SDL.SDL_GetCurrentDisplayMode(0, out dm);
+
                 return new DisplayMode(
-                    _screen.INTERNAL_glFramebufferWidth,
-                    _screen.INTERNAL_glFramebufferHeight,
-                    60, // FIXME: Assumption!
+                    dm.w,
+                    dm.h,
+                    dm.refresh_rate,
                     SurfaceFormat.Color
                 );
 #elif IOS

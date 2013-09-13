@@ -126,6 +126,9 @@ namespace Microsoft.Xna.Framework
         private IntPtr INTERNAL_GLContext;
         
         private string INTERNAL_deviceName;
+
+        private int INTERNAL_defaultWidth = 1280;
+        private int INTERNAL_defaultHeight = 720;
         
         #endregion
         
@@ -383,7 +386,7 @@ namespace Microsoft.Xna.Framework
                             Mouse.INTERNAL_WindowHeight = evt.window.data2;
                             
                             // Should be called on user resize only, NOT ApplyChanges!.
-                            OnClientSizeChanged();
+                                OnClientSizeChanged();
                         }
                         else if (evt.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_SIZE_CHANGED)
                         {
@@ -620,8 +623,8 @@ namespace Microsoft.Xna.Framework
                 "MonoGame-SDL2 Window",
                 SDL.SDL_WINDOWPOS_CENTERED,
                 SDL.SDL_WINDOWPOS_CENTERED,
-                800,
-                600,
+                INTERNAL_defaultWidth,
+                INTERNAL_defaultHeight,
                 INTERNAL_sdlWindowFlags_Next
             );
             
@@ -664,8 +667,8 @@ namespace Microsoft.Xna.Framework
                 TextureTarget.Texture2D,
                 0,
                 PixelInternalFormat.Rgba,
-                800,
-                600,
+                INTERNAL_defaultWidth,
+                INTERNAL_defaultHeight,
                 0,
                 PixelFormat.Rgba,
                 PixelType.UnsignedInt,
@@ -676,8 +679,8 @@ namespace Microsoft.Xna.Framework
                 TextureTarget.Texture2D,
                 0,
                 PixelInternalFormat.DepthComponent16,
-                800,
-                600,
+                INTERNAL_defaultWidth,
+                INTERNAL_defaultHeight,
                 0,
                 PixelFormat.DepthComponent,
                 PixelType.UnsignedByte,
@@ -698,10 +701,10 @@ namespace Microsoft.Xna.Framework
                 0
             );
             GL.BindTexture(TextureTarget.Texture2D, 0);
-            INTERNAL_glFramebufferWidth = 800;
-            INTERNAL_glFramebufferHeight = 600;
-            Mouse.INTERNAL_BackbufferWidth = 800;
-            Mouse.INTERNAL_BackbufferHeight = 600;
+            INTERNAL_glFramebufferWidth = INTERNAL_defaultWidth;
+            INTERNAL_glFramebufferHeight = INTERNAL_defaultHeight;
+            Mouse.INTERNAL_BackbufferWidth = INTERNAL_defaultWidth;
+            Mouse.INTERNAL_BackbufferHeight = INTERNAL_defaultHeight;
             
             INTERNAL_depthFormat = DepthFormat.Depth16;
 
