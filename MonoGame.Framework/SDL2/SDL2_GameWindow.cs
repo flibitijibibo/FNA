@@ -67,7 +67,7 @@ non-infringement.
 #endregion License
 
 #region RESIZABLE_WINDOW Option
-// #define RESIZABLE_WINDOW
+#define RESIZABLE_WINDOW
 /* So we've got this silly issue in SDL2's video API at the moment. We can't
  * add/remove the resizable property to the SDL_Window*!
  *
@@ -777,11 +777,12 @@ namespace Microsoft.Xna.Framework
                 int x = 0;
                 int y = 0;
                 SDL.SDL_GetWindowPosition(INTERNAL_sdlWindow, out x, out y);
-                SDL.SDL_SetWindowPosition(
-                    INTERNAL_sdlWindow,
-                    x + ((INTERNAL_glFramebufferWidth - clientWidth) / 2),
-                    y + ((INTERNAL_glFramebufferHeight - clientHeight) / 2)
-                );
+                // This forces the game to always go fullscreen for some reason
+                //SDL.SDL_SetWindowPosition(
+                //    INTERNAL_sdlWindow,
+                //    x + ((INTERNAL_glFramebufferWidth - clientWidth) / 2),
+                //    y + ((INTERNAL_glFramebufferHeight - clientHeight) / 2)
+                //);
             }
             
             // Current flags have just been updated.
