@@ -431,7 +431,13 @@ namespace Microsoft.Xna.Framework
                     {
                         // Clean up the controller and remove any reference to the game controller
                         // so that we don't get memory errors on the next polling.
-                        GamePad.DisconnectControllerIndex( evt.cdevice.which );
+                        //GamePad.DisconnectControllerIndex( evt.cdevice.which );
+
+                        // WARNING: evt.cdevice.which is sometimes wrong! If we connect a controller, disconnect it,
+                        // reconnect it, then disconnect it again. The last disconnection gives a different evt.cdevice.which.
+                        // Therefore, when a disconnection occurs, we must disconnect all controllers, then reconnect any
+                        // controllers that are plugged in.
+                        GamePad.ReinitAllControllers();
                     }
 
                     // Quit
@@ -671,7 +677,7 @@ namespace Microsoft.Xna.Framework
                 INTERNAL_defaultHeight,
                 0,
                 PixelFormat.Rgba,
-                PixelType.UnsignedInt,
+                PixelType.UnsignedByte,
                 IntPtr.Zero
             );
             GL.BindTexture(TextureTarget.Texture2D, INTERNAL_glDepthStencilAttachment);
@@ -799,7 +805,7 @@ namespace Microsoft.Xna.Framework
                 clientHeight,
                 0,
                 PixelFormat.Rgba,
-                PixelType.UnsignedInt,
+                PixelType.UnsignedByte,
                 IntPtr.Zero
             );
             
