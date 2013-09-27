@@ -368,55 +368,107 @@ namespace Microsoft.Xna.Framework.Input
             
             for (int x = 0; x < numSticks; x++)
             {
-                // We use this when dealing with Haptic initialization.
-                IntPtr thisJoystick;
+                InitControllerIndex(x);
+            }
+        }
+
+        /// <summary>
+        /// Initializes / re-initializes a game controller at the given game-controller
+        /// index (eg: controller 0 through controller 3).
+        /// </summary>
+        /// <param name="index"></param>
+        public static void InitControllerIndex(int index)
+        {
+            // We use this when dealing with Haptic initialization.
+            IntPtr thisJoystick;
+
+            // Initialize either a GameController or a Joystick.
+            if (SDL.SDL_IsGameController(index) == SDL.SDL_bool.SDL_TRUE)
+            {
+                INTERNAL_devices[index] = SDL.SDL_GameControllerOpen(index);
+                thisJoystick = SDL.SDL_GameControllerGetJoystick(INTERNAL_devices[index]);
+            }
+            else
+            {
+                INTERNAL_devices[index] = SDL.SDL_JoystickOpen(index);
+                thisJoystick = INTERNAL_devices[index];
+            }
+
+            // Initialize the haptics for each joystick.
+            if (SDL.SDL_JoystickIsHaptic(thisJoystick) == 1)
+            {
+                INTERNAL_haptics[index] = SDL.SDL_HapticOpenFromJoystick(thisJoystick);
+            }
+            if (INTERNAL_haptics[index] != IntPtr.Zero)
+            {
+                if (SDL.SDL_HapticEffectSupported(INTERNAL_haptics[index], ref INTERNAL_effect) == 1)
+                {
+                    SDL.SDL_HapticNewEffect(INTERNAL_haptics[index], ref INTERNAL_effect);
+                }
+                else if (SDL.SDL_HapticRumbleSupported(INTERNAL_haptics[index]) == 1)
+                {
+                    SDL.SDL_HapticRumbleInit(INTERNAL_haptics[index]);
+                }
+            }
+
+            // Check for an SDL_GameController configuration first!
+            if (SDL.SDL_IsGameController(index) == SDL.SDL_bool.SDL_TRUE)
+            {
+                System.Console.WriteLine(
+                    "Controller " + index + ", " +
+                    SDL.SDL_GameControllerName(INTERNAL_devices[index]) +
+                    ", will use SDL_GameController support."
+                );
+           }
+            else
+            {
+                System.Console.WriteLine(
+                    "Controller " + index + ", " +
+                    SDL.SDL_JoystickName(INTERNAL_devices[index]) +
+                    ", will use generic MonoGameJoystick support."
+                );
+            }
+        }
+
+        /// <summary>
+        /// Should be called when a SDL.SDL_EventType.SDL_CONTROLLERDEVICEREMOVED is received. This
+        /// will forget the previously-connected controller at the given index. It can be restored at
+        /// a later time if it is reconnected.
+        /// </summary>
+        /// <param name="index"></param>
+        public static void DisconnectControllerIndex(int index)
+        {
+            // Give SDL a chance to shut down the controller.
+            IntPtr device = INTERNAL_devices[index];
+            SDL.SDL_GameControllerClose(device);
+
+            // Forget the pointer to the old device.
+            INTERNAL_devices[index] = IntPtr.Zero;
+            INTERNAL_haptics[index] = IntPtr.Zero;
+        }
+
+        /// <summary>
+        /// This will disconnect and re-init each controller (only listens to first 4, like the other
+        /// code in this file).  When we get controller disconnection info, sometimes it disagrees
+        /// with the index that is actually being disconnected.
+        /// </summary>
+        public static void ReinitAllControllers()
+        {
+            // Limit to the first 4 sticks to avoid crashes.
+            const int MAX_STICKS = 4;
+
+            // Disconnect all sticks that could have been connected.
+            for (int x = 0; x < MAX_STICKS; x++)
+            {
+                DisconnectControllerIndex(x);
+            }
+
+            // Reconnect any sticks that are present.
+            int numSticksPluggedIn = Math.Min(MAX_STICKS, SDL.SDL_NumJoysticks());
+            for (int x = 0; x < numSticksPluggedIn; x++)
+            {
                 
-                // Initialize either a GameController or a Joystick.
-                if (SDL.SDL_IsGameController(x) == SDL.SDL_bool.SDL_TRUE)
-                {
-                    INTERNAL_devices[x] = SDL.SDL_GameControllerOpen(x);
-                    thisJoystick = SDL.SDL_GameControllerGetJoystick(INTERNAL_devices[x]);
-                }
-                else
-                {
-                    INTERNAL_devices[x] = SDL.SDL_JoystickOpen(x);
-                    thisJoystick = INTERNAL_devices[x];
-                }
-                
-                // Initialize the haptics for each joystick.
-                if (SDL.SDL_JoystickIsHaptic(thisJoystick) == 1)
-                {
-                    INTERNAL_haptics[x] = SDL.SDL_HapticOpenFromJoystick(thisJoystick);
-                }
-                if (INTERNAL_haptics[x] != IntPtr.Zero)
-                {
-                    if (SDL.SDL_HapticEffectSupported(INTERNAL_haptics[x], ref INTERNAL_effect) == 1)
-                    {
-                        SDL.SDL_HapticNewEffect(INTERNAL_haptics[x], ref INTERNAL_effect);
-                    }
-                    else if (SDL.SDL_HapticRumbleSupported(INTERNAL_haptics[x]) == 1)
-                    {
-                        SDL.SDL_HapticRumbleInit(INTERNAL_haptics[x]);
-                    }
-                }
-    
-                // Check for an SDL_GameController configuration first!
-                if (SDL.SDL_IsGameController(x) == SDL.SDL_bool.SDL_TRUE)
-                {
-                    System.Console.WriteLine(
-                        "Controller " + x + ", " +
-                        SDL.SDL_GameControllerName(INTERNAL_devices[x]) +
-                        ", will use SDL_GameController support."
-                    );
-                }
-                else
-                {
-                    System.Console.WriteLine(
-                        "Controller " + x + ", " +
-                        SDL.SDL_JoystickName(INTERNAL_devices[x]) +
-                        ", will use generic MonoGameJoystick support."
-                    );
-                }
+                InitControllerIndex(x);
             }
         }
 

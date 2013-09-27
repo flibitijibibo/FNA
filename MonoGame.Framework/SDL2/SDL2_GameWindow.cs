@@ -67,7 +67,7 @@ non-infringement.
 #endregion License
 
 #region RESIZABLE_WINDOW Option
-// #define RESIZABLE_WINDOW
+#define RESIZABLE_WINDOW
 /* So we've got this silly issue in SDL2's video API at the moment. We can't
  * add/remove the resizable property to the SDL_Window*!
  *
@@ -126,6 +126,9 @@ namespace Microsoft.Xna.Framework
         private IntPtr INTERNAL_GLContext;
         
         private string INTERNAL_deviceName;
+
+        private int INTERNAL_defaultWidth = 1280;
+        private int INTERNAL_defaultHeight = 720;
         
         #endregion
         
@@ -393,7 +396,7 @@ namespace Microsoft.Xna.Framework
                             Mouse.INTERNAL_WindowHeight = evt.window.data2;
                             
                             // Should be called on user resize only, NOT ApplyChanges!.
-                            OnClientSizeChanged();
+                                OnClientSizeChanged();
                         }
                         else if (evt.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_SIZE_CHANGED)
                         {
@@ -427,6 +430,24 @@ namespace Microsoft.Xna.Framework
                         {
                             OnTextInput(evt, new TextInputEventArgs(text[0]));
                         }
+                    }
+
+                    // Game pad connect/disconnect
+                    else if (evt.type == SDL.SDL_EventType.SDL_CONTROLLERDEVICEADDED)
+                    {
+                        GamePad.InitControllerIndex( evt.cdevice.which );
+                    }
+                    else if (evt.type == SDL.SDL_EventType.SDL_CONTROLLERDEVICEREMOVED)
+                    {
+                        // Clean up the controller and remove any reference to the game controller
+                        // so that we don't get memory errors on the next polling.
+                        //GamePad.DisconnectControllerIndex( evt.cdevice.which );
+
+                        // WARNING: evt.cdevice.which is sometimes wrong! If we connect a controller, disconnect it,
+                        // reconnect it, then disconnect it again. The last disconnection gives a different evt.cdevice.which.
+                        // Therefore, when a disconnection occurs, we must disconnect all controllers, then reconnect any
+                        // controllers that are plugged in.
+                        GamePad.ReinitAllControllers();
                     }
 
                     // Quit
@@ -618,8 +639,8 @@ namespace Microsoft.Xna.Framework
                 "MonoGame-SDL2 Window",
                 SDL.SDL_WINDOWPOS_CENTERED,
                 SDL.SDL_WINDOWPOS_CENTERED,
-                800,
-                600,
+                INTERNAL_defaultWidth,
+                INTERNAL_defaultHeight,
                 INTERNAL_sdlWindowFlags_Next
             );
             
@@ -662,8 +683,8 @@ namespace Microsoft.Xna.Framework
                 TextureTarget.Texture2D,
                 0,
                 PixelInternalFormat.Rgba,
-                800,
-                600,
+                INTERNAL_defaultWidth,
+                INTERNAL_defaultHeight,
                 0,
                 PixelFormat.Rgba,
                 PixelType.UnsignedByte,
@@ -674,8 +695,8 @@ namespace Microsoft.Xna.Framework
                 TextureTarget.Texture2D,
                 0,
                 PixelInternalFormat.DepthComponent16,
-                800,
-                600,
+                INTERNAL_defaultWidth,
+                INTERNAL_defaultHeight,
                 0,
                 PixelFormat.DepthComponent,
                 PixelType.UnsignedByte,
@@ -696,10 +717,10 @@ namespace Microsoft.Xna.Framework
                 0
             );
             GL.BindTexture(TextureTarget.Texture2D, 0);
-            INTERNAL_glFramebufferWidth = 800;
-            INTERNAL_glFramebufferHeight = 600;
-            Mouse.INTERNAL_BackbufferWidth = 800;
-            Mouse.INTERNAL_BackbufferHeight = 600;
+            INTERNAL_glFramebufferWidth = INTERNAL_defaultWidth;
+            INTERNAL_glFramebufferHeight = INTERNAL_defaultHeight;
+            Mouse.INTERNAL_BackbufferWidth = INTERNAL_defaultWidth;
+            Mouse.INTERNAL_BackbufferHeight = INTERNAL_defaultHeight;
             
             INTERNAL_depthFormat = DepthFormat.Depth16;
 
@@ -766,11 +787,12 @@ namespace Microsoft.Xna.Framework
                 int x = 0;
                 int y = 0;
                 SDL.SDL_GetWindowPosition(INTERNAL_sdlWindow, out x, out y);
-                SDL.SDL_SetWindowPosition(
-                    INTERNAL_sdlWindow,
-                    x + ((INTERNAL_glFramebufferWidth - clientWidth) / 2),
-                    y + ((INTERNAL_glFramebufferHeight - clientHeight) / 2)
-                );
+                // This forces the game to always go fullscreen for some reason
+                //SDL.SDL_SetWindowPosition(
+                //    INTERNAL_sdlWindow,
+                //    x + ((INTERNAL_glFramebufferWidth - clientWidth) / 2),
+                //    y + ((INTERNAL_glFramebufferHeight - clientHeight) / 2)
+                //);
             }
             
             // Current flags have just been updated.
