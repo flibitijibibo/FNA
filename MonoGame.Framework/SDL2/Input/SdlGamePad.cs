@@ -43,6 +43,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Xml.Serialization;
+using System.Runtime.InteropServices;
 
 using SDL2;
 
@@ -125,7 +126,8 @@ namespace Microsoft.Xna.Framework.Input
         {
             IntPtr haptic = INTERNAL_haptics[(int) playerIndex];
             return (    haptic != IntPtr.Zero &&
-                        (    SDL.SDL_HapticEffectSupported(haptic, ref GamePad.INTERNAL_effect) == 1 ||
+                        (    (  SDL.SDL_HapticEffectSupported(haptic, ref GamePad.INTERNAL_Custom_effect) == 1 && (SDL.SDL_HapticNumAxes(haptic) == 2)  ) ||
+                        SDL.SDL_HapticEffectSupported(haptic, ref GamePad.INTERNAL_LeftRight_effect) == 1 ||
                              SDL.SDL_HapticRumbleSupported(haptic) == 1  )       );
         }
   
@@ -350,9 +352,13 @@ namespace Microsoft.Xna.Framework.Input
                 }
                 if (INTERNAL_haptics[x] != IntPtr.Zero)
                 {
-                    if (SDL.SDL_HapticEffectSupported(INTERNAL_haptics[x], ref GamePad.INTERNAL_effect) == 1)
+                    if (SDL.SDL_HapticEffectSupported(INTERNAL_haptics[x], ref GamePad.INTERNAL_LeftRight_effect) == 1)
                     {
-                        SDL.SDL_HapticNewEffect(INTERNAL_haptics[x], ref GamePad.INTERNAL_effect);
+                        SDL.SDL_HapticNewEffect(INTERNAL_haptics[x], ref GamePad.INTERNAL_LeftRight_effect);
+                    }
+                    else if (SDL.SDL_HapticEffectSupported(INTERNAL_haptics[x], ref GamePad.INTERNAL_Custom_effect) == 1)
+                    {
+                        SDL.SDL_HapticNewEffect(INTERNAL_haptics[x], ref GamePad.INTERNAL_Custom_effect);
                     }
                     else if (SDL.SDL_HapticRumbleSupported(INTERNAL_haptics[x]) == 1)
                     {
@@ -809,20 +815,37 @@ namespace Microsoft.Xna.Framework.Input
                 SDL.SDL_HapticStopAll(INTERNAL_haptics[(int)playerIndex]);
                 return true;
             }
-            else if (SDL.SDL_HapticEffectSupported(INTERNAL_haptics[(int) playerIndex], ref GamePad.INTERNAL_effect) == 1)
+            else if (SDL.SDL_HapticEffectSupported(INTERNAL_haptics[(int) playerIndex], ref GamePad.INTERNAL_LeftRight_effect) == 1) {
+                GamePad.INTERNAL_LeftRight_effect.leftright.large_magnitude = (ushort)(65535.0f * leftMotor);
+                GamePad.INTERNAL_LeftRight_effect.leftright.small_magnitude = (ushort)(65535.0f * rightMotor);
+                SDL.SDL_HapticUpdateEffect (
+                    INTERNAL_haptics[(int) playerIndex],
+                    0,
+                    ref GamePad.INTERNAL_LeftRight_effect
+                );
+                SDL.SDL_HapticRunEffect (
+                    INTERNAL_haptics[(int) playerIndex],
+                    0,
+                    1
+                );
+            }
+            else if (SDL.SDL_HapticEffectSupported (INTERNAL_haptics [(int)playerIndex], ref GamePad.INTERNAL_Custom_effect) == 1)
             {
-                GamePad.INTERNAL_effect.leftright.large_magnitude = (ushort) (65535.0f * leftMotor);
-                GamePad.INTERNAL_effect.leftright.small_magnitude = (ushort) (65535.0f * rightMotor);
+                ushort[] data = {(ushort)(65535.0f * leftMotor), (ushort)(65535.0f * rightMotor)};
+                GCHandle pArry = GCHandle.Alloc(data, GCHandleType.Pinned);
+                IntPtr ptr = pArry.AddrOfPinnedObject();
+                GamePad.INTERNAL_Custom_effect.custom.data = ptr;
                 SDL.SDL_HapticUpdateEffect(
                     INTERNAL_haptics[(int) playerIndex],
                     0,
-                    ref GamePad.INTERNAL_effect
+                    ref GamePad.INTERNAL_Custom_effect
                 );
                 SDL.SDL_HapticRunEffect(
                     INTERNAL_haptics[(int) playerIndex],
                     0,
                     1
                 );
+                pArry.Free();
             }
             else
             {
