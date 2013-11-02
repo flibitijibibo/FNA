@@ -150,6 +150,9 @@ namespace Microsoft.Xna.Framework
         
         public override void Exit()
         {
+            // Stop drawing
+            Game.SuppressDraw ();
+
             // Stop the game loop
             INTERNAL_window.INTERNAL_StopLoop();
             
@@ -158,6 +161,9 @@ namespace Microsoft.Xna.Framework
             
             // Close SDL2_mixer if needed
             Media.Song.closeMixer();
+
+            // Actually quit the game
+            SDL.SDL_Quit ();
         }
 
         public override bool BeforeUpdate(GameTime gameTime)
