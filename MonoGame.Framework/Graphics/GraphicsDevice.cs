@@ -2390,7 +2390,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     }
                     vertBuffer.VertexBuffer.VertexDeclaration.Apply(
                         _vertexShader,
-                        (IntPtr) (vertBuffer.VertexBuffer.VertexDeclaration.VertexStride * (vertBuffer.VertexOffset + baseVertex))
+                        (IntPtr) (vertBuffer.VertexBuffer.VertexDeclaration.VertexStride * (vertBuffer.VertexOffset))
                     );
                 }
             }
@@ -2406,11 +2406,14 @@ namespace Microsoft.Xna.Framework.Graphics
             }
 
             // Draw!
-            GL.DrawElements(
+            GL.DrawRangeElementsBaseVertex(
                 PrimitiveTypeGL(primitiveType),
+		minVertexIndex,
+		numVertices,
                 GetElementCountArray(primitiveType, primitiveCount),
                 shortIndices ? DrawElementsType.UnsignedShort : DrawElementsType.UnsignedInt,
-                (IntPtr) (startIndex * (shortIndices ? 2 : 4))
+                (IntPtr) (startIndex * (shortIndices ? 2 : 4)),
+		baseVertex
             );
 
             // Check for errors in the debug context
@@ -2457,7 +2460,7 @@ namespace Microsoft.Xna.Framework.Graphics
                     }
                     vertBuffer.VertexBuffer.VertexDeclaration.Apply(
                         _vertexShader,
-                        (IntPtr) (vertBuffer.VertexBuffer.VertexDeclaration.VertexStride * (vertBuffer.VertexOffset + baseVertex)),
+                        (IntPtr) (vertBuffer.VertexBuffer.VertexDeclaration.VertexStride * (vertBuffer.VertexOffset)),
                         vertBuffer.InstanceFrequency
                     );
                 }
@@ -2474,12 +2477,13 @@ namespace Microsoft.Xna.Framework.Graphics
             }
 
             // Draw!
-            GL.DrawElementsInstanced(
+            GL.DrawElementsInstancedBaseVertex(
                 PrimitiveTypeGL(primitiveType),
                 GetElementCountArray(primitiveType, primitiveCount),
                 shortIndices ? DrawElementsType.UnsignedShort : DrawElementsType.UnsignedInt,
                 (IntPtr) (startIndex * (shortIndices ? 2 : 4)),
-                instanceCount
+                instanceCount,
+		baseVertex
             );
 
             // Check for errors in the debug context
@@ -2654,10 +2658,11 @@ namespace Microsoft.Xna.Framework.Graphics
             INTERNAL_FlushVertexAttributes();
 
             //Draw
-            GL.DrawElements(    PrimitiveTypeGL(primitiveType),
-                                GetElementCountArray(primitiveType, primitiveCount),
-                                DrawElementsType.UnsignedShort,
-                                (IntPtr)(ibHandle.AddrOfPinnedObject().ToInt64() + (indexOffset * sizeof(short))));
+            GL.DrawRangeElements(    PrimitiveTypeGL(primitiveType),
+	                             0, numVertices,
+                                     GetElementCountArray(primitiveType, primitiveCount),
+                                     DrawElementsType.UnsignedShort,
+                                     (IntPtr)(ibHandle.AddrOfPinnedObject().ToInt64() + (indexOffset * sizeof(short))));
             GraphicsExtensions.CheckGLError();
 
             // Release the handles.
@@ -2722,10 +2727,11 @@ namespace Microsoft.Xna.Framework.Graphics
             INTERNAL_FlushVertexAttributes();
 
             //Draw
-            GL.DrawElements(    PrimitiveTypeGL(primitiveType),
-                                GetElementCountArray(primitiveType, primitiveCount),
-                                DrawElementsType.UnsignedInt,
-                                (IntPtr)(ibHandle.AddrOfPinnedObject().ToInt64() + (indexOffset * sizeof(int))));
+            GL.DrawRangeElements(    PrimitiveTypeGL(primitiveType),
+	                             0, numVertices,
+                                     GetElementCountArray(primitiveType, primitiveCount),
+                                     DrawElementsType.UnsignedInt,
+                                     (IntPtr)(ibHandle.AddrOfPinnedObject().ToInt64() + (indexOffset * sizeof(int))));
             GraphicsExtensions.CheckGLError();
 
             // Release the handles.
