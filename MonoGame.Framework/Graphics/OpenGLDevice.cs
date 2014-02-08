@@ -1,3 +1,5 @@
+// vim: ts=4:sw=4:et
+
 using System;
 using OpenTK.Graphics.OpenGL;
 
@@ -194,6 +196,25 @@ namespace Microsoft.Xna.Framework.Graphics
                 GraphicsDeviceManager.DefaultBackBufferHeight
             )
         );
+
+        #endregion
+
+        #region Framebuffer State Variables
+
+        public OpenGLState<uint> BoundReadFramebuffer = new OpenGLState<uint>(0);
+        public OpenGLState<uint> BoundDrawFramebuffer = new OpenGLState<uint>(0);
+        // This function emulates the behaviour of glBindFramebuffer's GL_FRAMEBUFFER target,
+        // which binds the given FBO to both the READ and DRAW framebuffers.
+        public void BindFramebuffer(uint frameBufferObject)
+        {
+            BoundReadFramebuffer.Set(frameBufferObject);
+            BoundDrawFramebuffer.Set(frameBufferObject);
+        }
+        // We're setting the default to GL_BACK here, but it should default to GL_FRONT on single buffered contexts.
+        // Given single-buffered contexts are terrible, and we never use them because we like not having horrible flickering,
+        // this shouldn't be a problem. Note that for FBOs, you'll want to cast a FramebufferAttachment to DrawBufferMode when
+        // setting this.
+        public OpenGLState<DrawBufferMode> CurrentDrawBufferMode = new OpenGLState<DrawBufferMode>(DrawBufferMode.Back);
 
         #endregion
 
@@ -632,6 +653,25 @@ namespace Microsoft.Xna.Framework.Graphics
             }
 
             // END SAMPLER STATES
+
+            // FRAMEBUFFER STATES
+
+            if (force || BoundReadFramebuffer.NeedsFlush())
+            {
+                GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, BoundReadFramebuffer.Flush());
+            }
+
+            if (force || BoundDrawFramebuffer.NeedsFlush())
+            {
+                GL.BindFramebuffer(FramebufferTarget.DrawFramebuffer, BoundDrawFramebuffer.Flush());
+            }
+
+            if (force || CurrentDrawBufferMode.NeedsFlush())
+            {
+                GL.DrawBuffer(CurrentDrawBufferMode.Flush());
+            }
+
+            // END FRAMEBUFFER STATES
 
             // Check for errors.
             GraphicsExtensions.CheckGLError();
