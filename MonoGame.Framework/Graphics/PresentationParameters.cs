@@ -91,6 +91,7 @@ namespace Microsoft.Xna.Framework.Graphics
             }
             set
             {
+            	isFullScreen=value;
 			}
         }
 		
