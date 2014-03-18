@@ -1,4 +1,4 @@
-﻿#if OPENGL
+#if OPENGL
 
 using System;
 using System.Collections.Generic;
