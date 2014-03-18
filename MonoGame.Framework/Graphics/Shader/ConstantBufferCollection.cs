@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 #if SDL2
 using OpenTK.Graphics.OpenGL;
