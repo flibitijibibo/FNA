@@ -220,8 +220,8 @@ namespace Microsoft.Xna.Framework.Content
 			Stream stream;
 			try
 			{
-				string assetPath = Path.Combine(RootDirectory, assetName) + ".xnb";
-				stream = TitleContainer.OpenStream(assetPath);
+				string assetPath = Path.Combine(RootDirectoryFullPath, assetName) + ".xnb";
+				stream = File.OpenRead(TitleContainer.GetFilename(assetPath));
 
 			}
 			catch (FileNotFoundException fileNotFound)
@@ -290,7 +290,7 @@ namespace Microsoft.Xna.Framework.Content
 			catch (ContentLoadException ex)
 			{
 				// MonoGame try to load as a non-content file
-				assetName = TitleContainer.GetFilename(Path.Combine(RootDirectory, assetName));
+				assetName = TitleContainer.GetFilename(Path.Combine(RootDirectoryFullPath, assetName));
 				assetName = Normalize<T>(assetName);
 				if (string.IsNullOrEmpty(assetName))
 				{
@@ -355,7 +355,7 @@ namespace Microsoft.Xna.Framework.Content
 		{
 			if (typeof(T) == typeof(Texture2D) || typeof(T) == typeof(Texture))
 			{
-				using (Stream assetStream = TitleContainer.OpenStream(assetName))
+				using (Stream assetStream = File.OpenRead(assetName))
 				{
 					Texture2D texture = Texture2D.FromStream(
 						graphicsDeviceService.GraphicsDevice,
@@ -375,7 +375,7 @@ namespace Microsoft.Xna.Framework.Content
 			}
 			else if ((typeof(T) == typeof(SoundEffect)))
 			{
-				using (Stream s = TitleContainer.OpenStream(assetName))
+				using (Stream s = File.OpenRead(assetName))
 				{
 					return SoundEffect.FromStream(s);
 				}
@@ -386,7 +386,7 @@ namespace Microsoft.Xna.Framework.Content
 			}
 			else if ((typeof(T) == typeof(Effect)))
 			{
-				using (Stream assetStream = TitleContainer.OpenStream(assetName))
+				using (Stream assetStream = File.OpenRead(assetName))
 				{
 					byte[] data = new byte[assetStream.Length];
 					assetStream.Read(data, 0, (int) assetStream.Length);
@@ -587,7 +587,7 @@ namespace Microsoft.Xna.Framework.Content
 			catch (ContentLoadException)
 			{
 				// Try to reload as a non-xnb file.
-				assetName = TitleContainer.GetFilename(Path.Combine(RootDirectory, assetName));
+				assetName = TitleContainer.GetFilename(Path.Combine(RootDirectoryFullPath, assetName));
 				assetName = Normalize<T>(assetName);
 				ReloadRawAsset(currentAsset, assetName, originalAssetName);
 			}
@@ -628,6 +628,10 @@ namespace Microsoft.Xna.Framework.Content
 		{
 			get
 			{
+				if (Path.IsPathRooted(RootDirectory))
+				{
+					return RootDirectory;
+				}
 				return Path.Combine(TitleContainer.Location, RootDirectory);
 			}
 		}
