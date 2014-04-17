@@ -16,11 +16,13 @@
 #define VIDEOPLAYER_OPENGL
 #endregion
 
+#region Using Statements
 using System;
 using System.IO;
 using System.Threading;
 
 using Microsoft.Xna.Framework.Graphics;
+#endregion
 
 namespace Microsoft.Xna.Framework.Media
 {

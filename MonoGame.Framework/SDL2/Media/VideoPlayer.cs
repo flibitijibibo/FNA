@@ -25,11 +25,11 @@ using System.Diagnostics;
 using System.Threading;
 using OpenTK.Audio.OpenAL;
 
-using Microsoft.Xna.Framework.Graphics;
-
 #if VIDEOPLAYER_OPENGL
 using OpenTK.Graphics.OpenGL;
 #endif
+
+using Microsoft.Xna.Framework.Graphics;
 #endregion
 
 namespace Microsoft.Xna.Framework.Media
