@@ -46,17 +46,17 @@
 
 #region Using Statements
 using System;
-using System.ComponentModel;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 #if WIIU_GAMEPAD
 using System.Runtime.InteropServices;
 #endif
 
+using SDL2;
+
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-
-using SDL2;
 #endregion
 
 namespace Microsoft.Xna.Framework
