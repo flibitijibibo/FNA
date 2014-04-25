@@ -215,6 +215,8 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public void Dispose()
 		{
+			INTERNAL_baseEngine.Dispose();
+			INTERNAL_waveBankReader.Dispose();
 			Dispose(false);
 		}
 

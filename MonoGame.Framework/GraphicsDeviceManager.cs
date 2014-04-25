@@ -342,6 +342,7 @@ namespace Microsoft.Xna.Framework
 
 		public void Dispose()
 		{
+			_game.Dispose();
 			Dispose(true);
 			GC.SuppressFinalize(this);
 		}
