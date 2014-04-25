@@ -192,6 +192,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 		~Cue()
 		{
+			INTERNAL_baseEngine.Dispose();
 			Dispose();
 		}
 

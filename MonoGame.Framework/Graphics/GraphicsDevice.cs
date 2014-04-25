@@ -409,6 +409,8 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public void Dispose()
 		{
+			INTERNAL_vertexShader.Dispose();
+			INTERNAL_pixelShader.Dispose();
 			Dispose(true);
 			GC.SuppressFinalize(this);
 		}

@@ -386,6 +386,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public void Dispose()
 		{
+			INTERNAL_baseEngine.Dispose();
 			Dispose(false);
 		}
 
