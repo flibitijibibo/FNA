@@ -124,13 +124,14 @@ namespace Microsoft.Xna.Framework
 		public ContainmentType Contains(BoundingFrustum frustum)
 		{
 			/* TODO: bad done here need a fix.
-			 * Because question is not frustum contain box but reverse and this is not the same
+			 * Because the question is not if frustum contains box but the reverse and
+			 * this is not the same.
 			 */
 			int i;
 			ContainmentType contained;
 			Vector3[] corners = frustum.GetCorners();
 
-			// First we check if frustum is in box
+			// First we check if frustum is in box.
 			for (i = 0; i < corners.Length; i += 1)
 			{
 				this.Contains(ref corners[i], out contained);
@@ -146,15 +147,16 @@ namespace Microsoft.Xna.Framework
 				return ContainmentType.Contains;
 			}
 
-			// if i is not equal to zero, we can fastpath and say that this box intersects
+			// If i is not equal to zero, we can fastpath and say that this box intersects
 			if (i != 0)
 			{
 				return ContainmentType.Intersects;
 			}
 
 
-			/* If we get here, it means the first (and only) point we checked was actually contained in the frustum.
-			 * So we assume that all other points will also be contained. If one of the points is disjoint, we can
+			/* If we get here, it means the first (and only) point we checked was
+			 * actually contained in the frustum. So we assume that all other points
+			 * will also be contained. If one of the points is disjoint, we can
 			 * exit immediately saying that the result is Intersects
 			 */
 			i += 1;
@@ -168,7 +170,9 @@ namespace Microsoft.Xna.Framework
 
 			}
 
-			// If we get here, then we know all the points were actually contained, therefore result is Contains
+			/* If we get here, then we know all the points were actually contained,
+			 * therefore result is Contains.
+			 */
 			return ContainmentType.Contains;
 		}
 
@@ -262,7 +266,7 @@ namespace Microsoft.Xna.Framework
 
 		public void Contains(ref Vector3 point, out ContainmentType result)
 		{
-			// first we get if point is out of box
+			// First determine if point is out of box
 			if (	point.X < this.Min.X ||
 				point.X > this.Max.X ||
 				point.Y < this.Min.Y ||
@@ -272,7 +276,7 @@ namespace Microsoft.Xna.Framework
 			{
 				result = ContainmentType.Disjoint;
 			}
-			// or if point is on box because coordonate of point is lesser or equal
+			// or, if point is on box because coordonate of point is lesser or equal.
 			else if (	MathHelper.WithinEpsilon(point.X, this.Min.X) ||
 					MathHelper.WithinEpsilon(point.X, this.Max.X) ||
 					MathHelper.WithinEpsilon(point.Y, this.Min.Y) ||
@@ -508,9 +512,13 @@ namespace Microsoft.Xna.Framework
 		/// <summary>
 		/// Create a bounding box from the given list of points.
 		/// </summary>
-		/// <param name="points">The list of Vector3 instances defining the point cloud to bound</param>
+		/// <param name="points">
+		/// The list of Vector3 instances defining the point cloud to bound.
+		/// </param>
 		/// <returns>A bounding box that encapsulates the given point cloud.</returns>
-		/// <exception cref="System.ArgumentException">Thrown if the given list has no points.</exception>
+		/// <exception cref="System.ArgumentException">
+		/// Thrown if the given list has no points.
+		/// </exception>
 		public static BoundingBox CreateFromPoints(IEnumerable<Vector3> points)
 		{
 			if (points == null)

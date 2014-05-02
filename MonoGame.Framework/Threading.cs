@@ -79,7 +79,7 @@ namespace Microsoft.Xna.Framework
 		/// <summary>
 		/// Checks if the code is currently running on the main thread.
 		/// </summary>
-		/// <returns>true if the code is running on the main thread.</returns>
+		/// <returns>True if the code is running on the main thread.</returns>
 		public static bool IsOnMainThread()
 		{
 			return mainThreadId == Thread.CurrentThread.ManagedThreadId;
@@ -93,7 +93,7 @@ namespace Microsoft.Xna.Framework
 		/// Runs a threaded operation on the main thread, blocking the thread.
 		/// If we're on the main thread, the action will run immediately.
 		/// </summary>
-		/// <param name="action">The action to be run on the main thread</param>
+		/// <param name="action">The action to be run on the main thread.</param>
 		public static void ForceToMainThread(Action action)
 		{
 			// If we're already on the main thread, just call the action.
@@ -106,13 +106,13 @@ namespace Microsoft.Xna.Framework
 #if THREADED_GL
 			lock (BackgroundContext)
 			{
-				// Make the context current on this thread
+				// Make the context current on this thread.
 				SDL.SDL_GL_MakeCurrent(WindowInfo, BackgroundContext.context);
 
-				// Execute the action
+				// Execute the action.
 				action();
 
-				// Must flush the GL calls now before we release the context
+				// Must flush the GL calls now before we release the context.
 				GL.Flush();
 
 				// Free the threaded context for the next threaded call...

@@ -113,7 +113,7 @@ namespace Microsoft.Xna.Framework
 		public event EventHandler<EventArgs> ScreenDeviceNameChanged;
 
 		/// <summary>
-		/// Use this event to retrieve text for objects like textbox's.
+		/// Use this event to retrieve text for objects like textboxes.
 		/// This event is not raised by noncharacter keys.
 		/// This event also supports key repeat.
 		/// For more information this event is based off:

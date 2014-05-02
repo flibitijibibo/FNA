@@ -81,7 +81,7 @@ namespace Microsoft.Xna.Framework
 			set
 			{
 				/* Give GamePlatform implementations an opportunity to override
-				 * the new value
+				 * the new value.
 				 */
 				value = Platform.TargetElapsedTimeChanging(value);
 
@@ -137,7 +137,9 @@ namespace Microsoft.Xna.Framework
 
 					if (_graphicsDeviceService == null)
 					{
-						throw new InvalidOperationException("No Graphics Device Service");
+						throw new InvalidOperationException(
+							"No Graphics Device Service"
+						);
 					}
 				}
 				return _graphicsDeviceService.GraphicsDevice;
@@ -181,7 +183,9 @@ namespace Microsoft.Xna.Framework
 
 					if (_graphicsDeviceManager == null)
 					{
-						throw new InvalidOperationException("No Graphics Device Manager");
+						throw new InvalidOperationException(
+							"No Graphics Device Manager"
+						);
 					}
 				}
 				return (GraphicsDeviceManager)_graphicsDeviceManager;
@@ -274,16 +278,14 @@ namespace Microsoft.Xna.Framework
 			Platform.Deactivated += OnDeactivated;
 			_services.AddService(typeof(GamePlatform), Platform);
 
-			/* Set the window title
-			 * TODO: Get the title from the WindowsPhoneManifest.xml for WP7 projects
-			 */
+			// Set the window title.
 			string windowTitle = string.Empty;
 
-			// When running unit tests this can return null
+			// When running unit tests this can return null.
 			Assembly assembly = Assembly.GetEntryAssembly();
 			if (assembly != null)
 			{
-				// Use the Title attribute of the Assembly if possible
+				// Use the Title attribute of the Assembly if possible.
 				AssemblyTitleAttribute assemblyTitleAtt = (AssemblyTitleAttribute)
 					AssemblyTitleAttribute.GetCustomAttribute(
 						assembly,
@@ -295,7 +297,7 @@ namespace Microsoft.Xna.Framework
 					windowTitle = assemblyTitleAtt.Title;
 				}
 
-				// Otherwise, fallback to the Name of the assembly
+				// Otherwise, fallback to the Name of the assembly.
 				if (string.IsNullOrEmpty(windowTitle))
 				{
 					windowTitle = assembly.GetName().Name;
@@ -332,7 +334,7 @@ namespace Microsoft.Xna.Framework
 			{
 				if (disposing)
 				{
-					// Dispose loaded game components
+					// Dispose loaded game components.
 					for (int i = 0; i < _components.Count; i += 1)
 					{
 						IDisposable disposable = _components[i] as IDisposable;
@@ -381,7 +383,10 @@ namespace Microsoft.Xna.Framework
 				string name = GetType().Name;
 				throw new ObjectDisposedException(
 					name,
-					string.Format("The {0} object was used after being Disposed.", name)
+					string.Format(
+						"The {0} object was used after being Disposed.",
+						name
+					)
 				);
 			}
 		}
@@ -436,7 +441,7 @@ namespace Microsoft.Xna.Framework
 
 			BeginRun();
 
-			// Not quite right..
+			// FIXME:  Not quite right..
 			Tick();
 
 			EndRun();
@@ -490,18 +495,18 @@ namespace Microsoft.Xna.Framework
 
 		public void Tick()
 		{
-			/* NOTE: This code is very sensitive and can break very badly
-			 * with even what looks like a safe change. Be sure to test
+			/* NOTE: This code is very sensitive and can break very badly,
+			 * even with what looks like a safe change. Be sure to test
 			 * any change fully in both the fixed and variable timestep
 			 * modes across multiple devices and platforms.
 			 */
 
-			// Can only be running slow if we are fixed timestep
+			// Can only be running slow if we are fixed timestep.
 			bool possibleToBeRunningSlowly = IsFixedTimeStep;
 
 		RetryTick:
 
-			// Advance the accumulated elapsed time
+			// Advance the accumulated elapsed time.
 			long currentTicks = _gameTimer.Elapsed.Ticks;
 			_accumulatedElapsedTime += TimeSpan.FromTicks(currentTicks - _previousTicks);
 			_previousTicks = currentTicks;
@@ -517,20 +522,20 @@ namespace Microsoft.Xna.Framework
 				);
 
 				/* If we have had to sleep, we shouldn't report being
-				 * slow regardless of how long we actually sleep for
+				 * slow regardless of how long we actually sleep for.
 				 */
 				possibleToBeRunningSlowly = false;
 
 				/* NOTE: While sleep can be inaccurate in general it is
 				 * accurate enough for frame limiting purposes if some
-				 * fluctuation is an acceptable result
+				 * fluctuation is an acceptable result.
 				 */
 				System.Threading.Thread.Sleep(sleepTime);
 
 				goto RetryTick;
 			}
 
-			// Do not allow any update to take longer than our maximum
+			// Do not allow any update to take longer than our maximum.
 			if (_accumulatedElapsedTime > _maxElapsedTime)
 			{
 				_accumulatedElapsedTime = _maxElapsedTime;
@@ -538,7 +543,7 @@ namespace Microsoft.Xna.Framework
 
 			/* http://msdn.microsoft.com/en-us/library/microsoft.xna.framework.gametime.isrunningslowly.aspx
 			 * Calculate IsRunningSlowly for the fixed time step, but only when the accumulated time
-			 * exceeds the target time, and we haven't slept
+			 * exceeds the target time, and we haven't slept.
 			 */
 			_gameTime.IsRunningSlowly = (	possibleToBeRunningSlowly &&
 							(_accumulatedElapsedTime > TargetElapsedTime)	);
@@ -559,13 +564,13 @@ namespace Microsoft.Xna.Framework
 				}
 
 				/* Draw needs to know the total elapsed time
-				 * that occured for the fixed length updates
+				 * that occured for the fixed length updates.
 				 */
 				_gameTime.ElapsedGameTime = TimeSpan.FromTicks(TargetElapsedTime.Ticks * stepCount);
 			}
 			else
 			{
-				// Perform a single variable length update
+				// Perform a single variable length update.
 				_gameTime.ElapsedGameTime = _accumulatedElapsedTime;
 				_gameTime.TotalGameTime += _accumulatedElapsedTime;
 				_accumulatedElapsedTime = TimeSpan.Zero;
@@ -620,7 +625,6 @@ namespace Microsoft.Xna.Framework
 			 * GameComponents in Components at the time Initialize() is called
 			 * are initialized.
 			 * http://msdn.microsoft.com/en-us/library/microsoft.xna.framework.game.initialize.aspx
-			 * Initialize all existing components
 			 */
 			InitializeExistingComponents();
 
@@ -680,7 +684,7 @@ namespace Microsoft.Xna.Framework
 			GameComponentCollectionEventArgs e
 		) {
 			/* Since we only subscribe to ComponentAdded after the graphics
-			 * devices are set up, it is safe to just blindly call Initialize
+			 * devices are set up, it is safe to just blindly call Initialize.
 			 */
 			e.GameComponent.Initialize();
 			CategorizeComponent(e.GameComponent);
@@ -733,7 +737,7 @@ namespace Microsoft.Xna.Framework
 		internal void DoDraw(GameTime gameTime)
 		{
 			AssertNotDisposed();
-			/* Draw and EndDraw should not be called if BeginDraw returns false
+			/* Draw and EndDraw should not be called if BeginDraw returns false.
 			 * http://stackoverflow.com/questions/4054936/manual-control-over-when-to-redraw-the-screen/4057180#4057180
 			 * http://stackoverflow.com/questions/4235439/xna-3-1-to-4-0-requires-constant-redraw-or-will-display-a-purple-screen
 			 */
@@ -780,7 +784,7 @@ namespace Microsoft.Xna.Framework
 		private void InitializeExistingComponents()
 		{
 			/* TODO: Would be nice to get rid of this copy, but since it only
-			 * happens once per game, it's fairly low priority
+			 * happens once per game, it's fairly low priority.
 			 */
 			IGameComponent[] copy = new IGameComponent[Components.Count];
 			Components.CopyTo(copy, 0);
@@ -800,7 +804,7 @@ namespace Microsoft.Xna.Framework
 		}
 
 		/* FIXME: I am open to a better name for this method.
-		 * It does the opposite of CategorizeComponents
+		 * It does the opposite of CategorizeComponents.
 		 */
 		private void DecategorizeComponents()
 		{
@@ -821,7 +825,7 @@ namespace Microsoft.Xna.Framework
 		}
 
 		/* FIXME: I am open to a better name for this method.
-		 * It does the opposite of CategorizeComponent
+		 * It does the opposite of CategorizeComponent.
 		 */
 		private void DecategorizeComponent(IGameComponent component)
 		{
@@ -912,7 +916,7 @@ namespace Microsoft.Xna.Framework
 					ProcessRemoveJournal();
 					ProcessAddJournal();
 
-					// Rebuild the cache
+					// Rebuild the cache.
 					_cachedFilteredItems.Clear();
 					for (int i = 0; i < _items.Count; i += 1)
 						if (_filter(_items[i]))
@@ -930,7 +934,7 @@ namespace Microsoft.Xna.Framework
 
 				/* If the cache was invalidated as a result of processing items,
 				 * now is a good time to clear it and give the GC (more of) a
-				 * chance to do its thing
+				 * chance to do its thing.
 				 */
 				if (_shouldRebuildCache)
 				{
@@ -941,7 +945,7 @@ namespace Microsoft.Xna.Framework
 			public void Add(T item)
 			{
 				/* NOTE: We subscribe to item events after items in _addJournal
-				 * have been merged
+				 * have been merged.
 				 */
 				_addJournal.Add(new AddJournalEntry<T>(_addJournal.Count, item));
 				InvalidateCache();
@@ -1016,7 +1020,7 @@ namespace Microsoft.Xna.Framework
 				return ((System.Collections.IEnumerable) _items).GetEnumerator();
 			}
 
-			// Sort high to low
+			// Sort high to low.
 			private static readonly Comparison<int> RemoveJournalSortComparison =
 				(x, y) => Comparer<int>.Default.Compare(y, x);
 
@@ -1058,7 +1062,7 @@ namespace Microsoft.Xna.Framework
 				{
 					T addJournalItem = _addJournal[iAddJournal].Item;
 					/* If addJournalItem is less than (belongs before)
-					 * _items[iItems], insert it
+					 * _items[iItems], insert it.
 					 */
 					if (_sort(addJournalItem, _items[iItems]) < 0)
 					{
@@ -1068,12 +1072,12 @@ namespace Microsoft.Xna.Framework
 					}
 					/* Always increment iItems, either because we inserted and
 					 * need to move past the insertion, or because we didn't
-					 * insert and need to consider the next element
+					 * insert and need to consider the next element.
 					 */
 					iItems += 1;
 				}
 
-				// If _addJournal had any "tail" items, append them all now
+				// If _addJournal had any "tail" items, append them all now.
 				for (; iAddJournal < _addJournal.Count; iAddJournal += 1)
 				{
 					T addJournalItem = _addJournal[iAddJournal].Item;
@@ -1115,7 +1119,7 @@ namespace Microsoft.Xna.Framework
 				_removeJournal.Add(index);
 
 				/* Until the item is back in place, we don't care about its
-				 * events. We will re-subscribe when _addJournal is processed
+				 * events. We will re-subscribe when _addJournal is processed.
 				 */
 				UnsubscribeFromItemEvents(item);
 				InvalidateCache();

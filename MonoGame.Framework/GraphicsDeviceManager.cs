@@ -264,13 +264,13 @@ namespace Microsoft.Xna.Framework
 
 		public void ApplyChanges()
 		{
-			// Calling ApplyChanges() before CreateDevice() should have no effect
+			// Calling ApplyChanges() before CreateDevice() should have no effect.
 			if (_graphicsDevice == null)
 			{
 				return;
 			}
 
-			// Notify DeviceResetting EventHandlers
+			// Notify DeviceResetting EventHandlers.
 			OnDeviceResetting(null);
 			GraphicsDevice.OnDeviceResetting();
 
@@ -295,17 +295,17 @@ namespace Microsoft.Xna.Framework
 				GraphicsDevice.PresentationParameters.BackBufferHeight
 			);
 
-			// This platform uses VSyncEnabled rather than PresentationInterval.
+			// This platform uses VSyncEnabled rather than PresentationInterval...
 			_game.Platform.VSyncEnabled = SynchronizeWithVerticalRetrace;
 
-			// ... But we still need to apply the PresentInterval.
+			// ... but we still need to apply the PresentInterval.
 			GraphicsDevice.PresentationParameters.PresentationInterval = (
 				SynchronizeWithVerticalRetrace ?
 					PresentInterval.One :
 					PresentInterval.Immediate
 			);
 
-			// Notify DeviceReset EventHandlers
+			// Notify DeviceReset EventHandlers.
 			OnDeviceReset(null);
 			GraphicsDevice.OnDeviceReset();
 
@@ -373,7 +373,7 @@ namespace Microsoft.Xna.Framework
 		/// <summary>
 		/// This method is used by MonoGame Android to adjust the game's drawn to area to fill
 		/// as much of the screen as possible whilst retaining the aspect ratio inferred from
-		/// aspectRatio = (PreferredBackBufferWidth / PreferredBackBufferHeight)
+		/// aspectRatio = (PreferredBackBufferWidth / PreferredBackBufferHeight).
 		///
 		/// NOTE: this is a hack that should be removed if proper back buffer to screen scaling
 		/// is implemented. To disable it's effect, in the game's constructor use:
@@ -460,7 +460,7 @@ namespace Microsoft.Xna.Framework
 				GraphicsProfile = pe.GraphicsDeviceInformation.GraphicsProfile;
 			}
 
-			// Needs to be before ApplyChanges()
+			// Needs to be before ApplyChanges().
 			_graphicsDevice = new GraphicsDevice(
 				GraphicsAdapter.DefaultAdapter,
 				GraphicsProfile,

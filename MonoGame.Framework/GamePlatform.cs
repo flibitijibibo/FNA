@@ -195,18 +195,18 @@ namespace Microsoft.Xna.Framework
 		}
 
 		/// <summary>
-		/// When implemented in a derived, ends the active run loop.
+		/// When implemented in a derived class, ends the active run loop.
 		/// </summary>
 		public abstract void Exit();
 
 		/// <summary>
-		/// When implemented in a derived, starts the run loop and blocks
+		/// When implemented in a derived class, starts the run loop and blocks
 		/// until it has ended.
 		/// </summary>
 		public abstract void RunLoop();
 
 		/// <summary>
-		/// When implemented in a derived, starts the run loop and returns
+		/// When implemented in a derived class, starts the run loop and returns
 		/// immediately.
 		/// </summary>
 		public abstract void StartRunLoop();

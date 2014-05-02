@@ -54,8 +54,8 @@ namespace Microsoft.Xna.Framework
 			}
 			set
 			{
-				/* FIXME: The odds are the planes will be used a lot more often than the matrix
-				 * is updated, so this should help performance. I hope ;)
+				/* FIXME: The odds are the planes will be used a lot more often than
+				 * the matrix is updated, so this should help performance. I hope. ;)
 				 */
 				this.matrix = value;
 				this.CreatePlanes();
@@ -183,7 +183,7 @@ namespace Microsoft.Xna.Framework
 			{
 				PlaneIntersectionType planeIntersectionType = default(PlaneIntersectionType);
 
-				// TODO: we might want to inline this for performance reasons
+				// TODO: We might want to inline this for performance reasons.
 				sphere.Intersects(ref this.planes[i], out planeIntersectionType);
 				switch (planeIntersectionType)
 				{
@@ -397,14 +397,19 @@ namespace Microsoft.Xna.Framework
 
 		#region Private Static Methods
 
-		private static void IntersectionPoint(ref Plane a, ref Plane b, ref Plane c, out Vector3 result)
-		{
+		private static void IntersectionPoint(
+			ref Plane a,
+			ref Plane b,
+			ref Plane c,
+			out Vector3 result
+		) {
 			/* Formula used
 			 *                d1 ( N2 * N3 ) + d2 ( N3 * N1 ) + d3 ( N1 * N2 )
-			 * P =   -------------------------------------------------------------------------
+			 * P =   -------------------------------------------------------------------
 			 *                             N1 . ( N2 * N3 )
 			 *
-			 * Note: N refers to the normal, d refers to the displacement. '.' means dot product. '*' means cross product
+			 * Note: N refers to the normal, d refers to the displacement. '.' means dot
+			 * product. '*' means cross product
 			 */
 
 			Vector3 v1, v2, v3;
