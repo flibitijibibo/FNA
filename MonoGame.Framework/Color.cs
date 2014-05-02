@@ -1574,7 +1574,7 @@ namespace Microsoft.Xna.Framework
 		/// <summary>
 		/// Creates a new instance of <see cref="Color"/> struct.
 		/// </summary>
-		/// <param name="color">A <see cref="Vector4"/> representing color.</param>
+		/// <param name="color">A <see cref="Vector4"/> representing a color.</param>
 		public Color(Vector4 color)
 		{
 			_packedValue = 0;
@@ -1588,7 +1588,7 @@ namespace Microsoft.Xna.Framework
 		/// <summary>
 		/// Creates a new instance of <see cref="Color"/> struct.
 		/// </summary>
-		/// <param name="color">A <see cref="Vector3"/> representing color.</param>
+		/// <param name="color">A <see cref="Vector3"/> representing a color.</param>
 		public Color(Vector3 color)
 		{
 			_packedValue = 0;
@@ -1602,7 +1602,9 @@ namespace Microsoft.Xna.Framework
 		/// <summary>
 		/// Creates a new instance of <see cref="Color"/> struct.
 		/// </summary>
-		/// <param name="color">A <see cref="Color"/> for RGB values of new <see cref="Color"/> instance.</param>
+		/// <param name="color">
+		/// A <see cref="Color"/> for RGB values of new <see cref="Color"/> instance.
+		/// </param>
 		/// <param name="alpha">Alpha component value.</param>
 		public Color(Color color, int alpha)
 		{
@@ -1617,7 +1619,9 @@ namespace Microsoft.Xna.Framework
 		/// <summary>
 		/// Creates a new instance of <see cref="Color"/> struct.
 		/// </summary>
-		/// <param name="color">A <see cref="Color"/> for RGB values of new <see cref="Color"/> instance.</param>
+		/// <param name="color">
+		/// A <see cref="Color"/> for RGB values of new <see cref="Color"/> instance.
+		/// </param>
 		/// <param name="alpha">Alpha component value.</param>
 		public Color(Color color, float alpha)
 		{
@@ -1634,7 +1638,7 @@ namespace Microsoft.Xna.Framework
 		/// </summary>
 		/// <param name="r">Red component value.</param>
 		/// <param name="g">Green component value.</param>
-		/// <param name="b">Blue component value</param>
+		/// <param name="b">Blue component value.</param>
 		public Color(float r, float g, float b)
 		{
 			_packedValue = 0;
@@ -1650,7 +1654,7 @@ namespace Microsoft.Xna.Framework
 		/// </summary>
 		/// <param name="r">Red component value.</param>
 		/// <param name="g">Green component value.</param>
-		/// <param name="b">Blue component value</param>
+		/// <param name="b">Blue component value.</param>
 		public Color(int r, int g, int b)
 		{
 			_packedValue = 0;
@@ -1665,7 +1669,7 @@ namespace Microsoft.Xna.Framework
 		/// </summary>
 		/// <param name="r">Red component value.</param>
 		/// <param name="g">Green component value.</param>
-		/// <param name="b">Blue component value</param>
+		/// <param name="b">Blue component value.</param>
 		/// <param name="alpha">Alpha component value.</param>
 		public Color(int r, int g, int b, int alpha)
 		{
@@ -1681,7 +1685,7 @@ namespace Microsoft.Xna.Framework
 		/// </summary>
 		/// <param name="r">Red component value.</param>
 		/// <param name="g">Green component value.</param>
-		/// <param name="b">Blue component value</param>
+		/// <param name="b">Blue component value.</param>
 		/// <param name="alpha">Alpha component value.</param>
 		public Color(float r, float g, float b, float alpha)
 		{
@@ -1755,17 +1759,24 @@ namespace Microsoft.Xna.Framework
 		}
 
 		/// <summary>
-		/// Translate a non-premultipled alpha <see cref="Color"/> to a <see cref="Color"/> that contains premultiplied alpha.
+		/// Translate a non-premultipled alpha <see cref="Color"/> to a <see cref="Color"/>
+		/// that contains premultiplied alpha.
 		/// </summary>
 		/// <param name="vector">A <see cref="Vector4"/> representing color.</param>
 		/// <returns>A <see cref="Color"/> which contains premultiplied alpha data.</returns>
 		public static Color FromNonPremultiplied(Vector4 vector)
 		{
-			return new Color(vector.X * vector.W, vector.Y * vector.W, vector.Z * vector.W, vector.W);
+			return new Color(
+				vector.X * vector.W,
+				vector.Y * vector.W,
+				vector.Z * vector.W,
+				vector.W
+			);
 		}
 
 		/// <summary>
-		/// Translate a non-premultipled alpha <see cref="Color"/> to a <see cref="Color"/> that contains premultiplied alpha.
+		/// Translate a non-premultipled alpha <see cref="Color"/> to a <see cref="Color"/>
+		/// that contains premultiplied alpha.
 		/// </summary>
 		/// <param name="r">Red component value.</param>
 		/// <param name="g">Green component value.</param>
@@ -1774,7 +1785,12 @@ namespace Microsoft.Xna.Framework
 		/// <returns>A <see cref="Color"/> which contains premultiplied alpha data.</returns>
 		public static Color FromNonPremultiplied(int r, int g, int b, int a)
 		{
-			return new Color((byte) (r * a / 255), (byte) (g * a / 255), (byte) (b * a / 255), a);
+			return new Color(
+				(byte) (r * a / 255),
+				(byte) (g * a / 255),
+				(byte) (b * a / 255),
+				a
+			);
 		}
 
 		#endregion
@@ -1786,7 +1802,7 @@ namespace Microsoft.Xna.Framework
 		/// </summary>
 		/// <param name="a"><see cref="Color"/> instance on the left of the equal sign.</param>
 		/// <param name="b"><see cref="Color"/> instance on the right of the equal sign.</param>
-		/// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
+		/// <returns><c>True</c> if the instances are equal; <c>false</c> otherwise.</returns>
 		public static bool operator ==(Color a, Color b)
 		{
 			return (	a.A == b.A &&
@@ -1798,9 +1814,15 @@ namespace Microsoft.Xna.Framework
 		/// <summary>
 		/// Compares whether two <see cref="Color"/> instances are not equal.
 		/// </summary>
-		/// <param name="a"><see cref="Color"/> instance on the left of the not equal sign.</param>
-		/// <param name="b"><see cref="Color"/> instance on the right of the not equal sign.</param>
-		/// <returns><c>true</c> if the instances are not equal; <c>false</c> otherwise.</returns>
+		/// <param name="a">
+		/// <see cref="Color"/> instance on the left of the not equal sign.
+		/// </param>
+		/// <param name="b">
+		/// <see cref="Color"/> instance on the right of the not equal sign.
+		/// </param>
+		/// <returns>
+		/// <c>True</c> if the instances are not equal; <c>false</c> otherwise.
+		/// </returns>
 		public static bool operator !=(Color a, Color b)
 		{
 			return !(a == b);
@@ -1819,7 +1841,7 @@ namespace Microsoft.Xna.Framework
 		/// Compares whether current instance is equal to specified object.
 		/// </summary>
 		/// <param name="obj">The <see cref="Color"/> to compare.</param>
-		/// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
+		/// <returns><c>True</c> if the instances are equal; <c>false</c> otherwise.</returns>
 		public override bool Equals(object obj)
 		{
 			return ((obj is Color) && this.Equals((Color) obj));

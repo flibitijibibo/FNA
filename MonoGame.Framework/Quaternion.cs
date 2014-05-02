@@ -743,7 +743,7 @@ namespace Microsoft.Xna.Framework
 			/* This calculation would be a lot more complicated for non-unit length
 			 * quaternions.
 			 * Note: The constructor of Matrix4 expects the Matrix in column-major
-			 * format like expected by OpenGL
+			 * format like expected by OpenGL.
 			 */
 			matrix.M11 = 1.0f - 2.0f * (y2 + z2);
 			matrix.M12 = 2.0f * (xy - wz);

@@ -66,7 +66,7 @@ namespace Microsoft.Xna.Framework
 		 */
 		internal static string GetFilename(string name)
 		{
-			// Replace Windows path separators with local path separators
+			// Replaces Windows path separators with local path separators.
 			name = name.Replace('\\', Path.DirectorySeparatorChar);
 			return name;
 		}

@@ -578,8 +578,8 @@ namespace Microsoft.Xna.Framework
 
 		public static Vector3 Reflect(Vector3 vector, Vector3 normal)
 		{
-			/* I is the original array
-			 * N is the normal of the incident plane
+			/* I is the original array.
+			 * N is the normal of the incident plane.
 			 * R = I - (2 * N * ( DotProduct[ I,N] ))
 			 */
 			Vector3 reflectedVector;
@@ -595,12 +595,12 @@ namespace Microsoft.Xna.Framework
 
 		public static void Reflect(ref Vector3 vector, ref Vector3 normal, out Vector3 result)
 		{
-			/* I is the original array
-			 * N is the normal of the incident plane
+			/* I is the original array.
+			 * N is the normal of the incident plane.
 			 * R = I - (2 * N * ( DotProduct[ I,N] ))
 			 */
 
-			// Inline the dotProduct here instead of calling method
+			// Inline the dotProduct here instead of calling method.
 			float dotProduct = ((vector.X * normal.X) + (vector.Y * normal.Y)) +
 						(vector.Z * normal.Z);
 			result.X = vector.X - (2.0f * normal.X) * dotProduct;

@@ -14,11 +14,11 @@ namespace Microsoft.Xna.Framework
 		// A Flat tangent always has a value equal to zero
 		Flat,
 		/* A Linear tangent at a CurveKey is equal to the difference between its Value
-		 * and the Value of the preceding or succeeding CurveKey
+		 * and the Value of the preceding or succeeding CurveKey.
 		 */
 		Linear,
 		/* A Smooth tangent smooths the inflection between a TangentIn and TangentOut
-		 * by taking into account the values of both neighbors of the CurveKey
+		 * by taking into account the values of both neighbors of the CurveKey.
 		 */
 		Smooth
 	}

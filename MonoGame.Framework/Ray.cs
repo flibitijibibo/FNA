@@ -225,7 +225,7 @@ namespace Microsoft.Xna.Framework
 
 		public void Intersects(ref BoundingSphere sphere, out float? result)
 		{
-			// Find the vector between where the ray starts the the sphere's centre
+			// Find the vector between where the ray starts the the sphere's center.
 			Vector3 difference = sphere.Center - this.Position;
 
 			float differenceLengthSquared = difference.LengthSquared();
@@ -233,8 +233,8 @@ namespace Microsoft.Xna.Framework
 
 			float distanceAlongRay;
 
-			/* If the distance between the ray start and the sphere's centre is less than
-			 * the radius of the sphere, it means we've intersected. N.B. checking the
+			/* If the distance between the ray start and the sphere's center is less than
+			 * the radius of the sphere, it means we've intersected. Checking the
 			 * LengthSquared is faster.
 			 */
 			if (differenceLengthSquared < sphereRadiusSquared)
@@ -244,14 +244,15 @@ namespace Microsoft.Xna.Framework
 			}
 
 			Vector3.Dot(ref this.Direction, ref difference, out distanceAlongRay);
-			// If the ray is pointing away from the sphere then we don't ever intersect
+			// If the ray is pointing away from the sphere then we don't ever intersect.
 			if (distanceAlongRay < 0)
 			{
 				result = null;
 				return;
 			}
 
-			/* Next we kinda use Pythagoras to check if we are within the bounds of the sphere
+			/* Next we kinda use Pythagoras to check if we are within the bounds of the
+			 * sphere.
 			 * if x = radius of sphere
 			 * if y = distance between ray position and sphere centre
 			 * if z = the distance we've travelled along the ray

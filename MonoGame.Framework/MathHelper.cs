@@ -141,7 +141,7 @@ namespace Microsoft.Xna.Framework
 			float amount
 		) {
 			/* Using formula from http://www.mvps.org/directx/articles/catmull/
-			 * Internally using doubles not to lose precission
+			 * Internally using doubles not to lose precision.
 			 */
 			double amountSquared = amount * amount;
 			double amountCubed = amountSquared * amount;
@@ -170,7 +170,7 @@ namespace Microsoft.Xna.Framework
 		/// <returns>The clamped value.</returns>
 		public static float Clamp(float value, float min, float max)
 		{
-			// First we check to see if we're greater than the max
+			// First we check to see if we're greater than the max.
 			value = (value > max) ? max : value;
 
 			// Then we check to see if we're less than the min.
@@ -227,7 +227,7 @@ namespace Microsoft.Xna.Framework
 			float tangent2,
 			float amount
 		) {
-			/* All transformed to double not to lose precission
+			/* All transformed to double not to lose precision
 			 * Otherwise, for high numbers of param:amount the result is NaN instead
 			 * of Infinity.
 			 */
@@ -309,9 +309,9 @@ namespace Microsoft.Xna.Framework
 		/// <returns>Interpolated value.</returns>
 		public static float SmoothStep(float value1, float value2, float amount)
 		{
-			/* It is expected that 0 < amount < 1
-			 * If amount < 0, return value1
-			 * If amount > 1, return value2
+			/* It is expected that 0 < amount < 1.
+			 * If amount < 0, return value1.
+			 * If amount > 1, return value2.
 			 */
 			float result = MathHelper.Clamp(amount, 0f, 1f);
 			result = MathHelper.Hermite(value1, 0f, value2, 0f, result);
@@ -325,8 +325,7 @@ namespace Microsoft.Xna.Framework
 		/// <param name="radians">The angle in radians.</param>
 		/// <returns>The angle in degrees.</returns>
 		/// <remarks>
-		/// This method uses double precission internally,
-		/// though it returns single float
+		/// This method uses double precision internally, though it returns single float.
 		/// Factor = 180 / pi
 		/// </remarks>
 		public static float ToDegrees(float radians)
@@ -340,8 +339,7 @@ namespace Microsoft.Xna.Framework
 		/// <param name="degrees">The angle in degrees.</param>
 		/// <returns>The angle in radians.</returns>
 		/// <remarks>
-		/// This method uses double precission internally,
-		/// though it returns single float
+		/// This method uses double precision internally, though it returns single float.
 		/// Factor = pi / 180
 		/// </remarks>
 		public static float ToRadians(float degrees)
@@ -375,7 +373,9 @@ namespace Microsoft.Xna.Framework
 		/// Determines if value is powered by two.
 		/// </summary>
 		/// <param name="value">A value.</param>
-		/// <returns><c>true</c> if <c>value</c> is powered by two; otherwise <c>false</c>.</returns>
+		/// <returns>
+		/// <c>True</c> if <c>value</c> is powered by two; otherwise <c>false</c>.
+		/// </returns>
 		public static bool IsPowerOfTwo(int value)
 		{
 			return (value > 0) && ((value & (value - 1)) == 0);
@@ -409,7 +409,7 @@ namespace Microsoft.Xna.Framework
 			float comparison;
 
 			/* Keep halving the working value of machineEpsilon until we get a number that
-			 * when added to 1.0f will still evaluate as equal to 1.0f
+			 * when added to 1.0f will still evaluate as equal to 1.0f.
 			 */
 			do
 			{

@@ -561,11 +561,17 @@ namespace Microsoft.Xna.Framework
 			float num2 = vector2.LengthSquared();
 			if (num2 < 0.0001f)
 			{
-				vector2 = cameraForwardVector.HasValue ? -cameraForwardVector.Value : Vector3.Forward;
+				vector2 = cameraForwardVector.HasValue ?
+					-cameraForwardVector.Value :
+					Vector3.Forward;
 			}
 			else
 			{
-				Vector3.Multiply(ref vector2, (float) (1f / ((float) Math.Sqrt((double) num2))), out vector2);
+				Vector3.Multiply(
+					ref vector2,
+					(float) (1f / ((float) Math.Sqrt((double) num2))),
+					out vector2
+				);
 			}
 			Vector3 vector4 = rotateAxis;
 			Vector3.Dot(ref rotateAxis, ref vector2, out num);
@@ -577,14 +583,24 @@ namespace Microsoft.Xna.Framework
 					Vector3.Dot(ref rotateAxis, ref vector, out num);
 					if (Math.Abs(num) > 0.9982547f)
 					{
-						num = ((rotateAxis.X * Vector3.Forward.X) + (rotateAxis.Y * Vector3.Forward.Y)) + (rotateAxis.Z * Vector3.Forward.Z);
-						vector = (Math.Abs(num) > 0.9982547f) ? Vector3.Right : Vector3.Forward;
+						num = (
+							(rotateAxis.X * Vector3.Forward.X) +
+							(rotateAxis.Y * Vector3.Forward.Y)
+						) + (rotateAxis.Z * Vector3.Forward.Z);
+						vector = (Math.Abs(num) > 0.9982547f) ?
+							Vector3.Right :
+							Vector3.Forward;
 					}
 				}
 				else
 				{
-					num = ((rotateAxis.X * Vector3.Forward.X) + (rotateAxis.Y * Vector3.Forward.Y)) + (rotateAxis.Z * Vector3.Forward.Z);
-					vector = (Math.Abs(num) > 0.9982547f) ? Vector3.Right : Vector3.Forward;
+					num = (
+						(rotateAxis.X * Vector3.Forward.X) +
+						(rotateAxis.Y * Vector3.Forward.Y)
+					) + (rotateAxis.Z * Vector3.Forward.Z);
+					vector = (Math.Abs(num) > 0.9982547f) ?
+						Vector3.Right :
+						Vector3.Forward;
 				}
 				Vector3.Cross(ref rotateAxis, ref vector, out vector3);
 				vector3.Normalize();

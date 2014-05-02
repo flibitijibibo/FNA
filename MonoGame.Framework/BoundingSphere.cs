@@ -119,7 +119,7 @@ namespace Microsoft.Xna.Framework
 
 		public ContainmentType Contains(BoundingBox box)
 		{
-			// Check if all corner is in sphere
+			// Check if all corners are in sphere.
 			bool inside = true;
 			foreach (Vector3 corner in box.GetCorners())
 			{
@@ -135,7 +135,7 @@ namespace Microsoft.Xna.Framework
 				return ContainmentType.Contains;
 			}
 
-			// Check if the distance from sphere center to cube face < radius
+			// Check if the distance from sphere center to cube face is less than radius.
 			double dmin = 0;
 
 			if (Center.X < box.Min.X)
@@ -176,7 +176,7 @@ namespace Microsoft.Xna.Framework
 
 		public ContainmentType Contains(BoundingFrustum frustum)
 		{
-			// Check if all corner is in sphere
+			// Check if all corners are in sphere.
 			bool inside = true;
 
 			Vector3[] corners = frustum.GetCorners();
@@ -193,7 +193,7 @@ namespace Microsoft.Xna.Framework
 				return ContainmentType.Contains;
 			}
 
-			// Check if the distance from sphere center to frustrum face < radius
+			// Check if the distance from sphere center to frustrum face is less than radius.
 			double dmin = 0;
 			// TODO : calcul dmin
 
@@ -326,13 +326,13 @@ namespace Microsoft.Xna.Framework
 			// Intersect
 			if (distance <= original.Radius + additional.Radius)
 			{
-				// Original contain additional
+				// Original contains additional.
 				if (distance <= original.Radius - additional.Radius)
 				{
 					return original;
 				}
 
-				// Additional contain original
+				// Additional contains original.
 				if (distance <= additional.Radius - original.Radius)
 				{
 					return additional;
@@ -402,7 +402,7 @@ namespace Microsoft.Xna.Framework
 		public PlaneIntersectionType Intersects(Plane plane)
 		{
 			PlaneIntersectionType result = default(PlaneIntersectionType);
-			// TODO: we might want to inline this for performance reasons
+			// TODO: We might want to inline this for performance reasons.
 			this.Intersects(ref plane, out result);
 			return result;
 		}
@@ -410,7 +410,7 @@ namespace Microsoft.Xna.Framework
 		public void Intersects(ref Plane plane, out PlaneIntersectionType result)
 		{
 			float distance = default(float);
-			// TODO: we might want to inline this for performance reasons
+			// TODO: We might want to inline this for performance reasons.
 			Vector3.Dot(ref plane.Normal, ref this.Center, out distance);
 			distance += plane.D;
 			if (distance > this.Radius)
