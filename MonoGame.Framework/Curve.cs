@@ -118,7 +118,7 @@ namespace Microsoft.Xna.Framework
 						return first.Value;
 
 					case CurveLoopType.Linear:
-						// Linear y = a*x +b with a tangeant of last point.
+						// Linear y = a*x +b with a tangent of last point.
 						return first.Value - first.TangentIn * (first.Position - position);
 
 					case CurveLoopType.Cycle:
@@ -161,7 +161,7 @@ namespace Microsoft.Xna.Framework
 						return last.Value;
 
 					case CurveLoopType.Linear:
-						// Linear y = a*x +b with a tangeant of last point.
+						// Linear y = a*x +b with a tangent of last point.
 						return last.Value + first.TangentOut * (position - last.Position);
 
 					case CurveLoopType.Cycle:
@@ -309,7 +309,7 @@ namespace Microsoft.Xna.Framework
 
 		private float GetCurvePosition(float position)
 		{
-			// Only for position in curve
+			// Only for position in curve.
 			CurveKey prev = Keys[0];
 			CurveKey next;
 			for (int i = 1; i < Keys.Count; i++)

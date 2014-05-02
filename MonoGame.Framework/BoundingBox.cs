@@ -266,7 +266,7 @@ namespace Microsoft.Xna.Framework
 
 		public void Contains(ref Vector3 point, out ContainmentType result)
 		{
-			// First determine if point is out of box
+			// First determine if point is outside of this box.
 			if (	point.X < this.Min.X ||
 				point.X > this.Max.X ||
 				point.Y < this.Min.Y ||
@@ -276,7 +276,7 @@ namespace Microsoft.Xna.Framework
 			{
 				result = ContainmentType.Disjoint;
 			}
-			// or, if point is on box because coordonate of point is lesser or equal.
+			// Or, if the point is on box because coordinate is less than or equal.
 			else if (	MathHelper.WithinEpsilon(point.X, this.Min.X) ||
 					MathHelper.WithinEpsilon(point.X, this.Max.X) ||
 					MathHelper.WithinEpsilon(point.Y, this.Min.Y) ||
