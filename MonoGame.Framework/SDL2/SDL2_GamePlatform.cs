@@ -280,6 +280,17 @@ namespace Microsoft.Xna.Framework
 #if !THREADED_GL
 				Threading.Run();
 #endif
+
+				// Reset the mouse button forcing flag each frame
+				Mouse.INTERNAL_ForceLeftButton = false;
+
+				/* To properly set the ForceLeftButton flag, we track whether we've seen
+				 * both a left mouse button down and left mouse button up event in the
+				 * same frame.
+				 */
+				bool leftMouseDown = false;
+				bool leftMouseUp = false;
+
 				while (SDL.SDL_PollEvent(out evt) == 1)
 				{
 					// Keyboard
@@ -295,10 +306,25 @@ namespace Microsoft.Xna.Framework
 					else if (evt.type == SDL.SDL_EventType.SDL_KEYUP)
 					{
 						Keys key = SDL2_KeyboardUtil.ToXNA(evt.key.keysym.scancode);
-						if (keys.Contains(key))
+						if (keys.Remove(key))
 						{
-							keys.Remove(key);
 							INTERNAL_TextInputOut(key);
+						}
+					}
+
+					// Left mouse button tracking for ForceLeftButton flag
+					else if (evt.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN)
+					{
+						if (evt.button.button == SDL.SDL_BUTTON_LEFT)
+						{
+							leftMouseDown = true;
+						}
+					}
+					else if (evt.type == SDL.SDL_EventType.SDL_MOUSEBUTTONUP)
+					{
+						if (evt.button.button == SDL.SDL_BUTTON_LEFT)
+						{
+							leftMouseUp = true;
 						}
 					}
 
@@ -404,6 +430,10 @@ namespace Microsoft.Xna.Framework
 						break;
 					}
 				}
+
+				// If both a down and up event were sent in one frame, force the mouse left button for the next frame.
+				Mouse.INTERNAL_ForceLeftButton = leftMouseDown && leftMouseUp;
+
 				// Text Input Controls Key Handling
 				INTERNAL_TextInputUpdate();
 

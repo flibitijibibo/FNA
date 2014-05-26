@@ -43,6 +43,14 @@ namespace Microsoft.Xna.Framework.Input
 
 		internal static bool INTERNAL_IsWarped = false;
 
+		/* Many tap-to-click trackpads will wait until the user lifts their finger to send both
+		 * a down and up event in quick succession. These cases make the polling nature of Mouse
+		 * troublesome as these clicks are entirely missed. This flag allows the platform to force
+		 * the left button to be marked as pressed in cases where both a down and up event are 
+		 * seen on the same frame.
+		 */
+		internal static bool INTERNAL_ForceLeftButton = false;
+
 		#endregion
 
 		#region Public Interface
@@ -68,7 +76,8 @@ namespace Microsoft.Xna.Framework.Input
 				window.MouseState.Y = y;
 			}
 
-			window.MouseState.LeftButton =		(ButtonState) (flags & SDL.SDL_BUTTON_LMASK);
+			window.MouseState.LeftButton =
+				INTERNAL_ForceLeftButton ? ButtonState.Pressed : (ButtonState) (flags & SDL.SDL_BUTTON_LMASK);
 			window.MouseState.MiddleButton =	(ButtonState) ((flags & SDL.SDL_BUTTON_MMASK) >> 1);
 			window.MouseState.RightButton =		(ButtonState) ((flags & SDL.SDL_BUTTON_RMASK) >> 2);
 			window.MouseState.XButton1 =		(ButtonState) ((flags & SDL.SDL_BUTTON_X1MASK) >> 3);
