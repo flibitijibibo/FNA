@@ -9,6 +9,7 @@
 
 #region Using Statements
 using System;
+using OpenTK.Graphics.OpenGL;
 #endregion
 
 namespace Microsoft.Xna.Framework.Graphics
@@ -166,5 +167,35 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
 
 		#endregion
-	}
+
+        #region GetData Speedup
+        public override void GetData<T>(int level, Rectangle? rect, T[] data, int startIndex, int elementCount)
+        {
+#if OPENGL
+            RenderTargetBinding[] bindings = this.GraphicsDevice.GetRenderTargets();
+            bool isActiveTarget = bindings.Length == 1 && bindings[0].RenderTarget == this;
+
+            if (isActiveTarget)
+            {
+                // GL.ReadPixels should be faster than reading back from the render target if we are already bound
+                if (rect.HasValue)
+                {
+                    GL.ReadPixels(rect.Value.Left, rect.Value.Top, rect.Value.Width, rect.Value.Height, PixelFormat.Rgba, PixelType.UnsignedByte, data);
+                }
+                else
+                {
+                    GL.ReadPixels(0, 0, this.Width, this.Height, PixelFormat.Rgba, PixelType.UnsignedByte, data);
+                }
+            }
+            else
+            {
+                base.GetData<T>(level, rect, data, startIndex, elementCount);
+            }
+#else
+            base.GetData<T>(level, rect, data, startIndex, elementCount);
+#endif
+
+        }
+        #endregion
+    }
 }

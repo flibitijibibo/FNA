@@ -315,7 +315,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			);
 		}
 
-		public void GetData<T>(
+		public virtual void GetData<T>(
 			int level,
 			Rectangle? rect,
 			T[] data,
