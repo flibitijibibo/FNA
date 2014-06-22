@@ -43,6 +43,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Xml.Serialization;
+using System.Runtime.InteropServices;
 
 using SDL2;
 
@@ -64,8 +65,8 @@ namespace Microsoft.Xna.Framework.Input
         private static IntPtr[] INTERNAL_devices = new IntPtr[4];
         private static IntPtr[] INTERNAL_haptics = new IntPtr[4];
 
-        // We use this to apply XInput-like rumble effects.
-        internal static SDL.SDL_HapticEffect INTERNAL_effect = new SDL.SDL_HapticEffect
+        // We use this to apply XInput-like rumble effects using LeftRight.
+        internal static SDL.SDL_HapticEffect INTERNAL_LeftRight_effect = new SDL.SDL_HapticEffect
         {
             type = SDL.SDL_HAPTIC_LEFTRIGHT,
             leftright = new SDL.SDL_HapticLeftRight
@@ -77,6 +78,27 @@ namespace Microsoft.Xna.Framework.Input
             }
         };
         
+        // We use this to apply XInput-like rumble effects using a CustomEffect.
+        // Few controller drivers should support this (the Mac Xbox driver does);
+        // however it will likely cause issues if one is using an actual force-feedback joystick and not a gamepad.
+        internal static ushort[] data = {0, 0};
+        internal static GCHandle pArry = GCHandle.Alloc(data, GCHandleType.Pinned);
+        internal static IntPtr ptr = pArry.AddrOfPinnedObject();
+
+        internal static SDL.SDL_HapticEffect INTERNAL_Custom_effect = new SDL.SDL_HapticEffect
+        {
+            type = SDL.SDL_HAPTIC_CUSTOM,
+            custom = new SDL.SDL_HapticCustom
+            {
+                type = SDL.SDL_HAPTIC_CUSTOM,
+                length = SDL.SDL_HAPTIC_INFINITY,
+                channels = 2,
+                period = 1,
+                samples = 2,
+                data = ptr
+            }
+        };
+
         // Call this when you're done, if you don't want to depend on SDL_Quit();
         internal static void Cleanup()
         {
@@ -99,7 +121,8 @@ namespace Microsoft.Xna.Framework.Input
         {
             IntPtr haptic = INTERNAL_haptics[(int) playerIndex];
             return (    haptic != IntPtr.Zero &&
-                        (    SDL.SDL_HapticEffectSupported(haptic, ref INTERNAL_effect) == 1 ||
+                        (    (    SDL.SDL_HapticEffectSupported(haptic, ref INTERNAL_Custom_effect) == 1 && (SDL.SDL_HapticNumAxes(haptic) == 2)    ) ||
+                        SDL.SDL_HapticEffectSupported(haptic, ref INTERNAL_LeftRight_effect) == 1 ||
                              SDL.SDL_HapticRumbleSupported(haptic) == 1 )      );
         }
 
@@ -138,9 +161,13 @@ namespace Microsoft.Xna.Framework.Input
                     }
                     if (INTERNAL_haptics[x] != IntPtr.Zero)
                     {
-                        if (SDL.SDL_HapticEffectSupported(INTERNAL_haptics[x], ref INTERNAL_effect) == 1)
+                        if (SDL.SDL_HapticEffectSupported(INTERNAL_haptics[x], ref INTERNAL_LeftRight_effect) == 1)
                         {
-                            SDL.SDL_HapticNewEffect(INTERNAL_haptics[x], ref INTERNAL_effect);
+                            SDL.SDL_HapticNewEffect(INTERNAL_haptics[x], ref INTERNAL_LeftRight_effect);
+                        }
+                        else if (SDL.SDL_HapticEffectSupported(INTERNAL_haptics[x], ref INTERNAL_Custom_effect) == 1)
+                        {
+                            SDL.SDL_HapticNewEffect(INTERNAL_haptics[x], ref INTERNAL_Custom_effect);
                         }
                         else if (SDL.SDL_HapticRumbleSupported(INTERNAL_haptics[x]) == 1)
                         {
@@ -462,19 +489,36 @@ namespace Microsoft.Xna.Framework.Input
                 SDL.SDL_HapticStopAll(INTERNAL_haptics[(int)playerIndex]);
                 return;
             }
-            else if (SDL.SDL_HapticEffectSupported(INTERNAL_haptics[(int) playerIndex], ref INTERNAL_effect) == 1)
+            else if (SDL.SDL_HapticEffectSupported(INTERNAL_haptics[(int) playerIndex], ref INTERNAL_LeftRight_effect) == 1)
             {
-                INTERNAL_effect.leftright.large_magnitude = (ushort) (65535.0f * leftMotor);
-                INTERNAL_effect.leftright.small_magnitude = (ushort) (65535.0f * rightMotor);
+                INTERNAL_LeftRight_effect.leftright.large_magnitude = (ushort) (65535.0f * leftMotor);
+                INTERNAL_LeftRight_effect.leftright.small_magnitude = (ushort) (65535.0f * rightMotor);
                 SDL.SDL_HapticUpdateEffect(
                     INTERNAL_haptics[(int) playerIndex],
                     0,
-                    ref INTERNAL_effect
+                    ref INTERNAL_LeftRight_effect
                 );
                 SDL.SDL_HapticRunEffect(
                     INTERNAL_haptics[(int) playerIndex],
                     0,
                     1
+                );
+            }
+            else if (SDL.SDL_HapticEffectSupported (INTERNAL_haptics[(int)playerIndex], ref INTERNAL_Custom_effect) == 1)
+            {
+                ushort[] data = {(ushort)(65535.0f * leftMotor), (ushort)(65535.0f * rightMotor)};
+                GCHandle pArry = GCHandle.Alloc(data, GCHandleType.Pinned);
+                IntPtr ptr = pArry.AddrOfPinnedObject();
+                INTERNAL_Custom_effect.custom.data = ptr;
+                SDL.SDL_HapticUpdateEffect (
+                    INTERNAL_haptics[(int)playerIndex],
+                    0,
+                    ref INTERNAL_Custom_effect
+                    );
+                SDL.SDL_HapticRunEffect (
+                INTERNAL_haptics[(int)playerIndex],
+                0,
+                1
                 );
             }
             else
@@ -491,7 +535,7 @@ namespace Microsoft.Xna.Framework.Input
                 SDL.SDL_HapticRumblePlay(
                     INTERNAL_haptics[(int)playerIndex],
                     strength,
-                    uint.MaxValue // Oh dear...
+                    SDL.SDL_HAPTIC_INFINITY // Oh dear...
                 );
             }
         }
