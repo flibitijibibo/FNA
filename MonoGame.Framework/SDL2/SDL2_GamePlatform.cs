@@ -438,9 +438,6 @@ namespace Microsoft.Xna.Framework
 		{
 			// Stop the game loop
 			INTERNAL_runApplication = false;
-
-			// Close SDL2_mixer if needed
-			Media.Song.closeMixer();
 		}
 
 		public override void BeforeInitialize()

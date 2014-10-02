@@ -9,55 +9,16 @@
 
 #region Using Statements
 using System;
+using System.Collections.Generic;
 using System.IO;
 
-using SDL2;
+using Microsoft.Xna.Framework.Audio;
 #endregion
 
 namespace Microsoft.Xna.Framework.Media
 {
 	public sealed class Song : IEquatable<Song>, IDisposable
 	{
-		#region SDL_mixer Open/Close Routines
-
-		// Has SDL_mixer already been opened?
-		private static bool initialized = false;
-
-		private static void initializeMixer()
-		{
-			if (!initialized)
-			{
-				SDL.SDL_InitSubSystem(SDL.SDL_INIT_AUDIO);
-				SDL_mixer.Mix_OpenAudio(44100, SDL.AUDIO_S16SYS, 2, 1024);
-				initialized = true;
-			}
-		}
-
-		internal static void closeMixer()
-		{
-			if (initialized)
-			{
-				SDL_mixer.Mix_CloseAudio();
-				initialized = false;
-			}
-		}
-
-		#endregion
-
-		#region Private Member Data
-
-		private IntPtr INTERNAL_mixMusic;
-
-		SDL_mixer.MusicFinishedDelegate musicFinishedDelegate;
-
-		#endregion
-
-		#region Internal Member Data
-
-		internal delegate void FinishedPlayingHandler(object sender, EventArgs args);
-
-		#endregion
-
 		#region Public Properties
 
 		/// <summary>
@@ -177,13 +138,27 @@ namespace Microsoft.Xna.Framework.Media
 		{
 			get
 			{
-				return SDL_mixer.Mix_VolumeMusic(-1) / 128.0f;
+				return soundStream.Volume;
 			}
 			set
 			{
-				SDL_mixer.Mix_VolumeMusic((int) (value * 128));
+				soundStream.Volume = value;
 			}
 		}
+
+		#endregion
+
+		#region Internal Function Pointer Types
+
+		internal delegate void FinishedPlayingHandler(object sender, EventArgs args);
+
+		#endregion
+
+		#region Private Variables
+
+		private DynamicSoundEffectInstance soundStream;
+		private Vorbisfile.OggVorbis_File vorbisFile = new Vorbisfile.OggVorbis_File();
+		private byte[] vorbisBuffer = new byte[4096];
 
 		#endregion
 
@@ -198,14 +173,20 @@ namespace Microsoft.Xna.Framework.Media
 		{
 			FilePath = fileName;
 			Name = Path.GetFileNameWithoutExtension(FilePath);
-			initializeMixer();
-			INTERNAL_mixMusic = SDL_mixer.Mix_LoadMUS(fileName);
+			Vorbisfile.ov_fopen(fileName, ref vorbisFile);
+			Vorbisfile.vorbis_info fileInfo = Vorbisfile.ov_info(
+				ref vorbisFile,
+				0
+			);
+			soundStream = new DynamicSoundEffectInstance(
+				fileInfo.rate,
+				(AudioChannels) fileInfo.channels
+			);
 			IsDisposed = false;
 		}
 
 		~Song()
 		{
-			SDL_mixer.Mix_HookMusicFinished(null);
 			Dispose(true);
 		}
 
@@ -219,10 +200,9 @@ namespace Microsoft.Xna.Framework.Media
 		{
 			if (disposing)
 			{
-				if (INTERNAL_mixMusic != IntPtr.Zero)
-				{
-					SDL_mixer.Mix_FreeMusic(INTERNAL_mixMusic);
-				}
+				soundStream.Dispose();
+				soundStream = null;
+				Vorbisfile.ov_clear(ref vorbisFile);
 			}
 			IsDisposed = true;
 		}
@@ -233,36 +213,79 @@ namespace Microsoft.Xna.Framework.Media
 
 		internal void Play()
 		{
-			if (INTERNAL_mixMusic == IntPtr.Zero)
-			{
-				return;
-			}
-			musicFinishedDelegate = OnFinishedPlaying;
-			SDL_mixer.Mix_HookMusicFinished(musicFinishedDelegate);
-			SDL_mixer.Mix_PlayMusic(INTERNAL_mixMusic, 0);
+			soundStream.BufferNeeded += QueueBuffer;
+			QueueBuffer(null, null);
+			QueueBuffer(null, null);
+			soundStream.Play();
 			PlayCount += 1;
 		}
 
 		internal void Resume()
 		{
-			SDL_mixer.Mix_ResumeMusic();
+			soundStream.Resume();
 		}
 
 		internal void Pause()
 		{
-			SDL_mixer.Mix_PauseMusic();
+			soundStream.Pause();
 		}
 
 		internal void Stop()
 		{
-			SDL_mixer.Mix_HookMusicFinished(null);
-			SDL_mixer.Mix_HaltMusic();
+			soundStream.Stop();
+			soundStream.BufferNeeded -= QueueBuffer;
 			PlayCount = 0;
 		}
 
 		#endregion
 
 		#region Internal Event Handler Methods
+
+		internal void QueueBuffer(object sender, EventArgs args)
+		{
+			// Fill a List (ugh) with a series of ov_read blocks.
+			List<byte> totalBuf = new List<byte>();
+			int bs = 0;
+			long len = 0;
+			do
+			{
+				len = Vorbisfile.ov_read(
+					ref vorbisFile,
+					vorbisBuffer,
+					vorbisBuffer.Length,
+					0,
+					2,
+					1,
+					ref bs
+				);
+				if (len == vorbisBuffer.Length)
+				{
+					totalBuf.AddRange(vorbisBuffer);
+				}
+				else if (len > 0)
+				{
+					// UGH -flibit
+					byte[] smallBuf = new byte[len];
+					Array.Copy(vorbisBuffer, smallBuf, len);
+					totalBuf.AddRange(smallBuf);
+				}
+			} while (len > 0 && totalBuf.Count < 8192); // 4096 16-bit samples
+
+			// If we're at the end of the file, stop!
+			if (totalBuf.Count == 0)
+			{
+				soundStream.BufferNeeded -= QueueBuffer;
+				OnFinishedPlaying();
+				return;
+			}
+
+			// Send the filled buffer to the stream.
+			soundStream.SubmitBuffer(
+				totalBuf.ToArray(),
+				0,
+				totalBuf.Count
+			);
+		}
 
 		internal void OnFinishedPlaying()
 		{
