@@ -269,7 +269,7 @@ namespace Microsoft.Xna.Framework.Media
 					Array.Copy(vorbisBuffer, smallBuf, len);
 					totalBuf.AddRange(smallBuf);
 				}
-			} while (len > 0 && totalBuf.Count < 8192); // 4096 16-bit samples
+			} while (len > 0 && totalBuf.Count < 16384); // 8192 16-bit samples
 
 			// If we're at the end of the file, stop!
 			if (totalBuf.Count == 0)
