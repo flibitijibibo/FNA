@@ -19,12 +19,26 @@ namespace Microsoft.Xna.Framework.Media
 {
 	public sealed class Song : IEquatable<Song>, IDisposable
 	{
-		#region Public Properties
+		#region Public Metadata Properties
+
+		// TODO: vorbis_comment TITLE
+		public string Name
+		{
+			get;
+			private set;
+		}
+
+		// TODO: vorbis_comment TRACKNUMBER
+		public int TrackNumber
+		{
+			get;
+			private set;
+		}
 
 		/// <summary>
 		/// Gets the Album on which the Song appears.
 		/// </summary>
-		// TODO: A real Vorbis stream would have this info.
+		// TODO: vorbis_comment ALBUM
 		public Album Album
 		{
 			get
@@ -36,7 +50,7 @@ namespace Microsoft.Xna.Framework.Media
 		/// <summary>
 		/// Gets the Artist of the Song.
 		/// </summary>
-		// TODO: A real Vorbis stream would have this info.
+		// TODO: vorbis_comment ARTIST
 		public Artist Artist
 		{
 			get
@@ -48,7 +62,7 @@ namespace Microsoft.Xna.Framework.Media
 		/// <summary>
 		/// Gets the Genre of the Song.
 		/// </summary>
-		// TODO: A real Vorbis stream would have this info.
+		// TODO: vorbis_comment GENRE
 		public Genre Genre
 		{
 			get
@@ -57,21 +71,28 @@ namespace Microsoft.Xna.Framework.Media
 			}
 		}
 
-		// TODO: A real Vorbis stream would have this info.
+		#endregion
+
+		#region Public Stream Properties
+
 		public TimeSpan Duration
 		{
 			get;
 			private set;
 		}
 
-		// TODO: A real Vorbis stream would have this info.
+		// TODO: Track the ov_reads and stream position
 		public TimeSpan Position
 		{
 			get
 			{
-				return new TimeSpan(0);
+				return TimeSpan.Zero;
 			}
 		}
+
+		#endregion
+
+		#region Public MediaPlayer Properties
 
 		public bool IsProtected
 		{
@@ -89,12 +110,6 @@ namespace Microsoft.Xna.Framework.Media
 			}
 		}
 
-		public string Name
-		{
-			get;
-			private set;
-		}
-
 		public int PlayCount
 		{
 			get;
@@ -109,14 +124,9 @@ namespace Microsoft.Xna.Framework.Media
 			}
 		}
 
-		// TODO: Could be obtained with Vorbis metadata
-		public int TrackNumber
-		{
-			get
-			{
-				return 0;
-			}
-		}
+		#endregion
+
+		#region Public IDisposable Properties
 
 		public bool IsDisposed
 		{
@@ -127,12 +137,6 @@ namespace Microsoft.Xna.Framework.Media
 		#endregion
 
 		#region Internal Properties
-
-		internal string FilePath
-		{
-			get;
-			private set;
-		}
 
 		internal float Volume
 		{
@@ -148,12 +152,6 @@ namespace Microsoft.Xna.Framework.Media
 
 		#endregion
 
-		#region Internal Function Pointer Types
-
-		internal delegate void FinishedPlayingHandler(object sender, EventArgs args);
-
-		#endregion
-
 		#region Private Variables
 
 		private DynamicSoundEffectInstance soundStream;
@@ -164,25 +162,42 @@ namespace Microsoft.Xna.Framework.Media
 
 		#region Constructors, Deconstructor, Dispose()
 
-		internal Song(string fileName, int durationMS) : this(fileName)
-		{
-			Duration = TimeSpan.FromMilliseconds(durationMS);
-		}
-
 		internal Song(string fileName)
 		{
-			FilePath = fileName;
-			Name = Path.GetFileNameWithoutExtension(FilePath);
-			Vorbisfile.ov_fopen(fileName, ref vorbisFile);
+			Vorbisfile.ov_fopen(fileName, out vorbisFile);
 			Vorbisfile.vorbis_info fileInfo = Vorbisfile.ov_info(
 				ref vorbisFile,
 				0
 			);
+
+			// TODO: ov_comment() -flibit
+			Name = Path.GetFileNameWithoutExtension(fileName);
+			TrackNumber = 0;
+
+			Duration = TimeSpan.FromSeconds(
+				Vorbisfile.ov_time_total(ref vorbisFile, 0)
+			);
+
 			soundStream = new DynamicSoundEffectInstance(
 				fileInfo.rate,
 				(AudioChannels) fileInfo.channels
 			);
 			IsDisposed = false;
+		}
+
+		internal Song(string fileName, int durationMS) : this(fileName)
+		{
+			/* If you got here, you've still got the XNB file! Well done!
+			 * Except if you're running FNA, you're not using the WMA anymore.
+			 * But surely it's the same song, right...?
+			 * Well, consider this a check more than anything. If this bothers
+			 * you, just remove the XNB file and we'll read the OGG straight up.
+			 * -flibit
+			 */
+			if (Math.Abs(Duration.Milliseconds - durationMS) > 1)
+			{
+				throw new Exception("XNB/OGG duration mismatch!");
+			}
 		}
 
 		~Song()
@@ -245,7 +260,7 @@ namespace Microsoft.Xna.Framework.Media
 		{
 			// Fill a List (ugh) with a series of ov_read blocks.
 			List<byte> totalBuf = new List<byte>();
-			int bs = 0;
+			int bs;
 			long len = 0;
 			do
 			{
@@ -256,7 +271,7 @@ namespace Microsoft.Xna.Framework.Media
 					0,
 					2,
 					1,
-					ref bs
+					out bs
 				);
 				if (len == vorbisBuffer.Length)
 				{
