@@ -60,7 +60,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region Private Audio Thread Variables
 
-		private System.Threading.Thread audioThread;
+		private Thread audioThread;
 		private bool exitThread;
 
 		#endregion
