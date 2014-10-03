@@ -70,7 +70,12 @@ namespace Microsoft.Xna.Framework
 					 * -flibit
 					 */
 					SDL.SDL_DisplayMode mode;
-					SDL.SDL_GetCurrentDisplayMode(0, out mode);
+					SDL.SDL_GetCurrentDisplayMode(
+						SDL.SDL_GetWindowDisplayIndex(
+							INTERNAL_sdlWindow
+						),
+						out mode
+					);
 					result.X = 0;
 					result.Y = 0;
 					result.Width = mode.w;

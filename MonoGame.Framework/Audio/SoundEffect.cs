@@ -389,9 +389,6 @@ namespace Microsoft.Xna.Framework.Audio
 				throw new NoAudioHardwareException();
 			}
 
-			// FIXME: MSADPCM Duration
-			Duration = TimeSpan.FromSeconds(data.Length / 2 / channels / ((double) sampleRate));
-
 			// Generate the buffer now, in case we need to perform alBuffer ops.
 			INTERNAL_buffer = AL.GenBuffer();
 
@@ -420,6 +417,17 @@ namespace Microsoft.Xna.Framework.Audio
 				data,
 				data.Length,
 				(int) sampleRate
+			);
+
+			// Calculate the duration now, after we've unpacked the buffer
+			int bufLen, bits;
+			AL.GetBuffer(INTERNAL_buffer, ALGetBufferi.Size, out bufLen);
+			AL.GetBuffer(INTERNAL_buffer, ALGetBufferi.Bits, out bits);
+			Duration = TimeSpan.FromSeconds(
+				bufLen /
+				(bits / 8) /
+				channels /
+				((double) sampleRate)
 			);
 
 			// Set the loop points, if applicable

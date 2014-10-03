@@ -142,8 +142,9 @@ namespace Microsoft.Xna.Framework
 
 		#endregion
 
-		#region Private DisplayMode List
+		#region Private DisplayMode Variables
 
+		private int displayIndex = 0;
 		private DisplayModeCollection supportedDisplayModes = null;
 
 		#endregion
@@ -170,6 +171,12 @@ namespace Microsoft.Xna.Framework
 
 			// Set and initialize the SDL2 window
 			Window = new SDL2_GameWindow();
+
+			// Create the DisplayMode list
+			displayIndex = SDL.SDL_GetWindowDisplayIndex(
+				Window.Handle
+			);
+			INTERNAL_GenerateDisplayModes();
 
 			// Disable the screensaver.
 			SDL.SDL_DisableScreenSaver();
@@ -384,6 +391,24 @@ namespace Microsoft.Xna.Framework
 							}
 						}
 
+						// Window Move
+						else if (evt.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_MOVED)
+						{
+							/* Apparently if you move the window to a new
+							 * display, a GraphicsDevice Reset occurs.
+							 * -flibit
+							 */
+							int newIndex = SDL.SDL_GetWindowDisplayIndex(
+								Window.Handle
+							);
+							if (newIndex != displayIndex)
+							{
+								displayIndex = newIndex;
+								INTERNAL_GenerateDisplayModes();
+								Game.GraphicsDevice.Reset();
+							}
+						}
+
 						// Mouse Focus
 						else if (evt.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_ENTER)
 						{
@@ -533,7 +558,7 @@ namespace Microsoft.Xna.Framework
 		internal override DisplayMode GetCurrentDisplayMode()
 		{
 			SDL.SDL_DisplayMode mode;
-			SDL.SDL_GetCurrentDisplayMode(0, out mode);
+			SDL.SDL_GetCurrentDisplayMode(displayIndex, out mode);
 			return new DisplayMode(
 				mode.w,
 				mode.h,
@@ -543,37 +568,6 @@ namespace Microsoft.Xna.Framework
 
 		internal override DisplayModeCollection GetDisplayModes()
 		{
-			if (supportedDisplayModes == null)
-			{
-				List<DisplayMode> modes = new List<DisplayMode>(new DisplayMode[] { GetCurrentDisplayMode(), });
-				SDL.SDL_DisplayMode filler = new SDL.SDL_DisplayMode();
-				int numModes = SDL.SDL_GetNumDisplayModes(0);
-				for (int i = 0; i < numModes; i += 1)
-				{
-					SDL.SDL_GetDisplayMode(0, i, out filler);
-
-					// Check for dupes caused by varying refresh rates.
-					bool dupe = false;
-					foreach (DisplayMode mode in modes)
-					{
-						if (filler.w == mode.Width && filler.h == mode.Height)
-						{
-							dupe = true;
-						}
-					}
-					if (!dupe)
-					{
-						modes.Add(
-							new DisplayMode(
-								filler.w,
-								filler.h,
-								SurfaceFormat.Color // FIXME: Assumption!
-							)
-						);
-					}
-				}
-				supportedDisplayModes = new DisplayModeCollection(modes);
-			}
 			return supportedDisplayModes;
 		}
 
@@ -669,6 +663,42 @@ namespace Microsoft.Xna.Framework
 			}
 
 			base.Dispose(disposing);
+		}
+
+		#endregion
+
+		#region Private DisplayMode Methods
+
+		private void INTERNAL_GenerateDisplayModes()
+		{
+			List<DisplayMode> modes = new List<DisplayMode>();
+			SDL.SDL_DisplayMode filler = new SDL.SDL_DisplayMode();
+			int numModes = SDL.SDL_GetNumDisplayModes(displayIndex);
+			for (int i = 0; i < numModes; i += 1)
+			{
+				SDL.SDL_GetDisplayMode(displayIndex, i, out filler);
+
+				// Check for dupes caused by varying refresh rates.
+				bool dupe = false;
+				foreach (DisplayMode mode in modes)
+				{
+					if (filler.w == mode.Width && filler.h == mode.Height)
+					{
+						dupe = true;
+					}
+				}
+				if (!dupe)
+				{
+					modes.Add(
+						new DisplayMode(
+							filler.w,
+							filler.h,
+							SurfaceFormat.Color // FIXME: Assumption!
+						)
+					);
+				}
+			}
+			supportedDisplayModes = new DisplayModeCollection(modes);
 		}
 
 		#endregion
