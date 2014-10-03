@@ -10,6 +10,7 @@
 #region Using Statements
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 using OpenTK;
 using OpenTK.Audio.OpenAL;
@@ -54,6 +55,13 @@ namespace Microsoft.Xna.Framework.Audio
 
 		// Used to store all DynamicSoundEffectInstances, to check buffer counts.
 		internal List<DynamicSoundEffectInstance> dynamicInstancePool;
+
+		#endregion
+
+		#region Private Audio Thread Variables
+
+		private System.Threading.Thread audioThread;
+		private bool exitThread;
 
 		#endregion
 
@@ -127,6 +135,10 @@ namespace Microsoft.Xna.Framework.Audio
 
 			instancePool = new List<SoundEffectInstance>();
 			dynamicInstancePool = new List<DynamicSoundEffectInstance>();
+
+			exitThread = false;
+			audioThread = new Thread(AudioThread);
+			audioThread.Start();
 		}
 
 		#endregion
@@ -135,6 +147,8 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public void Dispose()
 		{
+			exitThread = true;
+			audioThread.Join();
 			Alc.MakeContextCurrent(ContextHandle.Zero);
 			if (alContext != ContextHandle.Zero)
 			{
@@ -151,31 +165,41 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#endregion
 
-		#region Public Update Methods
+		#region Private Audio Thread Method
 
-		public void Update()
+		private void AudioThread()
 		{
-#if DEBUG
-			CheckALError();
-#endif
-
-			for (int i = 0; i < instancePool.Count; i += 1)
+			while (!exitThread)
 			{
-				if (instancePool[i].State == SoundState.Stopped)
-				{
-					instancePool[i].Dispose();
-					instancePool.RemoveAt(i);
-					i -= 1;
-				}
-			}
+				CheckALError();
 
-			for (int i = 0; i < dynamicInstancePool.Count; i += 1)
-			{
-				if (!dynamicInstancePool[i].Update())
+				lock (instancePool)
 				{
-					dynamicInstancePool.Remove(dynamicInstancePool[i]);
-					i -= 1;
+					for (int i = 0; i < instancePool.Count; i += 1)
+					{
+						if (instancePool[i].State == SoundState.Stopped)
+						{
+							instancePool[i].Dispose();
+							instancePool.RemoveAt(i);
+							i -= 1;
+						}
+					}
 				}
+
+				lock (dynamicInstancePool)
+				{
+					for (int i = 0; i < dynamicInstancePool.Count; i += 1)
+					{
+						if (!dynamicInstancePool[i].Update())
+						{
+							dynamicInstancePool.Remove(dynamicInstancePool[i]);
+							i -= 1;
+						}
+					}
+				}
+
+				// Arbitrarily 1 frame in a 60Hz game -flibit
+				Thread.Sleep(16);
 			}
 		}
 
