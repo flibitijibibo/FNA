@@ -103,7 +103,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Storage\StorageContainer.cs" />
     <Compile Include="Storage\StorageDevice.cs" />
-    <Compile Include="TextInputEventArgsEXT.cs" />
+    <Compile Include="Input\TextInputEXT.cs" />
     <Compile Include="Audio\AudioChannels.cs" />
     <Compile Include="Media\MediaPlayer.cs" />
     <Compile Include="Media\MediaState.cs" />
