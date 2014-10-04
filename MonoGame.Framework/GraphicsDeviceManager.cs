@@ -111,6 +111,12 @@ namespace Microsoft.Xna.Framework
 
 		#endregion
 
+		#region Public Events
+
+		public event EventHandler<EventArgs> Disposed;
+
+		#endregion
+
 		#region IGraphicsDeviceService Events
 
 		public event EventHandler<EventArgs> DeviceCreated;
@@ -164,12 +170,6 @@ namespace Microsoft.Xna.Framework
 
 		#region Dispose Methods
 
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
 		protected virtual void Dispose(bool disposing)
 		{
 			if (!disposed)
@@ -178,83 +178,34 @@ namespace Microsoft.Xna.Framework
 				{
 					if (graphicsDevice != null)
 					{
+						OnDeviceDisposing(this, EventArgs.Empty);
 						graphicsDevice.Dispose();
 						graphicsDevice = null;
 					}
+				}
+				if (Disposed != null)
+				{
+					Disposed(this, EventArgs.Empty);
 				}
 				disposed = true;
 			}
 		}
 
+		void IDisposable.Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		internal void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
 		#endregion
 
 		#region Public Methods
-
-		public void CreateDevice()
-		{
-			// Set the default device information
-			GraphicsDeviceInformation gdi = new GraphicsDeviceInformation();
-			gdi.Adapter = GraphicsAdapter.DefaultAdapter;
-			gdi.GraphicsProfile = GraphicsProfile;
-			gdi.PresentationParameters = new PresentationParameters();
-			gdi.PresentationParameters.DeviceWindowHandle = game.Window.Handle;
-			gdi.PresentationParameters.DepthStencilFormat = DepthFormat.Depth24;
-			gdi.PresentationParameters.IsFullScreen = false;
-
-			// Give the user a chance to change the initial settings
-			if (PreparingDeviceSettings != null)
-			{
-				PreparingDeviceSettings(
-					this,
-					new PreparingDeviceSettingsEventArgs(gdi)
-				);
-			}
-
-			// Apply these settings to this GraphicsDeviceManager
-			GraphicsProfile = gdi.GraphicsProfile;
-			PreferredBackBufferFormat = gdi.PresentationParameters.BackBufferFormat;
-			PreferredDepthStencilFormat = gdi.PresentationParameters.DepthStencilFormat;
-
-			// Create the GraphicsDevice, apply the initial settings.
-			graphicsDevice = new GraphicsDevice(
-				gdi.Adapter,
-				gdi.GraphicsProfile,
-				gdi.PresentationParameters
-			);
-			ApplyChanges();
-
-			/* Set the new display orientation on the touch panel.
-			 *
-			 * TODO: In XNA this seems to be done as part of the
-			 * GraphicsDevice.DeviceReset event... we need to get
-			 * those working.
-			 */
-			TouchPanel.DisplayOrientation =
-				graphicsDevice.PresentationParameters.DisplayOrientation;
-
-			// Call the DeviceCreated Event
-			OnDeviceCreated(EventArgs.Empty);
-		}
-
-		public bool BeginDraw()
-		{
-			if (graphicsDevice == null)
-			{
-				return false;
-			}
-
-			drawBegun = true;
-			return true;
-		}
-
-		public void EndDraw()
-		{
-			if (graphicsDevice != null && drawBegun)
-			{
-				drawBegun = false;
-				graphicsDevice.Present();
-			}
-		}
 
 		public void ApplyChanges()
 		{
@@ -265,7 +216,7 @@ namespace Microsoft.Xna.Framework
 			}
 
 			// We're about to reset a device, notify the application.
-			OnDeviceResetting(null);
+			OnDeviceResetting(this, EventArgs.Empty);
 
 			// Apply the GraphicsDevice changes internally.
 			GraphicsDevice.PresentationParameters.BackBufferFormat =
@@ -300,7 +251,7 @@ namespace Microsoft.Xna.Framework
 			GraphicsDevice.Reset();
 
 			// We just reset a device, notify the application.
-			OnDeviceReset(null);
+			OnDeviceReset(this, EventArgs.Empty);
 
 			// FIXME: When does this actually happen?
 			UpdateTouchPanel();
@@ -333,7 +284,7 @@ namespace Microsoft.Xna.Framework
 			if (pp.BackBufferWidth != width || pp.BackBufferHeight != height)
 			{
 				// We're about to reset a device, notify the application.
-				OnDeviceResetting(null);
+				OnDeviceResetting(this, EventArgs.Empty);
 
 				pp.BackBufferWidth = width;
 				pp.BackBufferHeight = height;
@@ -341,10 +292,56 @@ namespace Microsoft.Xna.Framework
 				GraphicsDevice.Reset();
 
 				// We just reset a device, notify the application.
-				OnDeviceReset(null);
+				OnDeviceReset(this, EventArgs.Empty);
 
 				// FIXME: When does this actually happen?
 				UpdateTouchPanel();
+			}
+		}
+
+		#endregion
+
+		#region Protected Methods
+
+		protected virtual void OnDeviceCreated(object sender, EventArgs args)
+		{
+			if (DeviceCreated != null)
+			{
+				DeviceCreated(sender, args);
+			}
+		}
+
+		protected virtual void OnDeviceDisposing(object sender, EventArgs args)
+		{
+			if (DeviceDisposing != null)
+			{
+				DeviceDisposing(sender, args);
+			}
+		}
+
+		protected virtual void OnDeviceReset(object sender, EventArgs args)
+		{
+			if (DeviceReset != null)
+			{
+				DeviceReset(sender, args);
+			}
+		}
+
+		protected virtual void OnDeviceResetting(object sender, EventArgs args)
+		{
+			if (DeviceResetting != null)
+			{
+				DeviceResetting(sender, args);
+			}
+		}
+
+		protected virtual void OnPreparingDeviceSettings(
+			object sender,
+			PreparingDeviceSettingsEventArgs args
+		) {
+			if (PreparingDeviceSettings != null)
+			{
+				PreparingDeviceSettings(sender, args);
 			}
 		}
 
@@ -366,50 +363,68 @@ namespace Microsoft.Xna.Framework
 
 		#endregion
 
-		#region Internal IGraphicsDeviceService Methods
+		#region IGraphicsDeviceManager Methods
 
-		/* FIXME: Why does the GraphicsDeviceManager not know enough about the
-		 * GraphicsDevice to raise these events without help?
-		 */
-		internal void OnDeviceDisposing(EventArgs e)
+		void IGraphicsDeviceManager.CreateDevice()
 		{
-			Raise(DeviceDisposing, e);
+			// Set the default device information
+			GraphicsDeviceInformation gdi = new GraphicsDeviceInformation();
+			gdi.Adapter = GraphicsAdapter.DefaultAdapter;
+			gdi.GraphicsProfile = GraphicsProfile;
+			gdi.PresentationParameters = new PresentationParameters();
+			gdi.PresentationParameters.DeviceWindowHandle = game.Window.Handle;
+			gdi.PresentationParameters.DepthStencilFormat = DepthFormat.Depth24;
+			gdi.PresentationParameters.IsFullScreen = false;
+
+			// Give the user a chance to change the initial settings
+			OnPreparingDeviceSettings(
+				this,
+				new PreparingDeviceSettingsEventArgs(gdi)
+			);
+
+			// Apply these settings to this GraphicsDeviceManager
+			GraphicsProfile = gdi.GraphicsProfile;
+			PreferredBackBufferFormat = gdi.PresentationParameters.BackBufferFormat;
+			PreferredDepthStencilFormat = gdi.PresentationParameters.DepthStencilFormat;
+
+			// Create the GraphicsDevice, apply the initial settings.
+			graphicsDevice = new GraphicsDevice(
+				gdi.Adapter,
+				gdi.GraphicsProfile,
+				gdi.PresentationParameters
+			);
+			ApplyChanges();
+
+			/* Set the new display orientation on the touch panel.
+			 *
+			 * TODO: In XNA this seems to be done as part of the
+			 * GraphicsDevice.DeviceReset event... we need to get
+			 * those working.
+			 */
+			TouchPanel.DisplayOrientation =
+				graphicsDevice.PresentationParameters.DisplayOrientation;
+
+			// Call the DeviceCreated Event
+			OnDeviceCreated(this, EventArgs.Empty);
 		}
 
-		/* FIXME: Why does the GraphicsDeviceManager not know enough about the
-		 * GraphicsDevice to raise these events without help?
-		 */
-		internal void OnDeviceResetting(EventArgs e)
+		bool IGraphicsDeviceManager.BeginDraw()
 		{
-			Raise(DeviceResetting, e);
-		}
-
-		/* FIXME: Why does the GraphicsDeviceManager not know enough about the
-		 * GraphicsDevice to raise these events without help?
-		 */
-		internal void OnDeviceReset(EventArgs e)
-		{
-			Raise(DeviceReset, e);
-		}
-
-		/* FIXME: Why does the GraphicsDeviceManager not know enough about the
-		 * GraphicsDevice to raise these events without help?
-		 */
-		internal void OnDeviceCreated(EventArgs e)
-		{
-			Raise(DeviceCreated, e);
-		}
-
-		#endregion
-
-		#region Private IGraphicsDeviceService Methods
-
-		private void Raise<TEventArgs>(EventHandler<TEventArgs> handler, TEventArgs e)
-			where TEventArgs : EventArgs
-		{
-			if (handler != null)
+			if (graphicsDevice == null)
 			{
-				handler(this, e);
+				return false;
+			}
+
+			drawBegun = true;
+			return true;
+		}
+
+		void IGraphicsDeviceManager.EndDraw()
+		{
+			if (graphicsDevice != null && drawBegun)
+			{
+				drawBegun = false;
+				graphicsDevice.Present();
 			}
 		}
 
