@@ -20,12 +20,6 @@ namespace Microsoft.Xna.Framework.Graphics
 	{
 		#region Public Properties
 
-		public List<ModelMesh> Meshes
-		{
-			get;
-			private set;
-		}
-
 		/// <summary>
 		/// Gets a collection of bones that are children of this bone.
 		/// </summary>
@@ -90,6 +84,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		#region Private Variables
 
 		private List<ModelBone> children = new List<ModelBone>();
+		private List<ModelMesh> meshes = new List<ModelMesh>();
 
 		#endregion
 
@@ -98,19 +93,19 @@ namespace Microsoft.Xna.Framework.Graphics
 		public ModelBone()
 		{
 			Children = new ModelBoneCollection(new List<ModelBone>());
-			Meshes = new List<ModelMesh>();
+			meshes = new List<ModelMesh>();
 		}
 
 		#endregion
 
-		#region Public Methods
+		#region Internal Methods
 
-		public void AddMesh(ModelMesh mesh)
+		internal void AddMesh(ModelMesh mesh)
 		{
-			Meshes.Add(mesh);
+			meshes.Add(mesh);
 		}
 
-		public void AddChild(ModelBone modelBone)
+		internal void AddChild(ModelBone modelBone)
 		{
 			children.Add(modelBone);
 			Children = new ModelBoneCollection(children);

@@ -81,16 +81,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Public Methods
 
-		public void BuildHierarchy()
-		{
-			Matrix globalScale = Matrix.CreateScale(0.01f);
-			
-			foreach (ModelBone node in Root.Children)
-			{
-				BuildHierarchy(node, Root.Transform * globalScale, 0);
-			}
-		}
-
 		public void Draw(Matrix world, Matrix view, Matrix projection)
 		{
 			int boneCount = Bones.Count;
@@ -152,6 +142,20 @@ namespace Microsoft.Xna.Framework.Graphics
 						out destinationBoneTransforms[index1]
 					);
 				}
+			}
+		}
+
+		#endregion
+
+		#region Internal Methods
+
+		internal void BuildHierarchy()
+		{
+			Matrix globalScale = Matrix.CreateScale(0.01f);
+
+			foreach (ModelBone node in Root.Children)
+			{
+				BuildHierarchy(node, Root.Transform * globalScale, 0);
 			}
 		}
 

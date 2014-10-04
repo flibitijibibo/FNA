@@ -146,7 +146,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				}
 			}
 
-			public void Reset()
+			void IEnumerator.Reset()
 			{
 				position = -1;
 			}
