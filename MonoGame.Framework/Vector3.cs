@@ -923,8 +923,11 @@ namespace Microsoft.Xna.Framework
 			result.Z = z;
 		}
 
-		public static void TransformNormal(Vector3[] sourceArray, ref Matrix matrix, Vector3[] destinationArray)
-		{
+		public static void TransformNormal(
+			Vector3[] sourceArray,
+			ref Matrix matrix,
+			Vector3[] destinationArray
+		) {
 			Debug.Assert(
 				destinationArray.Length >= sourceArray.Length,
 				"The destination array is smaller than the source array."
@@ -936,6 +939,58 @@ namespace Microsoft.Xna.Framework
 				destinationArray[i].X = (normal.X * matrix.M11) + (normal.Y * matrix.M21) + (normal.Z * matrix.M31);
 				destinationArray[i].Y = (normal.X * matrix.M12) + (normal.Y * matrix.M22) + (normal.Z * matrix.M32);
 				destinationArray[i].Z = (normal.X * matrix.M13) + (normal.Y * matrix.M23) + (normal.Z * matrix.M33);
+			}
+		}
+
+		public static void TransformNormal(
+			Vector3[] sourceArray,
+			int sourceIndex,
+			ref Matrix matrix,
+			Vector3[] destinationArray,
+			int destinationIndex,
+			int length
+		) {
+			if (sourceArray == null)
+			{
+				throw new ArgumentNullException("sourceArray");
+			}
+			if (destinationArray == null)
+			{
+				throw new ArgumentNullException("destinationArray");
+			}
+			if ((sourceIndex + length) > sourceArray.Length)
+			{
+				throw new ArgumentException(
+					"the combination of sourceIndex and " +
+					"length was greater than sourceArray.Length"
+				);
+			}
+			if ((destinationIndex + length) > destinationArray.Length)
+			{
+				throw new ArgumentException(
+					"destinationArray is too small to " +
+					"contain the result"
+				);
+			}
+
+			for (int i = 0; i < length; i += 1)
+			{
+				Vector3 normal = sourceArray[i + sourceIndex];
+				destinationArray[i + destinationIndex].X = (
+					(normal.X * matrix.M11) +
+					(normal.Y * matrix.M21) +
+					(normal.Z * matrix.M31)
+				);
+				destinationArray[i + destinationIndex].Y = (
+					(normal.X * matrix.M12) +
+					(normal.Y * matrix.M22) +
+					(normal.Z * matrix.M32)
+				);
+				destinationArray[i + destinationIndex].Z = (
+					(normal.X * matrix.M13) +
+					(normal.Y * matrix.M23) +
+					(normal.Z * matrix.M33)
+				);
 			}
 		}
 
