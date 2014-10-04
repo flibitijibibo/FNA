@@ -437,10 +437,7 @@ namespace Microsoft.Xna.Framework
 						unsafe { text = new string((char*) evt.text.text); }
 						if (text.Length > 0)
 						{
-							TextInputEXT.OnTextInput(
-								evt,
-								new TextInputEXT.TextInputEventArgs(text[0])
-							);
+							TextInputEXT.OnTextInput(text[0]);
 						}
 					}
 
@@ -714,37 +711,25 @@ namespace Microsoft.Xna.Framework
 			{
 				INTERNAL_TextInputControlDown[0] = true;
 				INTERNAL_TextInputControlRepeat[0] = Environment.TickCount + 400;
-				TextInputEXT.OnTextInput(
-					null,
-					new TextInputEXT.TextInputEventArgs((char) 8) // Backspace
-				);
+				TextInputEXT.OnTextInput((char) 8); // Backspace
 			}
 			else if (key == Keys.Tab)
 			{
 				INTERNAL_TextInputControlDown[1] = true;
 				INTERNAL_TextInputControlRepeat[1] = Environment.TickCount + 400;
-				TextInputEXT.OnTextInput(
-					null,
-					new TextInputEXT.TextInputEventArgs((char) 9) // Tab
-				);
+				TextInputEXT.OnTextInput((char) 9); // Tab
 			}
 			else if (key == Keys.Enter)
 			{
 				INTERNAL_TextInputControlDown[2] = true;
 				INTERNAL_TextInputControlRepeat[2] = Environment.TickCount + 400;
-				TextInputEXT.OnTextInput(
-					null,
-					new TextInputEXT.TextInputEventArgs((char) 13) // Enter
-				);
+				TextInputEXT.OnTextInput((char) 13); // Enter
 			}
 			else if (keys.Contains(Keys.LeftControl) && key == Keys.V)
 			{
 				INTERNAL_TextInputControlDown[3] = true;
 				INTERNAL_TextInputControlRepeat[3] = Environment.TickCount + 400;
-				TextInputEXT.OnTextInput(
-					null,
-					new TextInputEXT.TextInputEventArgs((char) 22) // Control-V (Paste)
-				);
+				TextInputEXT.OnTextInput((char) 22); // Control-V (Paste)
 				INTERNAL_TextInputSuppress = true;
 			}
 		}
@@ -774,31 +759,19 @@ namespace Microsoft.Xna.Framework
 		{
 			if (INTERNAL_TextInputControlDown[0] && INTERNAL_TextInputControlRepeat[0] <= Environment.TickCount)
 			{
-				TextInputEXT.OnTextInput(
-					null,
-					new TextInputEXT.TextInputEventArgs((char) 8)
-				);
+				TextInputEXT.OnTextInput((char) 8);
 			}
 			if (INTERNAL_TextInputControlDown[1] && INTERNAL_TextInputControlRepeat[1] <= Environment.TickCount)
 			{
-				TextInputEXT.OnTextInput(
-					null,
-					new TextInputEXT.TextInputEventArgs((char) 9)
-				);
+				TextInputEXT.OnTextInput((char) 9);
 			}
 			if (INTERNAL_TextInputControlDown[2] && INTERNAL_TextInputControlRepeat[2] <= Environment.TickCount)
 			{
-				TextInputEXT.OnTextInput(
-					null,
-					new TextInputEXT.TextInputEventArgs((char) 13)
-				);
+				TextInputEXT.OnTextInput((char) 13);
 			}
 			if (INTERNAL_TextInputControlDown[3] && INTERNAL_TextInputControlRepeat[3] <= Environment.TickCount)
 			{
-				TextInputEXT.OnTextInput(
-					null,
-					new TextInputEXT.TextInputEventArgs((char) 22)
-				);
+				TextInputEXT.OnTextInput((char) 22);
 			}
 		}
 
