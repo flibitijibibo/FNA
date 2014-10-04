@@ -197,12 +197,6 @@ namespace Microsoft.Xna.Framework
 			GC.SuppressFinalize(this);
 		}
 
-		internal void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
 		#endregion
 
 		#region Public Methods
