@@ -129,6 +129,13 @@ namespace Microsoft.Xna.Framework.Media
 
 		#region Internal Properties
 
+		// TODO: Track the ov_reads and stream position
+		internal TimeSpan Position
+		{
+			get;
+			private set;
+		}
+
 		internal float Volume
 		{
 			get
@@ -168,6 +175,7 @@ namespace Microsoft.Xna.Framework.Media
 			Duration = TimeSpan.FromSeconds(
 				Vorbisfile.ov_time_total(ref vorbisFile, 0)
 			);
+			Position = TimeSpan.Zero;
 
 			soundStream = new DynamicSoundEffectInstance(
 				fileInfo.rate,
