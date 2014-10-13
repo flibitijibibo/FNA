@@ -9,61 +9,36 @@
 
 #region Using Statements
 using System;
+using System.Collections.Generic;
 using System.IO;
 
-using SDL2;
+using Microsoft.Xna.Framework.Audio;
 #endregion
 
 namespace Microsoft.Xna.Framework.Media
 {
 	public sealed class Song : IEquatable<Song>, IDisposable
 	{
-		#region SDL_mixer Open/Close Routines
+		#region Public Metadata Properties
 
-		// Has SDL_mixer already been opened?
-		private static bool initialized = false;
-
-		private static void initializeMixer()
+		// TODO: vorbis_comment TITLE
+		public string Name
 		{
-			if (!initialized)
-			{
-				SDL.SDL_InitSubSystem(SDL.SDL_INIT_AUDIO);
-				SDL_mixer.Mix_OpenAudio(44100, SDL.AUDIO_S16SYS, 2, 1024);
-				initialized = true;
-			}
+			get;
+			private set;
 		}
 
-		internal static void closeMixer()
+		// TODO: vorbis_comment TRACKNUMBER
+		public int TrackNumber
 		{
-			if (initialized)
-			{
-				SDL_mixer.Mix_CloseAudio();
-				initialized = false;
-			}
+			get;
+			private set;
 		}
-
-		#endregion
-
-		#region Private Member Data
-
-		private IntPtr INTERNAL_mixMusic;
-
-		SDL_mixer.MusicFinishedDelegate musicFinishedDelegate;
-
-		#endregion
-
-		#region Internal Member Data
-
-		internal delegate void FinishedPlayingHandler(object sender, EventArgs args);
-
-		#endregion
-
-		#region Public Properties
 
 		/// <summary>
 		/// Gets the Album on which the Song appears.
 		/// </summary>
-		// TODO: A real Vorbis stream would have this info.
+		// TODO: vorbis_comment ALBUM
 		public Album Album
 		{
 			get
@@ -75,7 +50,7 @@ namespace Microsoft.Xna.Framework.Media
 		/// <summary>
 		/// Gets the Artist of the Song.
 		/// </summary>
-		// TODO: A real Vorbis stream would have this info.
+		// TODO: vorbis_comment ARTIST
 		public Artist Artist
 		{
 			get
@@ -87,7 +62,7 @@ namespace Microsoft.Xna.Framework.Media
 		/// <summary>
 		/// Gets the Genre of the Song.
 		/// </summary>
-		// TODO: A real Vorbis stream would have this info.
+		// TODO: vorbis_comment GENRE
 		public Genre Genre
 		{
 			get
@@ -96,12 +71,19 @@ namespace Microsoft.Xna.Framework.Media
 			}
 		}
 
-		// TODO: A real Vorbis stream would have this info.
+		#endregion
+
+		#region Public Stream Properties
+
 		public TimeSpan Duration
 		{
 			get;
 			private set;
 		}
+
+		#endregion
+
+		#region Public MediaPlayer Properties
 
 		public bool IsProtected
 		{
@@ -119,12 +101,6 @@ namespace Microsoft.Xna.Framework.Media
 			}
 		}
 
-		public string Name
-		{
-			get;
-			private set;
-		}
-
 		public int PlayCount
 		{
 			get;
@@ -139,14 +115,9 @@ namespace Microsoft.Xna.Framework.Media
 			}
 		}
 
-		// TODO: Could be obtained with Vorbis metadata
-		public int TrackNumber
-		{
-			get
-			{
-				return 0;
-			}
-		}
+		#endregion
+
+		#region Public IDisposable Properties
 
 		public bool IsDisposed
 		{
@@ -158,54 +129,78 @@ namespace Microsoft.Xna.Framework.Media
 
 		#region Internal Properties
 
-		internal string FilePath
+		// TODO: Track the ov_reads and stream position
+		internal TimeSpan Position
 		{
 			get;
 			private set;
-		}
-
-		// TODO: A real Vorbis stream would have this info.
-		internal TimeSpan Position
-		{
-			get
-			{
-				return TimeSpan.Zero;
-			}
 		}
 
 		internal float Volume
 		{
 			get
 			{
-				return SDL_mixer.Mix_VolumeMusic(-1) / 128.0f;
+				return soundStream.Volume;
 			}
 			set
 			{
-				SDL_mixer.Mix_VolumeMusic((int) (value * 128));
+				soundStream.Volume = value;
 			}
 		}
 
 		#endregion
 
-		#region Constructors, Deconstructor, Dispose()
+		#region Private Variables
 
-		internal Song(string fileName, int durationMS) : this(fileName)
-		{
-			Duration = TimeSpan.FromMilliseconds(durationMS);
-		}
+		private DynamicSoundEffectInstance soundStream;
+		private Vorbisfile.OggVorbis_File vorbisFile = new Vorbisfile.OggVorbis_File();
+		private byte[] vorbisBuffer = new byte[4096];
+
+		#endregion
+
+		#region Constructors, Deconstructor, Dispose()
 
 		internal Song(string fileName)
 		{
-			FilePath = fileName;
-			Name = Path.GetFileNameWithoutExtension(FilePath);
-			initializeMixer();
-			INTERNAL_mixMusic = SDL_mixer.Mix_LoadMUS(fileName);
+			Vorbisfile.ov_fopen(fileName, out vorbisFile);
+			Vorbisfile.vorbis_info fileInfo = Vorbisfile.ov_info(
+				ref vorbisFile,
+				0
+			);
+
+			// TODO: ov_comment() -flibit
+			Name = Path.GetFileNameWithoutExtension(fileName);
+			TrackNumber = 0;
+
+			Duration = TimeSpan.FromSeconds(
+				Vorbisfile.ov_time_total(ref vorbisFile, 0)
+			);
+			Position = TimeSpan.Zero;
+
+			soundStream = new DynamicSoundEffectInstance(
+				fileInfo.rate,
+				(AudioChannels) fileInfo.channels
+			);
 			IsDisposed = false;
+		}
+
+		internal Song(string fileName, int durationMS) : this(fileName)
+		{
+			/* If you got here, you've still got the XNB file! Well done!
+			 * Except if you're running FNA, you're not using the WMA anymore.
+			 * But surely it's the same song, right...?
+			 * Well, consider this a check more than anything. If this bothers
+			 * you, just remove the XNB file and we'll read the OGG straight up.
+			 * -flibit
+			 */
+			if (Math.Abs(Duration.Milliseconds - durationMS) > 1)
+			{
+				throw new Exception("XNB/OGG duration mismatch!");
+			}
 		}
 
 		~Song()
 		{
-			SDL_mixer.Mix_HookMusicFinished(null);
 			Dispose(true);
 		}
 
@@ -219,10 +214,9 @@ namespace Microsoft.Xna.Framework.Media
 		{
 			if (disposing)
 			{
-				if (INTERNAL_mixMusic != IntPtr.Zero)
-				{
-					SDL_mixer.Mix_FreeMusic(INTERNAL_mixMusic);
-				}
+				soundStream.Dispose();
+				soundStream = null;
+				Vorbisfile.ov_clear(ref vorbisFile);
 			}
 			IsDisposed = true;
 		}
@@ -233,36 +227,79 @@ namespace Microsoft.Xna.Framework.Media
 
 		internal void Play()
 		{
-			if (INTERNAL_mixMusic == IntPtr.Zero)
-			{
-				return;
-			}
-			musicFinishedDelegate = OnFinishedPlaying;
-			SDL_mixer.Mix_HookMusicFinished(musicFinishedDelegate);
-			SDL_mixer.Mix_PlayMusic(INTERNAL_mixMusic, 0);
+			soundStream.BufferNeeded += QueueBuffer;
+			QueueBuffer(null, null);
+			QueueBuffer(null, null);
+			soundStream.Play();
 			PlayCount += 1;
 		}
 
 		internal void Resume()
 		{
-			SDL_mixer.Mix_ResumeMusic();
+			soundStream.Resume();
 		}
 
 		internal void Pause()
 		{
-			SDL_mixer.Mix_PauseMusic();
+			soundStream.Pause();
 		}
 
 		internal void Stop()
 		{
-			SDL_mixer.Mix_HookMusicFinished(null);
-			SDL_mixer.Mix_HaltMusic();
+			soundStream.Stop();
+			soundStream.BufferNeeded -= QueueBuffer;
 			PlayCount = 0;
 		}
 
 		#endregion
 
 		#region Internal Event Handler Methods
+
+		internal void QueueBuffer(object sender, EventArgs args)
+		{
+			// Fill a List (ugh) with a series of ov_read blocks.
+			List<byte> totalBuf = new List<byte>();
+			int bs;
+			long len = 0;
+			do
+			{
+				len = Vorbisfile.ov_read(
+					ref vorbisFile,
+					vorbisBuffer,
+					vorbisBuffer.Length,
+					0,
+					2,
+					1,
+					out bs
+				);
+				if (len == vorbisBuffer.Length)
+				{
+					totalBuf.AddRange(vorbisBuffer);
+				}
+				else if (len > 0)
+				{
+					// UGH -flibit
+					byte[] smallBuf = new byte[len];
+					Array.Copy(vorbisBuffer, smallBuf, len);
+					totalBuf.AddRange(smallBuf);
+				}
+			} while (len > 0 && totalBuf.Count < 16384); // 8192 16-bit samples
+
+			// If we're at the end of the file, stop!
+			if (totalBuf.Count == 0)
+			{
+				soundStream.BufferNeeded -= QueueBuffer;
+				OnFinishedPlaying();
+				return;
+			}
+
+			// Send the filled buffer to the stream.
+			soundStream.SubmitBuffer(
+				totalBuf.ToArray(),
+				0,
+				totalBuf.Count
+			);
+		}
 
 		internal void OnFinishedPlaying()
 		{

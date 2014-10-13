@@ -355,12 +355,16 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ThirdParty\TheoraPlay#\TheoraPlay-CS.csproj">
-      <Project>{85480198-8711-4355-830E-72FD794AD3F6}</Project>
+      <Project>{47CF0C2E-3710-4188-BB11-30D248B2B5FB}</Project>
       <Name>TheoraPlay-CS</Name>
     </ProjectReference>
     <ProjectReference Include="..\ThirdParty\SDL2#\SDL2-CS.csproj">
       <Project>{85480198-8711-4355-830E-72FD794AD3F6}</Project>
       <Name>SDL2-CS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThirdParty\Vorbisfile#\Vorbisfile-CS.csproj">
+      <Project>{C976BE87-E250-4120-9826-98B6C2CD7496}</Project>
+      <Name>Vorbisfile-CS</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
