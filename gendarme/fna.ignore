@@ -7,4 +7,5 @@ A: FNA
 # Ignore everything from the lib folder
 @ sdl2.ignore
 @ openal.ignore
+@ mojoshader.ignore
 @ theoraplay.ignore
