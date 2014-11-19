@@ -1,63 +1,87 @@
-﻿using System.Collections.Generic;
+#region License
+/* FNA - XNA4 Reimplementation for Desktop Platforms
+ * Copyright 2009-2014 Ethan Lee and the MonoGame Team
+ *
+ * Released under the Microsoft Public License.
+ * See LICENSE for details.
+ */
+#endregion
+
+#region Using Statements
+using System.Collections;
+using System.Collections.Generic;
+#endregion
 
 namespace Microsoft.Xna.Framework.Graphics
 {
-    public class EffectParameterCollection : IEnumerable<EffectParameter>
-    {
-        internal static readonly EffectParameterCollection Empty = new EffectParameterCollection(new EffectParameter[0]);
+	public sealed class EffectParameterCollection : IEnumerable<EffectParameter>, IEnumerable
+	{
+		#region Public Properties
 
-        private readonly EffectParameter[] _parameters;
+		public int Count
+		{
+			get
+			{
+				return elements.Length;
+			}
+		}
 
-        internal EffectParameterCollection(EffectParameter[] parameters)
-        {
-            _parameters = parameters;
-        }
-
-        internal EffectParameterCollection Clone()
-        {
-            if (_parameters.Length == 0)
-                return Empty;
-
-            var parameters = new EffectParameter[_parameters.Length];
-            for (var i = 0; i < _parameters.Length; i++)
-                parameters[i] = new EffectParameter(_parameters[i]);
-
-            return new EffectParameterCollection(parameters);
-        }
-
-        public int Count
-        {
-            get { return _parameters.Length; }
-        }
-		
 		public EffectParameter this[int index]
 		{
-			get { return _parameters[index]; }
-		}
-		
-		public EffectParameter this[string name]
-        {
-            get 
-            {
-                // TODO: Add a name to parameter lookup table.
-				foreach (var parameter in _parameters) 
-                {
-					if (parameter.Name == name) 
-						return parameter;
-				}
-
-				return null;
+			get
+			{
+				return elements[index];
 			}
-        }
+		}
 
-        public IEnumerator<EffectParameter> GetEnumerator()
-        {
-            return ((IEnumerable<EffectParameter>)_parameters).GetEnumerator();
-        }
+		public EffectParameter this[string name]
+		{
+			get
+			{
+				foreach (EffectParameter elem in elements)
+				{
+					if (name.Equals(elem.Name))
+					{
+						return elem;
+					}
+				}
+				return null; // FIXME: ArrayIndexOutOfBounds?
+			}
+		}
 
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            return _parameters.GetEnumerator();
-        }
-    }
+		#endregion
+
+		#region Private Variables
+
+		private EffectParameter[] elements;
+
+		#endregion
+
+		#region Internal Constructor
+
+		internal EffectParameterCollection(EffectParameter[] value)
+		{
+			elements = value;
+		}
+
+		#endregion
+
+		#region Public Methods
+
+		public IEnumerator<EffectParameter> GetEnumerator()
+		{
+			return ((IEnumerable<EffectParameter>) elements).GetEnumerator();
+		}
+
+		#endregion
+
+		#region IEnumerator Methods
+
+		IEnumerator System.Collections.IEnumerable.GetEnumerator()
+		{
+			return elements.GetEnumerator();
+		}
+
+		#endregion
+	}
 }

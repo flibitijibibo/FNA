@@ -1,8 +1,14 @@
-using System;
+#region License
+/* FNA - XNA4 Reimplementation for Desktop Platforms
+ * Copyright 2009-2014 Ethan Lee and the MonoGame Team
+ *
+ * Released under the Microsoft Public License.
+ * See LICENSE for details.
+ */
+#endregion
 
 namespace Microsoft.Xna.Framework.Graphics
 {
-	// http://msdn.microsoft.com/en-us/library/microsoft.xna.framework.graphics.effectparametertype.aspx
 	public enum EffectParameterType
 	{
 		Void,
@@ -17,4 +23,3 @@ namespace Microsoft.Xna.Framework.Graphics
 		TextureCube
 	}
 }
-

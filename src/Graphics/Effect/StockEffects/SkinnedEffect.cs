@@ -9,8 +9,6 @@
 
 #region Using Statements
 using System;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 #endregion
 
 namespace Microsoft.Xna.Framework.Graphics
@@ -36,8 +34,7 @@ namespace Microsoft.Xna.Framework.Graphics
         EffectParameter worldInverseTransposeParam;
         EffectParameter worldViewProjParam;
         EffectParameter bonesParam;
-
-        int _shaderIndex = -1;
+        EffectParameter shaderIndexParam;
 
         #endregion
 
@@ -69,14 +66,6 @@ namespace Microsoft.Xna.Framework.Graphics
         int weightsPerVertex = 4;
 
         EffectDirtyFlags dirtyFlags = EffectDirtyFlags.All;
-
-        static readonly byte[] Bytecode = LoadEffectResource(
-#if DIRECTX
-            "Microsoft.Xna.Framework.Graphics.Effect.Resources.SkinnedEffect.dx11.mgfxo"
-#else
-            "Microsoft.Xna.Framework.Graphics.Effect.Resources.SkinnedEffect.ogl.mgfxo"
-#endif
-        );            
 
         #endregion
 
@@ -389,7 +378,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// Creates a new SkinnedEffect with default parameter settings.
         /// </summary>
         public SkinnedEffect(GraphicsDevice device)
-            : base(device, Bytecode)
+            : base(device, Resources.SkinnedEffect)
         {
             CacheEffectParameters(null);
 
@@ -472,6 +461,7 @@ namespace Microsoft.Xna.Framework.Graphics
             worldInverseTransposeParam  = Parameters["WorldInverseTranspose"];
             worldViewProjParam          = Parameters["WorldViewProj"];
             bonesParam                  = Parameters["Bones"];
+            shaderIndexParam            = Parameters["ShaderIndex"];
 
             light0 = new DirectionalLight(Parameters["DirLight0Direction"],
                                           Parameters["DirLight0DiffuseColor"],
@@ -493,7 +483,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <summary>
         /// Lazily computes derived parameter values immediately before applying the effect.
         /// </summary>
-        protected internal override bool OnApply()
+        protected internal override void OnApply()
         {
             // Recompute the world+view+projection matrix or fog vector?
             dirtyFlags = EffectHelpers.SetWorldViewProjAndFog(dirtyFlags, ref world, ref view, ref projection, ref worldView, fogEnabled, fogStart, fogEnd, worldViewProjParam, fogVectorParam);
@@ -536,17 +526,10 @@ namespace Microsoft.Xna.Framework.Graphics
                 else if (oneLight)
                     shaderIndex += 6;
 
+                shaderIndexParam.SetValue(shaderIndex);
+
                 dirtyFlags &= ~EffectDirtyFlags.ShaderIndex;
-
-                if (_shaderIndex != shaderIndex)
-                {
-                    _shaderIndex = shaderIndex;
-                    CurrentTechnique = Techniques[_shaderIndex];
-                    return true;
-                }
             }
-
-            return false;
         }
 
 

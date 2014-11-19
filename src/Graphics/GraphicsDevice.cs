@@ -166,11 +166,6 @@ namespace Microsoft.Xna.Framework.Graphics
 					value,
 					RenderTargetCount > 0
 				);
-
-				/* In OpenGL we have to re-apply the special "posFixup"
-				 * vertex shader uniform if the viewport changes.
-				 */
-				vertexShaderDirty = true;
 			}
 		}
 
@@ -250,72 +245,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
-		#region Shader "Stuff" (Here Be Dragons)
-
-		private bool vertexShaderDirty;
-		private bool pixelShaderDirty;
-
-		private ShaderProgram shaderProgram;
-		private readonly ShaderProgramCache programCache = new ShaderProgramCache();
-
-		private readonly ConstantBufferCollection vertexConstantBuffers = new ConstantBufferCollection(ShaderStage.Vertex, 16);
-		private readonly ConstantBufferCollection pixelConstantBuffers = new ConstantBufferCollection(ShaderStage.Pixel, 16);
-
-		private static readonly float[] posFixup = new float[4];
-		// FIXME: Leak!
-		private static GCHandle posFixupHandle = GCHandle.Alloc(posFixup, GCHandleType.Pinned);
-		private static IntPtr posFixupPtr = posFixupHandle.AddrOfPinnedObject();
-
-		private Shader INTERNAL_vertexShader;
-		internal Shader VertexShader
-		{
-			get
-			{
-				return INTERNAL_vertexShader;
-			}
-			set
-			{
-				if (value == INTERNAL_vertexShader)
-				{
-					return;
-				}
-				INTERNAL_vertexShader = value;
-				vertexShaderDirty = true;
-			}
-		}
-
-		private Shader INTERNAL_pixelShader;
-		internal Shader PixelShader
-		{
-			get
-			{
-				return INTERNAL_pixelShader;
-			}
-			set
-			{
-				if (value == INTERNAL_pixelShader)
-				{
-					return;
-				}
-				INTERNAL_pixelShader = value;
-				pixelShaderDirty = true;
-			}
-		}
-
-		internal void SetConstantBuffer(ShaderStage stage, int slot, ConstantBuffer buffer)
-		{
-			if (stage == ShaderStage.Vertex)
-			{
-				vertexConstantBuffers[slot] = buffer;
-			}
-			else
-			{
-				pixelConstantBuffers[slot] = buffer;
-			}
-		}
-
-		#endregion
-
 		#region GraphicsDevice Events
 
 #pragma warning disable 0067
@@ -386,21 +315,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			Textures = new TextureCollection(this);
 			SamplerStates = new SamplerStateCollection(this);
 
-			// Clear constant buffers
-			vertexConstantBuffers.Clear();
-			pixelConstantBuffers.Clear();
-
-			// First draw will need to set the shaders.
-			vertexShaderDirty = true;
-			pixelShaderDirty = true;
-
 			// Set the default viewport and scissor rect.
 			Viewport = new Viewport(PresentationParameters.Bounds);
 			ScissorRectangle = Viewport.Bounds;
-
-			// Free all the cached shader programs.
-			programCache.Clear();
-			shaderProgram = null;
 		}
 
 		~GraphicsDevice()
@@ -430,9 +347,6 @@ namespace Microsoft.Xna.Framework.Graphics
 					 * disposing of the GraphicsDevice.
 					 */
 					GraphicsResource.DisposeAll();
-
-					// Free all the cached shader programs.
-					programCache.Dispose();
 
 					// Dispose of the GL Device/Context
 					GLDevice.Dispose();
@@ -892,6 +806,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				GLDevice.BindVertexBuffer(
 					vertexBufferBindings[i].VertexBuffer.Handle
 				);
+/* FIXME -flibit
 				vertexBufferBindings[i].VertexBuffer.VertexDeclaration.Apply(
 					VertexShader,
 					(IntPtr) (
@@ -899,6 +814,7 @@ namespace Microsoft.Xna.Framework.Graphics
 						(vertexBufferBindings[i].VertexOffset + baseVertex)
 					)
 				);
+*/
 			}
 
 			// Enable the appropriate vertex attributes.
@@ -949,6 +865,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				GLDevice.BindVertexBuffer(
 					vertexBufferBindings[i].VertexBuffer.Handle
 				);
+/* FIXME -flibit
 				vertexBufferBindings[i].VertexBuffer.VertexDeclaration.Apply(
 					VertexShader,
 					(IntPtr) (
@@ -957,6 +874,7 @@ namespace Microsoft.Xna.Framework.Graphics
 					),
 					vertexBufferBindings[i].InstanceFrequency
 				);
+*/
 			}
 
 			// Enable the appropriate vertex attributes.
@@ -992,6 +910,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				GLDevice.BindVertexBuffer(
 					vertexBufferBindings[i].VertexBuffer.Handle
 				);
+/* FIXME -flibit
 				vertexBufferBindings[i].VertexBuffer.VertexDeclaration.Apply(
 					VertexShader,
 					(IntPtr) (
@@ -999,6 +918,7 @@ namespace Microsoft.Xna.Framework.Graphics
 						vertexBufferBindings[i].VertexOffset
 					)
 				);
+*/
 			}
 
 			// Enable the appropriate vertex attributes.
@@ -1060,10 +980,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			// Setup the vertex declaration to point at the VB data.
 			vertexDeclaration.GraphicsDevice = this;
+/* FIXME -flibit
 			vertexDeclaration.Apply(
 				VertexShader,
 				(IntPtr) (vbHandle.AddrOfPinnedObject().ToInt64() + vertexDeclaration.VertexStride * vertexOffset)
 			);
+*/
 
 			// Enable the appropriate vertex attributes.
 			GLDevice.FlushGLVertexAttributes();
@@ -1127,10 +1049,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			// Setup the vertex declaration to point at the VB data.
 			vertexDeclaration.GraphicsDevice = this;
+/* FIXME -flibit
 			vertexDeclaration.Apply(
 				VertexShader,
 				(IntPtr) (vbHandle.AddrOfPinnedObject().ToInt64() + vertexDeclaration.VertexStride * vertexOffset)
 			);
+*/
 
 			// Enable the appropriate vertex attributes.
 			GLDevice.FlushGLVertexAttributes();
@@ -1187,7 +1111,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			// Setup the vertex declaration to point at the VB data.
 			vertexDeclaration.GraphicsDevice = this;
+/* FIXME -flibit
 			vertexDeclaration.Apply(VertexShader, vbHandle.AddrOfPinnedObject());
+*/
 
 			// Enable the appropriate vertex attributes.
 			GLDevice.FlushGLVertexAttributes();
@@ -1271,99 +1197,6 @@ namespace Microsoft.Xna.Framework.Graphics
 					SamplerStates[sampler]
 				);
 			}
-
-			// TODO: MSAA?
-
-			if (VertexShader == null)
-			{
-				throw new InvalidOperationException("A vertex shader must be set!");
-			}
-			if (PixelShader == null)
-			{
-				throw new InvalidOperationException("A pixel shader must be set!");
-			}
-
-			if (vertexShaderDirty || pixelShaderDirty)
-			{
-				ActivateShaderProgram();
-				vertexShaderDirty = pixelShaderDirty = false;
-			}
-
-			vertexConstantBuffers.SetConstantBuffers(this, shaderProgram);
-			pixelConstantBuffers.SetConstantBuffers(this, shaderProgram);
-		}
-
-		/// <summary>
-		/// Activates the Current Vertex/Pixel shader pair into a program.
-		/// </summary>
-		private void ActivateShaderProgram()
-		{
-			// Lookup the shader program.
-			ShaderProgram program = programCache.GetProgram(VertexShader, PixelShader);
-			if (program.Program == 0)
-			{
-				return;
-			}
-
-			// Set the new program if it has changed.
-			if (shaderProgram != program)
-			{
-				GLDevice.glUseProgram(program.Program);
-				shaderProgram = program;
-			}
-
-			int posFixupLoc = shaderProgram.GetUniformLocation("posFixup");
-			if (posFixupLoc == -1)
-			{
-				return;
-			}
-
-			/* Apply vertex shader fix:
-			 * The following two lines are appended to the end of vertex shaders
-			 * to account for rendering differences between OpenGL and DirectX:
-			 * 
-			 * gl_Position.y = gl_Position.y * posFixup.y;
-			 * gl_Position.xy += posFixup.zw * gl_Position.ww;
-			 * 
-			 * (the following paraphrased from wine, wined3d/state.c and
-			 * wined3d/glsl_shader.c)
-			 * 
-			 * - We need to flip along the y-axis in case of offscreen rendering.
-			 * - D3D coordinates refer to pixel centers while GL coordinates refer
-			 *   to pixel corners.
-			 * - D3D has a top-left filling convention. We need to maintain this
-			 *   even after the y-flip mentioned above.
-			 * 
-			 * In order to handle the last two points, we translate by
-			 * (63.0 / 128.0) / VPw and (63.0 / 128.0) / VPh. This is equivalent to
-			 * translating slightly less than half a pixel. We want the difference to
-			 * be large enough that it doesn't get lost due to rounding inside the
-			 * driver, but small enough to prevent it from interfering with any
-			 * anti-aliasing.
-			 * 
-			 * OpenGL coordinates specify the center of the pixel while d3d coords
-			 * specify the corner. The offsets are stored in z and w in posFixup.
-			 * posFixup.y contains 1.0 or -1.0 to turn the rendering upside down for
-			 * offscreen rendering.
-			 */
-
-			posFixup[0] = 1.0f;
-			posFixup[1] = 1.0f;
-			posFixup[2] = (63.0f / 64.0f) / Viewport.Width;
-			posFixup[3] = -(63.0f / 64.0f) / Viewport.Height;
-
-			// Flip vertically if we have a render target bound (rendering offscreen)
-			if (RenderTargetCount > 0)
-			{
-				posFixup[1] *= -1.0f;
-				posFixup[3] *= -1.0f;
-			}
-
-			GLDevice.glUniform4fv(
-				posFixupLoc,
-				1,
-				posFixupPtr
-			);
 		}
 
 		#endregion

@@ -7,11 +7,6 @@
 //-----------------------------------------------------------------------------
 #endregion
 
-#region Using Statements
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-#endregion
-
 namespace Microsoft.Xna.Framework.Graphics
 {
     /// <summary>
@@ -27,8 +22,7 @@ namespace Microsoft.Xna.Framework.Graphics
         EffectParameter fogColorParam;
         EffectParameter fogVectorParam;
         EffectParameter worldViewProjParam;
-
-        int _shaderIndex = -1;
+        EffectParameter shaderIndexParam;
 
         #endregion
 
@@ -51,14 +45,6 @@ namespace Microsoft.Xna.Framework.Graphics
         float fogEnd = 1;
 
         EffectDirtyFlags dirtyFlags = EffectDirtyFlags.All;
-
-        static readonly byte[] Bytecode = LoadEffectResource(
-#if DIRECTX
-            "Microsoft.Xna.Framework.Graphics.Effect.Resources.DualTextureEffect.dx11.mgfxo"
-#else
-            "Microsoft.Xna.Framework.Graphics.Effect.Resources.DualTextureEffect.ogl.mgfxo"
-#endif
-        );
 
         #endregion
 
@@ -245,7 +231,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// Creates a new DualTextureEffect with default parameter settings.
         /// </summary>
         public DualTextureEffect(GraphicsDevice device)
-            : base(device, Bytecode)
+            : base(device, Resources.DualTextureEffect)
         {
             CacheEffectParameters();
         }
@@ -295,13 +281,14 @@ namespace Microsoft.Xna.Framework.Graphics
             fogColorParam       = Parameters["FogColor"];
             fogVectorParam      = Parameters["FogVector"];
             worldViewProjParam  = Parameters["WorldViewProj"];
+            shaderIndexParam    = Parameters["ShaderIndex"];
         }
 
 
         /// <summary>
         /// Lazily computes derived parameter values immediately before applying the effect.
         /// </summary>
-        protected internal override bool OnApply()
+        protected internal override void OnApply()
         {
             // Recompute the world+view+projection matrix or fog vector?
             dirtyFlags = EffectHelpers.SetWorldViewProjAndFog(dirtyFlags, ref world, ref view, ref projection, ref worldView, fogEnabled, fogStart, fogEnd, worldViewProjParam, fogVectorParam);
@@ -325,17 +312,10 @@ namespace Microsoft.Xna.Framework.Graphics
                 if (vertexColorEnabled)
                     shaderIndex += 2;
                 
+                shaderIndexParam.SetValue(shaderIndex);
+
                 dirtyFlags &= ~EffectDirtyFlags.ShaderIndex;
-
-                if (_shaderIndex != shaderIndex)
-                {
-                    _shaderIndex = shaderIndex;
-                    CurrentTechnique = Techniques[_shaderIndex];
-                    return true;
-                }
             }
-
-            return false;
         }
 
 

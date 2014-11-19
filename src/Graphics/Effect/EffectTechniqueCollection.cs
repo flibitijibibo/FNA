@@ -1,55 +1,87 @@
-﻿using System.Collections.Generic;
+#region License
+/* FNA - XNA4 Reimplementation for Desktop Platforms
+ * Copyright 2009-2014 Ethan Lee and the MonoGame Team
+ *
+ * Released under the Microsoft Public License.
+ * See LICENSE for details.
+ */
+#endregion
+
+#region Using Statements
+using System.Collections;
+using System.Collections.Generic;
+#endregion
 
 namespace Microsoft.Xna.Framework.Graphics
 {
-    public class EffectTechniqueCollection : IEnumerable<EffectTechnique>
-    {
-		private readonly EffectTechnique[] _techniques;
+	public sealed class EffectTechniqueCollection : IEnumerable<EffectTechnique>, IEnumerable
+	{
+		#region Public Properties
 
-        public int Count { get { return _techniques.Length; } }
+		public int Count
+		{
+			get
+			{
+				return elements.Length;
+			}
+		}
 
-        internal EffectTechniqueCollection(EffectTechnique[] techniques)
-        {
-            _techniques = techniques;
-        }
+		public EffectTechnique this[int index]
+		{
+			get
+			{
+				return elements[index];
+			}
+		}
 
-        internal EffectTechniqueCollection Clone(Effect effect)
-        {
-            var techniques = new EffectTechnique[_techniques.Length];
-            for (var i = 0; i < _techniques.Length; i++)
-                techniques[i] = new EffectTechnique(effect, _techniques[i]);
+		public EffectTechnique this[string name]
+		{
+			get
+			{
+				foreach (EffectTechnique elem in elements)
+				{
+					if (name.Equals(elem.Name))
+					{
+						return elem;
+					}
+				}
+				return null; // FIXME: ArrayIndexOutOfBounds?
+			}
+		}
 
-            return new EffectTechniqueCollection(techniques);
-        }
-        
-        public EffectTechnique this[int index]
-        {
-            get { return _techniques [index]; }
-        }
+		#endregion
 
-        public EffectTechnique this[string name]
-        {
-            get 
-            {
-                // TODO: Add a name to technique lookup table.
-				foreach (var technique in _techniques) 
-                {
-					if (technique.Name == name)
-						return technique;
-			    }
+		#region Private Variables
 
-			    return null;
-		    }
-        }
+		private EffectTechnique[] elements;
 
-        public IEnumerator<EffectTechnique> GetEnumerator()
-        {
-            return ((IEnumerable<EffectTechnique>)_techniques).GetEnumerator();
-        }
+		#endregion
 
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            return _techniques.GetEnumerator();
-        }
-    }
+		#region Internal Constructor
+
+		internal EffectTechniqueCollection(EffectTechnique[] value)
+		{
+			elements = value;
+		}
+
+		#endregion
+
+		#region Public Methods
+
+		public IEnumerator<EffectTechnique> GetEnumerator()
+		{
+			return ((IEnumerable<EffectTechnique>) elements).GetEnumerator();
+		}
+
+		#endregion
+
+		#region IEnumerator Methods
+
+		IEnumerator System.Collections.IEnumerable.GetEnumerator()
+		{
+			return elements.GetEnumerator();
+		}
+
+		#endregion
+	}
 }

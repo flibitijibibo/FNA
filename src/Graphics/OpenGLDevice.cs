@@ -243,6 +243,31 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
+		#region OpenGL Effect Container Class
+
+		public class OpenGLEffect
+		{
+			public IntPtr EffectData
+			{
+				get;
+				private set;
+			}
+
+			public IntPtr GLEffectData
+			{
+				get;
+				private set;
+			}
+
+			public OpenGLEffect(IntPtr effect, IntPtr glEffect)
+			{
+				EffectData = effect;
+				GLEffectData = glEffect;
+			}
+		}
+
+		#endregion
+
 		#region Alpha Blending State Variables
 
 		internal bool alphaBlendEnable = false;
@@ -1504,6 +1529,39 @@ namespace Microsoft.Xna.Framework.Graphics
 				return true;
 			}
 			return false;
+		}
+
+		#endregion
+
+		#region Effect Methods
+
+		public OpenGLEffect CreateEffect(byte[] effectCode)
+		{
+			IntPtr effect = MojoShader.MOJOSHADER_parseEffect(
+				"glsl120", // TODO: glBestProfile -flibit
+				effectCode,
+				(uint) effectCode.Length,
+				null,
+				0,
+				null,
+				0,
+				null,
+				null,
+				IntPtr.Zero
+			);
+			IntPtr glEffect = MojoShader.MOJOSHADER_glCompileEffect(effect);
+			return new OpenGLEffect(effect, glEffect);
+		}
+
+		public void DeleteEffect(OpenGLEffect effect)
+		{
+			MojoShader.MOJOSHADER_glDeleteEffect(effect.GLEffectData);
+			MojoShader.MOJOSHADER_freeEffect(effect.EffectData);
+		}
+
+		public void ApplyEffect(OpenGLEffect effect, uint pass)
+		{
+			// FIXME -flibit
 		}
 
 		#endregion

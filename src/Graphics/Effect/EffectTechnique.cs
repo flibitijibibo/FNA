@@ -1,32 +1,66 @@
+#region License
+/* FNA - XNA4 Reimplementation for Desktop Platforms
+ * Copyright 2009-2014 Ethan Lee and the MonoGame Team
+ *
+ * Released under the Microsoft Public License.
+ * See LICENSE for details.
+ */
+#endregion
+
+#region Using Statements
 using System;
+#endregion
+
 namespace Microsoft.Xna.Framework.Graphics
 {
-	public class EffectTechnique
+	public sealed class EffectTechnique
 	{
-        public EffectPassCollection Passes { get; private set; }
+		#region Public Properties
 
-        public EffectAnnotationCollection Annotations { get; private set; }
+		public string Name
+		{
+			get;
+			private set;
+		}
 
-        public string Name { get; private set; }
+		public EffectPassCollection Passes
+		{
+			get;
+			private set;
+		}
 
-        internal EffectTechnique(Effect effect, EffectTechnique cloneSource)
-        {
-            // Share all the immutable types.
-            Name = cloneSource.Name;
-            Annotations = cloneSource.Annotations;
+		public EffectAnnotationCollection Annotations
+		{
+			get;
+			private set;
+		}
 
-            // Clone the mutable types.
-            Passes = cloneSource.Passes.Clone(effect);
-        }
+		#endregion
 
-        internal EffectTechnique(Effect effect, string name, EffectPassCollection passes, EffectAnnotationCollection annotations)
-        {
-            Name = name;
-            Passes = passes;
-            Annotations = annotations;
-        }
-    }
+		#region Internal Properties
 
+		internal IntPtr TechniquePointer
+		{
+			get;
+			private set;
+		}
 
+		#endregion
+
+		#region Internal Constructor
+
+		internal EffectTechnique(
+			string name,
+			IntPtr pointer,
+			EffectPassCollection passes,
+			EffectAnnotationCollection annotations
+		) {
+			Name = name;
+			Passes = passes;
+			Annotations = annotations;
+			TechniquePointer = pointer;
+		}
+
+		#endregion
+	}
 }
-

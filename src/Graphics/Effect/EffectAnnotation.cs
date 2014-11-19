@@ -1,44 +1,130 @@
+#region License
+/* FNA - XNA4 Reimplementation for Desktop Platforms
+ * Copyright 2009-2014 Ethan Lee and the MonoGame Team
+ *
+ * Released under the Microsoft Public License.
+ * See LICENSE for details.
+ */
+#endregion
+
+#region Using Statements
 using System;
+#endregion
 
 namespace Microsoft.Xna.Framework.Graphics
 {
-    // TODO: This class needs to be finished!
-
-	public class EffectAnnotation
+	public sealed class EffectAnnotation
 	{
-		internal EffectAnnotation (
-			EffectParameterClass class_,
-			EffectParameterType type,
+		#region Public Properties
+
+		public string Name
+		{
+			get;
+			private set;
+		}
+
+		public string Semantic
+		{
+			get;
+			private set;
+		}
+
+		public int RowCount
+		{
+			get;
+			private set;
+		}
+
+		public int ColumnCount
+		{
+			get;
+			private set;
+		}
+
+		public EffectParameterClass ParameterClass
+		{
+			get;
+			private set;
+		}
+
+		public EffectParameterType ParameterType
+		{
+			get;
+			private set;
+		}
+
+		#endregion
+
+		#region Private Variables
+
+		IntPtr values;
+
+		#endregion
+
+		#region Internal Constructor
+
+		internal EffectAnnotation(
 			string name,
+			string semantic,
 			int rowCount,
 			int columnCount,
-			string semantic,
-			object data)
-		{
-			ParameterClass = class_;
-			ParameterType = type;
+			EffectParameterClass parameterClass,
+			EffectParameterType parameterType,
+			IntPtr data
+		) {
 			Name = name;
+			Semantic = semantic;
 			RowCount = rowCount;
 			ColumnCount = columnCount;
-			Semantic = semantic;
+			ParameterClass = parameterClass;
+			ParameterType = parameterType;
+			values = data;
 		}
 
-		internal EffectAnnotation (EffectParameter parameter)
+		#endregion
+
+		#region Public Methods
+
+		public bool GetValueBoolean()
 		{
-			ParameterClass = parameter.ParameterClass;
-			ParameterType = parameter.ParameterType;
-			Name = parameter.Name;
-			RowCount = parameter.RowCount;
-			ColumnCount = parameter.ColumnCount;
-			Semantic = parameter.Semantic;
+			return false;
 		}
 
-		public EffectParameterClass ParameterClass {get; private set;}
-		public EffectParameterType ParameterType {get; private set;}
-		public string Name {get; private set;}
-		public int RowCount {get; private set;}
-		public int ColumnCount {get; private set;}
-		public string Semantic {get; private set;}
+		public int GetValueInt32()
+		{
+			return 0;
+		}
+
+		public Matrix GetValueMatrix()
+		{
+			return Matrix.Identity;
+		}
+
+		public float GetValueSingle()
+		{
+			return 0.0f;
+		}
+
+		public string GetValueString()
+		{
+			return "TODO";
+		}
+
+		public Vector2 GetValueVector2()
+		{
+			return Vector2.Zero;
+		}
+
+		public Vector3 GetValueVector3()
+		{
+			return Vector3.Zero;
+		}
+
+		public Vector4 GetValueVector4()
+		{
+			return Vector4.Zero;
+		}
+
+		#endregion
 	}
 }
-

@@ -339,8 +339,6 @@ namespace Microsoft.Xna.Framework
 
 					if (_graphicsDeviceManager != null)
 					{
-						Effect.FlushCache();
-
 						// FIXME: Does XNA4 require the GDM to be disposable? -flibit
 						(_graphicsDeviceManager as IDisposable).Dispose();
 						_graphicsDeviceManager = null;

@@ -9,8 +9,6 @@
 
 #region Using Statements
 using System;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 #endregion
 
 namespace Microsoft.Xna.Framework.Graphics
@@ -35,8 +33,7 @@ namespace Microsoft.Xna.Framework.Graphics
         EffectParameter worldParam;
         EffectParameter worldInverseTransposeParam;
         EffectParameter worldViewProjParam;
-
-        int _shaderIndex = -1;
+        EffectParameter shaderIndexParam;
 
         #endregion
 
@@ -67,14 +64,6 @@ namespace Microsoft.Xna.Framework.Graphics
         float fogEnd = 1;
 
         EffectDirtyFlags dirtyFlags = EffectDirtyFlags.All;
-
-        static readonly byte[] Bytecode = LoadEffectResource(
-#if DIRECTX
-            "Microsoft.Xna.Framework.Graphics.Effect.Resources.EnvironmentMapEffect.dx11.mgfxo"
-#else
-            "Microsoft.Xna.Framework.Graphics.Effect.Resources.EnvironmentMapEffect.ogl.mgfxo"
-#endif
-        );
 
         #endregion
 
@@ -370,7 +359,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// Creates a new EnvironmentMapEffect with default parameter settings.
         /// </summary>
         public EnvironmentMapEffect(GraphicsDevice device)
-            : base(device, Bytecode)
+            : base(device, Resources.EnvironmentMapEffect)
         {
             CacheEffectParameters(null);
 
@@ -445,6 +434,7 @@ namespace Microsoft.Xna.Framework.Graphics
             worldParam                  = Parameters["World"];
             worldInverseTransposeParam  = Parameters["WorldInverseTranspose"];
             worldViewProjParam          = Parameters["WorldViewProj"];
+            shaderIndexParam            = Parameters["ShaderIndex"];
 
             light0 = new DirectionalLight(Parameters["DirLight0Direction"],
                                           Parameters["DirLight0DiffuseColor"],
@@ -466,7 +456,7 @@ namespace Microsoft.Xna.Framework.Graphics
         /// <summary>
         /// Lazily computes derived parameter values immediately before applying the effect.
         /// </summary>
-        protected internal override bool OnApply()
+        protected internal override void OnApply()
         {
             // Recompute the world+view+projection matrix or fog vector?
             dirtyFlags = EffectHelpers.SetWorldViewProjAndFog(dirtyFlags, ref world, ref view, ref projection, ref worldView, fogEnabled, fogStart, fogEnd, worldViewProjParam, fogVectorParam);
@@ -508,17 +498,10 @@ namespace Microsoft.Xna.Framework.Graphics
                 if (oneLight)
                     shaderIndex += 8;
 
+                shaderIndexParam.SetValue(shaderIndex);
+
                 dirtyFlags &= ~EffectDirtyFlags.ShaderIndex;
-
-                if (_shaderIndex != shaderIndex)
-                {
-                    _shaderIndex = shaderIndex;
-                    CurrentTechnique = Techniques[_shaderIndex];
-                    return true;
-                }
             }
-
-            return false;
         }
 
 

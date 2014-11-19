@@ -7,3 +7,6 @@
 [submodule "lib/OpenAL#"]
 	path = lib/OpenAL-CS
 	url = git://github.com/flibitijibibo/OpenAL-CS.git
+[submodule "lib/MojoShader-CS"]
+	path = lib/MojoShader-CS
+	url = git://github.com/flibitijibibo/MojoShader-CS.git
