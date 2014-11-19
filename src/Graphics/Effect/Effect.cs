@@ -127,7 +127,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				EffectParameterClass.Object
 			},
 			{
-				MojoShader.MOJOSHADER_symbolClass.MOJOSHADER_SYMCLASS_SCALAR,
+				MojoShader.MOJOSHADER_symbolClass.MOJOSHADER_SYMCLASS_STRUCT,
 				EffectParameterClass.Struct
 			},
 		};

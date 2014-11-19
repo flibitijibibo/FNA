@@ -8,8 +8,7 @@
 #endregion
 
 #region Using Statements
-using System.Globalization;
-using System.Resources;
+using System.IO;
 #endregion
 
 namespace Microsoft.Xna.Framework.Graphics
@@ -22,7 +21,11 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			get
 			{
-				return Res.GetResource("AlphaTestEffect");
+				if (alphaTestEffect == null)
+				{
+					alphaTestEffect = GetResource("SpriteEffect");
+				}
+				return alphaTestEffect;
 			}
 		}
 
@@ -30,7 +33,11 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			get
 			{
-				return Res.GetResource("BasicEffect");
+				if (basicEffect == null)
+				{
+					basicEffect = GetResource("SpriteEffect");
+				}
+				return basicEffect;
 			}
 		}
 
@@ -38,7 +45,11 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			get
 			{
-				return Res.GetResource("DualTextureEffect");
+				if (dualTextureEffect == null)
+				{
+					dualTextureEffect = GetResource("SpriteEffect");
+				}
+				return dualTextureEffect;
 			}
 		}
 
@@ -46,7 +57,11 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			get
 			{
-				return Res.GetResource("EnvironmentMapEffect");
+				if (environmentMapEffect == null)
+				{
+					environmentMapEffect = GetResource("SpriteEffect");
+				}
+				return environmentMapEffect;
 			}
 		}
 
@@ -54,7 +69,11 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			get
 			{
-				return Res.GetResource("SkinnedEffect");
+				if (skinnedEffect == null)
+				{
+					skinnedEffect = GetResource("SpriteEffect");
+				}
+				return skinnedEffect;
 			}
 		}
 
@@ -62,23 +81,11 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			get
 			{
-				return Res.GetResource("SpriteEffect");
-			}
-		}
-
-		#endregion
-
-		#region Private Static Properties
-
-		private static Resources Res
-		{
-			get
-			{
-				if (resources != null)
+				if (spriteEffect == null)
 				{
-					resources = new Resources();
+					spriteEffect = GetResource("SpriteEffect");
 				}
-				return resources;
+				return spriteEffect;
 			}
 		}
 
@@ -86,36 +93,27 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Private Static Variables
 
-		private static Resources resources;
+		private static byte[] alphaTestEffect;
+		private static byte[] basicEffect;
+		private static byte[] dualTextureEffect;
+		private static byte[] environmentMapEffect;
+		private static byte[] skinnedEffect;
+		private static byte[] spriteEffect;
 
 		#endregion
 
-		#region Private Variables
+		#region Private Static Methods
 
-		private ResourceManager resourceManager;
-
-		#endregion
-
-		#region Internal Constructor
-
-		internal Resources()
+		private static byte[] GetResource(string name)
 		{
-			resourceManager = new ResourceManager(
-				"Microsoft.Xna.Framework.Graphics.Resources",
-				typeof(Resources).Assembly
+			Stream stream = typeof(Resources).Assembly.GetManifestResourceStream(
+				"Microsoft.Xna.Framework.Graphics.Effect.Resources." + name + ".fxb"
 			);
-		}
-
-		#endregion
-
-		#region Private Methods
-
-		private byte[] GetResource(string name)
-		{
-			return (byte[]) resourceManager.GetObject(
-				name + ".fxb",
-				CultureInfo.InvariantCulture
-			);
+			using (MemoryStream ms = new MemoryStream())
+			{
+				stream.CopyTo(ms);
+				return ms.ToArray();
+			}
 		}
 
 		#endregion
