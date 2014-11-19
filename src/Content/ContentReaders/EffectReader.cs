@@ -19,7 +19,7 @@ namespace Microsoft.Xna.Framework.Content
 	{
 		#region Private Supported File Extensions Variable
 
-		static string[] supportedExtensions = new string[] {".fxg"};
+		static string[] supportedExtensions = new string[] {".fxb" };
 
 		#endregion
 
@@ -69,8 +69,14 @@ namespace Microsoft.Xna.Framework.Content
 			ContentReader input,
 			Effect existingInstance
 		) {
-			int count = input.ReadInt32();
-			Effect effect = new Effect(input.GraphicsDevice,input.ReadBytes(count));
+			int length = input.ReadInt32();
+			input.ReadInt32(); // ???
+			int offset = input.ReadInt32();
+			input.ReadBytes(offset - 8); // ???
+			Effect effect = new Effect(
+				input.GraphicsDevice,
+				input.ReadBytes(length - offset)
+			);
 			effect.Name = input.AssetName;
 			return effect;
 		}
