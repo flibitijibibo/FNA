@@ -827,6 +827,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			// FIXME: Surely there's a better place for this. -flibit
 			MojoShader.MOJOSHADER_glProgramReady();
+			MojoShader.MOJOSHADER_glProgramViewportFlip(
+				(RenderTargetCount > 0) ? -1 : 1
+			);
 
 			// Draw!
 			GLDevice.glDrawRangeElements(
