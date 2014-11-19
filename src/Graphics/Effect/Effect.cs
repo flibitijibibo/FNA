@@ -179,10 +179,11 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		protected override void Dispose(bool disposing)
 		{
-			if (disposing)
+			if (!IsDisposed && disposing)
 			{
 				GraphicsDevice.GLDevice.DeleteEffect(glEffect);
 			}
+			base.Dispose(disposing);
 		}
 
 		protected internal virtual void OnApply()

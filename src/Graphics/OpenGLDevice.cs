@@ -471,6 +471,10 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		private string shaderProfile;
 		private IntPtr shaderContext;
+		private MojoShader.MOJOSHADER_effectStateChanges effectStateChanges;
+
+		private IntPtr currentEffect = IntPtr.Zero;
+		private uint currentPass = 0;
 
 		private static IntPtr glGetProcAddress(string name, IntPtr d)
 		{
@@ -1131,30 +1135,50 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public void DeleteEffect(OpenGLEffect effect)
 		{
-			// FIXME -flibit
-			// MojoShader.MOJOSHADER_glDeleteEffect(effect.GLEffectData);
-			// MojoShader.MOJOSHADER_freeEffect(effect.EffectData);
+			if (effect.GLEffectData == currentEffect)
+			{
+				MojoShader.MOJOSHADER_glEffectEndPass(currentEffect);
+				MojoShader.MOJOSHADER_glEffectEnd(currentEffect);
+				currentEffect = IntPtr.Zero;
+				currentPass = 0;
+			}
+			MojoShader.MOJOSHADER_glDeleteEffect(effect.GLEffectData);
+			MojoShader.MOJOSHADER_freeEffect(effect.EffectData);
 		}
 
-		bool hasApplied = false;
-		MojoShader.MOJOSHADER_effectStateChanges changes;
 		public void ApplyEffect(OpenGLEffect effect, uint pass)
 		{
-			// FIXME: Just messing with SpriteEffects... -flibit
-			if (hasApplied)
+			if (effect.GLEffectData == currentEffect)
 			{
-				MojoShader.MOJOSHADER_glEffectCommitChanges(effect.GLEffectData);
+				if (pass == currentPass)
+				{
+					MojoShader.MOJOSHADER_glEffectCommitChanges(currentEffect);
+					return;
+				}
+				MojoShader.MOJOSHADER_glEffectEndPass(currentEffect);
+				MojoShader.MOJOSHADER_glEffectBeginPass(currentEffect, pass);
+				currentPass = pass;
 				return;
 			}
-			uint passCount;
+			else if (currentEffect != IntPtr.Zero)
+			{
+				MojoShader.MOJOSHADER_glEffectEndPass(currentEffect);
+				MojoShader.MOJOSHADER_glEffectEnd(currentEffect);
+			}
+			uint whatever;
 			MojoShader.MOJOSHADER_glEffectBegin(
 				effect.GLEffectData,
-				out passCount,
+				out whatever,
 				0,
-				ref changes
+				ref effectStateChanges
 			);
-			MojoShader.MOJOSHADER_glEffectBeginPass(effect.GLEffectData, pass);
-			hasApplied = true;
+			// TODO: effectStateChanges! -flibit
+			MojoShader.MOJOSHADER_glEffectBeginPass(
+				effect.GLEffectData,
+				pass
+			);
+			currentEffect = effect.GLEffectData;
+			currentPass = pass;
 		}
 
 		#endregion
