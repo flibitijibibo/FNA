@@ -87,42 +87,98 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public bool GetValueBoolean()
 		{
-			return false;
+			unsafe
+			{
+				// Values are always 4 bytes, so we get to do this. -flibit
+				int* resPtr = (int*) values;
+				return *resPtr != 0;
+			}
 		}
 
 		public int GetValueInt32()
 		{
-			return 0;
+			unsafe
+			{
+				int* resPtr = (int*) values;
+				return *resPtr;
+			}
 		}
 
 		public Matrix GetValueMatrix()
 		{
-			return Matrix.Identity;
+			// FIXME: This assumes 4x4! -flibit
+			unsafe
+			{
+				float* resPtr = (float*) values;
+				return new Matrix(
+					resPtr[0],
+					resPtr[4],
+					resPtr[8],
+					resPtr[12],
+					resPtr[1],
+					resPtr[5],
+					resPtr[9],
+					resPtr[13],
+					resPtr[2],
+					resPtr[6],
+					resPtr[10],
+					resPtr[14],
+					resPtr[3],
+					resPtr[7],
+					resPtr[11],
+					resPtr[15]
+				);
+			}
 		}
 
 		public float GetValueSingle()
 		{
-			return 0.0f;
+			unsafe
+			{
+				float* resPtr = (float*) values;
+				return *resPtr;
+			}
 		}
 
 		public string GetValueString()
 		{
-			return "TODO";
+			/* FIXME: This requires digging into the effect->objects list.
+			 * We've got the data, we just need to hook it up to FNA.
+			 * -flibit
+			 */
+			throw new NotImplementedException("effect->objects[?]");
 		}
 
 		public Vector2 GetValueVector2()
 		{
-			return Vector2.Zero;
+			unsafe
+			{
+				float* resPtr = (float*) values;
+				return new Vector2(resPtr[0], resPtr[1]);
+			}
 		}
 
 		public Vector3 GetValueVector3()
 		{
-			return Vector3.Zero;
+			unsafe
+			{
+				float* resPtr = (float*) values;
+				return new Vector3(resPtr[0], resPtr[1], resPtr[2]);
+			}
 		}
 
 		public Vector4 GetValueVector4()
 		{
-			return Vector4.Zero;
+			unsafe
+			{
+				float* resPtr = (float*) values;
+				return new Vector4(
+					resPtr[0],
+					resPtr[1],
+					resPtr[2],
+					resPtr[3]
+				);
+			}
 		}
 
 		#endregion
