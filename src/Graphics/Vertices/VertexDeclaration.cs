@@ -103,69 +103,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
-		#region Internal Static Methods
-
-		internal static int GetNumberOfElements(VertexElementFormat elementFormat)
-		{
-			switch (elementFormat)
-			{
-				case VertexElementFormat.Single:
-					return 1;
-				case VertexElementFormat.Vector2:
-					return 2;
-				case VertexElementFormat.Vector3:
-					return 3;
-				case VertexElementFormat.Vector4:
-					return 4;
-				case VertexElementFormat.Color:
-					return 4;
-				case VertexElementFormat.Byte4:
-					return 4;
-				case VertexElementFormat.Short2:
-					return 2;
-				case VertexElementFormat.Short4:
-					return 2;
-				case VertexElementFormat.NormalizedShort2:
-					return 2;
-				case VertexElementFormat.NormalizedShort4:
-					return 4;
-				case VertexElementFormat.HalfVector2:
-					return 2;
-				case VertexElementFormat.HalfVector4:
-					return 4;
-			}
-
-			throw new ArgumentException("Should be a value defined in VertexElementFormat", "elementFormat");
-		}
-
-		internal static bool GetVertexAttribNormalized(VertexElement element)
-		{
-			/* TODO: This may or may not be the right behavior.
-			 *
-			 * For instance the VertexElementFormat.Byte4 format is not supposed
-			 * to be normalized, but this line makes it so.
-			 *
-			 * The question is in MS XNA are types normalized based on usage or
-			 * normalized based to their format?
-			 */
-			if (element.VertexElementUsage == VertexElementUsage.Color)
-			{
-				return true;
-			}
-
-			switch (element.VertexElementFormat)
-			{
-				case VertexElementFormat.NormalizedShort2:
-				case VertexElementFormat.NormalizedShort4:
-					return true;
-
-				default:
-					return false;
-			}
-		}
-
-		#endregion
-
 		#region Private Static VertexElement Methods
 
 		private static int GetVertexStride(VertexElement[] elements)

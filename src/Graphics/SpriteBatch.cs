@@ -979,12 +979,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				1,
 				out projection
 			);
-			/* FIXME: Half-pixel offset for GL!
-			 * Abstract out, or remove altogether.
-			 * -flibit
-			 */
-			projection.M41 += -0.5f * projection.M11;
-			projection.M42 += -0.5f * projection.M22;
 			Matrix.Multiply(
 				ref transformMatrix,
 				ref projection,

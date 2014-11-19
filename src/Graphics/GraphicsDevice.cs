@@ -806,22 +806,27 @@ namespace Microsoft.Xna.Framework.Graphics
 				GLDevice.BindVertexBuffer(
 					vertexBufferBindings[i].VertexBuffer.Handle
 				);
-/* FIXME -flibit
-				vertexBufferBindings[i].VertexBuffer.VertexDeclaration.Apply(
-					VertexShader,
-					(IntPtr) (
-						vertexBufferBindings[i].VertexBuffer.VertexDeclaration.VertexStride *
-						(vertexBufferBindings[i].VertexOffset + baseVertex)
-					)
-				);
-*/
+				foreach (VertexElement element in vertexBufferBindings[i].VertexBuffer.VertexDeclaration.elements)
+				{
+					GLDevice.SetVertexAttribute(
+						element,
+						GetNumberOfElements(element.VertexElementFormat),
+						GetVertexAttribNormalized(element),
+						vertexBufferBindings[i].VertexBuffer.VertexDeclaration.VertexStride,
+						(IntPtr) (
+							vertexBufferBindings[i].VertexBuffer.VertexDeclaration.VertexStride *
+							(vertexBufferBindings[i].VertexOffset + baseVertex)
+						),
+						0
+					);
+				}
 			}
-
-			// Enable the appropriate vertex attributes.
-			GLDevice.FlushGLVertexAttributes();
 
 			// Bind the index buffer
 			GLDevice.BindIndexBuffer(Indices.Handle);
+
+			// FIXME: Surely there's a better place for this. -flibit
+			MojoShader.MOJOSHADER_glProgramReady();
 
 			// Draw!
 			GLDevice.glDrawRangeElements(
@@ -865,20 +870,21 @@ namespace Microsoft.Xna.Framework.Graphics
 				GLDevice.BindVertexBuffer(
 					vertexBufferBindings[i].VertexBuffer.Handle
 				);
-/* FIXME -flibit
-				vertexBufferBindings[i].VertexBuffer.VertexDeclaration.Apply(
-					VertexShader,
-					(IntPtr) (
-						vertexBufferBindings[i].VertexBuffer.VertexDeclaration.VertexStride *
-						(vertexBufferBindings[i].VertexOffset + baseVertex)
-					),
-					vertexBufferBindings[i].InstanceFrequency
-				);
-*/
+				foreach (VertexElement element in vertexBufferBindings[i].VertexBuffer.VertexDeclaration.elements)
+				{
+					GLDevice.SetVertexAttribute(
+						element,
+						GetNumberOfElements(element.VertexElementFormat),
+						GetVertexAttribNormalized(element),
+						vertexBufferBindings[i].VertexBuffer.VertexDeclaration.VertexStride,
+						(IntPtr) (
+							vertexBufferBindings[i].VertexBuffer.VertexDeclaration.VertexStride *
+							(vertexBufferBindings[i].VertexOffset + baseVertex)
+						),
+						vertexBufferBindings[i].InstanceFrequency
+					);
+				}
 			}
-
-			// Enable the appropriate vertex attributes.
-			GLDevice.FlushGLVertexAttributes();
 
 			// Bind the index buffer
 			GLDevice.BindIndexBuffer(Indices.Handle);
@@ -910,19 +916,21 @@ namespace Microsoft.Xna.Framework.Graphics
 				GLDevice.BindVertexBuffer(
 					vertexBufferBindings[i].VertexBuffer.Handle
 				);
-/* FIXME -flibit
-				vertexBufferBindings[i].VertexBuffer.VertexDeclaration.Apply(
-					VertexShader,
-					(IntPtr) (
-						vertexBufferBindings[i].VertexBuffer.VertexDeclaration.VertexStride *
-						vertexBufferBindings[i].VertexOffset
-					)
-				);
-*/
+				foreach (VertexElement element in vertexBufferBindings[i].VertexBuffer.VertexDeclaration.elements)
+				{
+					GLDevice.SetVertexAttribute(
+						element,
+						GetNumberOfElements(element.VertexElementFormat),
+						GetVertexAttribNormalized(element),
+						vertexBufferBindings[i].VertexBuffer.VertexDeclaration.VertexStride,
+						(IntPtr) (
+							vertexBufferBindings[i].VertexBuffer.VertexDeclaration.VertexStride *
+							vertexBufferBindings[i].VertexOffset
+						),
+						0
+					);
+				}
 			}
-
-			// Enable the appropriate vertex attributes.
-			GLDevice.FlushGLVertexAttributes();
 
 			// Draw!
 			GLDevice.glDrawArrays(
@@ -980,15 +988,17 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			// Setup the vertex declaration to point at the VB data.
 			vertexDeclaration.GraphicsDevice = this;
-/* FIXME -flibit
-			vertexDeclaration.Apply(
-				VertexShader,
-				(IntPtr) (vbHandle.AddrOfPinnedObject().ToInt64() + vertexDeclaration.VertexStride * vertexOffset)
-			);
-*/
-
-			// Enable the appropriate vertex attributes.
-			GLDevice.FlushGLVertexAttributes();
+			foreach (VertexElement element in vertexDeclaration.elements)
+			{
+				GLDevice.SetVertexAttribute(
+					element,
+					GetNumberOfElements(element.VertexElementFormat),
+					GetVertexAttribNormalized(element),
+					vertexDeclaration.VertexStride,
+					(IntPtr) (vbHandle.AddrOfPinnedObject().ToInt64() + vertexDeclaration.VertexStride * vertexOffset),
+					0
+				);
+			}
 
 			// Draw!
 			GLDevice.glDrawRangeElements(
@@ -1049,15 +1059,17 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			// Setup the vertex declaration to point at the VB data.
 			vertexDeclaration.GraphicsDevice = this;
-/* FIXME -flibit
-			vertexDeclaration.Apply(
-				VertexShader,
-				(IntPtr) (vbHandle.AddrOfPinnedObject().ToInt64() + vertexDeclaration.VertexStride * vertexOffset)
-			);
-*/
-
-			// Enable the appropriate vertex attributes.
-			GLDevice.FlushGLVertexAttributes();
+			foreach (VertexElement element in vertexDeclaration.elements)
+			{
+				GLDevice.SetVertexAttribute(
+					element,
+					GetNumberOfElements(element.VertexElementFormat),
+					GetVertexAttribNormalized(element),
+					vertexDeclaration.VertexStride,
+					(IntPtr) (vbHandle.AddrOfPinnedObject().ToInt64() + vertexDeclaration.VertexStride * vertexOffset),
+					0
+				);
+			}
 
 			// Draw!
 			GLDevice.glDrawRangeElements(
@@ -1111,12 +1123,17 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			// Setup the vertex declaration to point at the VB data.
 			vertexDeclaration.GraphicsDevice = this;
-/* FIXME -flibit
-			vertexDeclaration.Apply(VertexShader, vbHandle.AddrOfPinnedObject());
-*/
-
-			// Enable the appropriate vertex attributes.
-			GLDevice.FlushGLVertexAttributes();
+			foreach (VertexElement element in vertexDeclaration.elements)
+			{
+				GLDevice.SetVertexAttribute(
+					element,
+					GetNumberOfElements(element.VertexElementFormat),
+					GetVertexAttribNormalized(element),
+					vertexDeclaration.VertexStride,
+					vbHandle.AddrOfPinnedObject(),
+					0
+				);
+			}
 
 			// Draw!
 			GLDevice.glDrawArrays(
@@ -1141,6 +1158,65 @@ namespace Microsoft.Xna.Framework.Graphics
 		#endregion
 
 		#region Private XNA->GL Conversion Methods
+
+		private static int GetNumberOfElements(VertexElementFormat elementFormat)
+		{
+			switch (elementFormat)
+			{
+				case VertexElementFormat.Single:
+					return 1;
+				case VertexElementFormat.Vector2:
+					return 2;
+				case VertexElementFormat.Vector3:
+					return 3;
+				case VertexElementFormat.Vector4:
+					return 4;
+				case VertexElementFormat.Color:
+					return 4;
+				case VertexElementFormat.Byte4:
+					return 4;
+				case VertexElementFormat.Short2:
+					return 2;
+				case VertexElementFormat.Short4:
+					return 2;
+				case VertexElementFormat.NormalizedShort2:
+					return 2;
+				case VertexElementFormat.NormalizedShort4:
+					return 4;
+				case VertexElementFormat.HalfVector2:
+					return 2;
+				case VertexElementFormat.HalfVector4:
+					return 4;
+			}
+
+			throw new ArgumentException("Should be a value defined in VertexElementFormat", "elementFormat");
+		}
+
+		private static bool GetVertexAttribNormalized(VertexElement element)
+		{
+			/* TODO: This may or may not be the right behavior.
+			 *
+			 * For instance the VertexElementFormat.Byte4 format is not supposed
+			 * to be normalized, but this line makes it so.
+			 *
+			 * The question is in MS XNA are types normalized based on usage or
+			 * normalized based to their format?
+			 */
+			if (element.VertexElementUsage == VertexElementUsage.Color)
+			{
+				return true;
+			}
+
+			switch (element.VertexElementFormat)
+			{
+				case VertexElementFormat.NormalizedShort2:
+				case VertexElementFormat.NormalizedShort4:
+					return true;
+
+				default:
+					return false;
+			}
+		}
 
 		private static int GetElementCountArray(PrimitiveType primitiveType, int primitiveCount)
 		{

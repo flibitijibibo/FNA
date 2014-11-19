@@ -1108,69 +1108,81 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
-		#region Flush Vertex Attributes Method
+		#region Effect Methods
 
-		public void FlushGLVertexAttributes()
+		public OpenGLEffect CreateEffect(byte[] effectCode)
 		{
-			for (int i = 0; i < Attributes.Length; i += 1)
-			{
-				if (AttributeEnabled[i])
-				{
-					AttributeEnabled[i] = false;
-					if (!previousAttributeEnabled[i])
-					{
-						glEnableVertexAttribArray(i);
-						previousAttributeEnabled[i] = true;
-					}
-				}
-				else if (previousAttributeEnabled[i])
-				{
-					glDisableVertexAttribArray(i);
-					previousAttributeEnabled[i] = false;
-				}
+			IntPtr effect = MojoShader.MOJOSHADER_parseEffect(
+				shaderProfile,
+				effectCode,
+				(uint) effectCode.Length,
+				null,
+				0,
+				null,
+				0,
+				null,
+				null,
+				IntPtr.Zero
+			);
+			IntPtr glEffect = MojoShader.MOJOSHADER_glCompileEffect(effect);
+			return new OpenGLEffect(effect, glEffect);
+		}
 
-				if (Attributes[i].Divisor != previousAttributeDivisor[i])
-				{
-					glVertexAttribDivisor(i, Attributes[i].Divisor);
-					previousAttributeDivisor[i] = Attributes[i].Divisor;
-				}
+		public void DeleteEffect(OpenGLEffect effect)
+		{
+			// FIXME -flibit
+			// MojoShader.MOJOSHADER_glDeleteEffect(effect.GLEffectData);
+			// MojoShader.MOJOSHADER_freeEffect(effect.EffectData);
+		}
+
+		bool hasApplied = false;
+		MojoShader.MOJOSHADER_effectStateChanges changes;
+		public void ApplyEffect(OpenGLEffect effect, uint pass)
+		{
+			// FIXME: Just messing with SpriteEffects... -flibit
+			if (hasApplied)
+			{
+				MojoShader.MOJOSHADER_glEffectCommitChanges(effect.GLEffectData);
+				return;
 			}
+			uint passCount;
+			MojoShader.MOJOSHADER_glEffectBegin(
+				effect.GLEffectData,
+				out passCount,
+				0,
+				ref changes
+			);
+			MojoShader.MOJOSHADER_glEffectBeginPass(effect.GLEffectData, pass);
+			hasApplied = true;
 		}
 
 		#endregion
 
-		#region glVertexAttribPointer Method
+		#region Flush Vertex Attributes Method
 
-		public void VertexAttribPointer(
-			int location,
+		public void SetVertexAttribute(
+			VertexElement element,
 			int size,
-			VertexElementFormat type,
 			bool normalized,
 			int stride,
-			IntPtr pointer
+			IntPtr ptr,
+			int divisor
 		) {
-			if (	Attributes[location].CurrentBuffer != currentVertexBuffer ||
-				Attributes[location].CurrentPointer != pointer ||
-				Attributes[location].CurrentSize != size ||
-				Attributes[location].CurrentType != type ||
-				Attributes[location].CurrentNormalized != normalized ||
-				Attributes[location].CurrentStride != stride	)
-			{
-				glVertexAttribPointer(
-					location,
-					size,
-					XNAToGL.PointerType[type],
-					normalized,
-					stride,
-					pointer
-				);
-				Attributes[location].CurrentBuffer = currentVertexBuffer;
-				Attributes[location].CurrentPointer = pointer;
-				Attributes[location].CurrentSize = size;
-				Attributes[location].CurrentType = type;
-				Attributes[location].CurrentNormalized = normalized;
-				Attributes[location].CurrentStride = stride;
-			}
+			// TODO: Track attribute states! -flibit
+			MojoShader.MOJOSHADER_glSetVertexAttribute(
+				XNAToGL.VertexAttribUsage[element.VertexElementUsage],
+				element.UsageIndex,
+				(uint) size,
+				XNAToGL.VertexAttribType[element.VertexElementFormat],
+				normalized ? 1 : 0,
+				(uint) stride,
+				(IntPtr) (ptr.ToInt64() + element.Offset)
+			);
+			MojoShader.MOJOSHADER_glSetVertexAttribDivisor(
+				XNAToGL.VertexAttribUsage[element.VertexElementUsage],
+				element.UsageIndex,
+				(uint) divisor
+			);
 		}
 
 		#endregion
@@ -1562,39 +1574,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				return true;
 			}
 			return false;
-		}
-
-		#endregion
-
-		#region Effect Methods
-
-		public OpenGLEffect CreateEffect(byte[] effectCode)
-		{
-			IntPtr effect = MojoShader.MOJOSHADER_parseEffect(
-				"glsl120", // TODO: glBestProfile -flibit
-				effectCode,
-				(uint) effectCode.Length,
-				null,
-				0,
-				null,
-				0,
-				null,
-				null,
-				IntPtr.Zero
-			);
-			IntPtr glEffect = MojoShader.MOJOSHADER_glCompileEffect(effect);
-			return new OpenGLEffect(effect, glEffect);
-		}
-
-		public void DeleteEffect(OpenGLEffect effect)
-		{
-			MojoShader.MOJOSHADER_glDeleteEffect(effect.GLEffectData);
-			MojoShader.MOJOSHADER_freeEffect(effect.EffectData);
-		}
-
-		public void ApplyEffect(OpenGLEffect effect, uint pass)
-		{
-			// FIXME -flibit
 		}
 
 		#endregion
@@ -2027,20 +2006,37 @@ namespace Microsoft.Xna.Framework.Graphics
 				{ DepthFormat.Depth24Stencil8,	GLenum.GL_UNSIGNED_INT_24_8 }
 			};
 
-			public static readonly Dictionary<VertexElementFormat, GLenum> PointerType = new Dictionary<VertexElementFormat, GLenum>()
+			public static readonly Dictionary<VertexElementUsage, MojoShader.MOJOSHADER_usage> VertexAttribUsage = new Dictionary<VertexElementUsage, MojoShader.MOJOSHADER_usage>()
 			{
-				{ VertexElementFormat.Single,		GLenum.GL_FLOAT },
-				{ VertexElementFormat.Vector2,		GLenum.GL_FLOAT },
-				{ VertexElementFormat.Vector3,		GLenum.GL_FLOAT },
-				{ VertexElementFormat.Vector4,		GLenum.GL_FLOAT },
-				{ VertexElementFormat.Color,		GLenum.GL_UNSIGNED_BYTE },
-				{ VertexElementFormat.Byte4,		GLenum.GL_UNSIGNED_BYTE },
-				{ VertexElementFormat.Short2,		GLenum.GL_SHORT },
-				{ VertexElementFormat.Short4,		GLenum.GL_SHORT },
-				{ VertexElementFormat.NormalizedShort2,	GLenum.GL_SHORT },
-				{ VertexElementFormat.NormalizedShort4,	GLenum.GL_SHORT },
-				{ VertexElementFormat.HalfVector2,	GLenum.GL_HALF_FLOAT },
-				{ VertexElementFormat.HalfVector4,	GLenum.GL_HALF_FLOAT }
+				{ VertexElementUsage.Position,		MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_POSITION },
+				{ VertexElementUsage.Color,		MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_COLOR },
+				{ VertexElementUsage.TextureCoordinate,	MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_TEXCOORD },
+				{ VertexElementUsage.Normal,		MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_NORMAL },
+				{ VertexElementUsage.Binormal,		MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_BINORMAL },
+				{ VertexElementUsage.Tangent,		MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_TANGENT },
+				{ VertexElementUsage.BlendIndices,	MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_BLENDINDICES },
+				{ VertexElementUsage.BlendWeight,	MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_BLENDWEIGHT },
+				{ VertexElementUsage.Depth,		MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_DEPTH },
+				{ VertexElementUsage.Fog,		MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_FOG },
+				{ VertexElementUsage.PointSize,		MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_POINTSIZE },
+				{ VertexElementUsage.Sample,		MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_SAMPLE },
+				{ VertexElementUsage.TessellateFactor,	MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_TESSFACTOR }
+			};
+
+			public static readonly Dictionary<VertexElementFormat, MojoShader.MOJOSHADER_attributeType> VertexAttribType = new Dictionary<VertexElementFormat, MojoShader.MOJOSHADER_attributeType>()
+			{
+				{ VertexElementFormat.Single,		MojoShader.MOJOSHADER_attributeType.MOJOSHADER_ATTRIBUTE_FLOAT },
+				{ VertexElementFormat.Vector2,		MojoShader.MOJOSHADER_attributeType.MOJOSHADER_ATTRIBUTE_FLOAT },
+				{ VertexElementFormat.Vector3,		MojoShader.MOJOSHADER_attributeType.MOJOSHADER_ATTRIBUTE_FLOAT },
+				{ VertexElementFormat.Vector4,		MojoShader.MOJOSHADER_attributeType.MOJOSHADER_ATTRIBUTE_FLOAT },
+				{ VertexElementFormat.Color,		MojoShader.MOJOSHADER_attributeType.MOJOSHADER_ATTRIBUTE_UBYTE },
+				{ VertexElementFormat.Byte4,		MojoShader.MOJOSHADER_attributeType.MOJOSHADER_ATTRIBUTE_UBYTE },
+				{ VertexElementFormat.Short2,		MojoShader.MOJOSHADER_attributeType.MOJOSHADER_ATTRIBUTE_SHORT },
+				{ VertexElementFormat.Short4,		MojoShader.MOJOSHADER_attributeType.MOJOSHADER_ATTRIBUTE_SHORT },
+				{ VertexElementFormat.NormalizedShort2,	MojoShader.MOJOSHADER_attributeType.MOJOSHADER_ATTRIBUTE_SHORT },
+				{ VertexElementFormat.NormalizedShort4,	MojoShader.MOJOSHADER_attributeType.MOJOSHADER_ATTRIBUTE_SHORT },
+				{ VertexElementFormat.HalfVector2,	MojoShader.MOJOSHADER_attributeType.MOJOSHADER_ATTRIBUTE_HALF_FLOAT },
+				{ VertexElementFormat.HalfVector4,	MojoShader.MOJOSHADER_attributeType.MOJOSHADER_ATTRIBUTE_HALF_FLOAT }
 			};
 		}
 

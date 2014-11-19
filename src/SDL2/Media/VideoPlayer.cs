@@ -737,6 +737,7 @@ namespace Microsoft.Xna.Framework.Media
 			{
 				currentDevice.GLDevice.AttributeEnabled[i] = false;
 			}
+/* FIXME -flibit
 			currentDevice.GLDevice.FlushGLVertexAttributes();
 			currentDevice.GLDevice.VertexAttribPointer(
 				0,
@@ -754,6 +755,7 @@ namespace Microsoft.Xna.Framework.Media
 				2 * sizeof(float),
 				vertTexPtr
 			);
+*/
 
 			// Bind our target framebuffer.
 			currentDevice.GLDevice.BindDrawFramebuffer(rgbaFramebuffer);

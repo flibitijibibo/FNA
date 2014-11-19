@@ -9,6 +9,7 @@
 
 #region Using Statements
 using System;
+using System.Runtime.InteropServices;
 #endregion
 
 namespace Microsoft.Xna.Framework.Graphics
@@ -233,6 +234,24 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public void SetValue(Matrix value)
 		{
+			float[] FIXME = new float[16]; // new, argh!
+			FIXME[0] = value.M11;
+			FIXME[1] = value.M21;
+			FIXME[2] = value.M31;
+			FIXME[3] = value.M41;
+			FIXME[4] = value.M12;
+			FIXME[5] = value.M22;
+			FIXME[6] = value.M32;
+			FIXME[7] = value.M42;
+			FIXME[8] = value.M13;
+			FIXME[9] = value.M23;
+			FIXME[10] = value.M33;
+			FIXME[11] = value.M43;
+			FIXME[12] = value.M14;
+			FIXME[13] = value.M24;
+			FIXME[14] = value.M34;
+			FIXME[15] = value.M44;
+			Marshal.Copy(FIXME, 0, values, FIXME.Length);
 		}
 
 		public void SetValue(Matrix[] value)
