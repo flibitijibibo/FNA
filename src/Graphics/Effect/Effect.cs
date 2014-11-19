@@ -101,6 +101,10 @@ namespace Microsoft.Xna.Framework.Graphics
 				MojoShader.MOJOSHADER_symbolType.MOJOSHADER_SYMTYPE_TEXTURECUBE,
 				EffectParameterType.TextureCube
 			},
+			{ // FIXME -flibit
+				MojoShader.MOJOSHADER_symbolType.MOJOSHADER_SYMTYPE_SAMPLER,
+				EffectParameterType.Texture
+			}
 		};
 
 		private static Dictionary<MojoShader.MOJOSHADER_symbolClass, EffectParameterClass> XNAClass =
@@ -129,7 +133,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				MojoShader.MOJOSHADER_symbolClass.MOJOSHADER_SYMCLASS_STRUCT,
 				EffectParameterClass.Struct
-			},
+			}
 		};
 
 		#endregion

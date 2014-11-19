@@ -467,6 +467,20 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
+		#region Private MojoShader Interop
+
+		private string shaderProfile;
+		private IntPtr shaderContext;
+
+		private static IntPtr glGetProcAddress(string name, IntPtr d)
+		{
+			// FIXME: This pointer-to-string-to-pointer is stupid. -flibit
+			return SDL.SDL_GL_GetProcAddress(name);
+		}
+		private static MojoShader.MOJOSHADER_glGetProcAddress GLGetProcAddress = glGetProcAddress;
+
+		#endregion
+
 		#region Public Constructor
 
 		public OpenGLDevice(
@@ -494,6 +508,23 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			// Initialize entry points
 			LoadGLEntryPoints();
+
+			shaderProfile = MojoShader.MOJOSHADER_glBestProfile(
+				GLGetProcAddress,
+				IntPtr.Zero,
+				null,
+				null,
+				IntPtr.Zero
+			);
+			shaderContext = MojoShader.MOJOSHADER_glCreateContext(
+				shaderProfile,
+				GLGetProcAddress,
+				IntPtr.Zero,
+				null,
+				null,
+				IntPtr.Zero
+			);
+			MojoShader.MOJOSHADER_glMakeContextCurrent(shaderContext);
 
 			// Print GL information
 			System.Console.WriteLine("OpenGL Device: " + glGetString(GLenum.GL_RENDERER));
@@ -574,6 +605,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			targetFramebuffer = 0;
 			Backbuffer.Dispose();
 			Backbuffer = null;
+			MojoShader.MOJOSHADER_glMakeContextCurrent(IntPtr.Zero);
+			MojoShader.MOJOSHADER_glDestroyContext(shaderContext);
 
 #if THREADED_GL
 			SDL.SDL_GL_DeleteContext(Threading.BackgroundContext.context);
