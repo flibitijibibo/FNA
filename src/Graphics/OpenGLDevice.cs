@@ -476,6 +476,8 @@ namespace Microsoft.Xna.Framework.Graphics
 		private IntPtr currentEffect = IntPtr.Zero;
 		private uint currentPass = 0;
 
+		private int flipViewport;
+
 		private static IntPtr glGetProcAddress(string name, IntPtr d)
 		{
 			// FIXME: This pointer-to-string-to-pointer is stupid. -flibit
@@ -1148,6 +1150,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public void ApplyEffect(OpenGLEffect effect, uint pass)
 		{
+			flipViewport = (currentDrawFramebuffer == targetFramebuffer) ? -1 : 1;
 			if (effect.GLEffectData == currentEffect)
 			{
 				if (pass == currentPass)
@@ -1183,31 +1186,80 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
-		#region Flush Vertex Attributes Method
+		#region glVertexAttribPointer/glVertexAttribDivisor Methods
 
-		public void SetVertexAttribute(
-			VertexElement element,
-			int size,
-			bool normalized,
-			int stride,
-			IntPtr ptr,
-			int divisor
+		public void ApplyVertexAttributes(
+			VertexBufferBinding[] bindings,
+			int numBindings,
+			int baseVertex
 		) {
-			// TODO: Track attribute states! -flibit
-			MojoShader.MOJOSHADER_glSetVertexAttribute(
-				XNAToGL.VertexAttribUsage[element.VertexElementUsage],
-				element.UsageIndex,
-				(uint) size,
-				XNAToGL.VertexAttribType[element.VertexElementFormat],
-				normalized ? 1 : 0,
-				(uint) stride,
-				(IntPtr) (ptr.ToInt64() + element.Offset)
-			);
-			MojoShader.MOJOSHADER_glSetVertexAttribDivisor(
-				XNAToGL.VertexAttribUsage[element.VertexElementUsage],
-				element.UsageIndex,
-				(uint) divisor
-			);
+			for (int i = 0; i < numBindings; i += 1)
+			{
+				BindVertexBuffer(bindings[i].VertexBuffer.Handle);
+				foreach (VertexElement element in bindings[i].VertexBuffer.VertexDeclaration.elements)
+				{
+					MojoShader.MOJOSHADER_glSetVertexAttribute(
+						XNAToGL.VertexAttribUsage[element.VertexElementUsage],
+						element.UsageIndex,
+						XNAToGL.VertexAttribSize[element.VertexElementFormat],
+						XNAToGL.VertexAttribType[element.VertexElementFormat],
+						XNAToGL.VertexAttribNormalized(element),
+						(uint) bindings[i].VertexBuffer.VertexDeclaration.VertexStride,
+						(IntPtr) (
+							(
+								bindings[i].VertexBuffer.VertexDeclaration.VertexStride *
+								(bindings[i].VertexOffset + baseVertex)
+							) + element.Offset
+						)
+					);
+					MojoShader.MOJOSHADER_glSetVertexAttribDivisor(
+						XNAToGL.VertexAttribUsage[element.VertexElementUsage],
+						element.UsageIndex,
+						(uint) bindings[i].InstanceFrequency
+					);
+				}
+			}
+			MojoShader.MOJOSHADER_glProgramReady();
+			if (flipViewport != 0)
+			{
+				MojoShader.MOJOSHADER_glProgramViewportFlip(flipViewport);
+				flipViewport = 0;
+			}
+		}
+
+		public void ApplyVertexAttributes(
+			VertexDeclaration vertexDeclaration,
+			IntPtr ptr,
+			int vertexOffset
+		) {
+			BindVertexBuffer(OpenGLVertexBuffer.NullBuffer);
+			foreach (VertexElement element in vertexDeclaration.elements)
+			{
+				MojoShader.MOJOSHADER_glSetVertexAttribute(
+					XNAToGL.VertexAttribUsage[element.VertexElementUsage],
+					element.UsageIndex,
+					XNAToGL.VertexAttribSize[element.VertexElementFormat],
+					XNAToGL.VertexAttribType[element.VertexElementFormat],
+					XNAToGL.VertexAttribNormalized(element),
+					(uint) vertexDeclaration.VertexStride,
+					(IntPtr) (
+						ptr.ToInt64() + (
+							vertexDeclaration.VertexStride * vertexOffset
+						) + element.Offset
+					)
+				);
+				MojoShader.MOJOSHADER_glSetVertexAttribDivisor(
+					XNAToGL.VertexAttribUsage[element.VertexElementUsage],
+					element.UsageIndex,
+					0
+				);
+			}
+			MojoShader.MOJOSHADER_glProgramReady();
+			if (flipViewport != 0)
+			{
+				MojoShader.MOJOSHADER_glProgramViewportFlip(flipViewport);
+				flipViewport = 0;
+			}
 		}
 
 		#endregion
@@ -1796,11 +1848,13 @@ namespace Microsoft.Xna.Framework.Graphics
 			if (attachments == null)
 			{
 				BindFramebuffer(Backbuffer.Handle);
+				flipViewport = 1;
 				return;
 			}
 			else
 			{
 				BindFramebuffer(targetFramebuffer);
+				flipViewport = -1;
 			}
 
 			// Update the color attachments, DrawBuffers state
@@ -2048,6 +2102,22 @@ namespace Microsoft.Xna.Framework.Graphics
 				{ VertexElementUsage.TessellateFactor,	MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_TESSFACTOR }
 			};
 
+			public static readonly Dictionary<VertexElementFormat, uint> VertexAttribSize = new Dictionary<VertexElementFormat, uint>()
+			{
+				{ VertexElementFormat.Single,		1 },
+				{ VertexElementFormat.Vector2,		2 },
+				{ VertexElementFormat.Vector3,		3 },
+				{ VertexElementFormat.Vector4,		4 },
+				{ VertexElementFormat.Color,		4 },
+				{ VertexElementFormat.Byte4,		4 },
+				{ VertexElementFormat.Short2,		2 },
+				{ VertexElementFormat.Short4,		2 },
+				{ VertexElementFormat.NormalizedShort2,	2 },
+				{ VertexElementFormat.NormalizedShort4,	4 },
+				{ VertexElementFormat.HalfVector2,	2 },
+				{ VertexElementFormat.HalfVector4,	4 }
+			};
+
 			public static readonly Dictionary<VertexElementFormat, MojoShader.MOJOSHADER_attributeType> VertexAttribType = new Dictionary<VertexElementFormat, MojoShader.MOJOSHADER_attributeType>()
 			{
 				{ VertexElementFormat.Single,		MojoShader.MOJOSHADER_attributeType.MOJOSHADER_ATTRIBUTE_FLOAT },
@@ -2063,6 +2133,20 @@ namespace Microsoft.Xna.Framework.Graphics
 				{ VertexElementFormat.HalfVector2,	MojoShader.MOJOSHADER_attributeType.MOJOSHADER_ATTRIBUTE_HALF_FLOAT },
 				{ VertexElementFormat.HalfVector4,	MojoShader.MOJOSHADER_attributeType.MOJOSHADER_ATTRIBUTE_HALF_FLOAT }
 			};
+
+			public static int VertexAttribNormalized(VertexElement element)
+			{
+				if (element.VertexElementUsage == VertexElementUsage.Color)
+				{
+					return 1;
+				}
+				if (	element.VertexElementFormat == VertexElementFormat.NormalizedShort2 ||
+					element.VertexElementFormat == VertexElementFormat.NormalizedShort4	)
+				{
+					return 1;
+				}
+				return 0;
+			}
 		}
 
 		#endregion

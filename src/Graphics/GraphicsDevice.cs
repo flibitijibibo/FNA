@@ -800,35 +800,14 @@ namespace Microsoft.Xna.Framework.Graphics
 			// Unsigned short or unsigned int?
 			bool shortIndices = Indices.IndexElementSize == IndexElementSize.SixteenBits;
 
-			// Set up the vertex buffers.
-			for (int i = 0; i < vertexBufferCount; i += 1)
-			{
-				GLDevice.BindVertexBuffer(
-					vertexBufferBindings[i].VertexBuffer.Handle
-				);
-				foreach (VertexElement element in vertexBufferBindings[i].VertexBuffer.VertexDeclaration.elements)
-				{
-					GLDevice.SetVertexAttribute(
-						element,
-						GetNumberOfElements(element.VertexElementFormat),
-						GetVertexAttribNormalized(element),
-						vertexBufferBindings[i].VertexBuffer.VertexDeclaration.VertexStride,
-						(IntPtr) (
-							vertexBufferBindings[i].VertexBuffer.VertexDeclaration.VertexStride *
-							(vertexBufferBindings[i].VertexOffset + baseVertex)
-						),
-						0
-					);
-				}
-			}
-
 			// Bind the index buffer
 			GLDevice.BindIndexBuffer(Indices.Handle);
 
-			// FIXME: Surely there's a better place for this. -flibit
-			MojoShader.MOJOSHADER_glProgramReady();
-			MojoShader.MOJOSHADER_glProgramViewportFlip(
-				(RenderTargetCount > 0) ? -1 : 1
+			// Set up the vertex buffers
+			GLDevice.ApplyVertexAttributes(
+				vertexBufferBindings,
+				vertexBufferCount,
+				baseVertex
 			);
 
 			// Draw!
@@ -867,30 +846,15 @@ namespace Microsoft.Xna.Framework.Graphics
 			// Unsigned short or unsigned int?
 			bool shortIndices = Indices.IndexElementSize == IndexElementSize.SixteenBits;
 
-			// Set up the vertex buffers.
-			for (int i = 0; i < vertexBufferCount; i += 1)
-			{
-				GLDevice.BindVertexBuffer(
-					vertexBufferBindings[i].VertexBuffer.Handle
-				);
-				foreach (VertexElement element in vertexBufferBindings[i].VertexBuffer.VertexDeclaration.elements)
-				{
-					GLDevice.SetVertexAttribute(
-						element,
-						GetNumberOfElements(element.VertexElementFormat),
-						GetVertexAttribNormalized(element),
-						vertexBufferBindings[i].VertexBuffer.VertexDeclaration.VertexStride,
-						(IntPtr) (
-							vertexBufferBindings[i].VertexBuffer.VertexDeclaration.VertexStride *
-							(vertexBufferBindings[i].VertexOffset + baseVertex)
-						),
-						vertexBufferBindings[i].InstanceFrequency
-					);
-				}
-			}
-
 			// Bind the index buffer
 			GLDevice.BindIndexBuffer(Indices.Handle);
+
+			// Set up the vertex buffers
+			GLDevice.ApplyVertexAttributes(
+				vertexBufferBindings,
+				vertexBufferCount,
+				baseVertex
+			);
 
 			// Draw!
 			GLDevice.glDrawElementsInstanced(
@@ -913,27 +877,12 @@ namespace Microsoft.Xna.Framework.Graphics
 			// Flush the GL state before moving on!
 			ApplyState();
 
-			// Set up the vertex buffers.
-			for (int i = 0; i < vertexBufferCount; i += 1)
-			{
-				GLDevice.BindVertexBuffer(
-					vertexBufferBindings[i].VertexBuffer.Handle
-				);
-				foreach (VertexElement element in vertexBufferBindings[i].VertexBuffer.VertexDeclaration.elements)
-				{
-					GLDevice.SetVertexAttribute(
-						element,
-						GetNumberOfElements(element.VertexElementFormat),
-						GetVertexAttribNormalized(element),
-						vertexBufferBindings[i].VertexBuffer.VertexDeclaration.VertexStride,
-						(IntPtr) (
-							vertexBufferBindings[i].VertexBuffer.VertexDeclaration.VertexStride *
-							vertexBufferBindings[i].VertexOffset
-						),
-						0
-					);
-				}
-			}
+			// Set up the vertex buffers
+			GLDevice.ApplyVertexAttributes(
+				vertexBufferBindings,
+				vertexBufferCount,
+				0
+			);
 
 			// Draw!
 			GLDevice.glDrawArrays(
@@ -981,27 +930,20 @@ namespace Microsoft.Xna.Framework.Graphics
 			// Flush the GL state before moving on!
 			ApplyState();
 
-			// Unbind current buffer objects.
-			GLDevice.BindVertexBuffer(OpenGLDevice.OpenGLVertexBuffer.NullBuffer);
+			// Unbind current index buffer.
 			GLDevice.BindIndexBuffer(OpenGLDevice.OpenGLIndexBuffer.NullBuffer);
 
 			// Pin the buffers.
 			GCHandle vbHandle = GCHandle.Alloc(vertexData, GCHandleType.Pinned);
 			GCHandle ibHandle = GCHandle.Alloc(indexData, GCHandleType.Pinned);
 
-			// Setup the vertex declaration to point at the VB data.
+			// Setup the vertex declaration to point at the vertex data.
 			vertexDeclaration.GraphicsDevice = this;
-			foreach (VertexElement element in vertexDeclaration.elements)
-			{
-				GLDevice.SetVertexAttribute(
-					element,
-					GetNumberOfElements(element.VertexElementFormat),
-					GetVertexAttribNormalized(element),
-					vertexDeclaration.VertexStride,
-					(IntPtr) (vbHandle.AddrOfPinnedObject().ToInt64() + vertexDeclaration.VertexStride * vertexOffset),
-					0
-				);
-			}
+			GLDevice.ApplyVertexAttributes(
+				vertexDeclaration,
+				vbHandle.AddrOfPinnedObject(),
+				vertexOffset
+			);
 
 			// Draw!
 			GLDevice.glDrawRangeElements(
@@ -1052,27 +994,20 @@ namespace Microsoft.Xna.Framework.Graphics
 			// Flush the GL state before moving on!
 			ApplyState();
 
-			// Unbind current buffer objects.
-			GLDevice.BindVertexBuffer(OpenGLDevice.OpenGLVertexBuffer.NullBuffer);
+			// Unbind current index buffer.
 			GLDevice.BindIndexBuffer(OpenGLDevice.OpenGLIndexBuffer.NullBuffer);
 
 			// Pin the buffers.
 			GCHandle vbHandle = GCHandle.Alloc(vertexData, GCHandleType.Pinned);
 			GCHandle ibHandle = GCHandle.Alloc(indexData, GCHandleType.Pinned);
 
-			// Setup the vertex declaration to point at the VB data.
+			// Setup the vertex declaration to point at the vertex data.
 			vertexDeclaration.GraphicsDevice = this;
-			foreach (VertexElement element in vertexDeclaration.elements)
-			{
-				GLDevice.SetVertexAttribute(
-					element,
-					GetNumberOfElements(element.VertexElementFormat),
-					GetVertexAttribNormalized(element),
-					vertexDeclaration.VertexStride,
-					(IntPtr) (vbHandle.AddrOfPinnedObject().ToInt64() + vertexDeclaration.VertexStride * vertexOffset),
-					0
-				);
-			}
+			GLDevice.ApplyVertexAttributes(
+				vertexDeclaration,
+				vbHandle.AddrOfPinnedObject(),
+				vertexOffset
+			);
 
 			// Draw!
 			GLDevice.glDrawRangeElements(
@@ -1124,19 +1059,13 @@ namespace Microsoft.Xna.Framework.Graphics
 			// Pin the buffers.
 			GCHandle vbHandle = GCHandle.Alloc(vertexData, GCHandleType.Pinned);
 
-			// Setup the vertex declaration to point at the VB data.
+			// Setup the vertex declaration to point at the vertex data.
 			vertexDeclaration.GraphicsDevice = this;
-			foreach (VertexElement element in vertexDeclaration.elements)
-			{
-				GLDevice.SetVertexAttribute(
-					element,
-					GetNumberOfElements(element.VertexElementFormat),
-					GetVertexAttribNormalized(element),
-					vertexDeclaration.VertexStride,
-					vbHandle.AddrOfPinnedObject(),
-					0
-				);
-			}
+			GLDevice.ApplyVertexAttributes(
+				vertexDeclaration,
+				vbHandle.AddrOfPinnedObject(),
+				0
+			);
 
 			// Draw!
 			GLDevice.glDrawArrays(
