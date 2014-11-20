@@ -1116,6 +1116,10 @@ namespace Microsoft.Xna.Framework.Graphics
 				IntPtr.Zero
 			);
 			IntPtr glEffect = MojoShader.MOJOSHADER_glCompileEffect(effect);
+			if (glEffect == IntPtr.Zero)
+			{
+				throw new Exception(MojoShader.MOJOSHADER_glGetError());
+			}
 			return new OpenGLEffect(effect, glEffect);
 		}
 
@@ -1190,6 +1194,7 @@ namespace Microsoft.Xna.Framework.Graphics
 							(bindings[i].VertexOffset + baseVertex)
 						) + element.Offset
 					);
+					/* FIXME -flibit
 					if (	Attributes[curAttrib].CurrentEffect != currentEffect ||
 						Attributes[curAttrib].CurrentPass != currentPass ||
 						Attributes[curAttrib].CurrentUsage != element.VertexElementUsage ||
@@ -1197,6 +1202,7 @@ namespace Microsoft.Xna.Framework.Graphics
 						Attributes[curAttrib].CurrentFormat != element.VertexElementFormat ||
 						Attributes[curAttrib].CurrentStride != vertexDeclaration.VertexStride ||
 						Attributes[curAttrib].CurrentPointer != pointer	)
+					*/
 					{
 						MojoShader.MOJOSHADER_glSetVertexAttribute(
 							XNAToGL.VertexAttribUsage[element.VertexElementUsage],
@@ -1249,6 +1255,7 @@ namespace Microsoft.Xna.Framework.Graphics
 						vertexDeclaration.VertexStride * vertexOffset
 					) + element.Offset
 				);
+				/* FIXME -flibit
 				if (	Attributes[curAttrib].CurrentEffect != currentEffect ||
 					Attributes[curAttrib].CurrentPass != currentPass ||
 					Attributes[curAttrib].CurrentUsage != element.VertexElementUsage ||
@@ -1256,6 +1263,7 @@ namespace Microsoft.Xna.Framework.Graphics
 					Attributes[curAttrib].CurrentFormat != element.VertexElementFormat ||
 					Attributes[curAttrib].CurrentStride != vertexDeclaration.VertexStride ||
 					Attributes[curAttrib].CurrentPointer != pointer	)
+				*/
 				{
 					MojoShader.MOJOSHADER_glSetVertexAttribute(
 						XNAToGL.VertexAttribUsage[element.VertexElementUsage],

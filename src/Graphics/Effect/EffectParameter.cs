@@ -54,6 +54,12 @@ namespace Microsoft.Xna.Framework.Graphics
 			private set;
 		}
 
+		public EffectParameterCollection Elements
+		{
+			get;
+			private set;
+		}
+
 		public EffectParameterCollection StructureMembers
 		{
 			get;
@@ -81,6 +87,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			string semantic,
 			int rowCount,
 			int columnCount,
+			int elementCount,
 			EffectParameterClass parameterClass,
 			EffectParameterType parameterType,
 			EffectParameterCollection structureMembers,
@@ -90,6 +97,13 @@ namespace Microsoft.Xna.Framework.Graphics
 			Name = name;
 			Semantic = semantic;
 			RowCount = rowCount;
+			if (elementCount > 0)
+			{
+				// FIXME: Elements is seriously a whole new collection? -flibit
+				Elements = new EffectParameterCollection(
+					new EffectParameter[elementCount]
+				);
+			}
 			ColumnCount = columnCount;
 			ParameterClass = parameterClass;
 			ParameterType = parameterType;

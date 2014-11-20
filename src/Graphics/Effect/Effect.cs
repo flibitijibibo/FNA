@@ -250,6 +250,7 @@ namespace Microsoft.Xna.Framework.Graphics
 					Marshal.PtrToStringAnsi(param.value.semantic),
 					(int) param.value.row_count,
 					(int) param.value.column_count,
+					(int) param.value.element_count,
 					XNAClass[param.value.value_class],
 					XNAType[param.value.value_type],
 					null, // FIXME: See mojoshader_effects.c:readvalue -flibit
