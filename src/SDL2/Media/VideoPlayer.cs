@@ -730,6 +730,7 @@ namespace Microsoft.Xna.Framework.Media
 			// We're using client-side arrays like CAVEMEN
 			currentDevice.GLDevice.BindVertexBuffer(OpenGLDevice.OpenGLVertexBuffer.NullBuffer);
 
+/* FIXME -flibit
 			// Set up the vertex pointers/arrays.
 			currentDevice.GLDevice.AttributeEnabled[0] = true;
 			currentDevice.GLDevice.AttributeEnabled[1] = true;
@@ -737,7 +738,6 @@ namespace Microsoft.Xna.Framework.Media
 			{
 				currentDevice.GLDevice.AttributeEnabled[i] = false;
 			}
-/* FIXME -flibit
 			currentDevice.GLDevice.FlushGLVertexAttributes();
 			currentDevice.GLDevice.VertexAttribPointer(
 				0,
