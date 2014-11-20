@@ -23,7 +23,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				if (alphaTestEffect == null)
 				{
-					alphaTestEffect = GetResource("SpriteEffect");
+					alphaTestEffect = GetResource("AlphaTestEffect");
 				}
 				return alphaTestEffect;
 			}
@@ -35,7 +35,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				if (basicEffect == null)
 				{
-					basicEffect = GetResource("SpriteEffect");
+					basicEffect = GetResource("BasicEffect");
 				}
 				return basicEffect;
 			}
@@ -47,7 +47,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				if (dualTextureEffect == null)
 				{
-					dualTextureEffect = GetResource("SpriteEffect");
+					dualTextureEffect = GetResource("DualTextureEffect");
 				}
 				return dualTextureEffect;
 			}
@@ -59,7 +59,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				if (environmentMapEffect == null)
 				{
-					environmentMapEffect = GetResource("SpriteEffect");
+					environmentMapEffect = GetResource("EnvironmentMapEffect");
 				}
 				return environmentMapEffect;
 			}
@@ -71,7 +71,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				if (skinnedEffect == null)
 				{
-					skinnedEffect = GetResource("SpriteEffect");
+					skinnedEffect = GetResource("SkinnedEffect");
 				}
 				return skinnedEffect;
 			}

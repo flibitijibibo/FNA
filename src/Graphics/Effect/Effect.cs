@@ -101,10 +101,39 @@ namespace Microsoft.Xna.Framework.Graphics
 				MojoShader.MOJOSHADER_symbolType.MOJOSHADER_SYMTYPE_TEXTURECUBE,
 				EffectParameterType.TextureCube
 			},
-			{ // FIXME -flibit
+			/* FIXME: All of the items below shouldn't be parameters!
+			 * These are types of read-only objects, and should not be
+			 * exposed as if they are customizable.
+			 * -flibit
+			 */
+			{
 				MojoShader.MOJOSHADER_symbolType.MOJOSHADER_SYMTYPE_SAMPLER,
 				EffectParameterType.Texture
-			}
+			},
+			{
+				MojoShader.MOJOSHADER_symbolType.MOJOSHADER_SYMTYPE_SAMPLER1D,
+				EffectParameterType.Texture
+			},
+			{
+				MojoShader.MOJOSHADER_symbolType.MOJOSHADER_SYMTYPE_SAMPLER2D,
+				EffectParameterType.Texture
+			},
+			{
+				MojoShader.MOJOSHADER_symbolType.MOJOSHADER_SYMTYPE_SAMPLER3D,
+				EffectParameterType.Texture
+			},
+			{
+				MojoShader.MOJOSHADER_symbolType.MOJOSHADER_SYMTYPE_SAMPLERCUBE,
+				EffectParameterType.Texture
+			},
+			{
+				MojoShader.MOJOSHADER_symbolType.MOJOSHADER_SYMTYPE_VERTEXSHADER,
+				EffectParameterType.Int32
+			},
+			{
+				MojoShader.MOJOSHADER_symbolType.MOJOSHADER_SYMTYPE_PIXELSHADER,
+				EffectParameterType.Int32
+			},
 		};
 
 		private static Dictionary<MojoShader.MOJOSHADER_symbolClass, EffectParameterClass> XNAClass =
