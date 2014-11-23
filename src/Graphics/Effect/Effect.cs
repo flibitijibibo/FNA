@@ -606,12 +606,16 @@ namespace Microsoft.Xna.Framework.Graphics
 						MojoShader.MOJOSHADER_samplerStateType type = states[j].type;
 						if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_TEXTURE)
 						{
-							string textureName = Marshal.PtrToStringAnsi(
+							string samplerName = Marshal.PtrToStringAnsi(
 								registers[i].sampler_name
 							);
-							if (samplerMap.ContainsKey(textureName))
+							if (samplerMap.ContainsKey(samplerName))
 							{
-								GraphicsDevice.Textures[register] = samplerMap[textureName].texture;
+								Texture texture = samplerMap[samplerName].texture;
+								if (texture != null)
+								{
+									GraphicsDevice.Textures[register] = texture;
+								}
 							}
 						}
 						else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_ADDRESSU)
