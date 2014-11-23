@@ -187,6 +187,14 @@ namespace Microsoft.Xna.Framework.Graphics
 			{ MojoShader.MOJOSHADER_stencilOp.MOJOSHADER_STENCILOP_DECR,	StencilOperation.Decrement }
 		};
 
+		private static readonly Dictionary<MojoShader.MOJOSHADER_textureAddress, TextureAddressMode> XNAAddress =
+			new Dictionary<MojoShader.MOJOSHADER_textureAddress, TextureAddressMode>()
+		{
+			{ MojoShader.MOJOSHADER_textureAddress.MOJOSHADER_TADDRESS_WRAP,	TextureAddressMode.Wrap },
+			{ MojoShader.MOJOSHADER_textureAddress.MOJOSHADER_TADDRESS_MIRROR,	TextureAddressMode.Mirror },
+			{ MojoShader.MOJOSHADER_textureAddress.MOJOSHADER_TADDRESS_CLAMP,	TextureAddressMode.Clamp }
+		};
+
 		#endregion
 
 		#region Public Constructor
@@ -583,15 +591,79 @@ namespace Microsoft.Xna.Framework.Graphics
 						MipMapLevelOfDetailBias = GraphicsDevice.SamplerStates[i].MipMapLevelOfDetailBias,
 					};
 				}
-				MojoShader.MOJOSHADER_samplerStateRegister* states = (MojoShader.MOJOSHADER_samplerStateRegister*) stateChanges.sampler_state_changes;
+				MojoShader.MOJOSHADER_samplerStateRegister* registers = (MojoShader.MOJOSHADER_samplerStateRegister*) stateChanges.sampler_state_changes;
 				for (int i = 0; i < stateChanges.sampler_state_change_count; i += 1)
 				{
-					if (states[i].sampler_state_count == 0)
+					if (registers[i].sampler_state_count == 0)
 					{
 						// Nothing to do
 						continue;
 					}
-					System.Console.WriteLine("SS REGISTER: " + states[i].sampler_register.ToString());
+					int register = (int) registers[i].sampler_register;
+					MojoShader.MOJOSHADER_effectSamplerState* states = (MojoShader.MOJOSHADER_effectSamplerState*) registers[i].sampler_states;
+					for (int j = 0; j < registers[i].sampler_state_count; j += 1)
+					{
+						MojoShader.MOJOSHADER_samplerStateType type = states[j].type;
+						if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_TEXTURE)
+						{
+							string textureName = Marshal.PtrToStringAnsi(
+								registers[i].sampler_name
+							);
+							GraphicsDevice.Textures[register] = samplerMap[textureName].texture;
+						}
+						else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_ADDRESSU)
+						{
+							MojoShader.MOJOSHADER_textureAddress* val = (MojoShader.MOJOSHADER_textureAddress*) states[j].value.values;
+							samplers[register].AddressU = XNAAddress[*val];
+							samplerChanged[register] = true;
+						}
+						else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_ADDRESSV)
+						{
+							MojoShader.MOJOSHADER_textureAddress* val = (MojoShader.MOJOSHADER_textureAddress*) states[j].value.values;
+							samplers[register].AddressV = XNAAddress[*val];
+							samplerChanged[register] = true;
+						}
+						else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_ADDRESSW)
+						{
+							MojoShader.MOJOSHADER_textureAddress* val = (MojoShader.MOJOSHADER_textureAddress*) states[j].value.values;
+							samplers[register].AddressW = XNAAddress[*val];
+							samplerChanged[register] = true;
+						}
+						else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_MAGFILTER)
+						{
+							// FIXME: TextureFilter combinations -flibit
+						}
+						else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_MINFILTER)
+						{
+							// FIXME: TextureFilter combinations -flibit
+						}
+						else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_MIPFILTER)
+						{
+							// FIXME: TextureFilter combinations -flibit
+						}
+						else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_MIPMAPLODBIAS)
+						{
+							float* val = (float*) states[i].value.values;
+							samplers[register].MipMapLevelOfDetailBias = *val;
+							samplerChanged[register] = true;
+						}
+						else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_MAXMIPLEVEL)
+						{
+							int* val = (int*) states[i].value.values;
+							samplers[register].MaxMipLevel = *val;
+							samplerChanged[register] = true;
+						}
+						else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_MAXANISOTROPY)
+						{
+							int* val = (int*) states[i].value.values;
+							samplers[register].MaxAnisotropy = *val;
+							samplerChanged[register] = true;
+						}
+						else
+						{
+							throw new Exception("Unhandled sampler state!");
+						}
+					}
 				}
 				for (int i = 0; i < samplers.Length; i += 1)
 				{
