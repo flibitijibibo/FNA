@@ -133,6 +133,60 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		};
 
+		private static readonly Dictionary<MojoShader.MOJOSHADER_blendMode, Blend> XNABlend =
+			new Dictionary<MojoShader.MOJOSHADER_blendMode, Blend>()
+		{
+			{ MojoShader.MOJOSHADER_blendMode.MOJOSHADER_BLEND_ZERO,		Blend.Zero },
+			{ MojoShader.MOJOSHADER_blendMode.MOJOSHADER_BLEND_ONE,			Blend.One },
+			{ MojoShader.MOJOSHADER_blendMode.MOJOSHADER_BLEND_SRCCOLOR,		Blend.SourceColor },
+			{ MojoShader.MOJOSHADER_blendMode.MOJOSHADER_BLEND_INVSRCCOLOR,		Blend.InverseSourceColor },
+			{ MojoShader.MOJOSHADER_blendMode.MOJOSHADER_BLEND_SRCALPHA,		Blend.SourceAlpha },
+			{ MojoShader.MOJOSHADER_blendMode.MOJOSHADER_BLEND_INVSRCALPHA,		Blend.InverseSourceAlpha },
+			{ MojoShader.MOJOSHADER_blendMode.MOJOSHADER_BLEND_DESTALPHA,		Blend.DestinationAlpha },
+			{ MojoShader.MOJOSHADER_blendMode.MOJOSHADER_BLEND_INVDESTALPHA,	Blend.InverseDestinationAlpha },
+			{ MojoShader.MOJOSHADER_blendMode.MOJOSHADER_BLEND_DESTCOLOR,		Blend.DestinationColor },
+			{ MojoShader.MOJOSHADER_blendMode.MOJOSHADER_BLEND_INVDESTCOLOR,	Blend.InverseDestinationColor },
+			{ MojoShader.MOJOSHADER_blendMode.MOJOSHADER_BLEND_SRCALPHASAT,		Blend.SourceAlphaSaturation },
+			{ MojoShader.MOJOSHADER_blendMode.MOJOSHADER_BLEND_BLENDFACTOR,		Blend.BlendFactor },
+			{ MojoShader.MOJOSHADER_blendMode.MOJOSHADER_BLEND_INVBLENDFACTOR,	Blend.InverseBlendFactor },
+		};
+
+		private static readonly Dictionary<MojoShader.MOJOSHADER_blendOp, BlendFunction> XNABlendOp =
+			new Dictionary<MojoShader.MOJOSHADER_blendOp, BlendFunction>()
+		{
+			{ MojoShader.MOJOSHADER_blendOp.MOJOSHADER_BLENDOP_ADD,		BlendFunction.Add },
+			{ MojoShader.MOJOSHADER_blendOp.MOJOSHADER_BLENDOP_SUBTRACT,	BlendFunction.Subtract },
+			{ MojoShader.MOJOSHADER_blendOp.MOJOSHADER_BLENDOP_REVSUBTRACT,	BlendFunction.ReverseSubtract },
+			{ MojoShader.MOJOSHADER_blendOp.MOJOSHADER_BLENDOP_MIN,		BlendFunction.Min },
+			{ MojoShader.MOJOSHADER_blendOp.MOJOSHADER_BLENDOP_MAX,		BlendFunction.Max }
+		};
+
+		private static readonly Dictionary<MojoShader.MOJOSHADER_compareFunc, CompareFunction> XNACompare =
+			new Dictionary<MojoShader.MOJOSHADER_compareFunc, CompareFunction>()
+		{
+			{ MojoShader.MOJOSHADER_compareFunc.MOJOSHADER_CMP_NEVER,		CompareFunction.Never },
+			{ MojoShader.MOJOSHADER_compareFunc.MOJOSHADER_CMP_LESS,		CompareFunction.Less },
+			{ MojoShader.MOJOSHADER_compareFunc.MOJOSHADER_CMP_EQUAL,		CompareFunction.Equal },
+			{ MojoShader.MOJOSHADER_compareFunc.MOJOSHADER_CMP_LESSEQUAL,		CompareFunction.LessEqual },
+			{ MojoShader.MOJOSHADER_compareFunc.MOJOSHADER_CMP_GREATER,		CompareFunction.Greater },
+			{ MojoShader.MOJOSHADER_compareFunc.MOJOSHADER_CMP_NOTEQUAL,		CompareFunction.NotEqual },
+			{ MojoShader.MOJOSHADER_compareFunc.MOJOSHADER_CMP_GREATEREQUAL,	CompareFunction.GreaterEqual },
+			{ MojoShader.MOJOSHADER_compareFunc.MOJOSHADER_CMP_ALWAYS,		CompareFunction.Always }
+		};
+
+		private static readonly Dictionary<MojoShader.MOJOSHADER_stencilOp, StencilOperation> XNAStencilOp =
+			new Dictionary<MojoShader.MOJOSHADER_stencilOp, StencilOperation>()
+		{
+			{ MojoShader.MOJOSHADER_stencilOp.MOJOSHADER_STENCILOP_KEEP,	StencilOperation.Keep },
+			{ MojoShader.MOJOSHADER_stencilOp.MOJOSHADER_STENCILOP_ZERO,	StencilOperation.Zero },
+			{ MojoShader.MOJOSHADER_stencilOp.MOJOSHADER_STENCILOP_REPLACE,	StencilOperation.Replace },
+			{ MojoShader.MOJOSHADER_stencilOp.MOJOSHADER_STENCILOP_INCRSAT,	StencilOperation.IncrementSaturation },
+			{ MojoShader.MOJOSHADER_stencilOp.MOJOSHADER_STENCILOP_DECRSAT,	StencilOperation.DecrementSaturation },
+			{ MojoShader.MOJOSHADER_stencilOp.MOJOSHADER_STENCILOP_INVERT,	StencilOperation.Invert },
+			{ MojoShader.MOJOSHADER_stencilOp.MOJOSHADER_STENCILOP_INCR,	StencilOperation.Increment },
+			{ MojoShader.MOJOSHADER_stencilOp.MOJOSHADER_STENCILOP_DECR,	StencilOperation.Decrement }
+		};
+
 		#endregion
 
 		#region Public Constructor
@@ -256,13 +310,248 @@ namespace Microsoft.Xna.Framework.Graphics
 				for (int i = 0; i < stateChanges.render_state_change_count; i += 1)
 				{
 					MojoShader.MOJOSHADER_renderStateType type = states[i].type;
-					if (	type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_VERTEXSHADER ||
-						type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_PIXELSHADER	)
+					if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_ZENABLE)
+					{
+						MojoShader.MOJOSHADER_zBufferType* val = (MojoShader.MOJOSHADER_zBufferType*) states[i].value.values;
+						newDepthStencil.DepthBufferEnable =
+							(*val == MojoShader.MOJOSHADER_zBufferType.MOJOSHADER_ZB_TRUE) ?
+								true : false;
+						depthStencilStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_FILLMODE)
+					{
+						MojoShader.MOJOSHADER_fillMode* val = (MojoShader.MOJOSHADER_fillMode*) states[i].value.values;
+						if (*val == MojoShader.MOJOSHADER_fillMode.MOJOSHADER_FILL_SOLID)
+						{
+							newRasterizer.FillMode = FillMode.Solid;
+						}
+						else if (*val == MojoShader.MOJOSHADER_fillMode.MOJOSHADER_FILL_WIREFRAME)
+						{
+							newRasterizer.FillMode = FillMode.WireFrame;
+						}
+						rasterizerStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_ZWRITEENABLE)
+					{
+						int* val = (int*) states[i].value.values;
+						newDepthStencil.DepthBufferWriteEnable = (*val == 1) ? true : false;
+						depthStencilStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_SRCBLEND)
+					{
+						MojoShader.MOJOSHADER_blendMode* val = (MojoShader.MOJOSHADER_blendMode*) states[i].value.values;
+						newBlend.ColorSourceBlend = XNABlend[*val];
+						blendStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_DESTBLEND)
+					{
+						MojoShader.MOJOSHADER_blendMode* val = (MojoShader.MOJOSHADER_blendMode*) states[i].value.values;
+						newBlend.ColorDestinationBlend = XNABlend[*val];
+						blendStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_CULLMODE)
+					{
+						MojoShader.MOJOSHADER_cullMode* val = (MojoShader.MOJOSHADER_cullMode*) states[i].value.values;
+						if (*val == MojoShader.MOJOSHADER_cullMode.MOJOSHADER_CULL_NONE)
+						{
+							newRasterizer.CullMode = CullMode.None;
+						}
+						else if (*val == MojoShader.MOJOSHADER_cullMode.MOJOSHADER_CULL_CW)
+						{
+							newRasterizer.CullMode = CullMode.CullClockwiseFace;
+						}
+						else if (*val == MojoShader.MOJOSHADER_cullMode.MOJOSHADER_CULL_CCW)
+						{
+							newRasterizer.CullMode = CullMode.CullCounterClockwiseFace;
+						}
+						rasterizerStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_ZFUNC)
+					{
+						MojoShader.MOJOSHADER_compareFunc* val = (MojoShader.MOJOSHADER_compareFunc*) states[i].value.values;
+						newDepthStencil.DepthBufferFunction = XNACompare[*val];
+						depthStencilStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_STENCILENABLE)
+					{
+						int* val = (int*) states[i].value.values;
+						newDepthStencil.StencilEnable = (*val == 1) ? true : false;
+						depthStencilStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_STENCILFAIL)
+					{
+						MojoShader.MOJOSHADER_stencilOp* val = (MojoShader.MOJOSHADER_stencilOp*) states[i].value.values;
+						newDepthStencil.StencilFail = XNAStencilOp[*val];
+						depthStencilStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_STENCILZFAIL)
+					{
+						MojoShader.MOJOSHADER_stencilOp* val = (MojoShader.MOJOSHADER_stencilOp*) states[i].value.values;
+						newDepthStencil.StencilDepthBufferFail = XNAStencilOp[*val];
+						depthStencilStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_STENCILPASS)
+					{
+						MojoShader.MOJOSHADER_stencilOp* val = (MojoShader.MOJOSHADER_stencilOp*) states[i].value.values;
+						newDepthStencil.StencilPass = XNAStencilOp[*val];
+						depthStencilStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_STENCILFUNC)
+					{
+						MojoShader.MOJOSHADER_compareFunc* val = (MojoShader.MOJOSHADER_compareFunc*) states[i].value.values;
+						newDepthStencil.StencilFunction = XNACompare[*val];
+						depthStencilStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_STENCILREF)
+					{
+						int* val = (int*) states[i].value.values;
+						newDepthStencil.ReferenceStencil = *val;
+						depthStencilStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_STENCILMASK)
+					{
+						int* val = (int*) states[i].value.values;
+						newDepthStencil.StencilMask = *val;
+						depthStencilStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_STENCILWRITEMASK)
+					{
+						int* val = (int*) states[i].value.values;
+						newDepthStencil.StencilWriteMask = *val;
+						depthStencilStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_MULTISAMPLEANTIALIAS)
+					{
+						int* val = (int*) states[i].value.values;
+						newRasterizer.MultiSampleAntiAlias = (*val == 1) ? true : false;
+						rasterizerStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_MULTISAMPLEMASK)
+					{
+						int* val = (int*) states[i].value.values;
+						newBlend.MultiSampleMask = *val;
+						blendStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_COLORWRITEENABLE)
+					{
+						int* val = (int*) states[i].value.values;
+						newBlend.ColorWriteChannels = (ColorWriteChannels) (*val);
+						blendStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_BLENDOP)
+					{
+						MojoShader.MOJOSHADER_blendOp* val = (MojoShader.MOJOSHADER_blendOp*) states[i].value.values;
+						newBlend.ColorBlendFunction = XNABlendOp[*val];
+						blendStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_SCISSORTESTENABLE)
+					{
+						int* val = (int*) states[i].value.values;
+						newRasterizer.ScissorTestEnable = (*val == 1) ? true : false;
+						rasterizerStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_SLOPESCALEDEPTHBIAS)
+					{
+						float* val = (float*) states[i].value.values;
+						newRasterizer.SlopeScaleDepthBias = *val;
+						rasterizerStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_TWOSIDEDSTENCILMODE)
+					{
+						int* val = (int*) states[i].value.values;
+						newDepthStencil.TwoSidedStencilMode = (*val == 1) ? true : false;
+						depthStencilStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_CCW_STENCILFAIL)
+					{
+						MojoShader.MOJOSHADER_stencilOp* val = (MojoShader.MOJOSHADER_stencilOp*) states[i].value.values;
+						newDepthStencil.CounterClockwiseStencilFail = XNAStencilOp[*val];
+						depthStencilStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_CCW_STENCILZFAIL)
+					{
+						MojoShader.MOJOSHADER_stencilOp* val = (MojoShader.MOJOSHADER_stencilOp*) states[i].value.values;
+						newDepthStencil.CounterClockwiseStencilDepthBufferFail = XNAStencilOp[*val];
+						depthStencilStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_CCW_STENCILPASS)
+					{
+						MojoShader.MOJOSHADER_stencilOp* val = (MojoShader.MOJOSHADER_stencilOp*) states[i].value.values;
+						newDepthStencil.CounterClockwiseStencilPass = XNAStencilOp[*val];
+						depthStencilStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_CCW_STENCILFUNC)
+					{
+						MojoShader.MOJOSHADER_compareFunc* val = (MojoShader.MOJOSHADER_compareFunc*) states[i].value.values;
+						newDepthStencil.CounterClockwiseStencilFunction = XNACompare[*val];
+						depthStencilStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_COLORWRITEENABLE1)
+					{
+						int* val = (int*) states[i].value.values;
+						newBlend.ColorWriteChannels1 = (ColorWriteChannels) (*val);
+						blendStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_COLORWRITEENABLE2)
+					{
+						int* val = (int*) states[i].value.values;
+						newBlend.ColorWriteChannels2 = (ColorWriteChannels) (*val);
+						blendStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_COLORWRITEENABLE3)
+					{
+						int* val = (int*) states[i].value.values;
+						newBlend.ColorWriteChannels3 = (ColorWriteChannels) (*val);
+						blendStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_BLENDFACTOR)
+					{
+						// FIXME: RGBA? -flibit
+						int* val = (int*) states[i].value.values;
+						newBlend.BlendFactor = new Color(
+							(*val >> 24) & 0xFF,
+							(*val >> 16) & 0xFF,
+							(*val >> 8) & 0xFF,
+							*val & 0xFF
+						);
+						blendStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_DEPTHBIAS)
+					{
+						float* val = (float*) states[i].value.values;
+						newRasterizer.DepthBias = *val;
+						rasterizerStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_SRCBLENDALPHA)
+					{
+						MojoShader.MOJOSHADER_blendMode* val = (MojoShader.MOJOSHADER_blendMode*) states[i].value.values;
+						newBlend.AlphaSourceBlend = XNABlend[*val];
+						blendStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_DESTBLENDALPHA)
+					{
+						MojoShader.MOJOSHADER_blendMode* val = (MojoShader.MOJOSHADER_blendMode*) states[i].value.values;
+						newBlend.AlphaDestinationBlend = XNABlend[*val];
+						blendStateChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_BLENDOPALPHA)
+					{
+						MojoShader.MOJOSHADER_blendOp* val = (MojoShader.MOJOSHADER_blendOp*) states[i].value.values;
+						newBlend.AlphaBlendFunction = XNABlendOp[*val];
+						blendStateChanged = true;
+					}
+					else if (	type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_VERTEXSHADER ||
+							type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_PIXELSHADER	)
 					{
 						// Skip shader states
 						continue;
 					}
-					System.Console.WriteLine("RS " + i.ToString() + ": " + type.ToString());
+					else
+					{
+						// FIXME: ALPHABLENDENABLE -flibit
+						// FIXME: SEPARATEALPHABLEND -flibit
+						throw new Exception("Unhandled render state!");
+					}
 				}
 				if (blendStateChanged)
 				{
