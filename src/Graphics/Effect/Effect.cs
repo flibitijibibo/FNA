@@ -53,6 +53,8 @@ namespace Microsoft.Xna.Framework.Graphics
 		#region Private Variables
 
 		private OpenGLDevice.OpenGLEffect glEffect;
+		private MojoShader.MOJOSHADER_effectStateChanges stateChanges;
+		private Dictionary<string, EffectParameter> samplerMap = new Dictionary<string, EffectParameter>();
 
 		#endregion
 
@@ -100,39 +102,6 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				MojoShader.MOJOSHADER_symbolType.MOJOSHADER_SYMTYPE_TEXTURECUBE,
 				EffectParameterType.TextureCube
-			},
-			/* FIXME: All of the items below shouldn't be parameters!
-			 * These are types of read-only objects, and should not be
-			 * exposed as if they are customizable.
-			 * -flibit
-			 */
-			{
-				MojoShader.MOJOSHADER_symbolType.MOJOSHADER_SYMTYPE_SAMPLER,
-				EffectParameterType.Texture
-			},
-			{
-				MojoShader.MOJOSHADER_symbolType.MOJOSHADER_SYMTYPE_SAMPLER1D,
-				EffectParameterType.Texture
-			},
-			{
-				MojoShader.MOJOSHADER_symbolType.MOJOSHADER_SYMTYPE_SAMPLER2D,
-				EffectParameterType.Texture
-			},
-			{
-				MojoShader.MOJOSHADER_symbolType.MOJOSHADER_SYMTYPE_SAMPLER3D,
-				EffectParameterType.Texture
-			},
-			{
-				MojoShader.MOJOSHADER_symbolType.MOJOSHADER_SYMTYPE_SAMPLERCUBE,
-				EffectParameterType.Texture
-			},
-			{
-				MojoShader.MOJOSHADER_symbolType.MOJOSHADER_SYMTYPE_VERTEXSHADER,
-				EffectParameterType.Int32
-			},
-			{
-				MojoShader.MOJOSHADER_symbolType.MOJOSHADER_SYMTYPE_PIXELSHADER,
-				EffectParameterType.Int32
 			},
 		};
 
@@ -227,8 +196,10 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			GraphicsDevice.GLDevice.ApplyEffect(
 				glEffect,
-				pass
+				pass,
+				ref stateChanges
 			);
+			// TODO: stateChanges!
 		}
 
 		#endregion
@@ -241,11 +212,48 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			// Set up Parameters
 			MojoShader.MOJOSHADER_effectParam* paramPtr = (MojoShader.MOJOSHADER_effectParam*) effectPtr->parameters;
-			EffectParameter[] parameters = new EffectParameter[effectPtr->param_count];
-			for (int i = 0; i < parameters.Length; i += 1)
+			List<EffectParameter> parameters = new List<EffectParameter>();
+			for (int i = 0; i < effectPtr->param_count; i += 1)
 			{
 				MojoShader.MOJOSHADER_effectParam param = paramPtr[i];
-				parameters[i] = new EffectParameter(
+				if (	param.value.value_type == MojoShader.MOJOSHADER_symbolType.MOJOSHADER_SYMTYPE_VERTEXSHADER ||
+					param.value.value_type == MojoShader.MOJOSHADER_symbolType.MOJOSHADER_SYMTYPE_PIXELSHADER	)
+				{
+					// Skip shader objects...
+					continue;
+				}
+				else if (	param.value.value_type >= MojoShader.MOJOSHADER_symbolType.MOJOSHADER_SYMTYPE_SAMPLER &&
+						param.value.value_type <= MojoShader.MOJOSHADER_symbolType.MOJOSHADER_SYMTYPE_SAMPLERCUBE	)
+				{
+					string textureName = String.Empty;
+					MojoShader.MOJOSHADER_effectSamplerState* states = (MojoShader.MOJOSHADER_effectSamplerState*) param.value.values;
+					for (int j = 0; j < param.value.value_count; j += 1)
+					{
+						if (	states[j].value.value_type >= MojoShader.MOJOSHADER_symbolType.MOJOSHADER_SYMTYPE_TEXTURE &&
+							states[j].value.value_type <= MojoShader.MOJOSHADER_symbolType.MOJOSHADER_SYMTYPE_TEXTURECUBE	)
+						{
+							MojoShader.MOJOSHADER_effectObject *objectPtr = (MojoShader.MOJOSHADER_effectObject*) effectPtr->objects;
+							int* index = (int*) states[j].value.values;
+							textureName = Marshal.PtrToStringAnsi(objectPtr[*index].mapping.name);
+							break;
+						}
+					}
+					/* Because textures have to be declared before the sampler,
+					 * we can assume that it will always be in the list by the
+					 * time we get to this point.
+					 * -flibit
+					 */
+					for (int j = 0; j < parameters.Count; j += 1)
+					{
+						if (textureName.Equals(parameters[j].Name))
+						{
+							samplerMap[Marshal.PtrToStringAnsi(param.value.name)] = parameters[j];
+							break;
+						}
+					}
+					continue;
+				}
+				parameters.Add(new EffectParameter(
 					Marshal.PtrToStringAnsi(param.value.name),
 					Marshal.PtrToStringAnsi(param.value.semantic),
 					(int) param.value.row_count,
@@ -259,9 +267,9 @@ namespace Microsoft.Xna.Framework.Graphics
 						param.annotation_count
 					),
 					param.value.values
-				);
+				));
 			}
-			Parameters = new EffectParameterCollection(parameters);
+			Parameters = new EffectParameterCollection(parameters.ToArray());
 
 			// Set up Techniques
 			MojoShader.MOJOSHADER_effectTechnique* techPtr = (MojoShader.MOJOSHADER_effectTechnique*) effectPtr->techniques;

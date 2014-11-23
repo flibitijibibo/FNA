@@ -461,7 +461,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		private string shaderProfile;
 		private IntPtr shaderContext;
-		private MojoShader.MOJOSHADER_effectStateChanges effectStateChanges;
 
 		private IntPtr currentEffect = IntPtr.Zero;
 		private uint currentPass = 0;
@@ -1136,8 +1135,11 @@ namespace Microsoft.Xna.Framework.Graphics
 			MojoShader.MOJOSHADER_freeEffect(effect.EffectData);
 		}
 
-		public void ApplyEffect(OpenGLEffect effect, uint pass)
-		{
+		public void ApplyEffect(
+			OpenGLEffect effect,
+			uint pass,
+			ref MojoShader.MOJOSHADER_effectStateChanges stateChanges
+		) {
 			flipViewport = (currentDrawFramebuffer == targetFramebuffer) ? -1 : 1;
 			if (effect.GLEffectData == currentEffect)
 			{
@@ -1161,9 +1163,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				effect.GLEffectData,
 				out whatever,
 				0,
-				ref effectStateChanges
+				ref stateChanges
 			);
-			// TODO: effectStateChanges! -flibit
 			MojoShader.MOJOSHADER_glEffectBeginPass(
 				effect.GLEffectData,
 				pass

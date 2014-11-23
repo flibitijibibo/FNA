@@ -74,6 +74,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
+		#region Internal Variables
+
+		internal Texture texture;
+
+		#endregion
+
 		#region Private Variables
 
 		private IntPtr values;
@@ -316,29 +322,17 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public Texture2D GetValueTexture2D()
 		{
-			/* FIXME: This requires digging into the effect->objects list.
-			 * We've got the data, we just need to hook it up to FNA.
-			 * -flibit
-			 */
-			throw new NotImplementedException("effect->objects[?]");
+			return (Texture2D) texture;
 		}
 
 		public Texture3D GetValueTexture3D()
 		{
-			/* FIXME: This requires digging into the effect->objects list.
-			 * We've got the data, we just need to hook it up to FNA.
-			 * -flibit
-			 */
-			throw new NotImplementedException("effect->objects[?]");
+			return (Texture3D) texture;
 		}
 
 		public TextureCube GetValueTextureCube()
 		{
-			/* FIXME: This requires digging into the effect->objects list.
-			 * We've got the data, we just need to hook it up to FNA.
-			 * -flibit
-			 */
-			throw new NotImplementedException("effect->objects[?]");
+			return (TextureCube) texture;
 		}
 
 		public Vector2 GetValueVector2()
@@ -616,11 +610,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public void SetValue(Texture value)
 		{
-			/* FIXME: This requires digging into the effect->objects list.
-			 * We've got the data, we just need to hook it up to FNA.
-			 * -flibit
-			 */
-			throw new NotImplementedException("effect->objects[?]");
+			texture = value;
 		}
 
 		public void SetValue(Vector2 value)
