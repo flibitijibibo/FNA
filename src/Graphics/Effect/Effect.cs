@@ -609,7 +609,10 @@ namespace Microsoft.Xna.Framework.Graphics
 							string textureName = Marshal.PtrToStringAnsi(
 								registers[i].sampler_name
 							);
-							GraphicsDevice.Textures[register] = samplerMap[textureName].texture;
+							if (samplerMap.ContainsKey(textureName))
+							{
+								GraphicsDevice.Textures[register] = samplerMap[textureName].texture;
+							}
 						}
 						else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_ADDRESSU)
 						{
