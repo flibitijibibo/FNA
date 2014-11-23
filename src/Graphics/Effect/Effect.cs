@@ -53,7 +53,6 @@ namespace Microsoft.Xna.Framework.Graphics
 		#region Private Variables
 
 		private OpenGLDevice.OpenGLEffect glEffect;
-		private MojoShader.MOJOSHADER_effectStateChanges stateChanges;
 		private Dictionary<string, EffectParameter> samplerMap = new Dictionary<string, EffectParameter>();
 
 		#endregion
@@ -192,14 +191,127 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Internal Methods
 
-		internal void INTERNAL_applyEffect(uint pass)
+		internal unsafe void INTERNAL_applyEffect(uint pass)
 		{
+			MojoShader.MOJOSHADER_effectStateChanges stateChanges = new MojoShader.MOJOSHADER_effectStateChanges();
 			GraphicsDevice.GLDevice.ApplyEffect(
 				glEffect,
 				pass,
 				ref stateChanges
 			);
-			// TODO: stateChanges!
+			// FIXME: Reduce allocs here! -flibit
+			/* FIXME: Does this actually affect the XNA variables?
+			 * There's a chance that the D3DXEffect calls do this
+			 * behind XNA's back, even.
+			 * -flibit
+			 */
+			if (stateChanges.render_state_change_count > 0)
+			{
+				bool blendStateChanged = false;
+				bool depthStencilStateChanged = false;
+				bool rasterizerStateChanged = false;
+				BlendState newBlend = new BlendState()
+				{
+					AlphaBlendFunction = GraphicsDevice.BlendState.AlphaBlendFunction,
+					AlphaDestinationBlend = GraphicsDevice.BlendState.AlphaDestinationBlend,
+					AlphaSourceBlend = GraphicsDevice.BlendState.AlphaSourceBlend,
+					ColorBlendFunction = GraphicsDevice.BlendState.ColorBlendFunction,
+					ColorDestinationBlend = GraphicsDevice.BlendState.ColorDestinationBlend,
+					ColorSourceBlend = GraphicsDevice.BlendState.ColorSourceBlend,
+					ColorWriteChannels1 = GraphicsDevice.BlendState.ColorWriteChannels1,
+					ColorWriteChannels2 = GraphicsDevice.BlendState.ColorWriteChannels2,
+					ColorWriteChannels3 = GraphicsDevice.BlendState.ColorWriteChannels3,
+					BlendFactor = GraphicsDevice.BlendState.BlendFactor,
+					MultiSampleMask = GraphicsDevice.BlendState.MultiSampleMask
+				};
+				DepthStencilState newDepthStencil = new DepthStencilState()
+				{
+					DepthBufferEnable = GraphicsDevice.DepthStencilState.DepthBufferEnable,
+					DepthBufferWriteEnable = GraphicsDevice.DepthStencilState.DepthBufferWriteEnable,
+					DepthBufferFunction = GraphicsDevice.DepthStencilState.DepthBufferFunction,
+					StencilEnable = GraphicsDevice.DepthStencilState.StencilEnable,
+					StencilFunction = GraphicsDevice.DepthStencilState.StencilFunction,
+					StencilPass = GraphicsDevice.DepthStencilState.StencilPass,
+					StencilFail = GraphicsDevice.DepthStencilState.StencilFail,
+					StencilDepthBufferFail = GraphicsDevice.DepthStencilState.StencilDepthBufferFail,
+					TwoSidedStencilMode = GraphicsDevice.DepthStencilState.TwoSidedStencilMode,
+					CounterClockwiseStencilFunction = GraphicsDevice.DepthStencilState.CounterClockwiseStencilFunction,
+					CounterClockwiseStencilFail = GraphicsDevice.DepthStencilState.CounterClockwiseStencilFail,
+					CounterClockwiseStencilPass = GraphicsDevice.DepthStencilState.CounterClockwiseStencilPass,
+					CounterClockwiseStencilDepthBufferFail = GraphicsDevice.DepthStencilState.CounterClockwiseStencilDepthBufferFail,
+					StencilMask = GraphicsDevice.DepthStencilState.StencilMask,
+					StencilWriteMask = GraphicsDevice.DepthStencilState.StencilWriteMask,
+					ReferenceStencil = GraphicsDevice.DepthStencilState.ReferenceStencil
+				};
+				RasterizerState newRasterizer = new RasterizerState()
+				{
+					CullMode = GraphicsDevice.RasterizerState.CullMode,
+					FillMode = GraphicsDevice.RasterizerState.FillMode,
+					DepthBias = GraphicsDevice.RasterizerState.DepthBias,
+					MultiSampleAntiAlias = GraphicsDevice.RasterizerState.MultiSampleAntiAlias,
+					ScissorTestEnable = GraphicsDevice.RasterizerState.ScissorTestEnable,
+					SlopeScaleDepthBias = GraphicsDevice.RasterizerState.SlopeScaleDepthBias
+				};
+				MojoShader.MOJOSHADER_effectState* states = (MojoShader.MOJOSHADER_effectState*) stateChanges.render_state_changes;
+				for (int i = 0; i < stateChanges.render_state_change_count; i += 1)
+				{
+					MojoShader.MOJOSHADER_renderStateType type = states[i].type;
+					if (	type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_VERTEXSHADER ||
+						type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_PIXELSHADER	)
+					{
+						// Skip shader states
+						continue;
+					}
+					System.Console.WriteLine("RS " + i.ToString() + ": " + type.ToString());
+				}
+				if (blendStateChanged)
+				{
+					GraphicsDevice.BlendState = newBlend;
+				}
+				if (depthStencilStateChanged)
+				{
+					GraphicsDevice.DepthStencilState = newDepthStencil;
+				}
+				if (rasterizerStateChanged)
+				{
+					GraphicsDevice.RasterizerState = newRasterizer;
+				}
+			}
+			if (stateChanges.sampler_state_change_count > 0)
+			{
+				SamplerState[] samplers = new SamplerState[stateChanges.sampler_state_change_count];
+				bool[] samplerChanged = new bool[stateChanges.sampler_state_change_count];
+				for (int i = 0; i < samplers.Length; i += 1)
+				{
+					samplers[i] = new SamplerState()
+					{
+						Filter = GraphicsDevice.SamplerStates[i].Filter,
+						AddressU = GraphicsDevice.SamplerStates[i].AddressU,
+						AddressV = GraphicsDevice.SamplerStates[i].AddressV,
+						AddressW = GraphicsDevice.SamplerStates[i].AddressW,
+						MaxAnisotropy = GraphicsDevice.SamplerStates[i].MaxAnisotropy,
+						MaxMipLevel = GraphicsDevice.SamplerStates[i].MaxMipLevel,
+						MipMapLevelOfDetailBias = GraphicsDevice.SamplerStates[i].MipMapLevelOfDetailBias,
+					};
+				}
+				MojoShader.MOJOSHADER_samplerStateRegister* states = (MojoShader.MOJOSHADER_samplerStateRegister*) stateChanges.sampler_state_changes;
+				for (int i = 0; i < stateChanges.sampler_state_change_count; i += 1)
+				{
+					if (states[i].sampler_state_count == 0)
+					{
+						// Nothing to do
+						continue;
+					}
+					System.Console.WriteLine("SS REGISTER: " + states[i].sampler_register.ToString());
+				}
+				for (int i = 0; i < samplers.Length; i += 1)
+				{
+					if (samplerChanged[i])
+					{
+						GraphicsDevice.SamplerStates[i] = samplers[i];
+					}
+				}
+			}
 		}
 
 		#endregion
