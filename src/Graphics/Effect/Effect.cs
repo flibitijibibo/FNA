@@ -54,6 +54,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		private OpenGLDevice.OpenGLEffect glEffect;
 		private Dictionary<string, EffectParameter> samplerMap = new Dictionary<string, EffectParameter>();
+		private MojoShader.MOJOSHADER_effectStateChanges stateChanges = new MojoShader.MOJOSHADER_effectStateChanges();
 
 		#endregion
 
@@ -255,7 +256,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		internal unsafe void INTERNAL_applyEffect(uint pass)
 		{
-			MojoShader.MOJOSHADER_effectStateChanges stateChanges = new MojoShader.MOJOSHADER_effectStateChanges();
 			GraphicsDevice.GLDevice.ApplyEffect(
 				glEffect,
 				pass,
