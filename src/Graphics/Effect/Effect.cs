@@ -196,6 +196,48 @@ namespace Microsoft.Xna.Framework.Graphics
 			{ MojoShader.MOJOSHADER_textureAddress.MOJOSHADER_TADDRESS_CLAMP,	TextureAddressMode.Clamp }
 		};
 
+		private static readonly Dictionary<TextureFilter, MojoShader.MOJOSHADER_textureFilterType> XNAMag =
+			new Dictionary<TextureFilter, MojoShader.MOJOSHADER_textureFilterType>()
+		{
+			{ TextureFilter.Linear,				MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR },
+			{ TextureFilter.Point,				MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT },
+			{ TextureFilter.Anisotropic,			MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_ANISOTROPIC },
+			{ TextureFilter.LinearMipPoint,			MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR },
+			{ TextureFilter.PointMipLinear,			MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT },
+			{ TextureFilter.MinLinearMagPointMipLinear,	MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT },
+			{ TextureFilter.MinLinearMagPointMipPoint,	MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT },
+			{ TextureFilter.MinPointMagLinearMipLinear,	MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR },
+			{ TextureFilter.MinPointMagLinearMipPoint,	MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR }
+		};
+
+		private static readonly Dictionary<TextureFilter, MojoShader.MOJOSHADER_textureFilterType> XNAMin =
+			new Dictionary<TextureFilter, MojoShader.MOJOSHADER_textureFilterType>()
+		{
+			{ TextureFilter.Linear,				MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR },
+			{ TextureFilter.Point,				MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT },
+			{ TextureFilter.Anisotropic,			MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_ANISOTROPIC },
+			{ TextureFilter.LinearMipPoint,			MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR },
+			{ TextureFilter.PointMipLinear,			MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT },
+			{ TextureFilter.MinLinearMagPointMipLinear,	MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR },
+			{ TextureFilter.MinLinearMagPointMipPoint,	MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR },
+			{ TextureFilter.MinPointMagLinearMipLinear,	MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT },
+			{ TextureFilter.MinPointMagLinearMipPoint,	MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT }
+		};
+
+		private static readonly Dictionary<TextureFilter, MojoShader.MOJOSHADER_textureFilterType> XNAMip =
+			new Dictionary<TextureFilter, MojoShader.MOJOSHADER_textureFilterType>()
+		{
+			{ TextureFilter.Linear,				MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR },
+			{ TextureFilter.Point,				MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT },
+			{ TextureFilter.Anisotropic,			MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_ANISOTROPIC },
+			{ TextureFilter.LinearMipPoint,			MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT },
+			{ TextureFilter.PointMipLinear,			MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR },
+			{ TextureFilter.MinLinearMagPointMipLinear,	MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR },
+			{ TextureFilter.MinLinearMagPointMipPoint,	MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT },
+			{ TextureFilter.MinPointMagLinearMipLinear,	MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR },
+			{ TextureFilter.MinPointMagLinearMipPoint,	MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT }
+		};
+
 		#endregion
 
 		#region Public Constructor
@@ -599,6 +641,10 @@ namespace Microsoft.Xna.Framework.Graphics
 						// Nothing to do
 						continue;
 					}
+					MojoShader.MOJOSHADER_textureFilterType magFilter = XNAMag[samplers[i].Filter];
+					MojoShader.MOJOSHADER_textureFilterType minFilter = XNAMin[samplers[i].Filter];
+					MojoShader.MOJOSHADER_textureFilterType mipFilter = XNAMip[samplers[i].Filter];
+					bool filterChanged = false;
 					int register = (int) registers[i].sampler_register;
 					MojoShader.MOJOSHADER_effectSamplerState* states = (MojoShader.MOJOSHADER_effectSamplerState*) registers[i].sampler_states;
 					for (int j = 0; j < registers[i].sampler_state_count; j += 1)
@@ -638,15 +684,21 @@ namespace Microsoft.Xna.Framework.Graphics
 						}
 						else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_MAGFILTER)
 						{
-							// FIXME: TextureFilter combinations -flibit
+							MojoShader.MOJOSHADER_textureFilterType* val = (MojoShader.MOJOSHADER_textureFilterType*) states[j].value.values;
+							magFilter = *val;
+							filterChanged = true;
 						}
 						else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_MINFILTER)
 						{
-							// FIXME: TextureFilter combinations -flibit
+							MojoShader.MOJOSHADER_textureFilterType* val = (MojoShader.MOJOSHADER_textureFilterType*) states[j].value.values;
+							minFilter = *val;
+							filterChanged = true;
 						}
 						else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_MIPFILTER)
 						{
-							// FIXME: TextureFilter combinations -flibit
+							MojoShader.MOJOSHADER_textureFilterType* val = (MojoShader.MOJOSHADER_textureFilterType*) states[j].value.values;
+							mipFilter = *val;
+							filterChanged = true;
 						}
 						else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_MIPMAPLODBIAS)
 						{
@@ -670,6 +722,67 @@ namespace Microsoft.Xna.Framework.Graphics
 						{
 							throw new Exception("Unhandled sampler state!");
 						}
+					}
+					if (filterChanged)
+					{
+						if (	magFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_ANISOTROPIC ||
+							minFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_ANISOTROPIC ||
+							mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_ANISOTROPIC	)
+						{
+							// Just assume we wanted Anisotropic if any of these qualify.
+							samplers[i].Filter = TextureFilter.Anisotropic;
+						}
+						else if (magFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT)
+						{
+							if (minFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT)
+							{
+								if (mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT)
+								{
+									samplers[i].Filter = TextureFilter.Point;
+								}
+								else if (mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR)
+								{
+									samplers[i].Filter = TextureFilter.PointMipLinear;
+								}
+							}
+							else if (minFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR)
+							{
+								if (mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT)
+								{
+									samplers[i].Filter = TextureFilter.MinLinearMagPointMipPoint;
+								}
+								else if (mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR)
+								{
+									samplers[i].Filter = TextureFilter.MinLinearMagPointMipLinear;
+								}
+							}
+						}
+						else if (magFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR)
+						{
+							if (minFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT)
+							{
+								if (mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT)
+								{
+									samplers[i].Filter = TextureFilter.MinPointMagLinearMipPoint;
+								}
+								else if (mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR)
+								{
+									samplers[i].Filter = TextureFilter.MinPointMagLinearMipLinear;
+								}
+							}
+							else if (minFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR)
+							{
+								if (mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT)
+								{
+									samplers[i].Filter = TextureFilter.LinearMipPoint;
+								}
+								else if (mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR)
+								{
+									samplers[i].Filter = TextureFilter.Linear;
+								}
+							}
+						}
+						samplerChanged[i] = true;
 					}
 				}
 				for (int i = 0; i < samplers.Length; i += 1)
