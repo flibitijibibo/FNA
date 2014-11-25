@@ -262,8 +262,24 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		protected Effect(Effect cloneSource)
 		{
-			// FIXME: MojoShader needs MOJOSHADER_effectClone! -flibit
-			throw new NotImplementedException("See MojoShader!");
+			GraphicsDevice = cloneSource.GraphicsDevice;
+
+			// Send the parsed data to be cloned and recompiled by MojoShader
+			glEffect = GraphicsDevice.GLDevice.CloneEffect(
+				cloneSource.glEffect
+			);
+
+			// Double the ugly, double the fun!
+			INTERNAL_parseEffectStruct();
+
+			// The default technique is whatever the current technique was.
+			for (int i = 0; i < cloneSource.Techniques.Count; i += 1)
+			{
+				if (cloneSource.Techniques[i] == cloneSource.CurrentTechnique)
+				{
+					CurrentTechnique = Techniques[i];
+				}
+			}
 		}
 
 		#endregion
