@@ -422,6 +422,19 @@ namespace Microsoft.Xna.Framework.Graphics
 						newDepthStencil.DepthBufferFunction = XNACompare[*val];
 						depthStencilStateChanged = true;
 					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_ALPHABLENDENABLE)
+					{
+						// FIXME: Assuming no other blend calls are made in the effect!
+						int* val = (int*) states[i].value.values;
+						if (*val == 0)
+						{
+							newBlend.ColorSourceBlend = Blend.One;
+							newBlend.ColorDestinationBlend = Blend.Zero;
+							newBlend.AlphaSourceBlend = Blend.One;
+							newBlend.AlphaDestinationBlend = Blend.Zero;
+							blendStateChanged = true;
+						}
+					}
 					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_STENCILENABLE)
 					{
 						int* val = (int*) states[i].value.values;
@@ -598,7 +611,6 @@ namespace Microsoft.Xna.Framework.Graphics
 					}
 					else
 					{
-						// FIXME: ALPHABLENDENABLE -flibit
 						// FIXME: SEPARATEALPHABLEND -flibit
 						throw new Exception("Unhandled render state!");
 					}
