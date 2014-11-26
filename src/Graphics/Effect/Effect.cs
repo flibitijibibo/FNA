@@ -344,6 +344,14 @@ namespace Microsoft.Xna.Framework.Graphics
 					BlendFactor = GraphicsDevice.BlendState.BlendFactor,
 					MultiSampleMask = GraphicsDevice.BlendState.MultiSampleMask
 				};
+				/* FIXME: Do we actually care about this calculation, or do we
+				 * just assume false each time?
+				 * -flibit
+				 */
+				bool separateAlphaBlend = (
+					GraphicsDevice.BlendState.ColorBlendFunction != GraphicsDevice.BlendState.AlphaBlendFunction ||
+					GraphicsDevice.BlendState.ColorDestinationBlend != GraphicsDevice.BlendState.AlphaDestinationBlend
+				);
 				DepthStencilState newDepthStencil = new DepthStencilState()
 				{
 					DepthBufferEnable = GraphicsDevice.DepthStencilState.DepthBufferEnable,
@@ -407,12 +415,20 @@ namespace Microsoft.Xna.Framework.Graphics
 					{
 						MojoShader.MOJOSHADER_blendMode* val = (MojoShader.MOJOSHADER_blendMode*) states[i].value.values;
 						newBlend.ColorSourceBlend = XNABlend[*val];
+						if (!separateAlphaBlend)
+						{
+							newBlend.AlphaSourceBlend = XNABlend[*val];
+						}
 						blendStateChanged = true;
 					}
 					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_DESTBLEND)
 					{
 						MojoShader.MOJOSHADER_blendMode* val = (MojoShader.MOJOSHADER_blendMode*) states[i].value.values;
 						newBlend.ColorDestinationBlend = XNABlend[*val];
+						if (!separateAlphaBlend)
+						{
+							newBlend.AlphaDestinationBlend = XNABlend[*val];
+						}
 						blendStateChanged = true;
 					}
 					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_CULLMODE)
@@ -601,6 +617,12 @@ namespace Microsoft.Xna.Framework.Graphics
 						newRasterizer.DepthBias = *val;
 						rasterizerStateChanged = true;
 					}
+					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_SEPARATEALPHABLENDENABLE)
+					{
+						int* val = (int*) states[i].value.values;
+						separateAlphaBlend = (*val == 1);
+						// FIXME: Do we want to update the state for this...? -flibit
+					}
 					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_SRCBLENDALPHA)
 					{
 						MojoShader.MOJOSHADER_blendMode* val = (MojoShader.MOJOSHADER_blendMode*) states[i].value.values;
@@ -627,7 +649,6 @@ namespace Microsoft.Xna.Framework.Graphics
 					}
 					else
 					{
-						// FIXME: SEPARATEALPHABLEND -flibit
 						throw new Exception("Unhandled render state!");
 					}
 				}
