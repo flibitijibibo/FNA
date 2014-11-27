@@ -1102,37 +1102,45 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public OpenGLEffect CreateEffect(byte[] effectCode)
 		{
-			IntPtr effect = MojoShader.MOJOSHADER_parseEffect(
-				shaderProfile,
-				effectCode,
-				(uint) effectCode.Length,
-				null,
-				0,
-				null,
-				0,
-				null,
-				null,
-				IntPtr.Zero
-			);
-			IntPtr glEffect = MojoShader.MOJOSHADER_glCompileEffect(effect);
-			if (glEffect == IntPtr.Zero)
+			IntPtr effect;
+			IntPtr glEffect;
+			Threading.ForceToMainThread(() =>
 			{
-				throw new Exception(MojoShader.MOJOSHADER_glGetError());
-			}
+				effect = MojoShader.MOJOSHADER_parseEffect(
+					shaderProfile,
+					effectCode,
+					(uint) effectCode.Length,
+					null,
+					0,
+					null,
+					0,
+					null,
+					null,
+					IntPtr.Zero
+				);
+				glEffect = MojoShader.MOJOSHADER_glCompileEffect(effect);
+				if (glEffect == IntPtr.Zero)
+				{
+					throw new Exception(MojoShader.MOJOSHADER_glGetError());
+				}
+			});
 			return new OpenGLEffect(effect, glEffect);
 		}
 
 		public void DeleteEffect(OpenGLEffect effect)
 		{
-			if (effect.GLEffectData == currentEffect)
+			Threading.ForceToMainThread(() =>
 			{
-				MojoShader.MOJOSHADER_glEffectEndPass(currentEffect);
-				MojoShader.MOJOSHADER_glEffectEnd(currentEffect);
-				currentEffect = IntPtr.Zero;
-				currentPass = 0;
-			}
-			MojoShader.MOJOSHADER_glDeleteEffect(effect.GLEffectData);
-			MojoShader.MOJOSHADER_freeEffect(effect.EffectData);
+				if (effect.GLEffectData == currentEffect)
+				{
+					MojoShader.MOJOSHADER_glEffectEndPass(currentEffect);
+					MojoShader.MOJOSHADER_glEffectEnd(currentEffect);
+					currentEffect = IntPtr.Zero;
+					currentPass = 0;
+				}
+				MojoShader.MOJOSHADER_glDeleteEffect(effect.GLEffectData);
+				MojoShader.MOJOSHADER_freeEffect(effect.EffectData);
+			});
 		}
 
 		public OpenGLEffect CloneEffect(OpenGLEffect cloneSource)
