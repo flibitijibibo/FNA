@@ -558,7 +558,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		);
 		private VertexAttribDivisor glVertexAttribDivisor;
 
-		private delegate void G_VertexAttribPointer(
+		public delegate void G_VertexAttribPointer(
 			int index,
 			int size,
 			GLenum type,
@@ -566,7 +566,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			int stride,
 			IntPtr pointer
 		);
-		private G_VertexAttribPointer glVertexAttribPointer;
+		public G_VertexAttribPointer glVertexAttribPointer;
 
 		/* END VERTEX ATTRIBUTE FUNCTIONS */
 
