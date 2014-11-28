@@ -21,10 +21,13 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			set
 			{
-				textures[index] = value;
-				if (!graphicsDevice.ModifiedSamplers.Contains(index))
+				if (textures[index] != value)
 				{
-					graphicsDevice.ModifiedSamplers.Enqueue(index);
+					textures[index] = value;
+					if (!graphicsDevice.ModifiedSamplers.Contains(index))
+					{
+						graphicsDevice.ModifiedSamplers.Enqueue(index);
+					}
 				}
 			}
 		}
