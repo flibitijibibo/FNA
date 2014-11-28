@@ -282,7 +282,6 @@
     <Compile Include="src\Media\SongCollection.cs" />
     <Compile Include="src\Content\ContentReaders\EffectMaterialReader.cs" />
     <Compile Include="src\Content\ContentReaders\ExternalReferenceReader.cs" />
-    <Compile Include="src\Utilities\Hash.cs" />
     <Compile Include="src\Content\ResourceContentManager.cs" />
     <Compile Include="src\Media\VideoSoundtrackType.cs" />
     <Compile Include="src\Audio\OpenALDevice.cs" />
