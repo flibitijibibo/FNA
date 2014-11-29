@@ -1241,7 +1241,7 @@ namespace Microsoft.Xna.Framework.Graphics
 						Attributes[curAttrib].CurrentStride = vertexDeclaration.VertexStride;
 						Attributes[curAttrib].CurrentPointer = pointer;
 					}
-					if (Attributes[curAttrib].CurrentDivisor != bindings[i].InstanceFrequency)
+					// FIXME: if (Attributes[curAttrib].CurrentDivisor != bindings[i].InstanceFrequency)
 					{
 						MojoShader.MOJOSHADER_glSetVertexAttribDivisor(
 							XNAToGL.VertexAttribUsage[element.VertexElementUsage],
@@ -1302,7 +1302,7 @@ namespace Microsoft.Xna.Framework.Graphics
 					Attributes[curAttrib].CurrentStride = vertexDeclaration.VertexStride;
 					Attributes[curAttrib].CurrentPointer = pointer;
 				}
-				if (Attributes[curAttrib].CurrentDivisor != 0)
+				// FIXME: if (Attributes[curAttrib].CurrentDivisor != 0)
 				{
 					MojoShader.MOJOSHADER_glSetVertexAttribDivisor(
 						XNAToGL.VertexAttribUsage[element.VertexElementUsage],
