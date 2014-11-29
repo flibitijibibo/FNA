@@ -21,7 +21,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			set
 			{
-				if (samplers[index] != value)
+				// FIXME: Bring this back after the IGLDevice is established.
+				// if (samplers[index] != value)
 				{
 					samplers[index] = value;
 					if (!graphicsDevice.ModifiedSamplers.Contains(index))

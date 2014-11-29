@@ -21,7 +21,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			set
 			{
-				if (textures[index] != value)
+				// FIXME: Bring this back after the IGLDevice is established.
+				// if (textures[index] != value)
 				{
 					textures[index] = value;
 					if (!graphicsDevice.ModifiedSamplers.Contains(index))
