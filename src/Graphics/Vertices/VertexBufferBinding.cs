@@ -116,5 +116,14 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
 
 		#endregion
+
+		#region Implicit Operators
+
+		public static implicit operator VertexBufferBinding(VertexBuffer buffer)
+		{
+			return new VertexBufferBinding(buffer);
+		}
+
+		#endregion
 	}
 }
