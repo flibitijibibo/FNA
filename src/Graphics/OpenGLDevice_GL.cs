@@ -183,7 +183,6 @@ namespace Microsoft.Xna.Framework.Graphics
 			GL_STREAM_DRAW =			0x88E0,
 			GL_STATIC_DRAW =			0x88E4,
 			GL_READ_ONLY =				0x88B8,
-			GL_MAX_VERTEX_ATTRIBS =			0x8869,
 			// Render targets
 			GL_FRAMEBUFFER =			0x8D40,
 			GL_READ_FRAMEBUFFER =			0x8CA8,
@@ -546,17 +545,19 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		/* BEGIN VERTEX ATTRIBUTE FUNCTIONS */
 
-		private delegate void EnableVertexAttribArray(int index);
-		private EnableVertexAttribArray glEnableVertexAttribArray;
+		// FIXME: Remove once VideoPlayer uses GraphicsDevice! -flibit
 
-		private delegate void DisableVertexAttribArray(int index);
-		private DisableVertexAttribArray glDisableVertexAttribArray;
+		public delegate void EnableVertexAttribArray(int index);
+		public EnableVertexAttribArray glEnableVertexAttribArray;
 
-		private delegate void VertexAttribDivisor(
+		public delegate void DisableVertexAttribArray(int index);
+		public DisableVertexAttribArray glDisableVertexAttribArray;
+
+		public delegate void VertexAttribDivisor(
 			int index,
 			int divisor
 		);
-		private VertexAttribDivisor glVertexAttribDivisor;
+		public VertexAttribDivisor glVertexAttribDivisor;
 
 		public delegate void G_VertexAttribPointer(
 			int index,
@@ -741,6 +742,8 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		/* BEGIN SHADER FUNCTIONS */
 
+		// FIXME: Remove once VideoPlayer uses GraphicsDevice! -flibit
+
 		public delegate uint CreateShader(GLenum type);
 		public CreateShader glCreateShader;
 
@@ -779,38 +782,11 @@ namespace Microsoft.Xna.Framework.Graphics
 		public delegate void Uniform1i(int location, int v0);
 		public Uniform1i glUniform1i;
 
-		public delegate void Uniform4fv(
-			int location,
-			int count,
-			IntPtr value
-		);
-		public Uniform4fv glUniform4fv;
-
-		public delegate void GetShaderiv(
-			uint shader,
-			GLenum pname,
-			out int param
-		);
-		public GetShaderiv glGetShaderiv;
-
-		public delegate void GetProgramiv(
-			uint program,
-			GLenum pname,
-			out int param
-		);
-		public GetProgramiv glGetProgramiv;
-
 		public delegate int GetUniformLocation(
 			uint program,
 			string name
 		);
 		public GetUniformLocation glGetUniformLocation;
-
-		public delegate int GetAttribLocation(
-			uint program,
-			string name
-		);
-		public GetAttribLocation glGetAttribLocation;
 
 		public delegate void BindAttribLocation(
 			uint program,
@@ -818,18 +794,6 @@ namespace Microsoft.Xna.Framework.Graphics
 			string name
 		);
 		public BindAttribLocation glBindAttribLocation;
-
-		public delegate bool IsShader(uint shader);
-		public IsShader glIsShader;
-
-		public delegate bool IsProgram(uint program);
-		public IsProgram glIsProgram;
-
-		public delegate string GetShaderInfoLog(uint shader);
-		public GetShaderInfoLog glGetShaderInfoLog;
-
-		public delegate string GetProgramInfoLog(uint program);
-		public GetProgramInfoLog glGetProgramInfoLog;
 
 		/* END SHADER FUNCTIONS */
 
@@ -1191,45 +1155,13 @@ namespace Microsoft.Xna.Framework.Graphics
 					SDL.SDL_GL_GetProcAddress("glUniform1i"),
 					typeof(Uniform1i)
 				);
-				glUniform4fv = (Uniform4fv) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glUniform4fv"),
-					typeof(Uniform4fv)
-				);
-				glGetShaderiv = (GetShaderiv) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glGetShaderiv"),
-					typeof(GetShaderiv)
-				);
-				glGetProgramiv = (GetProgramiv) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glGetProgramiv"),
-					typeof(GetProgramiv)
-				);
 				glGetUniformLocation = (GetUniformLocation) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glGetUniformLocation"),
 					typeof(GetUniformLocation)
 				);
-				glGetAttribLocation = (GetAttribLocation) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glGetAttribLocation"),
-					typeof(GetAttribLocation)
-				);
 				glBindAttribLocation = (BindAttribLocation) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glBindAttribLocation"),
 					typeof(BindAttribLocation)
-				);
-				glIsShader = (IsShader) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glIsShader"),
-					typeof(IsShader)
-				);
-				glIsProgram = (IsProgram) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glIsProgram"),
-					typeof(IsProgram)
-				);
-				glGetShaderInfoLog = (GetShaderInfoLog) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glGetShaderInfoLog"),
-					typeof(GetShaderInfoLog)
-				);
-				glGetProgramInfoLog = (GetProgramInfoLog) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glGetProgramInfoLog"),
-					typeof(GetProgramInfoLog)
 				);
 				glFlush = (Flush) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glFlush"),

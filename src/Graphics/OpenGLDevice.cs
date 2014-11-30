@@ -214,34 +214,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
-		#region OpenGL Vertex Attribute State Container Class
-
-		public class OpenGLVertexAttribute
-		{
-			public IntPtr CurrentEffect;
-			public uint CurrentPass;
-			public VertexElementUsage CurrentUsage;
-			public int CurrentUsageIndex;
-			public VertexElementFormat CurrentFormat;
-			public int CurrentStride;
-			public IntPtr CurrentPointer;
-			public int CurrentDivisor;
-
-			public OpenGLVertexAttribute()
-			{
-				CurrentEffect = IntPtr.Zero;
-				CurrentPass = 0;
-				CurrentUsage = VertexElementUsage.Position;
-				CurrentUsageIndex = 0;
-				CurrentFormat = VertexElementFormat.Single;
-				CurrentStride = 0;
-				CurrentPointer = IntPtr.Zero;
-				CurrentDivisor = 0;
-			}
-		}
-
-		#endregion
-
 		#region OpenGL Effect Container Class
 
 		public class OpenGLEffect
@@ -345,16 +317,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		// FIXME: This doesn't need to be public. Blame VideoPlayer. -flibit
 		public OpenGLTexture[] Textures
-		{
-			get;
-			private set;
-		}
-
-		#endregion
-
-		#region Vertex Attribute State Variables
-
-		public OpenGLVertexAttribute[] Attributes
 		{
 			get;
 			private set;
@@ -469,7 +431,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		private static IntPtr glGetProcAddress(string name, IntPtr d)
 		{
-			// FIXME: This pointer-to-string-to-pointer is stupid. -flibit
 			return SDL.SDL_GL_GetProcAddress(name);
 		}
 		private static MojoShader.MOJOSHADER_glGetProcAddress GLGetProcAddress = glGetProcAddress;
@@ -557,15 +518,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				Textures[i] = OpenGLTexture.NullTexture;
 			}
 			MaxTextureSlots = numSamplers;
-
-			// Initialize vertex attribute state array
-			int numAttributes;
-			glGetIntegerv(GLenum.GL_MAX_VERTEX_ATTRIBS, out numAttributes);
-			Attributes = new OpenGLVertexAttribute[numAttributes];
-			for (int i = 0; i < numAttributes; i += 1)
-			{
-				Attributes[i] = new OpenGLVertexAttribute();
-			}
 
 			// Initialize render target FBO and state arrays
 			int numAttachments;
@@ -1205,52 +1157,32 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				BindVertexBuffer(bindings[i].VertexBuffer.Handle);
 				VertexDeclaration vertexDeclaration = bindings[i].VertexBuffer.VertexDeclaration;
-				int curAttrib = 0;
 				foreach (VertexElement element in vertexDeclaration.elements)
 				{
+					// FIXME: Attribute state caching? -flibit
 					IntPtr pointer = (IntPtr) (
 						(
 							vertexDeclaration.VertexStride *
 							(bindings[i].VertexOffset + baseVertex)
 						) + element.Offset
 					);
-					/* FIXME -flibit
-					if (	Attributes[curAttrib].CurrentEffect != currentEffect ||
-						Attributes[curAttrib].CurrentPass != currentPass ||
-						Attributes[curAttrib].CurrentUsage != element.VertexElementUsage ||
-						Attributes[curAttrib].CurrentUsageIndex != element.UsageIndex ||
-						Attributes[curAttrib].CurrentFormat != element.VertexElementFormat ||
-						Attributes[curAttrib].CurrentStride != vertexDeclaration.VertexStride ||
-						Attributes[curAttrib].CurrentPointer != pointer	)
-					*/
-					{
-						MojoShader.MOJOSHADER_glSetVertexAttribute(
-							XNAToGL.VertexAttribUsage[element.VertexElementUsage],
-							element.UsageIndex,
-							XNAToGL.VertexAttribSize[element.VertexElementFormat],
-							XNAToGL.VertexAttribType[element.VertexElementFormat],
-							XNAToGL.VertexAttribNormalized(element),
-							(uint) vertexDeclaration.VertexStride,
-							pointer
-						);
-						Attributes[curAttrib].CurrentEffect = currentEffect;
-						Attributes[curAttrib].CurrentPass = currentPass;
-						Attributes[curAttrib].CurrentUsage = element.VertexElementUsage;
-						Attributes[curAttrib].CurrentUsageIndex = element.UsageIndex;
-						Attributes[curAttrib].CurrentFormat = element.VertexElementFormat;
-						Attributes[curAttrib].CurrentStride = vertexDeclaration.VertexStride;
-						Attributes[curAttrib].CurrentPointer = pointer;
-					}
-					// FIXME: if (Attributes[curAttrib].CurrentDivisor != bindings[i].InstanceFrequency)
+					MojoShader.MOJOSHADER_glSetVertexAttribute(
+						XNAToGL.VertexAttribUsage[element.VertexElementUsage],
+						element.UsageIndex,
+						XNAToGL.VertexAttribSize[element.VertexElementFormat],
+						XNAToGL.VertexAttribType[element.VertexElementFormat],
+						XNAToGL.VertexAttribNormalized(element),
+						(uint) vertexDeclaration.VertexStride,
+						pointer
+					);
+					if (SupportsHardwareInstancing)
 					{
 						MojoShader.MOJOSHADER_glSetVertexAttribDivisor(
 							XNAToGL.VertexAttribUsage[element.VertexElementUsage],
 							element.UsageIndex,
 							(uint) bindings[i].InstanceFrequency
 						);
-						Attributes[curAttrib].CurrentDivisor = bindings[i].InstanceFrequency;
 					}
-					curAttrib += 1;
 				}
 			}
 			MojoShader.MOJOSHADER_glProgramReady();
@@ -1267,51 +1199,31 @@ namespace Microsoft.Xna.Framework.Graphics
 			int vertexOffset
 		) {
 			BindVertexBuffer(OpenGLVertexBuffer.NullBuffer);
-			int curAttrib = 0;
 			foreach (VertexElement element in vertexDeclaration.elements)
 			{
+				// FIXME: Attribute state caching? -flibit
 				IntPtr pointer = (IntPtr) (
 					ptr.ToInt64() + (
 						vertexDeclaration.VertexStride * vertexOffset
 					) + element.Offset
 				);
-				/* FIXME -flibit
-				if (	Attributes[curAttrib].CurrentEffect != currentEffect ||
-					Attributes[curAttrib].CurrentPass != currentPass ||
-					Attributes[curAttrib].CurrentUsage != element.VertexElementUsage ||
-					Attributes[curAttrib].CurrentUsageIndex != element.UsageIndex ||
-					Attributes[curAttrib].CurrentFormat != element.VertexElementFormat ||
-					Attributes[curAttrib].CurrentStride != vertexDeclaration.VertexStride ||
-					Attributes[curAttrib].CurrentPointer != pointer	)
-				*/
-				{
-					MojoShader.MOJOSHADER_glSetVertexAttribute(
-						XNAToGL.VertexAttribUsage[element.VertexElementUsage],
-						element.UsageIndex,
-						XNAToGL.VertexAttribSize[element.VertexElementFormat],
-						XNAToGL.VertexAttribType[element.VertexElementFormat],
-						XNAToGL.VertexAttribNormalized(element),
-						(uint) vertexDeclaration.VertexStride,
-						pointer
-					);
-					Attributes[curAttrib].CurrentEffect = currentEffect;
-					Attributes[curAttrib].CurrentPass = currentPass;
-					Attributes[curAttrib].CurrentUsage = element.VertexElementUsage;
-					Attributes[curAttrib].CurrentUsageIndex = element.UsageIndex;
-					Attributes[curAttrib].CurrentFormat = element.VertexElementFormat;
-					Attributes[curAttrib].CurrentStride = vertexDeclaration.VertexStride;
-					Attributes[curAttrib].CurrentPointer = pointer;
-				}
-				// FIXME: if (Attributes[curAttrib].CurrentDivisor != 0)
+				MojoShader.MOJOSHADER_glSetVertexAttribute(
+					XNAToGL.VertexAttribUsage[element.VertexElementUsage],
+					element.UsageIndex,
+					XNAToGL.VertexAttribSize[element.VertexElementFormat],
+					XNAToGL.VertexAttribType[element.VertexElementFormat],
+					XNAToGL.VertexAttribNormalized(element),
+					(uint) vertexDeclaration.VertexStride,
+					pointer
+				);
+				if (SupportsHardwareInstancing)
 				{
 					MojoShader.MOJOSHADER_glSetVertexAttribDivisor(
 						XNAToGL.VertexAttribUsage[element.VertexElementUsage],
 						element.UsageIndex,
 						0
 					);
-					Attributes[curAttrib].CurrentDivisor = 0;
 				}
-				curAttrib += 1;
 			}
 			MojoShader.MOJOSHADER_glProgramReady();
 			if (flipViewport != 0)

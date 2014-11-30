@@ -319,7 +319,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				pass,
 				ref stateChanges
 			);
-			// FIXME: Reduce allocs here! -flibit
 			/* FIXME: Does this actually affect the XNA variables?
 			 * There's a chance that the D3DXEffect calls do this
 			 * behind XNA's back, even.
@@ -463,7 +462,7 @@ namespace Microsoft.Xna.Framework.Graphics
 					}
 					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_ALPHABLENDENABLE)
 					{
-						// FIXME: Assuming no other blend calls are made in the effect!
+						// FIXME: Assuming no other blend calls are made in the effect! -flibit
 						int* val = (int*) states[i].value.values;
 						if (*val == 0)
 						{

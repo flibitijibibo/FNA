@@ -103,6 +103,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			Name = name;
 			Semantic = semantic;
 			RowCount = rowCount;
+			ColumnCount = columnCount;
 			if (elementCount > 0)
 			{
 				// FIXME: Elements is seriously a whole new collection? -flibit
@@ -110,7 +111,6 @@ namespace Microsoft.Xna.Framework.Graphics
 					new EffectParameter[elementCount]
 				);
 			}
-			ColumnCount = columnCount;
 			ParameterClass = parameterClass;
 			ParameterType = parameterType;
 			StructureMembers = structureMembers;
