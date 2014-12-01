@@ -65,8 +65,8 @@ namespace Microsoft.Xna.Framework.Content
 				}
 				else
 				{
-					int readerType = input.ReadByte();
-					list.Add(input.ReadObject<T>(input.TypeReaders[readerType - 1]));
+					int readerType = input.Read7BitEncodedInt();
+					list.Add((readerType > 0) ? input.ReadObject<T>(input.TypeReaders[readerType - 1]) : default(T));
 				}
 			}
 			return list;

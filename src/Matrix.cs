@@ -2053,6 +2053,22 @@ namespace Microsoft.Xna.Framework
 			result = ret;
 		}
 
+		public static Matrix Transform(Matrix value, Quaternion rotation)
+		{
+			Matrix result;
+			Transform(ref value, ref rotation, out result);
+			return result;
+		}
+
+		public static void Transform(
+			ref Matrix value,
+			ref Quaternion rotation,
+			out Matrix result
+		) {
+			// TODO: Codename OhGodNo -flibit
+			throw new NotImplementedException();
+		}
+
 		#endregion
 	}
 }

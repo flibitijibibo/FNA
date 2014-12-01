@@ -139,6 +139,12 @@ namespace Microsoft.Xna.Framework
 
 		#region Public Methods
 
+		public ContainmentType Contains(BoundingFrustum frustum)
+		{
+			// TODO: Codename OhGodNo -flibit
+			throw new NotImplementedException();
+		}
+
 		public ContainmentType Contains(BoundingBox box)
 		{
 			ContainmentType result = default(ContainmentType);

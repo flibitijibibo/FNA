@@ -71,8 +71,8 @@ namespace Microsoft.Xna.Framework.Content
 				}
 				else
 				{
-					int readerType = input.ReadByte();
-					key = input.ReadObject<TKey>(input.TypeReaders[readerType - 1]);
+					int readerType = input.Read7BitEncodedInt();
+					key = (readerType > 0) ? input.ReadObject<TKey>(input.TypeReaders[readerType - 1]) : default(TKey);
 				}
 				if (valueType.IsValueType)
 				{
@@ -80,8 +80,8 @@ namespace Microsoft.Xna.Framework.Content
 				}
 				else
 				{
-					int readerType = input.ReadByte();
-					value = input.ReadObject<TValue>(input.TypeReaders[readerType - 1]);
+					int readerType = input.Read7BitEncodedInt();
+					value = (readerType > 0) ? input.ReadObject<TValue>(input.TypeReaders[readerType - 1]) : default(TValue);
 				}
 				dictionary.Add(key, value);
 			}

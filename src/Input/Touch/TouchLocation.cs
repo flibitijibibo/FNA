@@ -383,6 +383,10 @@ namespace Microsoft.Xna.Framework.Input.Touch
 				state == TouchLocationState.Pressed,
 				"Can only age the state of touches that are in the Pressed State"
 			);
+
+			previousState = state;
+			previousPosition = position;
+
 			if (SameFrameReleased)
 			{
 				state = TouchLocationState.Released;
