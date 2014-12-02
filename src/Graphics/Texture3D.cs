@@ -57,34 +57,35 @@ namespace Microsoft.Xna.Framework.Graphics
 			Width = width;
 			Height = height;
 			Depth = depth;
-			LevelCount = 1;
-
-			if (mipMap)
-			{
-				throw new NotImplementedException("Texture3D does not yet support mipmaps.");
-			}
+			LevelCount = mipMap ? CalculateMipLevels(width, height) : 1;
 
 			Format = format;
 			GetGLSurfaceFormat();
 
-			texture = GraphicsDevice.GLDevice.CreateTexture(
-				typeof(Texture3D),
-				Format,
-				mipMap
-			);
+			Threading.ForceToMainThread(() =>
+			{
+				texture = GraphicsDevice.GLDevice.CreateTexture(
+					typeof(Texture3D),
+					Format,
+					mipMap
+				);
 
-			GraphicsDevice.GLDevice.glTexImage3D(
-				OpenGLDevice.GLenum.GL_TEXTURE_3D,
-				0,
-				(int) glInternalFormat,
-				width,
-				height,
-				depth,
-				0,
-				glFormat,
-				glType,
-				IntPtr.Zero
-			);
+				for (int i = 0; i < LevelCount; i += 1)
+				{
+					GraphicsDevice.GLDevice.glTexImage3D(
+						OpenGLDevice.GLenum.GL_TEXTURE_3D,
+						0,
+						(int) glInternalFormat,
+						Math.Max(width >> i, 1),
+						Math.Max(height >> i, 1),
+						depth,
+						0,
+						glFormat,
+						glType,
+						IntPtr.Zero
+					);
+				}
+			});
 		}
 
 		#endregion
@@ -136,24 +137,31 @@ namespace Microsoft.Xna.Framework.Graphics
 				throw new ArgumentNullException("data");
 			}
 
-			GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
-
-			GraphicsDevice.GLDevice.BindTexture(texture);
-			GraphicsDevice.GLDevice.glTexSubImage3D(
-				OpenGLDevice.GLenum.GL_TEXTURE_3D,
-				level,
-				left,
-				top,
-				front,
-				right - left,
-				bottom - top,
-				back - front,
-				glFormat,
-				glType,
-				(IntPtr) (dataHandle.AddrOfPinnedObject().ToInt64() + startIndex * Marshal.SizeOf(typeof(T)))
-			);
-
-			dataHandle.Free();
+			Threading.ForceToMainThread(() =>
+			{
+				GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
+				try
+				{
+					GraphicsDevice.GLDevice.BindTexture(texture);
+					GraphicsDevice.GLDevice.glTexSubImage3D(
+						OpenGLDevice.GLenum.GL_TEXTURE_3D,
+						level,
+						left,
+						top,
+						front,
+						right - left,
+						bottom - top,
+						back - front,
+						glFormat,
+						glType,
+						(IntPtr) (dataHandle.AddrOfPinnedObject().ToInt64() + startIndex * Marshal.SizeOf(typeof(T)))
+					);
+				}
+				finally
+				{
+					dataHandle.Free();
+				}
+			});
 		}
 
 		#endregion

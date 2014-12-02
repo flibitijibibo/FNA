@@ -373,7 +373,75 @@ namespace Microsoft.Xna.Framework.Audio
 			DSPReverbEffect effect = (DSPReverbEffect) Effect;
 
 			// Apply the value to the parameter
-			if (index == 17)
+			if (index == 0)
+			{
+				// TODO: Codename OhGodNo -flibit
+			}
+			else if (index == 1)
+			{
+				// TODO: Codename OhGodNo -flibit
+			}
+			else if (index == 2)
+			{
+				// TODO: Codename OhGodNo -flibit
+			}
+			else if (index == 3)
+			{
+				// TODO: Codename OhGodNo -flibit
+			}
+			else if (index == 4)
+			{
+				// TODO: Codename OhGodNo -flibit
+			}
+			else if (index == 5)
+			{
+				// TODO: Codename OhGodNo -flibit
+			}
+			else if (index == 6)
+			{
+				// TODO: Codename OhGodNo -flibit
+			}
+			else if (index == 7)
+			{
+				// TODO: Codename OhGodNo -flibit
+			}
+			else if (index == 8)
+			{
+				// TODO: Codename OhGodNo -flibit
+			}
+			else if (index == 9)
+			{
+				// TODO: Codename OhGodNo -flibit
+			}
+			else if (index == 10)
+			{
+				// TODO: Codename OhGodNo -flibit
+			}
+			else if (index == 11)
+			{
+				// TODO: Codename OhGodNo -flibit
+			}
+			else if (index == 12)
+			{
+				// TODO: Codename OhGodNo -flibit
+			}
+			else if (index == 13)
+			{
+				// TODO: Codename OhGodNo -flibit
+			}
+			else if (index == 14)
+			{
+				// TODO: Codename OhGodNo -flibit
+			}
+			else if (index == 15)
+			{
+				// TODO: Codename OhGodNo -flibit
+			}
+			else if (index == 16)
+			{
+				// TODO: Codename OhGodNo -flibit
+			}
+			else if (index == 17)
 			{
 				effect.SetGain(Parameters[index].Value);
 			}
@@ -384,6 +452,14 @@ namespace Microsoft.Xna.Framework.Audio
 			else if (index == 19)
 			{
 				effect.SetDensity(Parameters[index].Value);
+			}
+			else if (index == 20)
+			{
+				// TODO: Codename OhGodNo -flibit
+			}
+			else if (index == 21)
+			{
+				// TODO: Codename OhGodNo -flibit
 			}
 			else
 			{

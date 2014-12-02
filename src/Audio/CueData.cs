@@ -329,7 +329,12 @@ namespace Microsoft.Xna.Framework.Audio
 				reader.ReadUInt16();
 
 				// Load the Event
-				if (eventType == 1)
+				if (eventType == 0)
+				{
+					// TODO: Codename OhGodNo
+					// Stop Event
+				}
+				else if (eventType == 1)
 				{
 					// Unknown value
 					reader.ReadByte();
@@ -585,6 +590,11 @@ namespace Microsoft.Xna.Framework.Audio
 						weights
 					);
 				}
+				else if (eventType == 7)
+				{
+					// TODO: Codename OhGodNo -flibit
+					// Pitch Event
+				}
 				else if (eventType == 8)
 				{
 					// Unknown values
@@ -611,6 +621,11 @@ namespace Microsoft.Xna.Framework.Audio
 						XACTCalculator.CalculateAmplitudeRatio(constant)
 					);
 				}
+				else if (eventType == 15)
+				{
+					// TODO: Codename OhGodNo -flibit
+					// Unknown Event!
+				}
 				else if (eventType == 17)
 				{
 					// TODO: Codename OhGodNo -flibit
@@ -621,8 +636,6 @@ namespace Microsoft.Xna.Framework.Audio
 					/* TODO: All XACT Events.
 					 * The following type information is based on
 					 * third-party contributions:
-					 * Type 0 - Stop Event
-					 * Type 7 - Pitch Event
 					 * Type 9 - Marker Event
 					 * -flibit
 					 */
