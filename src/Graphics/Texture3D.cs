@@ -74,7 +74,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				{
 					GraphicsDevice.GLDevice.glTexImage3D(
 						OpenGLDevice.GLenum.GL_TEXTURE_3D,
-						0,
+						i,
 						(int) glInternalFormat,
 						Math.Max(width >> i, 1),
 						Math.Max(height >> i, 1),
