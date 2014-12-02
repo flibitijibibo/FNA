@@ -106,10 +106,26 @@ namespace Microsoft.Xna.Framework.Graphics
 			ColumnCount = columnCount;
 			if (elementCount > 0)
 			{
-				// FIXME: Elements is seriously a whole new collection? -flibit
-				Elements = new EffectParameterCollection(
-					new EffectParameter[elementCount]
-				);
+				EffectParameter[] elements = new EffectParameter[elementCount];
+				for (int i = 0; i < elementCount; i += 1)
+				{
+					// FIXME: Probably incomplete? -flibit
+					elements[i] = new EffectParameter(
+						null,
+						null,
+						rowCount,
+						columnCount,
+						0,
+						ParameterClass,
+						parameterType,
+						null, // FIXME: See mojoshader_effects.c:readvalue -flibit
+						null,
+						new IntPtr(
+							data.ToInt64() + (i * (4 * rowCount * columnCount))
+						)
+					);
+				}
+				Elements = new EffectParameterCollection(elements);
 			}
 			ParameterClass = parameterClass;
 			ParameterType = parameterType;
