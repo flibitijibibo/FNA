@@ -16,7 +16,7 @@ namespace Microsoft.Xna.Framework.Content
 	{
 		#region Public Constructor
 
-		public ExternalReferenceReader() : base(null)
+		public ExternalReferenceReader() : base(typeof(object))
 		{
 		}
 
