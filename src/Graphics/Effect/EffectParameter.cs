@@ -121,7 +121,7 @@ namespace Microsoft.Xna.Framework.Graphics
 						null, // FIXME: See mojoshader_effects.c:readvalue -flibit
 						null,
 						new IntPtr(
-							data.ToInt64() + (i * (4 * rowCount * columnCount))
+							data.ToInt64() + (i * rowCount * columnCount)
 						)
 					);
 				}
