@@ -30,6 +30,15 @@ namespace Microsoft.Xna.Framework
 		{
 			get
 			{
+				/* FIXME: If you call this before Game.Initialize(), you can
+				 * actually get a device in XNA4. But, even in XNA4, Game.Run
+				 * is what calls CreateDevice! So is this check accurate?
+				 * -flibit
+				 */
+				if (graphicsDevice == null)
+				{
+					((IGraphicsDeviceManager) this).CreateDevice();
+				}
 				return graphicsDevice;
 			}
 		}

@@ -83,12 +83,13 @@ namespace Microsoft.Xna.Framework.Graphics
 					{
 						for (int l = 0; l < LevelCount; l += 1)
 						{
+							int levelSize = Math.Max(size >> l, 1);
 							graphicsDevice.GLDevice.glTexImage2D(
 								OpenGLDevice.GLenum.GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
 								l,
 								(int) glInternalFormat,
-								size,
-								size,
+								levelSize,
+								levelSize,
 								0,
 								glFormat,
 								glType,

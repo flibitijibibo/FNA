@@ -611,6 +611,11 @@ namespace Microsoft.Xna.Framework.Audio
 						XACTCalculator.CalculateAmplitudeRatio(constant)
 					);
 				}
+				else if (eventType == 17)
+				{
+					// TODO: Codename OhGodNo -flibit
+					// Volume Repeat Event
+				}
 				else
 				{
 					/* TODO: All XACT Events.
@@ -619,7 +624,6 @@ namespace Microsoft.Xna.Framework.Audio
 					 * Type 0 - Stop Event
 					 * Type 7 - Pitch Event
 					 * Type 9 - Marker Event
-					 * Type 17 - Volume Repeat Event
 					 * -flibit
 					 */
 					throw new Exception(
