@@ -1097,12 +1097,17 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public OpenGLEffect CloneEffect(OpenGLEffect cloneSource)
 		{
-			IntPtr effect = MojoShader.MOJOSHADER_cloneEffect(cloneSource.EffectData);
-			IntPtr glEffect = MojoShader.MOJOSHADER_glCompileEffect(effect);
-			if (glEffect == IntPtr.Zero)
+			IntPtr effect;
+			IntPtr glEffect;
+			Threading.ForceToMainThread(() =>
 			{
-				throw new Exception(MojoShader.MOJOSHADER_glGetError());
-			}
+				effect = MojoShader.MOJOSHADER_cloneEffect(cloneSource.EffectData);
+				glEffect = MojoShader.MOJOSHADER_glCompileEffect(effect);
+				if (glEffect == IntPtr.Zero)
+				{
+					throw new Exception(MojoShader.MOJOSHADER_glGetError());
+				}
+			});
 			return new OpenGLEffect(effect, glEffect);
 		}
 
