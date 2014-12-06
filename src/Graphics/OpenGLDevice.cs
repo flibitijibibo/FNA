@@ -1888,7 +1888,7 @@ namespace Microsoft.Xna.Framework.Graphics
 						GLenum.GL_FRAMEBUFFER,
 						GLenum.GL_STENCIL_ATTACHMENT,
 						GLenum.GL_RENDERBUFFER,
-						renderbuffer
+						0
 					);
 				}
 				currentDepthStencilFormat = depthFormat;
