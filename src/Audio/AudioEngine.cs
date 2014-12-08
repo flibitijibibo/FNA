@@ -95,11 +95,11 @@ namespace Microsoft.Xna.Framework.Audio
 				// Number of XACT Variables
 				ushort numVariables = reader.ReadUInt16();
 
-				// Unknown value, KEY#1 Length?
-				reader.ReadUInt16();
+				// KEY#1 Length
+				/*ushort numKeyOne =*/ reader.ReadUInt16();
 
-				// Unknown value, KEY#2 Length?
-				reader.ReadUInt16();
+				// KEY#2 Length
+				/*ushort numKeyTwo =*/ reader.ReadUInt16();
 
 				// Number of RPC Variables
 				ushort numRPCs = reader.ReadUInt16();
@@ -114,14 +114,14 @@ namespace Microsoft.Xna.Framework.Audio
 				// Variable Offset in XGS File
 				uint variableOffset = reader.ReadUInt32();
 
-				// Unknown value, KEY#1 Offset?
-				reader.ReadUInt32();
+				// KEY#1 Offset
+				/*uint keyOneOffset =*/ reader.ReadUInt32();
 
 				// Category Name Index Offset, unused
 				reader.ReadUInt32();
 
-				// Unknown value, KEY#2 Offset?
-				reader.ReadUInt32();
+				// KEY#2 Offset
+				/*uint keyTwoOffset =*/ reader.ReadUInt32();
 
 				// Variable Name Index Offset, unused
 				reader.ReadUInt32();
@@ -138,6 +138,59 @@ namespace Microsoft.Xna.Framework.Audio
 				// DSP Preset/Parameter Offsets in XGS File
 				uint dspPresetOffset = reader.ReadUInt32();
 				uint dspParameterOffset = reader.ReadUInt32();
+
+				/* Unknown table #1
+				reader.BaseStream.Seek(keyOneOffset, SeekOrigin.Begin);
+				for (int i = 0; i < numKeyOne; i += 1)
+				{
+					// Appears to consistently be 16 shorts?
+					System.Console.WriteLine(reader.ReadInt16());
+				}
+				/* OhGodNo
+				 *  1, -1,  4, -1,
+				 *  3, -1, -1,  7,
+				 * -1,  2,  5, -1,
+				 *  6,  0, -1, -1
+				 *
+				 * Naddachance
+				 *  1, -1,  4, -1,
+				 *  5, -1, -1, -1,
+				 * -1,  2, -1, -1,
+				 *  3,  0, -1, -1
+				 *
+				 * TFA
+				 *  1, -1, -1, -1,
+				 * -1, -1, -1, -1,
+				 * -1,  2, -1, -1,
+				 * -1, -0, -1, -1
+				 */
+
+				/* Unknown table #2
+				reader.BaseStream.Seek(keyTwoOffset, SeekOrigin.Begin);
+				for (int i = 0; i < numKeyTwo; i += 1)
+				{
+					// Appears to be between 16-20 shorts?
+					System.Console.WriteLine(reader.ReadInt16());
+				}
+				/* OhGodNo
+				 *  2,  7,  1, -1,
+				 * -1, 10, 19, -1,
+				 *  11, 3, -1, -1,
+				 *  8, -1, 14,  5,
+				 * 12,  0,  4,  6
+				 *
+				 * Naddachance
+				 *  2,  3, -1, -1,
+				 *  9, -1,  7, -1,
+				 * 10,  0,  1,  5,
+				 * -1, -1, -1, -1
+				 *
+				 * TFA
+				 *  2,  3, -1, -1,
+				 * -1, -1, -1, -1,
+				 * -1,  0,  1,  5,
+				 * -1, -1, -1, -1
+				 */
 
 				// Obtain the Audio Category Names
 				reader.BaseStream.Seek(categoryNameOffset, SeekOrigin.Begin);
