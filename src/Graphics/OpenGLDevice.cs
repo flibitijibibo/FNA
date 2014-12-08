@@ -425,6 +425,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		private IntPtr shaderContext;
 
 		private IntPtr currentEffect = IntPtr.Zero;
+		private IntPtr currentTechnique = IntPtr.Zero;
 		private uint currentPass = 0;
 
 		private int flipViewport;
@@ -1088,6 +1089,7 @@ namespace Microsoft.Xna.Framework.Graphics
 					MojoShader.MOJOSHADER_glEffectEndPass(currentEffect);
 					MojoShader.MOJOSHADER_glEffectEnd(currentEffect);
 					currentEffect = IntPtr.Zero;
+					currentTechnique = IntPtr.Zero;
 					currentPass = 0;
 				}
 				MojoShader.MOJOSHADER_glDeleteEffect(effect.GLEffectData);
@@ -1113,19 +1115,21 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public void ApplyEffect(
 			OpenGLEffect effect,
+			IntPtr technique,
 			uint pass,
 			ref MojoShader.MOJOSHADER_effectStateChanges stateChanges
 		) {
 			flipViewport = (currentDrawFramebuffer == targetFramebuffer) ? -1 : 1;
 			if (effect.GLEffectData == currentEffect)
 			{
-				if (pass == currentPass)
+				if (technique == currentTechnique && pass == currentPass)
 				{
 					MojoShader.MOJOSHADER_glEffectCommitChanges(currentEffect);
 					return;
 				}
 				MojoShader.MOJOSHADER_glEffectEndPass(currentEffect);
 				MojoShader.MOJOSHADER_glEffectBeginPass(currentEffect, pass);
+				currentTechnique = technique;
 				currentPass = pass;
 				return;
 			}

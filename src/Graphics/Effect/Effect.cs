@@ -316,6 +316,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			GraphicsDevice.GLDevice.ApplyEffect(
 				glEffect,
+				CurrentTechnique.TechniquePointer,
 				pass,
 				ref stateChanges
 			);
