@@ -180,60 +180,220 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public Matrix GetValueMatrix()
 		{
-			// FIXME: This assumes 4x4! -flibit
+			// FIXME: All Matrix sizes... this will get ugly. -flibit
 			unsafe
 			{
 				float* resPtr = (float*) values;
-				return new Matrix(
-					resPtr[0],
-					resPtr[4],
-					resPtr[8],
-					resPtr[12],
-					resPtr[1],
-					resPtr[5],
-					resPtr[9],
-					resPtr[13],
-					resPtr[2],
-					resPtr[6],
-					resPtr[10],
-					resPtr[14],
-					resPtr[3],
-					resPtr[7],
-					resPtr[11],
-					resPtr[15]
-				);
+				if (RowCount == 4 && ColumnCount == 4)
+				{
+					return new Matrix(
+						resPtr[0],
+						resPtr[4],
+						resPtr[8],
+						resPtr[12],
+						resPtr[1],
+						resPtr[5],
+						resPtr[9],
+						resPtr[13],
+						resPtr[2],
+						resPtr[6],
+						resPtr[10],
+						resPtr[14],
+						resPtr[3],
+						resPtr[7],
+						resPtr[11],
+						resPtr[15]
+					);
+				}
+				else if (RowCount == 3 && ColumnCount == 3)
+				{
+					return new Matrix(
+						resPtr[0],
+						resPtr[3],
+						resPtr[6],
+						0.0f,
+						resPtr[1],
+						resPtr[4],
+						resPtr[7],
+						0.0f,
+						resPtr[2],
+						resPtr[5],
+						resPtr[8],
+						0.0f,
+						0.0f,
+						0.0f,
+						0.0f,
+						0.0f
+					);
+				}
+				else if (RowCount == 4 && ColumnCount == 3)
+				{
+					return new Matrix(
+						resPtr[0],
+						resPtr[4],
+						resPtr[8],
+						0.0f,
+						resPtr[1],
+						resPtr[5],
+						resPtr[9],
+						0.0f,
+						resPtr[2],
+						resPtr[6],
+						resPtr[10],
+						0.0f,
+						resPtr[3],
+						resPtr[7],
+						resPtr[11],
+						0.0f
+					);
+				}
+				else if (RowCount == 3 && ColumnCount == 4)
+				{
+					return new Matrix(
+						resPtr[0],
+						resPtr[3],
+						resPtr[6],
+						resPtr[9],
+						resPtr[1],
+						resPtr[4],
+						resPtr[7],
+						resPtr[10],
+						resPtr[2],
+						resPtr[5],
+						resPtr[8],
+						resPtr[11],
+						0.0f,
+						0.0f,
+						0.0f,
+						0.0f
+					);
+				}
+				else
+				{
+					throw new NotImplementedException(
+						"Matrix Size: " +
+						RowCount.ToString() + " " +
+						ColumnCount.ToString()
+					);
+				}
 			}
 		}
 
 		public Matrix[] GetValueMatrixArray(int count)
 		{
-			// FIXME: This assumes 4x4! -flibit
+			// FIXME: All Matrix sizes... this will get ugly. -flibit
 			Matrix[] result = new Matrix[count];
 			unsafe
 			{
 				float* resPtr = (float*) values;
 				int curOffset = 0;
-				for (int i = 0; i < count; i += 1)
+				if (RowCount == 4 && ColumnCount == 4)
 				{
-					result[i] = new Matrix(
-						resPtr[curOffset],
-						resPtr[curOffset + 4],
-						resPtr[curOffset + 8],
-						resPtr[curOffset + 12],
-						resPtr[curOffset + 1],
-						resPtr[curOffset + 5],
-						resPtr[curOffset + 9],
-						resPtr[curOffset + 13],
-						resPtr[curOffset + 2],
-						resPtr[curOffset + 6],
-						resPtr[curOffset + 10],
-						resPtr[curOffset + 14],
-						resPtr[curOffset + 3],
-						resPtr[curOffset + 7],
-						resPtr[curOffset + 11],
-						resPtr[curOffset + 15]
+					for (int i = 0; i < count; i += 1)
+					{
+						result[i] = new Matrix(
+							resPtr[curOffset],
+							resPtr[curOffset + 4],
+							resPtr[curOffset + 8],
+							resPtr[curOffset + 12],
+							resPtr[curOffset + 1],
+							resPtr[curOffset + 5],
+							resPtr[curOffset + 9],
+							resPtr[curOffset + 13],
+							resPtr[curOffset + 2],
+							resPtr[curOffset + 6],
+							resPtr[curOffset + 10],
+							resPtr[curOffset + 14],
+							resPtr[curOffset + 3],
+							resPtr[curOffset + 7],
+							resPtr[curOffset + 11],
+							resPtr[curOffset + 15]
+						);
+						curOffset += 16;
+					}
+				}
+				else if (RowCount == 3 && ColumnCount == 3)
+				{
+					for (int i = 0; i < count; i += 1)
+					{
+						result[i] = new Matrix(
+							resPtr[curOffset],
+							resPtr[curOffset + 3],
+							resPtr[curOffset + 6],
+							0.0f,
+							resPtr[curOffset + 1],
+							resPtr[curOffset + 4],
+							resPtr[curOffset + 7],
+							0.0f,
+							resPtr[curOffset + 2],
+							resPtr[curOffset + 5],
+							resPtr[curOffset + 8],
+							0.0f,
+							0.0f,
+							0.0f,
+							0.0f,
+							0.0f
+						);
+						curOffset += 9;
+					}
+				}
+				else if (RowCount == 4 && ColumnCount == 3)
+				{
+					for (int i = 0; i < count; i += 1)
+					{
+						result[i] = new Matrix(
+							resPtr[curOffset],
+							resPtr[curOffset + 4],
+							resPtr[curOffset + 8],
+							0.0f,
+							resPtr[curOffset + 1],
+							resPtr[curOffset + 5],
+							resPtr[curOffset + 9],
+							0.0f,
+							resPtr[curOffset + 2],
+							resPtr[curOffset + 6],
+							resPtr[curOffset + 10],
+							0.0f,
+							resPtr[curOffset + 3],
+							resPtr[curOffset + 7],
+							resPtr[curOffset + 11],
+							0.0f
+						);
+						curOffset += 12;
+					}
+				}
+				else if (RowCount == 3 && ColumnCount == 4)
+				{
+					for (int i = 0; i < count; i += 1)
+					{
+						result[i] = new Matrix(
+							resPtr[curOffset],
+							resPtr[curOffset + 3],
+							resPtr[curOffset + 6],
+							resPtr[curOffset + 9],
+							resPtr[curOffset + 1],
+							resPtr[curOffset + 4],
+							resPtr[curOffset + 7],
+							resPtr[curOffset + 10],
+							resPtr[curOffset + 2],
+							resPtr[curOffset + 5],
+							resPtr[curOffset + 8],
+							resPtr[curOffset + 11],
+							0.0f,
+							0.0f,
+							0.0f,
+							0.0f
+						);
+						curOffset += 12;
+					}
+				}
+				else
+				{
+					throw new NotImplementedException(
+						"Matrix Size: " +
+						RowCount.ToString() + " " +
+						ColumnCount.ToString()
 					);
-					curOffset += 16;
 				}
 			}
 			return result;
@@ -241,58 +401,219 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public Matrix GetValueMatrixTranspose()
 		{
-			// FIXME: This assumes 4x4! -flibit
+			// FIXME: All Matrix sizes... this will get ugly. -flibit
 			unsafe
 			{
 				float* resPtr = (float*) values;
-				return new Matrix(
-					resPtr[0],
-					resPtr[1],
-					resPtr[2],
-					resPtr[3],
-					resPtr[4],
-					resPtr[5],
-					resPtr[6],
-					resPtr[7],
-					resPtr[8],
-					resPtr[9],
-					resPtr[10],
-					resPtr[11],
-					resPtr[12],
-					resPtr[13],
-					resPtr[14],
-					resPtr[15]
-				);
+				if (RowCount == 4 && ColumnCount == 4)
+				{
+					return new Matrix(
+						resPtr[0],
+						resPtr[1],
+						resPtr[2],
+						resPtr[3],
+						resPtr[4],
+						resPtr[5],
+						resPtr[6],
+						resPtr[7],
+						resPtr[8],
+						resPtr[9],
+						resPtr[10],
+						resPtr[11],
+						resPtr[12],
+						resPtr[13],
+						resPtr[14],
+						resPtr[15]
+					);
+				}
+				else if (RowCount == 3 && ColumnCount == 3)
+				{
+					return new Matrix(
+						resPtr[0],
+						resPtr[1],
+						resPtr[2],
+						0.0f,
+						resPtr[3],
+						resPtr[4],
+						resPtr[5],
+						0.0f,
+						resPtr[6],
+						resPtr[7],
+						resPtr[8],
+						0.0f,
+						0.0f,
+						0.0f,
+						0.0f,
+						0.0f
+					);
+				}
+				else if (RowCount == 4 && ColumnCount == 3)
+				{
+					return new Matrix(
+						resPtr[0],
+						resPtr[1],
+						resPtr[2],
+						0.0f,
+						resPtr[3],
+						resPtr[4],
+						resPtr[5],
+						0.0f,
+						resPtr[6],
+						resPtr[7],
+						resPtr[8],
+						0.0f,
+						resPtr[9],
+						resPtr[10],
+						resPtr[11],
+						0.0f
+					);
+				}
+				else if (RowCount == 3 && ColumnCount == 4)
+				{
+					return new Matrix(
+						resPtr[0],
+						resPtr[1],
+						resPtr[2],
+						resPtr[3],
+						resPtr[4],
+						resPtr[5],
+						resPtr[6],
+						resPtr[7],
+						resPtr[8],
+						resPtr[9],
+						resPtr[10],
+						resPtr[11],
+						0.0f,
+						0.0f,
+						0.0f,
+						0.0f
+					);
+				}
+				else
+				{
+					throw new NotImplementedException(
+						"Matrix Size: " +
+						RowCount.ToString() + " " +
+						ColumnCount.ToString()
+					);
+				}
 			}
 		}
 
 		public Matrix[] GetValueMatrixTransposeArray(int count)
 		{
-			// FIXME: This assumes 4x4! -flibit
+			// FIXME: All Matrix sizes... this will get ugly. -flibit
 			Matrix[] result = new Matrix[count];
 			unsafe
 			{
 				float* resPtr = (float*) values;
 				int curOffset = 0;
-				for (int i = 0; i < count; i += 1)
+				if (RowCount == 4 && ColumnCount == 4)
 				{
-					result[i] = new Matrix(
-						resPtr[curOffset++],
-						resPtr[curOffset++],
-						resPtr[curOffset++],
-						resPtr[curOffset++],
-						resPtr[curOffset++],
-						resPtr[curOffset++],
-						resPtr[curOffset++],
-						resPtr[curOffset++],
-						resPtr[curOffset++],
-						resPtr[curOffset++],
-						resPtr[curOffset++],
-						resPtr[curOffset++],
-						resPtr[curOffset++],
-						resPtr[curOffset++],
-						resPtr[curOffset++],
-						resPtr[curOffset++]
+					for (int i = 0; i < count; i += 1)
+					{
+						result[i] = new Matrix(
+							resPtr[curOffset],
+							resPtr[curOffset + 1],
+							resPtr[curOffset + 2],
+							resPtr[curOffset + 3],
+							resPtr[curOffset + 4],
+							resPtr[curOffset + 5],
+							resPtr[curOffset + 6],
+							resPtr[curOffset + 7],
+							resPtr[curOffset + 8],
+							resPtr[curOffset + 9],
+							resPtr[curOffset + 10],
+							resPtr[curOffset + 11],
+							resPtr[curOffset + 12],
+							resPtr[curOffset + 13],
+							resPtr[curOffset + 14],
+							resPtr[curOffset + 15]
+						);
+						curOffset += 16;
+					}
+				}
+				else if (RowCount == 3 && ColumnCount == 3)
+				{
+					for (int i = 0; i < count; i += 1)
+					{
+						result[i] = new Matrix(
+							resPtr[curOffset],
+							resPtr[curOffset + 1],
+							resPtr[curOffset + 2],
+							0.0f,
+							resPtr[curOffset + 3],
+							resPtr[curOffset + 4],
+							resPtr[curOffset + 5],
+							0.0f,
+							resPtr[curOffset + 6],
+							resPtr[curOffset + 7],
+							resPtr[curOffset + 8],
+							0.0f,
+							0.0f,
+							0.0f,
+							0.0f,
+							0.0f
+						);
+						curOffset += 9;
+					}
+				}
+				else if (RowCount == 4 && ColumnCount == 3)
+				{
+					for (int i = 0; i < count; i += 1)
+					{
+						result[i] = new Matrix(
+							resPtr[curOffset],
+							resPtr[curOffset + 1],
+							resPtr[curOffset + 2],
+							0.0f,
+							resPtr[curOffset + 3],
+							resPtr[curOffset + 4],
+							resPtr[curOffset + 5],
+							0.0f,
+							resPtr[curOffset + 6],
+							resPtr[curOffset + 7],
+							resPtr[curOffset + 8],
+							0.0f,
+							resPtr[curOffset + 9],
+							resPtr[curOffset + 10],
+							resPtr[curOffset + 11],
+							0.0f
+						);
+						curOffset += 12;
+					}
+				}
+				else if (RowCount == 3 && ColumnCount == 4)
+				{
+					for (int i = 0; i < count; i += 1)
+					{
+						result[i] = new Matrix(
+							resPtr[curOffset],
+							resPtr[curOffset + 1],
+							resPtr[curOffset + 2],
+							resPtr[curOffset + 3],
+							resPtr[curOffset + 4],
+							resPtr[curOffset + 5],
+							resPtr[curOffset + 6],
+							resPtr[curOffset + 7],
+							resPtr[curOffset + 8],
+							resPtr[curOffset + 9],
+							resPtr[curOffset + 10],
+							resPtr[curOffset + 11],
+							0.0f,
+							0.0f,
+							0.0f,
+							0.0f
+						);
+						curOffset += 12;
+					}
+				}
+				else
+				{
+					throw new NotImplementedException(
+						"Matrix Size: " +
+						RowCount.ToString() + " " +
+						ColumnCount.ToString()
 					);
 				}
 			}
@@ -483,108 +804,338 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public void SetValue(Matrix value)
 		{
-			// FIXME: This assumes 4x4! -flibit
+			// FIXME: All Matrix sizes... this will get ugly. -flibit
 			unsafe
 			{
 				float* dstPtr = (float*) values;
-				dstPtr[0] = value.M11;
-				dstPtr[1] = value.M21;
-				dstPtr[2] = value.M31;
-				dstPtr[3] = value.M41;
-				dstPtr[4] = value.M12;
-				dstPtr[5] = value.M22;
-				dstPtr[6] = value.M32;
-				dstPtr[7] = value.M42;
-				dstPtr[8] = value.M13;
-				dstPtr[9] = value.M23;
-				dstPtr[10] = value.M33;
-				dstPtr[11] = value.M43;
-				dstPtr[12] = value.M14;
-				dstPtr[13] = value.M24;
-				dstPtr[14] = value.M34;
-				dstPtr[15] = value.M44;
+				if (RowCount == 4 && ColumnCount == 4)
+				{
+					dstPtr[0] = value.M11;
+					dstPtr[1] = value.M21;
+					dstPtr[2] = value.M31;
+					dstPtr[3] = value.M41;
+					dstPtr[4] = value.M12;
+					dstPtr[5] = value.M22;
+					dstPtr[6] = value.M32;
+					dstPtr[7] = value.M42;
+					dstPtr[8] = value.M13;
+					dstPtr[9] = value.M23;
+					dstPtr[10] = value.M33;
+					dstPtr[11] = value.M43;
+					dstPtr[12] = value.M14;
+					dstPtr[13] = value.M24;
+					dstPtr[14] = value.M34;
+					dstPtr[15] = value.M44;
+				}
+				else if (RowCount == 3 && ColumnCount == 3)
+				{
+					dstPtr[0] = value.M11;
+					dstPtr[1] = value.M21;
+					dstPtr[2] = value.M31;
+					dstPtr[3] = value.M12;
+					dstPtr[4] = value.M22;
+					dstPtr[5] = value.M32;
+					dstPtr[6] = value.M13;
+					dstPtr[7] = value.M23;
+					dstPtr[8] = value.M33;
+				}
+				else if (RowCount == 4 && ColumnCount == 3)
+				{
+					dstPtr[0] = value.M11;
+					dstPtr[1] = value.M21;
+					dstPtr[2] = value.M31;
+					dstPtr[3] = value.M41;
+					dstPtr[4] = value.M12;
+					dstPtr[5] = value.M22;
+					dstPtr[6] = value.M32;
+					dstPtr[7] = value.M42;
+					dstPtr[8] = value.M13;
+					dstPtr[9] = value.M23;
+					dstPtr[10] = value.M33;
+					dstPtr[11] = value.M43;
+				}
+				else if (RowCount == 3 && ColumnCount == 4)
+				{
+					dstPtr[0] = value.M11;
+					dstPtr[1] = value.M21;
+					dstPtr[2] = value.M31;
+					dstPtr[3] = value.M12;
+					dstPtr[4] = value.M22;
+					dstPtr[5] = value.M32;
+					dstPtr[6] = value.M13;
+					dstPtr[7] = value.M23;
+					dstPtr[8] = value.M33;
+					dstPtr[9] = value.M14;
+					dstPtr[10] = value.M24;
+					dstPtr[11] = value.M34;
+				}
+				else
+				{
+					throw new NotImplementedException(
+						"Matrix Size: " +
+						RowCount.ToString() + " " +
+						ColumnCount.ToString()
+					);
+				}
 			}
 		}
 
 		public void SetValue(Matrix[] value)
 		{
-			// FIXME: This assumes 4x4! -flibit
+			// FIXME: All Matrix sizes... this will get ugly. -flibit
 			unsafe
 			{
 				float* dstPtr = (float*) values;
 				int curOffset = 0;
-				for (int i = 0; i < value.Length; i += 1)
+				if (RowCount == 4 && ColumnCount == 4)
 				{
-					dstPtr[curOffset++] = value[i].M11;
-					dstPtr[curOffset++] = value[i].M21;
-					dstPtr[curOffset++] = value[i].M31;
-					dstPtr[curOffset++] = value[i].M41;
-					dstPtr[curOffset++] = value[i].M12;
-					dstPtr[curOffset++] = value[i].M22;
-					dstPtr[curOffset++] = value[i].M32;
-					dstPtr[curOffset++] = value[i].M42;
-					dstPtr[curOffset++] = value[i].M13;
-					dstPtr[curOffset++] = value[i].M23;
-					dstPtr[curOffset++] = value[i].M33;
-					dstPtr[curOffset++] = value[i].M43;
-					dstPtr[curOffset++] = value[i].M14;
-					dstPtr[curOffset++] = value[i].M24;
-					dstPtr[curOffset++] = value[i].M34;
-					dstPtr[curOffset++] = value[i].M44;
+					for (int i = 0; i < value.Length; i += 1)
+					{
+						dstPtr[curOffset++] = value[i].M11;
+						dstPtr[curOffset++] = value[i].M21;
+						dstPtr[curOffset++] = value[i].M31;
+						dstPtr[curOffset++] = value[i].M41;
+						dstPtr[curOffset++] = value[i].M12;
+						dstPtr[curOffset++] = value[i].M22;
+						dstPtr[curOffset++] = value[i].M32;
+						dstPtr[curOffset++] = value[i].M42;
+						dstPtr[curOffset++] = value[i].M13;
+						dstPtr[curOffset++] = value[i].M23;
+						dstPtr[curOffset++] = value[i].M33;
+						dstPtr[curOffset++] = value[i].M43;
+						dstPtr[curOffset++] = value[i].M14;
+						dstPtr[curOffset++] = value[i].M24;
+						dstPtr[curOffset++] = value[i].M34;
+						dstPtr[curOffset++] = value[i].M44;
+					}
+				}
+				else if (RowCount == 3 && ColumnCount == 3)
+				{
+					for (int i = 0; i < value.Length; i += 1)
+					{
+						dstPtr[curOffset++] = value[i].M11;
+						dstPtr[curOffset++] = value[i].M21;
+						dstPtr[curOffset++] = value[i].M31;
+						dstPtr[curOffset++] = value[i].M12;
+						dstPtr[curOffset++] = value[i].M22;
+						dstPtr[curOffset++] = value[i].M32;
+						dstPtr[curOffset++] = value[i].M13;
+						dstPtr[curOffset++] = value[i].M23;
+						dstPtr[curOffset++] = value[i].M33;
+					}
+				}
+				else if (RowCount == 4 && ColumnCount == 3)
+				{
+					for (int i = 0; i < value.Length; i += 1)
+					{
+						dstPtr[curOffset++] = value[i].M11;
+						dstPtr[curOffset++] = value[i].M21;
+						dstPtr[curOffset++] = value[i].M31;
+						dstPtr[curOffset++] = value[i].M41;
+						dstPtr[curOffset++] = value[i].M12;
+						dstPtr[curOffset++] = value[i].M22;
+						dstPtr[curOffset++] = value[i].M32;
+						dstPtr[curOffset++] = value[i].M42;
+						dstPtr[curOffset++] = value[i].M13;
+						dstPtr[curOffset++] = value[i].M23;
+						dstPtr[curOffset++] = value[i].M33;
+						dstPtr[curOffset++] = value[i].M43;
+					}
+				}
+				else if (RowCount == 3 && ColumnCount == 4)
+				{
+					for (int i = 0; i < value.Length; i += 1)
+					{
+						dstPtr[curOffset++] = value[i].M11;
+						dstPtr[curOffset++] = value[i].M21;
+						dstPtr[curOffset++] = value[i].M31;
+						dstPtr[curOffset++] = value[i].M12;
+						dstPtr[curOffset++] = value[i].M22;
+						dstPtr[curOffset++] = value[i].M32;
+						dstPtr[curOffset++] = value[i].M13;
+						dstPtr[curOffset++] = value[i].M23;
+						dstPtr[curOffset++] = value[i].M33;
+						dstPtr[curOffset++] = value[i].M14;
+						dstPtr[curOffset++] = value[i].M24;
+						dstPtr[curOffset++] = value[i].M34;
+					}
+				}
+				else
+				{
+					throw new NotImplementedException(
+						"Matrix Size: " +
+						RowCount.ToString() + " " +
+						ColumnCount.ToString()
+					);
 				}
 			}
 		}
 
 		public void SetValueTranspose(Matrix value)
 		{
-			// FIXME: This assumes 4x4! -flibit
+			// FIXME: All Matrix sizes... this will get ugly. -flibit
 			unsafe
 			{
 				float* dstPtr = (float*) values;
-				dstPtr[0] = value.M11;
-				dstPtr[1] = value.M12;
-				dstPtr[2] = value.M13;
-				dstPtr[3] = value.M14;
-				dstPtr[4] = value.M21;
-				dstPtr[5] = value.M22;
-				dstPtr[6] = value.M23;
-				dstPtr[7] = value.M24;
-				dstPtr[8] = value.M31;
-				dstPtr[9] = value.M32;
-				dstPtr[10] = value.M33;
-				dstPtr[11] = value.M34;
-				dstPtr[12] = value.M41;
-				dstPtr[13] = value.M42;
-				dstPtr[14] = value.M43;
-				dstPtr[15] = value.M44;
+				if (RowCount == 4 && ColumnCount == 4)
+				{
+					dstPtr[0] = value.M11;
+					dstPtr[1] = value.M12;
+					dstPtr[2] = value.M13;
+					dstPtr[3] = value.M14;
+					dstPtr[4] = value.M21;
+					dstPtr[5] = value.M22;
+					dstPtr[6] = value.M23;
+					dstPtr[7] = value.M24;
+					dstPtr[8] = value.M31;
+					dstPtr[9] = value.M32;
+					dstPtr[10] = value.M33;
+					dstPtr[11] = value.M34;
+					dstPtr[12] = value.M41;
+					dstPtr[13] = value.M42;
+					dstPtr[14] = value.M43;
+					dstPtr[15] = value.M44;
+				}
+				else if (RowCount == 3 && ColumnCount == 3)
+				{
+					dstPtr[0] = value.M11;
+					dstPtr[1] = value.M12;
+					dstPtr[2] = value.M13;
+					dstPtr[3] = value.M21;
+					dstPtr[4] = value.M22;
+					dstPtr[5] = value.M23;
+					dstPtr[6] = value.M31;
+					dstPtr[7] = value.M32;
+					dstPtr[8] = value.M33;
+				}
+				else if (RowCount == 4 && ColumnCount == 3)
+				{
+					dstPtr[0] = value.M11;
+					dstPtr[1] = value.M12;
+					dstPtr[2] = value.M13;
+					dstPtr[3] = value.M21;
+					dstPtr[4] = value.M22;
+					dstPtr[5] = value.M23;
+					dstPtr[6] = value.M31;
+					dstPtr[7] = value.M32;
+					dstPtr[8] = value.M33;
+					dstPtr[9] = value.M41;
+					dstPtr[10] = value.M42;
+					dstPtr[11] = value.M43;
+				}
+				else if (RowCount == 3 && ColumnCount == 4)
+				{
+					dstPtr[0] = value.M11;
+					dstPtr[1] = value.M12;
+					dstPtr[2] = value.M13;
+					dstPtr[3] = value.M14;
+					dstPtr[4] = value.M21;
+					dstPtr[5] = value.M22;
+					dstPtr[6] = value.M23;
+					dstPtr[7] = value.M24;
+					dstPtr[8] = value.M31;
+					dstPtr[9] = value.M32;
+					dstPtr[10] = value.M33;
+					dstPtr[11] = value.M34;
+				}
+				else
+				{
+					throw new NotImplementedException(
+						"Matrix Size: " +
+						RowCount.ToString() + " " +
+						ColumnCount.ToString()
+					);
+				}
 			}
 		}
 
 		public void SetValueTranspose(Matrix[] value)
 		{
-			// FIXME: This assumes 4x4! -flibit
+			// FIXME: All Matrix sizes... this will get ugly. -flibit
 			unsafe
 			{
 				float* dstPtr = (float*) values;
 				int curOffset = 0;
-				for (int i = 0; i < value.Length; i += 1)
+				if (RowCount == 4 && ColumnCount == 4)
 				{
-					dstPtr[curOffset++] = value[i].M11;
-					dstPtr[curOffset++] = value[i].M12;
-					dstPtr[curOffset++] = value[i].M13;
-					dstPtr[curOffset++] = value[i].M14;
-					dstPtr[curOffset++] = value[i].M21;
-					dstPtr[curOffset++] = value[i].M22;
-					dstPtr[curOffset++] = value[i].M23;
-					dstPtr[curOffset++] = value[i].M24;
-					dstPtr[curOffset++] = value[i].M31;
-					dstPtr[curOffset++] = value[i].M32;
-					dstPtr[curOffset++] = value[i].M33;
-					dstPtr[curOffset++] = value[i].M34;
-					dstPtr[curOffset++] = value[i].M41;
-					dstPtr[curOffset++] = value[i].M42;
-					dstPtr[curOffset++] = value[i].M43;
-					dstPtr[curOffset++] = value[i].M44;
+					for (int i = 0; i < value.Length; i += 1)
+					{
+						dstPtr[curOffset++] = value[i].M11;
+						dstPtr[curOffset++] = value[i].M12;
+						dstPtr[curOffset++] = value[i].M13;
+						dstPtr[curOffset++] = value[i].M14;
+						dstPtr[curOffset++] = value[i].M21;
+						dstPtr[curOffset++] = value[i].M22;
+						dstPtr[curOffset++] = value[i].M23;
+						dstPtr[curOffset++] = value[i].M24;
+						dstPtr[curOffset++] = value[i].M31;
+						dstPtr[curOffset++] = value[i].M32;
+						dstPtr[curOffset++] = value[i].M33;
+						dstPtr[curOffset++] = value[i].M34;
+						dstPtr[curOffset++] = value[i].M41;
+						dstPtr[curOffset++] = value[i].M42;
+						dstPtr[curOffset++] = value[i].M43;
+						dstPtr[curOffset++] = value[i].M44;
+					}
+				}
+				else if (RowCount == 3 && ColumnCount == 3)
+				{
+					for (int i = 0; i < value.Length; i += 1)
+					{
+						dstPtr[curOffset++] = value[i].M11;
+						dstPtr[curOffset++] = value[i].M12;
+						dstPtr[curOffset++] = value[i].M13;
+						dstPtr[curOffset++] = value[i].M21;
+						dstPtr[curOffset++] = value[i].M22;
+						dstPtr[curOffset++] = value[i].M23;
+						dstPtr[curOffset++] = value[i].M31;
+						dstPtr[curOffset++] = value[i].M32;
+						dstPtr[curOffset++] = value[i].M33;
+					}
+				}
+				else if (RowCount == 4 && ColumnCount == 3)
+				{
+					for (int i = 0; i < value.Length; i += 1)
+					{
+						dstPtr[curOffset++] = value[i].M11;
+						dstPtr[curOffset++] = value[i].M12;
+						dstPtr[curOffset++] = value[i].M13;
+						dstPtr[curOffset++] = value[i].M21;
+						dstPtr[curOffset++] = value[i].M22;
+						dstPtr[curOffset++] = value[i].M23;
+						dstPtr[curOffset++] = value[i].M31;
+						dstPtr[curOffset++] = value[i].M32;
+						dstPtr[curOffset++] = value[i].M33;
+						dstPtr[curOffset++] = value[i].M41;
+						dstPtr[curOffset++] = value[i].M42;
+						dstPtr[curOffset++] = value[i].M43;
+					}
+				}
+				else if (RowCount == 3 && ColumnCount == 4)
+				{
+					for (int i = 0; i < value.Length; i += 1)
+					{
+						dstPtr[curOffset++] = value[i].M11;
+						dstPtr[curOffset++] = value[i].M12;
+						dstPtr[curOffset++] = value[i].M13;
+						dstPtr[curOffset++] = value[i].M14;
+						dstPtr[curOffset++] = value[i].M21;
+						dstPtr[curOffset++] = value[i].M22;
+						dstPtr[curOffset++] = value[i].M23;
+						dstPtr[curOffset++] = value[i].M24;
+						dstPtr[curOffset++] = value[i].M31;
+						dstPtr[curOffset++] = value[i].M32;
+						dstPtr[curOffset++] = value[i].M33;
+						dstPtr[curOffset++] = value[i].M34;
+					}
+				}
+				else
+				{
+					throw new NotImplementedException(
+						"Matrix Size: " +
+						RowCount.ToString() + " " +
+						ColumnCount.ToString()
+					);
 				}
 			}
 		}
