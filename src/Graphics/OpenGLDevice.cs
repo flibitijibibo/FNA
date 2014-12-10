@@ -1162,7 +1162,13 @@ namespace Microsoft.Xna.Framework.Graphics
 			int numBindings,
 			int baseVertex
 		) {
-			for (int i = 0; i < numBindings; i += 1)
+			/* There's this weird case where you can have multiple vertbuffers,
+			 * but they will have overlapping attributes. It seems like the
+			 * first buffer gets priority, so start with the last one so the
+			 * first buffer's attributes are what's bound at the end.
+			 * -flibit
+			 */
+			for (int i = numBindings - 1; i >= 0; i -= 1)
 			{
 				BindVertexBuffer(bindings[i].VertexBuffer.Handle);
 				VertexDeclaration vertexDeclaration = bindings[i].VertexBuffer.VertexDeclaration;
