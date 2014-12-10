@@ -1086,10 +1086,6 @@ namespace Microsoft.Xna.Framework.Graphics
 					SDL.SDL_GL_GetProcAddress("glReadPixels"),
 					typeof(ReadPixels)
 				);
-				glGenerateMipmap = (GenerateMipmap) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glGenerateMipmap"),
-					typeof(GenerateMipmap)
-				);
 				glDrawRangeElements = (DrawRangeElements) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glDrawRangeElements"),
 					typeof(DrawRangeElements)
@@ -1202,6 +1198,10 @@ namespace Microsoft.Xna.Framework.Graphics
 				glFramebufferRenderbuffer = (FramebufferRenderbuffer) Marshal.GetDelegateForFunctionPointer(
 					TryGetFramebufferEP("glFramebufferRenderbuffer"),
 					typeof(FramebufferRenderbuffer)
+				);
+				glGenerateMipmap = (GenerateMipmap) Marshal.GetDelegateForFunctionPointer(
+					TryGetFramebufferEP("glGenerateMipmap"),
+					typeof(GenerateMipmap)
 				);
 #if !DISABLE_FAUXBACKBUFFER
 				glBlitFramebuffer = (BlitFramebuffer) Marshal.GetDelegateForFunctionPointer(
