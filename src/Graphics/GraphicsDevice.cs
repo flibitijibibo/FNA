@@ -618,7 +618,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				}
 			}
 
-			Array.Clear(renderTargetBindings, 0, renderTargetBindings.Length);
 			if (renderTargets == null || renderTargets.Length == 0)
 			{
 				GLDevice.SetRenderTargets(null, null, 0, DepthFormat.None);
@@ -635,6 +634,18 @@ namespace Microsoft.Xna.Framework.Graphics
 				{
 					Clear(DiscardColor);
 				}
+
+				// Generate mipmaps for previous targets, if needed
+				for (int i = 0; i < RenderTargetCount; i += 1)
+				{
+					if (renderTargetBindings[i].RenderTarget.LevelCount > 1)
+					{
+						GLDevice.GenerateTargetMipmaps(
+							renderTargetBindings[i].RenderTarget.texture
+						);
+					}
+				}
+				Array.Clear(renderTargetBindings, 0, renderTargetBindings.Length);
 			}
 			else
 			{
@@ -660,6 +671,30 @@ namespace Microsoft.Xna.Framework.Graphics
 					target.DepthStencilFormat
 				);
 
+				// Generate mipmaps for previous targets, if needed
+				for (int i = 0; i < RenderTargetCount; i += 1)
+				{
+					if (renderTargetBindings[i].RenderTarget.LevelCount > 1)
+					{
+						// We only need to gen mipmaps if the target is no longer bound.
+						bool stillBound = false;
+						for (int j = 0; j < renderTargets.Length; j += 1)
+						{
+							if (renderTargetBindings[i].RenderTarget == renderTargets[j].RenderTarget)
+							{
+								stillBound = true;
+								break;
+							}
+						}
+						if (!stillBound)
+						{
+							GLDevice.GenerateTargetMipmaps(
+								renderTargetBindings[i].RenderTarget.texture
+							);
+						}
+					}
+				}
+				Array.Clear(renderTargetBindings, 0, renderTargetBindings.Length);
 				Array.Copy(renderTargets, renderTargetBindings, renderTargets.Length);
 				RenderTargetCount = renderTargets.Length;
 

@@ -1641,6 +1641,18 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
+		#region glGenerateMipmap Method
+
+		public void GenerateTargetMipmaps(OpenGLTexture target)
+		{
+			OpenGLTexture prevTex = Textures[0];
+			BindTexture(target);
+			glGenerateMipmap(target.Target);
+			BindTexture(prevTex);
+		}
+
+		#endregion
+
 		#region Framebuffer Methods
 
 		public void BindFramebuffer(uint handle)
