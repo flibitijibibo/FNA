@@ -64,20 +64,20 @@ namespace Microsoft.Xna.Framework.Audio
 			using (Stream stream = TitleContainer.OpenStream(settingsFile))
 			using (BinaryReader reader = new BinaryReader(stream))
 			{
-				// Check the file header. Should be 'XGFS'
+				// Check the file header. Should be 'XGSF'
 				if (reader.ReadUInt32() != 0x46534758)
 				{
-					throw new ArgumentException("XGFS format not recognized!");
+					throw new ArgumentException("XGSF format not recognized!");
 				}
 
 				// Check the Content and Tool versions
 				if (reader.ReadUInt16() != ContentVersion)
 				{
-					throw new ArgumentException("XGFS Content version!");
+					throw new ArgumentException("XGSF Content version!");
 				}
 				if (reader.ReadUInt16() != 42)
 				{
-					throw new ArgumentException("XGFS Tool version!");
+					throw new ArgumentException("XGSF Tool version!");
 				}
 
 				// Unknown value
@@ -86,7 +86,7 @@ namespace Microsoft.Xna.Framework.Audio
 				// Last Modified, Unused
 				reader.ReadUInt64();
 
-				// Unknown value
+				// XACT Version, Unused
 				reader.ReadByte();
 
 				// Number of AudioCategories
