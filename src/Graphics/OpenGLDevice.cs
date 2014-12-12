@@ -1100,8 +1100,8 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public OpenGLEffect CreateEffect(byte[] effectCode)
 		{
-			IntPtr effect;
-			IntPtr glEffect;
+			IntPtr effect = IntPtr.Zero;
+			IntPtr glEffect = IntPtr.Zero;
 			Threading.ForceToMainThread(() =>
 			{
 				effect = MojoShader.MOJOSHADER_parseEffect(
@@ -1144,8 +1144,8 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public OpenGLEffect CloneEffect(OpenGLEffect cloneSource)
 		{
-			IntPtr effect;
-			IntPtr glEffect;
+			IntPtr effect = IntPtr.Zero;
+			IntPtr glEffect = IntPtr.Zero;
 			Threading.ForceToMainThread(() =>
 			{
 				effect = MojoShader.MOJOSHADER_cloneEffect(cloneSource.EffectData);
