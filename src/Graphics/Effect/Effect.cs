@@ -347,6 +347,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				BlendFunction colorBlendFunction = oldBlendState.ColorBlendFunction;
 				Blend colorDestinationBlend = oldBlendState.ColorDestinationBlend;
 				Blend colorSourceBlend = oldBlendState.ColorSourceBlend;
+				ColorWriteChannels colorWriteChannels = oldBlendState.ColorWriteChannels;
 				ColorWriteChannels colorWriteChannels1 = oldBlendState.ColorWriteChannels1;
 				ColorWriteChannels colorWriteChannels2 = oldBlendState.ColorWriteChannels2;
 				ColorWriteChannels colorWriteChannels3 = oldBlendState.ColorWriteChannels3;
@@ -537,7 +538,7 @@ namespace Microsoft.Xna.Framework.Graphics
 					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_COLORWRITEENABLE)
 					{
 						int* val = (int*) states[i].value.values;
-						colorWriteChannels1 = (ColorWriteChannels) (*val);
+						colorWriteChannels = (ColorWriteChannels) (*val);
 						blendStateChanged = true;
 					}
 					else if (type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_BLENDOP)
@@ -670,6 +671,7 @@ namespace Microsoft.Xna.Framework.Graphics
 						ColorBlendFunction = colorBlendFunction,
 						ColorDestinationBlend = colorDestinationBlend,
 						ColorSourceBlend = colorSourceBlend,
+						ColorWriteChannels = colorWriteChannels,
 						ColorWriteChannels1 = colorWriteChannels1,
 						ColorWriteChannels2 = colorWriteChannels2,
 						ColorWriteChannels3 = colorWriteChannels3,
