@@ -51,14 +51,8 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public ColorWriteChannels ColorWriteChannels
 		{
-			get
-			{
-				return ColorWriteChannels1;
-			}
-			set
-			{
-				ColorWriteChannels1 = value;
-			}
+			get;
+			set;
 		}
 
 		public ColorWriteChannels ColorWriteChannels1
@@ -139,6 +133,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			ColorBlendFunction = BlendFunction.Add;
 			ColorDestinationBlend = Blend.Zero;
 			ColorSourceBlend = Blend.One;
+			ColorWriteChannels = ColorWriteChannels.All;
 			ColorWriteChannels1 = ColorWriteChannels.All;
 			ColorWriteChannels2 = ColorWriteChannels.All;
 			ColorWriteChannels3 = ColorWriteChannels.All;

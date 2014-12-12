@@ -311,6 +311,15 @@ namespace Microsoft.Xna.Framework.Graphics
 		);
 		private ColorMask glColorMask;
 
+		private delegate void ColorMaskIndexedEXT(
+			uint buf,
+			bool red,
+			bool green,
+			bool blue,
+			bool alpha
+		);
+		private ColorMaskIndexedEXT glColorMaskIndexedEXT;
+
 		/* END BLEND STATE FUNCTIONS */
 
 		/* BEGIN DEPTH/STENCIL STATE FUNCTIONS */
@@ -1247,6 +1256,19 @@ namespace Microsoft.Xna.Framework.Graphics
 			catch
 			{
 				SupportsHardwareInstancing = false;
+			}
+
+			/* EXT_draw_buffers2 is probably used by nobody. */
+			try
+			{
+				glColorMaskIndexedEXT = (ColorMaskIndexedEXT) Marshal.GetDelegateForFunctionPointer(
+					SDL.SDL_GL_GetProcAddress("glColorMaskIndexedEXT"),
+					typeof(ColorMaskIndexedEXT)
+				);
+			}
+			catch
+			{
+				// FIXME: SupportsIndependentWriteMasks? -flibit
 			}
 
 #if DEBUG

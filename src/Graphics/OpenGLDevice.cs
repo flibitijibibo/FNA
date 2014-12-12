@@ -250,6 +250,9 @@ namespace Microsoft.Xna.Framework.Graphics
 		private Blend srcBlendAlpha = Blend.One;
 		private Blend dstBlendAlpha = Blend.Zero;
 		private ColorWriteChannels colorWriteEnable = ColorWriteChannels.All;
+		private ColorWriteChannels colorWriteEnable1 = ColorWriteChannels.All;
+		private ColorWriteChannels colorWriteEnable2 = ColorWriteChannels.All;
+		private ColorWriteChannels colorWriteEnable3 = ColorWriteChannels.All;
 
 		#endregion
 
@@ -729,6 +732,48 @@ namespace Microsoft.Xna.Framework.Graphics
 					(colorWriteEnable & ColorWriteChannels.Green) != 0,
 					(colorWriteEnable & ColorWriteChannels.Blue) != 0,
 					(colorWriteEnable & ColorWriteChannels.Alpha) != 0
+				);
+			}
+			/* FIXME: So how exactly do we factor in
+			 * COLORWRITEENABLE for buffer 0? Do we just assume that
+			 * the default is just buffer 0, and all other calls
+			 * update the other write masks afterward? Or do we
+			 * assume that COLORWRITEENABLE only touches 0, and the
+			 * other 3 buffers are left alone unless we don't have
+			 * EXT_draw_buffers2?
+			 * -flibit
+			 */
+			if (blendState.ColorWriteChannels1 != colorWriteEnable1)
+			{
+				colorWriteEnable1 = blendState.ColorWriteChannels1;
+				glColorMaskIndexedEXT(
+					1,
+					(colorWriteEnable1 & ColorWriteChannels.Red) != 0,
+					(colorWriteEnable1 & ColorWriteChannels.Green) != 0,
+					(colorWriteEnable1 & ColorWriteChannels.Blue) != 0,
+					(colorWriteEnable1 & ColorWriteChannels.Alpha) != 0
+				);
+			}
+			if (blendState.ColorWriteChannels2 != colorWriteEnable2)
+			{
+				colorWriteEnable2 = blendState.ColorWriteChannels2;
+				glColorMaskIndexedEXT(
+					2,
+					(colorWriteEnable2 & ColorWriteChannels.Red) != 0,
+					(colorWriteEnable2 & ColorWriteChannels.Green) != 0,
+					(colorWriteEnable2 & ColorWriteChannels.Blue) != 0,
+					(colorWriteEnable2 & ColorWriteChannels.Alpha) != 0
+				);
+			}
+			if (blendState.ColorWriteChannels3 != colorWriteEnable3)
+			{
+				colorWriteEnable3 = blendState.ColorWriteChannels3;
+				glColorMaskIndexedEXT(
+					3,
+					(colorWriteEnable3 & ColorWriteChannels.Red) != 0,
+					(colorWriteEnable3 & ColorWriteChannels.Green) != 0,
+					(colorWriteEnable3 & ColorWriteChannels.Blue) != 0,
+					(colorWriteEnable3 & ColorWriteChannels.Alpha) != 0
 				);
 			}
 		}
