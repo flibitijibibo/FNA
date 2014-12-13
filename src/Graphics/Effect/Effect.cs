@@ -58,6 +58,46 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
+		#region Private State Cache Hack Variables
+
+		/* This is a workaround to prevent excessive state allocation.
+		 * Well, I say "excessive", but even this allocates a minimum of
+		 * 1916 bytes per effect. Just for states.
+		 *
+		 * Additionally, we depend on our inaccurate behavior of letting you
+		 * change the state after it's been bound to the GraphicsDevice.
+		 *
+		 * More accurate behavior will require hashing the current states,
+		 * comparing them to the new state after applying the effect, and
+		 * getting a state from a cache, generating a new one if needed.
+		 * -flibit
+		 */
+		private BlendState[] blendCache = new BlendState[2]
+		{
+			new BlendState(), new BlendState()
+		};
+		private DepthStencilState[] depthStencilCache = new DepthStencilState[2]
+		{
+			new DepthStencilState(), new DepthStencilState()
+		};
+		private RasterizerState[] rasterizerCache = new RasterizerState[2]
+		{
+			new RasterizerState(), new RasterizerState()
+		};
+		private SamplerState[] samplerCache = GenerateSamplerCache();
+		private static SamplerState[] GenerateSamplerCache()
+		{
+			int numSamplers = 60; // FIXME: Arbitrary! -flibit
+			SamplerState[] result = new SamplerState[numSamplers];
+			for (int i = 0; i < numSamplers; i += 1)
+			{
+				result[i] = new SamplerState();
+			}
+			return result;
+		}
+
+		#endregion
+
 		#region Private Static Variables
 
 		private Dictionary<MojoShader.MOJOSHADER_symbolType, EffectParameterType> XNAType =
@@ -662,58 +702,79 @@ namespace Microsoft.Xna.Framework.Graphics
 				}
 				if (blendStateChanged)
 				{
-					// TODO: BlendState caching system -flibit
-					GraphicsDevice.BlendState = new BlendState()
+					// FIXME: This is part of the state cache hack! -flibit
+					BlendState newBlend;
+					if (GraphicsDevice.BlendState == blendCache[0])
 					{
-						AlphaBlendFunction = alphaBlendFunction,
-						AlphaDestinationBlend = alphaDestinationBlend,
-						AlphaSourceBlend = alphaSourceBlend,
-						ColorBlendFunction = colorBlendFunction,
-						ColorDestinationBlend = colorDestinationBlend,
-						ColorSourceBlend = colorSourceBlend,
-						ColorWriteChannels = colorWriteChannels,
-						ColorWriteChannels1 = colorWriteChannels1,
-						ColorWriteChannels2 = colorWriteChannels2,
-						ColorWriteChannels3 = colorWriteChannels3,
-						BlendFactor = blendFactor,
-						MultiSampleMask = multiSampleMask
-					};
+						newBlend = blendCache[1];
+					}
+					else
+					{
+						newBlend = blendCache[0];
+					}
+					newBlend.AlphaBlendFunction = alphaBlendFunction;
+					newBlend.AlphaDestinationBlend = alphaDestinationBlend;
+					newBlend.AlphaSourceBlend = alphaSourceBlend;
+					newBlend.ColorBlendFunction = colorBlendFunction;
+					newBlend.ColorDestinationBlend = colorDestinationBlend;
+					newBlend.ColorSourceBlend = colorSourceBlend;
+					newBlend.ColorWriteChannels = colorWriteChannels;
+					newBlend.ColorWriteChannels1 = colorWriteChannels1;
+					newBlend.ColorWriteChannels2 = colorWriteChannels2;
+					newBlend.ColorWriteChannels3 = colorWriteChannels3;
+					newBlend.BlendFactor = blendFactor;
+					newBlend.MultiSampleMask = multiSampleMask;
+					GraphicsDevice.BlendState = newBlend;
 				}
 				if (depthStencilStateChanged)
 				{
-					// TODO: DepthStencilState caching system -flibit
-					GraphicsDevice.DepthStencilState = new DepthStencilState()
+					// FIXME: This is part of the state cache hack! -flibit
+					DepthStencilState newDepthStencil;
+					if (GraphicsDevice.DepthStencilState == depthStencilCache[0])
 					{
-						DepthBufferEnable = depthBufferEnable,
-						DepthBufferWriteEnable = depthBufferWriteEnable,
-						DepthBufferFunction = depthBufferFunction,
-						StencilEnable = stencilEnable,
-						StencilFunction = stencilFunction,
-						StencilPass = stencilPass,
-						StencilFail = stencilFail,
-						StencilDepthBufferFail = stencilDepthBufferFail,
-						TwoSidedStencilMode = twoSidedStencilMode,
-						CounterClockwiseStencilFunction = ccwStencilFunction,
-						CounterClockwiseStencilFail = ccwStencilFail,
-						CounterClockwiseStencilPass = ccwStencilPass,
-						CounterClockwiseStencilDepthBufferFail = ccwStencilDepthBufferFail,
-						StencilMask = stencilMask,
-						StencilWriteMask = stencilWriteMask,
-						ReferenceStencil = referenceStencil
-					};
+						newDepthStencil = depthStencilCache[1];
+					}
+					else
+					{
+						newDepthStencil = depthStencilCache[0];
+					}
+					newDepthStencil.DepthBufferEnable = depthBufferEnable;
+					newDepthStencil.DepthBufferWriteEnable = depthBufferWriteEnable;
+					newDepthStencil.DepthBufferFunction = depthBufferFunction;
+					newDepthStencil.StencilEnable = stencilEnable;
+					newDepthStencil.StencilFunction = stencilFunction;
+					newDepthStencil.StencilPass = stencilPass;
+					newDepthStencil.StencilFail = stencilFail;
+					newDepthStencil.StencilDepthBufferFail = stencilDepthBufferFail;
+					newDepthStencil.TwoSidedStencilMode = twoSidedStencilMode;
+					newDepthStencil.CounterClockwiseStencilFunction = ccwStencilFunction;
+					newDepthStencil.CounterClockwiseStencilFail = ccwStencilFail;
+					newDepthStencil.CounterClockwiseStencilPass = ccwStencilPass;
+					newDepthStencil.CounterClockwiseStencilDepthBufferFail = ccwStencilDepthBufferFail;
+					newDepthStencil.StencilMask = stencilMask;
+					newDepthStencil.StencilWriteMask = stencilWriteMask;
+					newDepthStencil.ReferenceStencil = referenceStencil;
+					GraphicsDevice.DepthStencilState = newDepthStencil;
 				}
 				if (rasterizerStateChanged)
 				{
-					// TODO: RasterizerState caching system -flibit
-					GraphicsDevice.RasterizerState = new RasterizerState()
+					// FIXME: This is part of the state cache hack! -flibit
+					RasterizerState newRasterizer;
+					if (GraphicsDevice.RasterizerState == rasterizerCache[0])
 					{
-						CullMode = cullMode,
-						FillMode = fillMode,
-						DepthBias = depthBias,
-						MultiSampleAntiAlias = multiSampleAntiAlias,
-						ScissorTestEnable = scissorTestEnable,
-						SlopeScaleDepthBias = slopeScaleDepthBias
-					};
+						newRasterizer = rasterizerCache[1];
+					}
+					else
+					{
+						newRasterizer = rasterizerCache[0];
+					}
+					newRasterizer.CullMode = cullMode;
+					newRasterizer.FillMode = fillMode;
+					newRasterizer.DepthBias = depthBias;
+					newRasterizer.MultiSampleAntiAlias = multiSampleAntiAlias;
+					newRasterizer.ScissorTestEnable = scissorTestEnable;
+					newRasterizer.SlopeScaleDepthBias = slopeScaleDepthBias;
+					GraphicsDevice.RasterizerState = newRasterizer;
 				}
 			}
 			if (stateChanges.sampler_state_change_count > 0)
@@ -894,17 +955,25 @@ namespace Microsoft.Xna.Framework.Graphics
 
 					if (samplerChanged)
 					{
-						// TODO: SamplerState caching system -flibit
-						GraphicsDevice.SamplerStates[register] = new SamplerState()
+						// FIXME: This is part of the state cache hack! -flibit
+						SamplerState newSampler;
+						if (GraphicsDevice.SamplerStates[register] == samplerCache[register])
 						{
-							Filter = filter,
-							AddressU = addressU,
-							AddressV = addressV,
-							AddressW = addressW,
-							MaxAnisotropy = maxAnisotropy,
-							MaxMipLevel = maxMipLevel,
-							MipMapLevelOfDetailBias = mipMapLODBias
-						};
+							// FIXME: 30 is arbitrary! -flibit
+							newSampler = samplerCache[register + 30];
+						}
+						else
+						{
+							newSampler = samplerCache[register];
+						}
+						newSampler.Filter = filter;
+						newSampler.AddressU = addressU;
+						newSampler.AddressV = addressV;
+						newSampler.AddressW = addressW;
+						newSampler.MaxAnisotropy = maxAnisotropy;
+						newSampler.MaxMipLevel = maxMipLevel;
+						newSampler.MipMapLevelOfDetailBias = mipMapLODBias;
+						GraphicsDevice.SamplerStates[register] = newSampler;
 					}
 				}
 			}
