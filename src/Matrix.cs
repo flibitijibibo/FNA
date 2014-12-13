@@ -2066,17 +2066,7 @@ namespace Microsoft.Xna.Framework
 			out Matrix result
 		) {
 			Matrix rotMatrix = CreateFromQuaternion(rotation);
-			Matrix negTranslation = CreateTranslation(
-				-rotation.X,
-				-rotation.Y,
-				-rotation.Z
-			);
-			Matrix posTranslation = CreateTranslation(
-				rotation.X,
-				rotation.Y,
-				rotation.Z
-			);
-			result = (negTranslation * rotMatrix) * posTranslation;
+			Multiply(ref value, ref rotMatrix, out result);
 		}
 
 		#endregion
