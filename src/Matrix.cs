@@ -2065,8 +2065,18 @@ namespace Microsoft.Xna.Framework
 			ref Quaternion rotation,
 			out Matrix result
 		) {
-			// TODO: Codename OhGodNo -flibit
-			throw new NotImplementedException();
+			Matrix rotMatrix = CreateFromQuaternion(rotation);
+			Matrix negTranslation = CreateTranslation(
+				-rotation.X,
+				-rotation.Y,
+				-rotation.Z
+			);
+			Matrix posTranslation = CreateTranslation(
+				rotation.X,
+				rotation.Y,
+				rotation.Z
+			);
+			result = (negTranslation * rotMatrix) * posTranslation;
 		}
 
 		#endregion
