@@ -141,8 +141,34 @@ namespace Microsoft.Xna.Framework
 
 		public ContainmentType Contains(BoundingFrustum frustum)
 		{
-			// TODO: Codename OhGodNo -flibit
-			throw new NotImplementedException();
+			if (this == frustum)
+			{
+				return ContainmentType.Contains;
+			}
+			bool containsAll = true;
+			bool containsOne = false;
+			foreach (Vector3 corner in frustum.corners)
+			{
+				ContainmentType cornerResult = Contains(corner);
+				if (	cornerResult == ContainmentType.Contains ||
+					cornerResult == ContainmentType.Intersects	)
+				{
+					containsOne = true;
+				}
+				else if (cornerResult == ContainmentType.Disjoint)
+				{
+					containsAll = false;
+				}
+			}
+			if (containsAll)
+			{
+				return ContainmentType.Contains;
+			}
+			else if (containsOne)
+			{
+				return ContainmentType.Intersects;
+			}
+			return ContainmentType.Disjoint;
 		}
 
 		public ContainmentType Contains(BoundingBox box)
@@ -210,6 +236,7 @@ namespace Microsoft.Xna.Framework
 
 		public void Contains(ref Vector3 point, out ContainmentType result)
 		{
+			bool intersects = false;
 			for (int i = 0; i < PlaneCount; i += 1)
 			{
 				float classifyPoint = (
@@ -223,8 +250,13 @@ namespace Microsoft.Xna.Framework
 					result = ContainmentType.Disjoint;
 					return;
 				}
+				else if (classifyPoint == 0)
+				{
+					intersects = true;
+					break;
+				}
 			}
-			result = ContainmentType.Contains;
+			result = intersects ? ContainmentType.Intersects : ContainmentType.Contains;
 		}
 
 		public bool Equals(BoundingFrustum other)
@@ -254,6 +286,11 @@ namespace Microsoft.Xna.Framework
 		public override int GetHashCode()
 		{
 			return this.matrix.GetHashCode();
+		}
+
+		public bool Intersects(BoundingFrustum frustum)
+		{
+			return (Contains(frustum) != ContainmentType.Disjoint);
 		}
 
 		public bool Intersects(BoundingBox box)
