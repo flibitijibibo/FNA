@@ -169,18 +169,20 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		}
 
-		// FIXME: Codename OhGodNo -flibit
 		public int ReferenceStencil
 		{
-			get;
-			set;
-		}
-
-		// FIXME: Codename OhGodNo -flibit
-		public SamplerStateCollection VertexSamplerStates
-		{
-			get;
-			private set;
+			get
+			{
+				return GLDevice.ReferenceStencil;
+			}
+			set
+			{
+				/* FIXME: Does this affect the value found in
+				 * DepthStencilState?
+				 * -flibit
+				 */
+				GLDevice.ReferenceStencil = value;
+			}
 		}
 
 		#endregion

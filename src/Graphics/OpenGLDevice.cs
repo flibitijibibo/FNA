@@ -266,6 +266,44 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Stencil State Variables
 
+		public int ReferenceStencil
+		{
+			get
+			{
+				return stencilRef;
+			}
+			set
+			{
+				if (value != stencilRef)
+				{
+					stencilRef = value;
+					if (separateStencilEnable)
+					{
+						glStencilFuncSeparate(
+							GLenum.GL_FRONT,
+							XNAToGL.CompareFunc[stencilFunc],
+							stencilRef,
+							stencilMask
+						);
+						glStencilFuncSeparate(
+							GLenum.GL_BACK,
+							XNAToGL.CompareFunc[ccwStencilFunc],
+							stencilRef,
+							stencilMask
+						);
+					}
+					else
+					{
+						glStencilFunc(
+							XNAToGL.CompareFunc[stencilFunc],
+							stencilRef,
+							stencilMask
+						);
+					}
+				}
+			}
+		}
+
 		private bool stencilEnable = false;
 		private int stencilWriteMask = -1; // AKA 0xFFFFFFFF, ugh -flibit
 		private bool separateStencilEnable = false;
