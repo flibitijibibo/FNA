@@ -73,6 +73,18 @@ namespace Microsoft.Xna.Framework.Graphics
 			return ((IEnumerable<EffectParameter>) elements).GetEnumerator();
 		}
 
+		public EffectParameter GetParameterBySemantic(string semantic)
+		{
+			foreach (EffectParameter elem in elements)
+			{
+				if (semantic.Equals(elem.Semantic))
+				{
+					return elem;
+				}
+			}
+			return null;
+		}
+
 		#endregion
 
 		#region IEnumerator Methods
