@@ -1233,6 +1233,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				pass
 			);
 			currentEffect = effect.GLEffectData;
+			currentTechnique = technique;
 			currentPass = pass;
 		}
 
