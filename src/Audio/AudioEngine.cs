@@ -539,11 +539,16 @@ namespace Microsoft.Xna.Framework.Audio
 				 * What if there's more than one?
 				 * -flibit
 				 */
-				// FIXME: Why don't we use the RPC calc here...? -flibit
 				curDSP.SetParameter(
 					(int) curRPC.Parameter - (int) RPCParameter.NUM_PARAMETERS,
-					GetGlobalVariable(curVar.Name)
+					curRPC.CalculateRPC(GetGlobalVariable(curVar.Name))
 				);
+			}
+
+			// Apply all DSP changes once they have been made
+			foreach (DSPPreset curDSP in INTERNAL_dspPresets.Values)
+			{
+				curDSP.Effect.CommitChanges();
 			}
 
 			// Update Cues

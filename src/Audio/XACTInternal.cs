@@ -375,75 +375,75 @@ namespace Microsoft.Xna.Framework.Audio
 			// Apply the value to the parameter
 			if (index == 0)
 			{
-				// TODO: Codename OhGodNo -flibit
+				effect.SetReflectionsDelay(Parameters[index].Value);
 			}
 			else if (index == 1)
 			{
-				// TODO: Codename OhGodNo -flibit
+				effect.SetReverbDelay(Parameters[index].Value);
 			}
 			else if (index == 2)
 			{
-				// TODO: Codename OhGodNo -flibit
+				effect.SetPositionLeft(Parameters[index].Value);
 			}
 			else if (index == 3)
 			{
-				// TODO: Codename OhGodNo -flibit
+				effect.SetPositionRight(Parameters[index].Value);
 			}
 			else if (index == 4)
 			{
-				// TODO: Codename OhGodNo -flibit
+				effect.SetPositionLeftMatrix(Parameters[index].Value);
 			}
 			else if (index == 5)
 			{
-				// TODO: Codename OhGodNo -flibit
+				effect.SetPositionRightMatrix(Parameters[index].Value);
 			}
 			else if (index == 6)
 			{
-				// TODO: Codename OhGodNo -flibit
+				effect.SetEarlyDiffusion(Parameters[index].Value);
 			}
 			else if (index == 7)
 			{
-				// TODO: Codename OhGodNo -flibit
+				effect.SetLateDiffusion(Parameters[index].Value);
 			}
 			else if (index == 8)
 			{
-				// TODO: Codename OhGodNo -flibit
+				effect.SetLowEQGain(Parameters[index].Value);
 			}
 			else if (index == 9)
 			{
-				// TODO: Codename OhGodNo -flibit
+				effect.SetLowEQCutoff(Parameters[index].Value);
 			}
 			else if (index == 10)
 			{
-				// TODO: Codename OhGodNo -flibit
+				effect.SetHighEQGain(Parameters[index].Value);
 			}
 			else if (index == 11)
 			{
-				// TODO: Codename OhGodNo -flibit
+				effect.SetHighEQCutoff(Parameters[index].Value);
 			}
 			else if (index == 12)
 			{
-				// TODO: Codename OhGodNo -flibit
+				effect.SetRearDelay(Parameters[index].Value);
 			}
 			else if (index == 13)
 			{
-				// TODO: Codename OhGodNo -flibit
+				effect.SetRoomFilterFrequency(Parameters[index].Value);
 			}
 			else if (index == 14)
 			{
-				// TODO: Codename OhGodNo -flibit
+				effect.SetRoomFilterMain(Parameters[index].Value);
 			}
 			else if (index == 15)
 			{
-				// TODO: Codename OhGodNo -flibit
+				effect.SetRoomFilterHighFrequency(Parameters[index].Value);
 			}
 			else if (index == 16)
 			{
-				// TODO: Codename OhGodNo -flibit
+				effect.SetReflectionsGain(Parameters[index].Value);
 			}
 			else if (index == 17)
 			{
-				effect.SetGain(Parameters[index].Value);
+				effect.SetReverbGain(Parameters[index].Value);
 			}
 			else if (index == 18)
 			{
@@ -455,11 +455,11 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 			else if (index == 20)
 			{
-				// TODO: Codename OhGodNo -flibit
+				effect.SetRoomSize(Parameters[index].Value);
 			}
 			else if (index == 21)
 			{
-				// TODO: Codename OhGodNo -flibit
+				effect.SetWetDryMix(Parameters[index].Value);
 			}
 			else
 			{

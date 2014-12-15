@@ -61,6 +61,12 @@ namespace Microsoft.Xna.Framework.Audio
 		}
 
 		#endregion
+
+		#region Abstract Methods
+
+		public abstract void CommitChanges();
+
+		#endregion
 	}
 
 	internal class DSPReverbEffect : DSPEffect
@@ -76,7 +82,29 @@ namespace Microsoft.Xna.Framework.Audio
 				EFX.AL_EFFECT_EAXREVERB
 			);
 
-			// TODO: Use DSP Parameters on EAXReverb Effect. They don't bind very cleanly. :/
+			// Apply initial values
+			SetReflectionsDelay(parameters[0].Value);
+			SetReverbDelay(parameters[1].Value);
+			SetPositionLeft(parameters[2].Value);
+			SetPositionRight(parameters[3].Value);
+			SetPositionLeftMatrix(parameters[4].Value);
+			SetPositionRightMatrix(parameters[5].Value);
+			SetEarlyDiffusion(parameters[6].Value);
+			SetLateDiffusion(parameters[7].Value);
+			SetLowEQGain(parameters[8].Value);
+			SetLowEQCutoff(parameters[9].Value);
+			SetHighEQGain(parameters[10].Value);
+			SetHighEQCutoff(parameters[11].Value);
+			SetRearDelay(parameters[12].Value);
+			SetRoomFilterFrequency(parameters[13].Value);
+			SetRoomFilterMain(parameters[14].Value);
+			SetRoomFilterHighFrequency(parameters[15].Value);
+			SetReflectionsGain(parameters[16].Value);
+			SetReverbGain(parameters[17].Value);
+			SetDecayTime(parameters[18].Value);
+			SetDensity(parameters[19].Value);
+			SetRoomSize(parameters[20].Value);
+			SetWetDryMix(parameters[21].Value);
 
 			// Bind the Effect to the EffectSlot. XACT will use the EffectSlot.
 			EFX.alAuxiliaryEffectSloti(
@@ -90,31 +118,198 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region Public Methods
 
-		public void SetGain(float value)
+		public void SetReflectionsDelay(float value)
 		{
-			// Apply the value to the effect
+			EFX.alEffectf(
+				effectHandle,
+				EFX.AL_EAXREVERB_REFLECTIONS_DELAY,
+				value / 1000.0f
+			);
+		}
+
+		public void SetReverbDelay(float value)
+		{
+			EFX.alEffectf(
+				effectHandle,
+				EFX.AL_EAXREVERB_LATE_REVERB_DELAY,
+				value / 1000.0f
+			);
+		}
+
+		public void SetPositionLeft(float value)
+		{
+			// No known mapping :(
+		}
+
+		public void SetPositionRight(float value)
+		{
+			// No known mapping :(
+		}
+
+		public void SetPositionLeftMatrix(float value)
+		{
+			// No known mapping :(
+		}
+
+		public void SetPositionRightMatrix(float value)
+		{
+			// No known mapping :(
+		}
+
+		public void SetEarlyDiffusion(float value)
+		{
+			// Same as late diffusion, whatever... -flibit
+			EFX.alEffectf(
+				effectHandle,
+				EFX.AL_EAXREVERB_DIFFUSION,
+				value / 15.0f
+			);
+		}
+
+		public void SetLateDiffusion(float value)
+		{
+			// Same as early diffusion, whatever... -flibit
+			EFX.alEffectf(
+				effectHandle,
+				EFX.AL_EAXREVERB_DIFFUSION,
+				value / 15.0f
+			);
+		}
+
+		public void SetLowEQGain(float value)
+		{
+			// Cutting off volumes from 0db to 4db! -flibit
+			EFX.alEffectf(
+				effectHandle,
+				EFX.AL_EAXREVERB_GAINLF,
+				Math.Min(
+					XACTCalculator.CalculateAmplitudeRatio(
+						value - 8.0f
+					),
+					1.0f
+				)
+			);
+		}
+
+		public void SetLowEQCutoff(float value)
+		{
+			EFX.alEffectf(
+				effectHandle,
+				EFX.AL_EAXREVERB_LFREFERENCE,
+				(value * 50.0f) + 50.0f
+			);
+		}
+
+		public void SetHighEQGain(float value)
+		{
+			EFX.alEffectf(
+				effectHandle,
+				EFX.AL_EAXREVERB_GAINHF,
+				XACTCalculator.CalculateAmplitudeRatio(
+					value - 8.0f
+				)
+			);
+		}
+
+		public void SetHighEQCutoff(float value)
+		{
+			EFX.alEffectf(
+				effectHandle,
+				EFX.AL_EAXREVERB_HFREFERENCE,
+				(value * 500.0f) + 1000.0f
+			);
+		}
+
+		public void SetRearDelay(float value)
+		{
+			// No known mapping :(
+		}
+
+		public void SetRoomFilterFrequency(float value)
+		{
+			// No known mapping :(
+		}
+
+		public void SetRoomFilterMain(float value)
+		{
+			// No known mapping :(
+		}
+
+		public void SetRoomFilterHighFrequency(float value)
+		{
+			// No known mapping :(
+		}
+
+		public void SetReflectionsGain(float value)
+		{
+			// Cutting off possible float values above 3.16, for EFX -flibit
+			EFX.alEffectf(
+				effectHandle,
+				EFX.AL_EAXREVERB_REFLECTIONS_GAIN,
+				Math.Min(
+					XACTCalculator.CalculateAmplitudeRatio(value),
+					3.16f
+				)
+			);
+		}
+
+		public void SetReverbGain(float value)
+		{
+			// Cutting off volumes from 0db to 20db! -flibit
 			EFX.alEffectf(
 				effectHandle,
 				EFX.AL_EAXREVERB_GAIN,
-				value
-			);
-
-			// Apply the newly modified effect to the effect slot
-			EFX.alAuxiliaryEffectSloti(
-				Handle,
-				EFX.AL_EFFECTSLOT_EFFECT,
-				(int) effectHandle
+				Math.Min(
+					XACTCalculator.CalculateAmplitudeRatio(value),
+					1.0f
+				)
 			);
 		}
 
 		public void SetDecayTime(float value)
 		{
-			// TODO
+			/* FIXME: WTF is with this XACT value?
+			 * XACT: 0-30 equal to 0.1-inf seconds?!
+			 * EFX: 0.1-20 seconds
+			 * -flibit
+			EFX.alEffectf(
+				effectHandle,
+				EFX.AL_EAXREVERB_GAIN,
+				value
+			);
+			*/
 		}
 
 		public void SetDensity(float value)
 		{
-			// TODO
+			EFX.alEffectf(
+				effectHandle,
+				EFX.AL_EAXREVERB_DENSITY,
+				value / 100.0f
+			);
+		}
+
+		public void SetRoomSize(float value)
+		{
+			// No known mapping :(
+		}
+
+		public void SetWetDryMix(float value)
+		{
+			// No known mapping :(
+		}
+
+		#endregion
+
+		#region DSPEffect Methods
+
+		public override void CommitChanges()
+		{
+			EFX.alAuxiliaryEffectSloti(
+				Handle,
+				EFX.AL_EFFECTSLOT_EFFECT,
+				(int) effectHandle
+			);
 		}
 
 		#endregion
