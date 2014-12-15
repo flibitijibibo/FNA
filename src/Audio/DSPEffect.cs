@@ -62,9 +62,16 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#endregion
 
-		#region Abstract Methods
+		#region Public Methods
 
-		public abstract void CommitChanges();
+		public void CommitChanges()
+		{
+			EFX.alAuxiliaryEffectSloti(
+				Handle,
+				EFX.AL_EFFECTSLOT_EFFECT,
+				(int) effectHandle
+			);
+		}
 
 		#endregion
 	}
@@ -297,19 +304,6 @@ namespace Microsoft.Xna.Framework.Audio
 		public void SetWetDryMix(float value)
 		{
 			// No known mapping :(
-		}
-
-		#endregion
-
-		#region DSPEffect Methods
-
-		public override void CommitChanges()
-		{
-			EFX.alAuxiliaryEffectSloti(
-				Handle,
-				EFX.AL_EFFECTSLOT_EFFECT,
-				(int) effectHandle
-			);
 		}
 
 		#endregion
