@@ -618,12 +618,22 @@ namespace Microsoft.Xna.Framework
 
 		protected virtual void Initialize()
 		{
-			/* According to the information given on MSDN (see link below), all
-			 * GameComponents in Components at the time Initialize() is called
-			 * are initialized.
+			/* According to the information given on MSDN, all GameComponents
+			 * in Components at the time Initialize() is called are initialized:
+			 *
 			 * http://msdn.microsoft.com/en-us/library/microsoft.xna.framework.game.initialize.aspx
+			 *
+			 * Note, however, that we are NOT using a foreach. It's actually
+			 * possible to add something during initialization, and those must
+			 * also be initialized. There may be a safer way to account for it,
+			 * considering it may be possible to _remove_ components as well,
+			 * but for now, let's worry about initializing everything we get.
+			 * -flibit
 			 */
-			InitializeExistingComponents();
+			for (int i = 0; i < Components.Count; i += 1)
+			{
+				Components[i].Initialize();
+			}
 
 			_graphicsDeviceService = (IGraphicsDeviceService)
 				Services.GetService(typeof(IGraphicsDeviceService));
@@ -766,25 +776,6 @@ namespace Microsoft.Xna.Framework
 		#endregion
 
 		#region Private Methods
-
-		/* NOTE: InitializeExistingComponents really should only be called once.
-		 * Game.Initialize is the only method in a position to guarantee
-		 * that no component will get a duplicate Initialize call.
-		 * Further calls to Initialize occur immediately in response to
-		 * Components.ComponentAdded.
-		 */
-		private void InitializeExistingComponents()
-		{
-			/* TODO: Would be nice to get rid of this copy, but since it only
-			 * happens once per game, it's fairly low priority.
-			 */
-			IGameComponent[] copy = new IGameComponent[Components.Count];
-			Components.CopyTo(copy, 0);
-			foreach (IGameComponent component in copy)
-			{
-				component.Initialize();
-			}
-		}
 
 		private void CategorizeComponents()
 		{
