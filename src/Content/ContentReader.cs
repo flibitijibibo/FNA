@@ -138,14 +138,7 @@ namespace Microsoft.Xna.Framework.Content
 
 		public T ReadObject<T>()
 		{
-			int typeReaderIndex = Read7BitEncodedInt();
-			if (typeReaderIndex == 0)
-			{
-				return default(T);
-			}
-			T result = (T) typeReaders[typeReaderIndex - 1].Read(this, default(T));
-			RecordDisposable(result);
-			return result;
+			return ReadObject(default(T));
 		}
 
 		public T ReadObject<T>(ContentTypeReader typeReader)
@@ -157,21 +150,14 @@ namespace Microsoft.Xna.Framework.Content
 
 		public T ReadObject<T>(T existingInstance)
 		{
-			int typeReaderIndex = Read7BitEncodedInt();
-			if (typeReaderIndex == 0)
-			{
-				return default(T);
-			}
-			T result = (T) typeReaders[typeReaderIndex - 1].Read(this, existingInstance);
-			RecordDisposable(result);
-			return result;
+			return InnerReadObject(existingInstance);
 		}
 
 		public T ReadObject<T>(ContentTypeReader typeReader, T existingInstance)
 		{
 			if (!typeReader.TargetType.IsValueType)
 			{
-				return (T) ReadObject<object>();
+				return ReadObject(existingInstance);
 			}
 			T result = (T) typeReader.Read(this, existingInstance);
 			RecordDisposable(result);
@@ -311,16 +297,7 @@ namespace Microsoft.Xna.Framework.Content
 			object[] sharedResources = new object[sharedResourceCount];
 			for (int i = 0; i < sharedResourceCount; i += 1)
 			{
-				int index = Read7BitEncodedInt();
-				if (index > 0)
-				{
-					ContentTypeReader contentReader = typeReaders[index - 1];
-					sharedResources[i] = ReadObject<object>(contentReader);
-				}
-				else
-				{
-					sharedResources[i] = null;
-				}
+				sharedResources[i] = InnerReadObject<object>(null);
 			}
 			// Fixup shared resources by calling each registered action
 			foreach (KeyValuePair<int, Action<object>> fixup in sharedResourceFixups)
@@ -344,6 +321,25 @@ namespace Microsoft.Xna.Framework.Content
 		#endregion
 
 		#region Private Methods
+
+		private T InnerReadObject<T>(T existingInstance)
+		{
+			int typeReaderIndex = Read7BitEncodedInt();
+			if (typeReaderIndex == 0)
+			{
+				return existingInstance;
+			}
+			if (typeReaderIndex > typeReaders.Length)
+			{
+				throw new ContentLoadException(
+					"Incorrect type reader index found!"
+				);
+			}
+			ContentTypeReader typeReader = typeReaders[typeReaderIndex - 1];
+			T result = (T) typeReader.Read(this, default(T));
+			RecordDisposable(result);
+			return result;
+		}
 
 		private void RecordDisposable<T>(T result)
 		{

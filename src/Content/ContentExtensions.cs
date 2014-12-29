@@ -39,7 +39,7 @@ namespace Microsoft.Xna.Framework.Content
 			 * its get method with that of its base class. If they're the same
 			 * Then it's an overridden property.
 			 */
-			BindingFlags attrs = (
+			const BindingFlags attrs = (
 				BindingFlags.NonPublic |
 				BindingFlags.Public |
 				BindingFlags.Instance |
