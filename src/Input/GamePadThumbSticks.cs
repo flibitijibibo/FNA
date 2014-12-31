@@ -73,42 +73,108 @@ namespace Microsoft.Xna.Framework.Input
 
 		#endregion
 
-		#region Internal Methods
+		#region Internal Constructor
 
-		internal void ApplyDeadZone(GamePadDeadZone dz, float size)
+		internal GamePadThumbSticks(
+			Vector2 leftPosition,
+			Vector2 rightPosition,
+			GamePadDeadZone deadZoneMode
+		) : this() {
+			/* XNA applies dead zones before rounding/clamping values.
+			 * The public constructor does not allow this because the
+			 * dead zone must be known first.
+			 */
+			left = leftPosition;
+			right = rightPosition;
+			ApplyDeadZone(deadZoneMode);
+			Left = left;
+			Right = right;
+		}
+
+		#endregion
+
+		#region Private Methods
+
+		private void ApplyDeadZone(GamePadDeadZone dz)
 		{
+			// Based on the XInput constants
+			const float leftThumbDeadZone = 0.24f;
+			const float rightThumbDeadZone = 0.265f;
 			switch (dz)
 			{
 				case GamePadDeadZone.None:
 					break;
 				case GamePadDeadZone.IndependentAxes:
-					if (Math.Abs(left.X) < size)
+					if (Math.Abs(left.X) < leftThumbDeadZone)
 					{
 						left.X = 0f;
 					}
-					if (Math.Abs(left.Y) < size)
+					if (Math.Abs(left.Y) < leftThumbDeadZone)
 					{
 						left.Y = 0f;
 					}
-					if (Math.Abs(right.X) < size)
+					if (Math.Abs(right.X) < rightThumbDeadZone)
 					{
 						right.X = 0f;
 					}
-					if (Math.Abs(right.Y) < size)
+					if (Math.Abs(right.Y) < rightThumbDeadZone)
 					{
 						right.Y = 0f;
 					}
 					break;
 				case GamePadDeadZone.Circular:
-					if (left.LengthSquared() < size * size)
+					if (left.LengthSquared() < leftThumbDeadZone * leftThumbDeadZone)
 					{
 						left = Vector2.Zero;
 					}
-					if (right.LengthSquared() < size * size)
+					if (right.LengthSquared() < rightThumbDeadZone * rightThumbDeadZone)
 					{
 						right = Vector2.Zero;
 					}
 					break;
+			}
+
+			// Excluding dead zone from the final output range
+			if (dz != GamePadDeadZone.None)
+			{
+				if (left.X < -leftThumbDeadZone)
+				{
+					left.X += leftThumbDeadZone;
+				}
+				else if (left.X > leftThumbDeadZone)
+				{
+					left.X -= leftThumbDeadZone;
+				}
+				if (left.Y < -leftThumbDeadZone)
+				{
+					left.Y += leftThumbDeadZone;
+				}
+				else if (left.Y > leftThumbDeadZone)
+				{
+					left.Y -= leftThumbDeadZone;
+				}
+
+				if (right.X < -rightThumbDeadZone)
+				{
+					right.X += rightThumbDeadZone;
+				}
+				else if (right.X > rightThumbDeadZone)
+				{
+					right.X -= rightThumbDeadZone;
+				}
+				if (right.Y < -rightThumbDeadZone)
+				{
+					right.Y += rightThumbDeadZone;
+				}
+				else if (right.Y > rightThumbDeadZone)
+				{
+					right.Y -= rightThumbDeadZone;
+				}
+
+				left.X /= 1.0f - leftThumbDeadZone;
+				left.Y /= 1.0f - leftThumbDeadZone;
+				right.X /= 1.0f - rightThumbDeadZone;
+				right.Y /= 1.0f - rightThumbDeadZone;
 			}
 		}
 
@@ -159,7 +225,7 @@ namespace Microsoft.Xna.Framework.Input
 			return (obj is GamePadThumbSticks) && (this == (GamePadThumbSticks) obj);
 		}
 
-		public override int GetHashCode ()
+		public override int GetHashCode()
 		{
 			return this.Left.GetHashCode() + 37 * this.Right.GetHashCode();
 		}

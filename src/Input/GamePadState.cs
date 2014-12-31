@@ -172,7 +172,6 @@ namespace Microsoft.Xna.Framework.Input
 		{
 			Buttons result = Buttons.buttons;
 			GamePadThumbSticks sticks = ThumbSticks;
-			sticks.ApplyDeadZone(GamePadDeadZone.IndependentAxes, 7849 / 32767f);
 
 			if (sticks.Left.X < 0)
 			{

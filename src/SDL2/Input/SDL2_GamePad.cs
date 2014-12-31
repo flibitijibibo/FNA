@@ -743,9 +743,9 @@ namespace Microsoft.Xna.Framework.Input
 							device,
 							SDL.SDL_GameControllerAxis.SDL_CONTROLLER_AXIS_RIGHTY
 						) / -32768.0f
-					)
+					),
+					deadZoneMode
 				);
-				gc_sticks.ApplyDeadZone(deadZoneMode, DeadZoneSize);
 				gc_buttonState |= READ_StickToButtons(
 					gc_sticks.Left,
 					Buttons.LeftThumbstickLeft,
@@ -885,9 +885,9 @@ namespace Microsoft.Xna.Framework.Input
 				new Vector2(
 					READTYPE_ReadFloat(INTERNAL_joystickConfig.AXIS_RX, device),
 					-READTYPE_ReadFloat(INTERNAL_joystickConfig.AXIS_RY, device)
-				)
+				),
+				deadZoneMode
 			);
-			sticks.ApplyDeadZone(deadZoneMode, DeadZoneSize);
 			buttonState |= READ_StickToButtons(
 				sticks.Left,
 				Buttons.LeftThumbstickLeft,
