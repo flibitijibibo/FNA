@@ -7,6 +7,23 @@
  */
 #endregion
 
+#region USE_SCANCODES Option
+// #define USE_SCANCODES
+/* XNA Keys are based on Keycodes, rather than scancodes.
+ *
+ * With SDL2 you can actually pick between SDL_Keycode and SDL_Scancode, but
+ * scancodes will not be accurate to XNA4. The benefit is that scancodes will
+ * essentially ignore "foreign" keyboard layouts, making default keyboard
+ * layouts work out of the box everywhere (unless the actual symbol for the keys
+ * matters in your game).
+ *
+ * At the same time, the TextInputEXT will still read the actual chars
+ * correctly, so you can (mostly) have your cake and eat it too if you don't
+ * care about your bindings menu not making a lot of sense on foreign layouts.
+ * -flibit
+ */
+#endregion
+
 #region THREADED_GL Option
 // #define THREADED_GL
 /* Ah, so I see you've run into some issues with threaded GL...
@@ -262,7 +279,11 @@ namespace Microsoft.Xna.Framework
 					// Keyboard
 					if (evt.type == SDL.SDL_EventType.SDL_KEYDOWN)
 					{
+#if USE_SCANCODES
 						Keys key = SDL2_KeyboardUtil.ToXNA(evt.key.keysym.scancode);
+#else
+						Keys key = SDL2_KeyboardUtil.ToXNA(evt.key.keysym.sym);
+#endif
 						if (!keys.Contains(key))
 						{
 							keys.Add(key);
@@ -271,7 +292,11 @@ namespace Microsoft.Xna.Framework
 					}
 					else if (evt.type == SDL.SDL_EventType.SDL_KEYUP)
 					{
+#if USE_SCANCODES
 						Keys key = SDL2_KeyboardUtil.ToXNA(evt.key.keysym.scancode);
+#else
+						Keys key = SDL2_KeyboardUtil.ToXNA(evt.key.keysym.sym);
+#endif
 						if (keys.Remove(key))
 						{
 							INTERNAL_TextInputOut(key);
