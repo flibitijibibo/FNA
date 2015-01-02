@@ -9,7 +9,7 @@
 
 #region USE_SCANCODES Option
 // #define USE_SCANCODES
-/* XNA Keys are based on Keycodes, rather than scancodes.
+/* XNA Keys are based on keycodes, rather than scancodes.
  *
  * With SDL2 you can actually pick between SDL_Keycode and SDL_Scancode, but
  * scancodes will not be accurate to XNA4. The benefit is that scancodes will
@@ -17,7 +17,7 @@
  * layouts work out of the box everywhere (unless the actual symbol for the keys
  * matters in your game).
  *
- * At the same time, the TextInputEXT will still read the actual chars
+ * At the same time, the TextInputEXT extension will still read the actual chars
  * correctly, so you can (mostly) have your cake and eat it too if you don't
  * care about your bindings menu not making a lot of sense on foreign layouts.
  * -flibit
