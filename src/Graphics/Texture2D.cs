@@ -312,78 +312,81 @@ namespace Microsoft.Xna.Framework.Graphics
 				);
 			}
 
-			if (GraphicsDevice.GLDevice.ReadTargetIfApplicable(texture, level, data, rect))
+			Threading.ForceToMainThread(() =>
 			{
-				return;
-			}
-
-			GraphicsDevice.GLDevice.BindTexture(texture);
-
-			if (glFormat == OpenGLDevice.GLenum.GL_COMPRESSED_TEXTURE_FORMATS)
-			{
-				throw new NotImplementedException("GetData, CompressedTexture");
-			}
-			else if (rect == null)
-			{
-				// Just throw the whole texture into the user array.
-				GCHandle ptr = GCHandle.Alloc(data, GCHandleType.Pinned);
-				try
+				if (GraphicsDevice.GLDevice.ReadTargetIfApplicable(texture, level, data, rect))
 				{
-					GraphicsDevice.GLDevice.glGetTexImage(
-						OpenGLDevice.GLenum.GL_TEXTURE_2D,
-						0,
-						glFormat,
-						glType,
-						ptr.AddrOfPinnedObject()
-					);
-				}
-				finally
-				{
-					ptr.Free();
-				}
-			}
-			else
-			{
-				// Get the whole texture...
-				T[] texData = new T[Width * Height];
-				GCHandle ptr = GCHandle.Alloc(texData, GCHandleType.Pinned);
-				try
-				{
-					GraphicsDevice.GLDevice.glGetTexImage(
-						OpenGLDevice.GLenum.GL_TEXTURE_2D,
-						0,
-						glFormat,
-						glType,
-						ptr.AddrOfPinnedObject()
-					);
-				}
-				finally
-				{
-					ptr.Free();
+					return;
 				}
 
-				// Now, blit the rect region into the user array.
-				Rectangle region = rect.Value;
-				int curPixel = -1;
-				for (int row = region.Y; row < region.Y + region.Height; row += 1)
+				GraphicsDevice.GLDevice.BindTexture(texture);
+
+				if (glFormat == OpenGLDevice.GLenum.GL_COMPRESSED_TEXTURE_FORMATS)
 				{
-					for (int col = region.X; col < region.X + region.Width; col += 1)
+					throw new NotImplementedException("GetData, CompressedTexture");
+				}
+				else if (rect == null)
+				{
+					// Just throw the whole texture into the user array.
+					GCHandle ptr = GCHandle.Alloc(data, GCHandleType.Pinned);
+					try
 					{
-						curPixel += 1;
-						if (curPixel < startIndex)
-						{
-							// If we're not at the start yet, just keep going...
-							continue;
-						}
-						if (curPixel > elementCount)
-						{
-							// If we're past the end, we're done!
-							return;
-						}
-						data[curPixel - startIndex] = texData[(row * Width) + col];
+						GraphicsDevice.GLDevice.glGetTexImage(
+							OpenGLDevice.GLenum.GL_TEXTURE_2D,
+							0,
+							glFormat,
+							glType,
+							ptr.AddrOfPinnedObject()
+						);
+					}
+					finally
+					{
+						ptr.Free();
 					}
 				}
-			}
+				else
+				{
+					// Get the whole texture...
+					T[] texData = new T[Width * Height];
+					GCHandle ptr = GCHandle.Alloc(texData, GCHandleType.Pinned);
+					try
+					{
+						GraphicsDevice.GLDevice.glGetTexImage(
+							OpenGLDevice.GLenum.GL_TEXTURE_2D,
+							0,
+							glFormat,
+							glType,
+							ptr.AddrOfPinnedObject()
+						);
+					}
+					finally
+					{
+						ptr.Free();
+					}
+
+					// Now, blit the rect region into the user array.
+					Rectangle region = rect.Value;
+					int curPixel = -1;
+					for (int row = region.Y; row < region.Y + region.Height; row += 1)
+					{
+						for (int col = region.X; col < region.X + region.Width; col += 1)
+						{
+							curPixel += 1;
+							if (curPixel < startIndex)
+							{
+								// If we're not at the start yet, just keep going...
+								continue;
+							}
+							if (curPixel > elementCount)
+							{
+								// If we're past the end, we're done!
+								return;
+							}
+							data[curPixel - startIndex] = texData[(row * Width) + col];
+						}
+					}
+				}
+			});
 		}
 
 		#endregion
