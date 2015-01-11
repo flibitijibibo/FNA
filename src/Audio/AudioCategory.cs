@@ -212,8 +212,6 @@ namespace Microsoft.Xna.Framework.Audio
 				{
 					if (!activeCues[i].INTERNAL_update())
 					{
-						cueInstanceCounts[activeCues[i].Name] -= 1;
-						activeCues.RemoveAt(i);
 						i -= 1;
 					}
 				}
@@ -335,9 +333,6 @@ namespace Microsoft.Xna.Framework.Audio
 			if (activeCues.Contains(cue))
 			{
 				activeCues.Remove(cue);
-			}
-			if (cueInstanceCounts.ContainsKey(cue.Name))
-			{
 				cueInstanceCounts[cue.Name] -= 1;
 			}
 		}

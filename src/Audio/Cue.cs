@@ -220,6 +220,7 @@ namespace Microsoft.Xna.Framework.Audio
 					INTERNAL_instancePitches.Clear();
 					INTERNAL_queuedPlayback = false;
 				}
+				INTERNAL_category.INTERNAL_removeActiveCue(this);
 				IsDisposed = true;
 			}
 		}
@@ -547,6 +548,10 @@ namespace Microsoft.Xna.Framework.Audio
 				if (INTERNAL_isManaged)
 				{
 					Dispose();
+				}
+				else
+				{
+					INTERNAL_category.INTERNAL_removeActiveCue(this);
 				}
 				return false;
 			}
