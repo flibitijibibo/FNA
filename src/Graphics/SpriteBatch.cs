@@ -910,6 +910,14 @@ namespace Microsoft.Xna.Framework.Graphics
 			int offset = 0;
 			Texture2D curTexture = null;
 
+			PrepRenderState();
+
+			if (numSprites == 0)
+			{
+				// Nothing to do.
+				return;
+			}
+
 			// FIXME: OPTIMIZATION POINT: Speed up sprite sorting! -flibit
 			if (sortMode == SpriteSortMode.Texture)
 			{
@@ -938,8 +946,6 @@ namespace Microsoft.Xna.Framework.Graphics
 					FrontToBackCompare
 				);
 			}
-
-			PrepRenderState();
 
 			for (int i = 0; i < numSprites; i += 1)
 			{
