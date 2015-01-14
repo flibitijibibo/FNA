@@ -199,6 +199,82 @@ namespace Microsoft.Xna.Framework
 			result.D = value.D * factor;
 		}
 
+		/// <summary>
+		/// Transforms a normalized plane by a matrix.
+		/// </summary>
+		/// <param name="plane">The normalized plane to transform.</param>
+		/// <param name="matrix">The transformation matrix.</param>
+		/// <returns>The transformed plane.</returns>
+		public static Plane Transform(Plane plane, Matrix matrix)
+		{
+			Plane result;
+			Transform(ref plane, ref matrix, out result);
+			return result;
+		}
+
+		/// <summary>
+		/// Transforms a normalized plane by a matrix.
+		/// </summary>
+		/// <param name="plane">The normalized plane to transform.</param>
+		/// <param name="matrix">The transformation matrix.</param>
+		/// <param name="result">The transformed plane.</param>
+		public static void Transform(
+			ref Plane plane,
+			ref Matrix matrix,
+			out Plane result
+		) {
+			/* See "Transforming Normals" in
+			 * http://www.glprogramming.com/red/appendixf.html
+			 * for an explanation of how this works.
+			 */
+			Matrix transformedMatrix;
+			Matrix.Invert(ref matrix, out transformedMatrix);
+			Matrix.Transpose(
+				ref transformedMatrix,
+				out transformedMatrix
+			);
+			Vector4 vector = new Vector4(plane.Normal, plane.D);
+			Vector4 transformedVector;
+			Vector4.Transform(
+				ref vector,
+				ref transformedMatrix,
+				out transformedVector
+			);
+			result = new Plane(transformedVector);
+		}
+
+		/// <summary>
+		/// Transforms a normalized plane by a quaternion rotation.
+		/// </summary>
+		/// <param name="plane">The normalized plane to transform.</param>
+		/// <param name="rotation">The quaternion rotation.</param>
+		/// <returns>The transformed plane.</returns>
+		public static Plane Transform(Plane plane, Quaternion rotation)
+		{
+			Plane result;
+			Transform(ref plane, ref rotation, out result);
+			return result;
+		}
+
+		/// <summary>
+		/// Transforms a normalized plane by a quaternion rotation.
+		/// </summary>
+		/// <param name="plane">The normalized plane to transform.</param>
+		/// <param name="rotation">The quaternion rotation.</param>
+		/// <param name="result">The transformed plane.</param>
+		public static void Transform(
+			ref Plane plane,
+			ref Quaternion rotation,
+			out Plane result
+		) {
+			Vector3.Transform(
+				ref plane.Normal,
+				ref rotation,
+				out result.Normal
+			);
+			result.D = plane.D;
+		}
+
 		#endregion
 
 		#region Public Static Operators and Override Methods
@@ -231,9 +307,9 @@ namespace Microsoft.Xna.Framework
 		public override string ToString()
 		{
 			return (
-				"{{Normal:" + Normal.ToString() +
+				"{Normal:" + Normal.ToString() +
 				" D:" + D.ToString() +
-				"}}"
+				"}"
 			);
 		}
 

@@ -214,9 +214,9 @@ namespace Microsoft.Xna.Framework
 		public override string ToString()
 		{
 			return (
-				"{{X:" + X.ToString() +
+				"{X:" + X.ToString() +
 				" Y:" + Y.ToString() +
-				"}}"
+				"}"
 			);
 		}
 

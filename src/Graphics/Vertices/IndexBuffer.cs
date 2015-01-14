@@ -106,7 +106,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		) {
 			if (graphicsDevice == null)
 			{
-				throw new ArgumentNullException("GraphicsDevice is null");
+				throw new ArgumentNullException("graphicsDevice");
 			}
 
 			GraphicsDevice = graphicsDevice;
@@ -177,7 +177,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		) where T : struct {
 			if (data == null)
 			{
-				throw new ArgumentNullException("data is null");
+				throw new ArgumentNullException("data");
 			}
 			if (data.Length < (startIndex + elementCount))
 			{
@@ -261,7 +261,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		) where T : struct {
 			if (data == null)
 			{
-				throw new ArgumentNullException("data is null");
+				throw new ArgumentNullException("data");
 			}
 			if (data.Length < (startIndex + elementCount))
 			{
@@ -322,7 +322,11 @@ namespace Microsoft.Xna.Framework.Graphics
 				return IndexElementSize.ThirtyTwoBits;
 			}
 
-			throw new ArgumentOutOfRangeException("Index buffers can only be created for types that are sixteen or thirty two bits in length");
+			throw new ArgumentOutOfRangeException(
+				"type",
+				"Index buffers can only be created for types" +
+				" that are sixteen or thirty two bits in length"
+			);
 		}
 
 		#endregion
