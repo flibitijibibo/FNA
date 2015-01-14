@@ -218,7 +218,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				data,
 				0,
 				data.Length,
-				VertexDeclaration.VertexStride,
+				Marshal.SizeOf(typeof(T)),
 				SetDataOptions.None
 			);
 		}
@@ -233,7 +233,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				data,
 				startIndex,
 				elementCount,
-				VertexDeclaration.VertexStride,
+				Marshal.SizeOf(typeof(T)),
 				SetDataOptions.None
 			);
 		}
@@ -280,8 +280,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				);
 			}
 
-			int bufferSize = VertexCount * VertexDeclaration.VertexStride;
-			if (vertexStride > bufferSize)
+			if (	elementCount > 1 &&
+				(elementCount * vertexStride > Handle.BufferSize)	)
 			{
 				throw new InvalidOperationException(
 					"The vertex stride is larger than the vertex buffer."
@@ -293,7 +293,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				vertexStride = elementSizeInBytes;
 			}
-			if (vertexStride < VertexDeclaration.VertexStride)
+			if (vertexStride < elementSizeInBytes)
 			{
 				throw new ArgumentOutOfRangeException(
 					"The vertex stride must be greater than" +
@@ -305,13 +305,11 @@ namespace Microsoft.Xna.Framework.Graphics
 			Threading.ForceToMainThread(() =>
 				GraphicsDevice.GLDevice.SetVertexBufferData(
 					Handle,
-					bufferSize,
 					elementSizeInBytes,
 					offsetInBytes,
 					data,
 					startIndex,
 					elementCount,
-					vertexStride,
 					options
 				)
 			);

@@ -127,6 +127,12 @@ namespace Microsoft.Xna.Framework.Graphics
 				private set;
 			}
 
+			public int BufferSize
+			{
+				get;
+				private set;
+			}
+
 			public GLenum Dynamic
 			{
 				get;
@@ -142,12 +148,13 @@ namespace Microsoft.Xna.Framework.Graphics
 				uint handle;
 				graphicsDevice.GLDevice.glGenBuffers(1, out handle);
 				Handle = handle;
+				BufferSize = vertexStride * vertexCount;
 				Dynamic = dynamic ? GLenum.GL_STREAM_DRAW : GLenum.GL_STATIC_DRAW;
 
 				graphicsDevice.GLDevice.BindVertexBuffer(this);
 				graphicsDevice.GLDevice.glBufferData(
 					GLenum.GL_ARRAY_BUFFER,
-					(IntPtr) (vertexStride * vertexCount),
+					(IntPtr) BufferSize,
 					IntPtr.Zero,
 					Dynamic
 				);
@@ -1360,13 +1367,11 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public void SetVertexBufferData<T>(
 			OpenGLVertexBuffer handle,
-			int bufferSize,
 			int elementSizeInBytes,
 			int offsetInBytes,
 			T[] data,
 			int startIndex,
 			int elementCount,
-			int vertexStride,
 			SetDataOptions options
 		) where T : struct {
 			BindVertexBuffer(handle);
@@ -1375,7 +1380,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				glBufferData(
 					GLenum.GL_ARRAY_BUFFER,
-					(IntPtr) bufferSize,
+					(IntPtr) handle.BufferSize,
 					IntPtr.Zero,
 					handle.Dynamic
 				);
