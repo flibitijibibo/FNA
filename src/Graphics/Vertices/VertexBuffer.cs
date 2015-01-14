@@ -218,7 +218,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				data,
 				0,
 				data.Length,
-				Marshal.SizeOf(typeof(T)),
+				VertexDeclaration.VertexStride,
 				SetDataOptions.None
 			);
 		}
@@ -233,7 +233,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				data,
 				startIndex,
 				elementCount,
-				Marshal.SizeOf(typeof(T)),
+				VertexDeclaration.VertexStride,
 				SetDataOptions.None
 			);
 		}
@@ -281,7 +281,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 
 			int bufferSize = VertexCount * VertexDeclaration.VertexStride;
-			if (elementCount > 1 && (elementCount * vertexStride > bufferSize))
+			if (vertexStride > bufferSize)
 			{
 				throw new InvalidOperationException(
 					"The vertex stride is larger than the vertex buffer."
