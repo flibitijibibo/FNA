@@ -330,7 +330,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 		internal void INTERNAL_removeActiveCue(Cue cue)
 		{
-			if (activeCues.Contains(cue))
+			if (activeCues != null && activeCues.Contains(cue))
 			{
 				activeCues.Remove(cue);
 				cueInstanceCounts[cue.Name] -= 1;
