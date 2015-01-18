@@ -226,28 +226,29 @@ namespace Microsoft.Xna.Framework.Audio
 		public float CalculateRPC(float varInput)
 		{
 			// TODO: Non-linear curves
-			float result = 0.0f;
 			if (varInput == 0.0f)
 			{
 				if (Points[0].X == 0.0f)
 				{
 					// Some curves may start X->0 elsewhere.
-					result = Points[0].Y;
+					return Points[0].Y;
 				}
+				return 0.0f;
 			}
 			else if (varInput <= Points[0].X)
 			{
 				// Zero to first defined point
-				result = Points[0].Y / (varInput / Points[0].X);
+				return Points[0].Y / (varInput / Points[0].X);
 			}
 			else if (varInput >= Points[Points.Length - 1].X)
 			{
 				// Last defined point to infinity
-				result = Points[Points.Length - 1].Y / (Points[Points.Length - 1].X / varInput);
+				return Points[Points.Length - 1].Y / (Points[Points.Length - 1].X / varInput);
 			}
 			else
 			{
 				// Something between points...
+				float result = 0.0f;
 				for (int i = 0; i < Points.Length - 1; i += 1)
 				{
 					// y = b
@@ -263,19 +264,8 @@ namespace Microsoft.Xna.Framework.Audio
 						break;
 					}
 				}
+				return result;
 			}
-
-			// Clamp the result to +/- 10000.
-			if (result > 10000.0f)
-			{
-				result = 10000.0f;
-			}
-			else if (result < -10000.0f)
-			{
-				result = -10000.0f;
-			}
-
-			return result;
 		}
 	}
 

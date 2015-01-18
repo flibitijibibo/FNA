@@ -304,6 +304,7 @@ namespace Microsoft.Xna.Framework.Audio
 				0,
 				1.0,
 				1.0,
+				-1,
 				0,
 				0,
 				new byte[] { 0xFF }
@@ -369,6 +370,7 @@ namespace Microsoft.Xna.Framework.Audio
 						0,
 						clipVolume,
 						clipVolume,
+						-1,
 						loopCount,
 						0,
 						new byte[] { 0xFF }
@@ -430,6 +432,7 @@ namespace Microsoft.Xna.Framework.Audio
 						0,
 						clipVolume,
 						clipVolume,
+						-1,
 						loopCount,
 						variationType,
 						weights
@@ -477,8 +480,8 @@ namespace Microsoft.Xna.Framework.Audio
 					reader.ReadSingle();
 					reader.ReadSingle();
 
-					// Unknown value
-					reader.ReadByte();
+					// Filter Type
+					byte filterType = reader.ReadByte();
 					
 					// Finally.
 					INTERNAL_events[i] = new PlayWaveEvent(
@@ -489,6 +492,7 @@ namespace Microsoft.Xna.Framework.Audio
 						maxPitch,
 						minVolume,
 						maxVolume,
+						(int) filterType,
 						loopCount,
 						0,
 						new byte[] { 0xFF }
@@ -530,8 +534,8 @@ namespace Microsoft.Xna.Framework.Audio
 					reader.ReadSingle();
 					reader.ReadSingle();
 
-					// Unknown value
-					reader.ReadByte();
+					// Filter Type
+					byte filterType = reader.ReadByte();
 
 					// Variation flags
 					// FIXME: There's probably more to these flags...
@@ -585,6 +589,7 @@ namespace Microsoft.Xna.Framework.Audio
 						maxPitch,
 						minVolume,
 						maxVolume,
+						(int) filterType,
 						loopCount,
 						variationType,
 						weights
@@ -730,6 +735,8 @@ namespace Microsoft.Xna.Framework.Audio
 		private double INTERNAL_minVolume;
 		private double INTERNAL_maxVolume;
 
+		private int INTERNAL_filterType;
+
 		private byte INTERNAL_loopCount;
 
 		private VariationPlaylistType INTERNAL_variationType;
@@ -748,6 +755,7 @@ namespace Microsoft.Xna.Framework.Audio
 			short maxPitch,
 			double minVolume,
 			double maxVolume,
+			int filterType,
 			byte loopCount,
 			ushort variationType,
 			byte[] weights
@@ -758,6 +766,7 @@ namespace Microsoft.Xna.Framework.Audio
 			INTERNAL_maxPitch = maxPitch;
 			INTERNAL_minVolume = minVolume;
 			INTERNAL_maxVolume = maxVolume;
+			INTERNAL_filterType = filterType;
 			INTERNAL_loopCount = loopCount;
 			INTERNAL_variationType = (VariationPlaylistType) variationType;
 			INTERNAL_weights = weights;
@@ -796,6 +805,7 @@ namespace Microsoft.Xna.Framework.Audio
 					INTERNAL_maxPitch
 				) / 1000.0f
 			) + soundPitch;
+			result.FilterType = INTERNAL_filterType;
 			// FIXME: Better looping!
 			result.IsLooped = (INTERNAL_loopCount == 255);
 			return result;

@@ -494,6 +494,8 @@ namespace Microsoft.Xna.Framework.Audio
 
 			float rpcVolume = 1.0f;
 			float rpcPitch = 0.0f;
+			float hfGain = 1.0f;
+			float lfGain = 1.0f;
 			foreach (uint curCode in INTERNAL_activeSound.RPCCodes)
 			{
 				RPC curRPC = INTERNAL_baseEngine.INTERNAL_getRPC(curCode);
@@ -521,7 +523,10 @@ namespace Microsoft.Xna.Framework.Audio
 				}
 				else if (curRPC.Parameter == RPCParameter.FilterFrequency)
 				{
-					// TODO: Filters?
+					System.Console.WriteLine(result);
+					// FIXME: Just listening to the last RPC!
+					hfGain = result / 20000.0f;
+					lfGain = 1.0f - hfGain;
 				}
 				else
 				{
@@ -539,6 +544,15 @@ namespace Microsoft.Xna.Framework.Audio
 				 * authored pitch and RPC pitch results.
 				 */
 				INTERNAL_instancePool[i].Pitch = INTERNAL_instancePitches[i] + rpcPitch;
+
+				/* The final filter is determined by the instance's filter type,
+				 * in addition to our calculation of the HF/LF gain values.
+				 */
+				INTERNAL_instancePool[i].INTERNAL_applyFilter(
+					INTERNAL_baseEngine.Filter,
+					hfGain,
+					lfGain
+				);
 			}
 
 			// Finally, check if we're still active.

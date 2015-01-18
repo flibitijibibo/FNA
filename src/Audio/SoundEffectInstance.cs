@@ -148,6 +148,16 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#endregion
 
+		#region Internal Properties
+
+		internal int FilterType
+		{
+			get;
+			set;
+		}
+
+		#endregion
+
 		#region Private Variables: XNA Implementation
 
 		private SoundEffect INTERNAL_parentEffect;
@@ -415,6 +425,37 @@ namespace Microsoft.Xna.Framework.Audio
 					(int) INTERNAL_alEffectSlot,
 					0,
 					0
+				);
+			}
+		}
+
+		internal void INTERNAL_applyFilter(
+			DSPFilter filter,
+			float hfGain,
+			float lfGain
+		) {
+			if (FilterType == -1)
+			{
+				return;
+			}
+			else if (FilterType == 0)
+			{
+				filter.ApplyLowPassFilter(INTERNAL_alSource, hfGain);
+			}
+			else if (FilterType == 1)
+			{
+				filter.ApplyHighPassFilter(INTERNAL_alSource, lfGain);
+			}
+			else if (FilterType == 2)
+			{
+				filter.ApplyBandPassFilter(INTERNAL_alSource, hfGain, lfGain);
+			}
+			if (INTERNAL_alSource != 0)
+			{
+				AL10.alSourcei(
+					INTERNAL_alSource,
+					EFX.AL_DIRECT_FILTER,
+					(int) filter.Handle
 				);
 			}
 		}
