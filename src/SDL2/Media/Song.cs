@@ -7,6 +7,18 @@
  */
 #endregion
 
+#region NO_STREAM_THREAD Option
+// #define NO_STREAM_THREAD
+/* We use a thread to stream Songs specifically, because if the game hangs, the
+ * Song needs to keep playing, as Windows Media Player would in XNA4.
+ *
+ * If you know that won't happen and want to cut out a thread, or you want to
+ * use this with XNA4 somehow, you can uncomment this define.
+ *
+ * -flibit
+ */
+#endregion
+
 #region Using Statements
 using System;
 using System.Collections.Generic;
@@ -157,8 +169,10 @@ namespace Microsoft.Xna.Framework.Media
 		private Vorbisfile.OggVorbis_File vorbisFile = new Vorbisfile.OggVorbis_File();
 		private byte[] vorbisBuffer = new byte[4096];
 
+#if !NO_STREAM_THREAD
 		private Thread songThread;
 		private bool exitThread;
+#endif
 
 		#endregion
 
@@ -236,12 +250,17 @@ namespace Microsoft.Xna.Framework.Media
 			soundStream.BufferNeeded += QueueBuffer;
 			QueueBuffer(null, null);
 			QueueBuffer(null, null);
+
+#if NO_STREAM_THREAD
+			soundStream.Play();
+#else
 			soundStream.Play(false);
 
 			exitThread = false;
 			songThread = new Thread(SongThread);
 			songThread.IsBackground = true;
 			songThread.Start();
+#endif
 
 			PlayCount += 1;
 		}
@@ -258,11 +277,13 @@ namespace Microsoft.Xna.Framework.Media
 
 		internal void Stop()
 		{
+#if !NO_STREAM_THREAD
 			exitThread = true;
 			if (songThread != null && Thread.CurrentThread != songThread)
 			{
 				songThread.Join();
 			}
+#endif
 
 			soundStream.Stop();
 			soundStream.BufferNeeded -= QueueBuffer;
@@ -328,6 +349,7 @@ namespace Microsoft.Xna.Framework.Media
 
 		#region Private Song Update Thread
 
+#if !NO_STREAM_THREAD
 		private void SongThread()
 		{
 			while (!exitThread)
@@ -340,6 +362,7 @@ namespace Microsoft.Xna.Framework.Media
 				}
 			}
 		}
+#endif
 
 		#endregion
 
