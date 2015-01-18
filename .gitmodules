@@ -10,3 +10,6 @@
 [submodule "lib/MojoShader-CS"]
 	path = lib/MojoShader-CS
 	url = git://github.com/flibitijibibo/MojoShader-CS.git
+[submodule "lib/Vorbisfile-CS"]
+	path = lib/Vorbisfile-CS
+	url = https://github.com/flibitijibibo/Vorbisfile-CS.git

@@ -1,0 +1,95 @@
+R: Gendarme.Rules.Performance.AvoidLargeStructureRule
+T: Vorbisfile/ogg_stream_state
+T: Vorbisfile/vorbis_dsp_state
+T: Vorbisfile/vorbis_block
+T: Vorbisfile/vorbis_info
+T: Vorbisfile/OggVorbis_File
+
+R: Gendarme.Rules.Naming.AvoidNonAlphanumericIdentifierRule
+M: System.Int32 Vorbisfile::ov_fopen(System.String,Vorbisfile/OggVorbis_File&)
+M: Vorbisfile/vorbis_info Vorbisfile::ov_info(Vorbisfile/OggVorbis_File&,System.Int32)
+M: Vorbisfile/vorbis_comment Vorbisfile::ov_comment(Vorbisfile/OggVorbis_File&,System.Int32)
+M: System.Double Vorbisfile::ov_time_total(Vorbisfile/OggVorbis_File&,System.Int32)
+M: System.Int64 Vorbisfile::ov_read(Vorbisfile/OggVorbis_File&,System.Byte[],System.Int32,System.Int32,System.Int32,System.Int32,System.Int32&)
+M: System.Int32 Vorbisfile::ov_clear(Vorbisfile/OggVorbis_File&)
+T: Vorbisfile/oggpack_buffer
+T: Vorbisfile/ogg_sync_state
+T: Vorbisfile/ogg_stream_state
+T: Vorbisfile/vorbis_dsp_state
+T: Vorbisfile/vorbis_block
+T: Vorbisfile/vorbis_info
+T: Vorbisfile/vorbis_comment
+T: Vorbisfile/ov_callbacks
+T: Vorbisfile/OggVorbis_File
+
+R: Gendarme.Rules.Design.AvoidRefAndOutParametersRule
+M: Vorbisfile/vorbis_info Vorbisfile::ov_info(Vorbisfile/OggVorbis_File&,System.Int32)
+M: Vorbisfile/vorbis_comment Vorbisfile::ov_comment(Vorbisfile/OggVorbis_File&,System.Int32)
+
+R: Gendarme.Rules.Design.AvoidVisibleFieldsRule
+T: Vorbisfile/oggpack_buffer
+T: Vorbisfile/ogg_sync_state
+T: Vorbisfile/ogg_stream_state
+T: Vorbisfile/vorbis_dsp_state
+T: Vorbisfile/vorbis_block
+T: Vorbisfile/vorbis_info
+T: Vorbisfile/vorbis_comment
+T: Vorbisfile/ov_callbacks
+T: Vorbisfile/OggVorbis_File
+
+R: Gendarme.Rules.Design.AvoidVisibleNestedTypesRule
+T: Vorbisfile/oggpack_buffer
+T: Vorbisfile/ogg_sync_state
+T: Vorbisfile/ogg_stream_state
+T: Vorbisfile/ogg_stream_state/<header>__FixedBuffer0
+T: Vorbisfile/vorbis_dsp_state
+T: Vorbisfile/vorbis_block
+T: Vorbisfile/vorbis_info
+T: Vorbisfile/vorbis_comment
+T: Vorbisfile/ov_callbacks
+T: Vorbisfile/OggVorbis_File
+
+R: Gendarme.Rules.Interoperability.CentralizePInvokesIntoNativeMethodsTypeRule
+M: System.Int32 Vorbisfile::ov_fopen(System.String,Vorbisfile/OggVorbis_File&)
+M: System.IntPtr Vorbisfile::INTERNAL_ov_info(Vorbisfile/OggVorbis_File&,System.Int32)
+M: System.IntPtr Vorbisfile::INTERNAL_ov_comment(Vorbisfile/OggVorbis_File&,System.Int32)
+M: System.Double Vorbisfile::ov_time_total(Vorbisfile/OggVorbis_File&,System.Int32)
+M: System.Int64 Vorbisfile::ov_read(Vorbisfile/OggVorbis_File&,System.Byte[],System.Int32,System.Int32,System.Int32,System.Int32,System.Int32&)
+M: System.Int32 Vorbisfile::ov_clear(Vorbisfile/OggVorbis_File&)
+
+R: Gendarme.Rules.Design.MarkAssemblyWithAssemblyVersionRule
+A: Vorbisfile-CS, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+
+R: Gendarme.Rules.Design.MarkAssemblyWithCLSCompliantRule
+A: Vorbisfile-CS, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+
+R: Gendarme.Rules.Design.MarkAssemblyWithComVisibleRule
+A: Vorbisfile-CS, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+
+R: Gendarme.Rules.Security.NativeFieldsShouldNotBeVisibleRule
+T: Vorbisfile/oggpack_buffer
+T: Vorbisfile/ogg_sync_state
+T: Vorbisfile/ogg_stream_state
+T: Vorbisfile/vorbis_dsp_state
+T: Vorbisfile/vorbis_block
+T: Vorbisfile/vorbis_info
+T: Vorbisfile/vorbis_comment
+T: Vorbisfile/ov_callbacks
+T: Vorbisfile/OggVorbis_File
+
+R: Gendarme.Rules.Naming.UseCorrectCasingRule
+M: System.Int32 Vorbisfile::ov_fopen(System.String,Vorbisfile/OggVorbis_File&)
+M: Vorbisfile/vorbis_info Vorbisfile::ov_info(Vorbisfile/OggVorbis_File&,System.Int32)
+M: Vorbisfile/vorbis_comment Vorbisfile::ov_comment(Vorbisfile/OggVorbis_File&,System.Int32)
+M: System.Double Vorbisfile::ov_time_total(Vorbisfile/OggVorbis_File&,System.Int32)
+M: System.Int64 Vorbisfile::ov_read(Vorbisfile/OggVorbis_File&,System.Byte[],System.Int32,System.Int32,System.Int32,System.Int32,System.Int32&)
+M: System.Int32 Vorbisfile::ov_clear(Vorbisfile/OggVorbis_File&)
+T: Vorbisfile/oggpack_buffer
+T: Vorbisfile/ogg_sync_state
+T: Vorbisfile/ogg_stream_state
+T: Vorbisfile/vorbis_dsp_state
+T: Vorbisfile/vorbis_block
+T: Vorbisfile/vorbis_info
+T: Vorbisfile/vorbis_comment
+T: Vorbisfile/ov_callbacks
+

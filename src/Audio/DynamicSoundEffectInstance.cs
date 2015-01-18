@@ -199,6 +199,15 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public override void Play()
 		{
+			Play(true);
+		}
+
+		#endregion
+
+		#region Internal Play Method
+
+		internal void Play(bool isManaged)
+		{
 			if (State != SoundState.Stopped)
 			{
 				return; // No-op if we're already playing.
@@ -259,7 +268,10 @@ namespace Microsoft.Xna.Framework.Audio
 
 			// Finally.
 			AL10.alSourcePlay(INTERNAL_alSource);
-			OpenALDevice.Instance.dynamicInstancePool.Add(this);
+			if (isManaged)
+			{
+				OpenALDevice.Instance.dynamicInstancePool.Add(this);
+			}
 
 			// ... but wait! What if we need moar buffers?
 			if (PendingBufferCount <= 2 && BufferNeeded != null)

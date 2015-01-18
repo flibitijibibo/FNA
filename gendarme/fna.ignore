@@ -8,4 +8,5 @@ A: FNA
 @ sdl2.ignore
 @ openal.ignore
 @ mojoshader.ignore
+@ vorbisfile.ignore
 @ theoraplay.ignore

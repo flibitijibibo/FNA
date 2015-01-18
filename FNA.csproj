@@ -349,7 +349,6 @@
     <Compile Include="src\NamespaceDocs.cs" />
     <Compile Include="lib\SDL2-CS\src\SDL2.cs" />
     <Compile Include="lib\SDL2-CS\src\SDL2_image.cs" />
-    <Compile Include="lib\SDL2-CS\src\SDL2_mixer.cs" />
     <Compile Include="lib\SDL2-CS\src\LPUtf8StrMarshaler.cs" />
     <Compile Include="lib\OpenAL-CS\src\ALC10.cs" />
     <Compile Include="lib\OpenAL-CS\src\AL10.cs" />
@@ -357,6 +356,7 @@
     <Compile Include="lib\OpenAL-CS\src\EFX.cs" />
     <Compile Include="lib\MojoShader-CS\MojoShader.cs" />
     <Compile Include="lib\TheoraPlay-CS\TheoraPlay.cs" />
+    <Compile Include="lib\Vorbisfile-CS\Vorbisfile.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="FNA.dll.config">
