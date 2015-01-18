@@ -523,7 +523,6 @@ namespace Microsoft.Xna.Framework.Audio
 				}
 				else if (curRPC.Parameter == RPCParameter.FilterFrequency)
 				{
-					System.Console.WriteLine(result);
 					// FIXME: Just listening to the last RPC!
 					hfGain = result / 20000.0f;
 					lfGain = 1.0f - hfGain;
