@@ -100,39 +100,51 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public void Pause()
 		{
-			foreach (Cue curCue in activeCues)
+			lock (activeCues)
 			{
-				curCue.Pause();
+				foreach (Cue curCue in activeCues)
+				{
+					curCue.Pause();
+				}
 			}
 		}
 
 		public void Resume()
 		{
-			foreach (Cue curCue in activeCues)
+			lock (activeCues)
 			{
-				curCue.Resume();
+				foreach (Cue curCue in activeCues)
+				{
+					curCue.Resume();
+				}
 			}
 		}
 
 		public void SetVolume(float volume)
 		{
 			INTERNAL_volume.Value = volume;
-			foreach (Cue curCue in activeCues)
+			lock (activeCues)
 			{
-				curCue.SetVariable("Volume", volume);
+				foreach (Cue curCue in activeCues)
+				{
+					curCue.SetVariable("Volume", volume);
+				}
 			}
 		}
 
 		public void Stop(AudioStopOptions options)
 		{
-			while (activeCues.Count > 0)
+			lock (activeCues)
 			{
-				Cue curCue = activeCues[0];
-				curCue.Stop(options);
-				curCue.SetVariable("NumCueInstances", 0);
-				cueInstanceCounts[curCue.Name] -= 1;
+				while (activeCues.Count > 0)
+				{
+					Cue curCue = activeCues[0];
+					curCue.Stop(options);
+					curCue.SetVariable("NumCueInstances", 0);
+					cueInstanceCounts[curCue.Name] -= 1;
+				}
+				activeCues.Clear();
 			}
-			activeCues.Clear();
 		}
 
 		public override int GetHashCode()
@@ -237,71 +249,80 @@ namespace Microsoft.Xna.Framework.Audio
 
 		internal bool INTERNAL_addCue(Cue newCue)
 		{
-			if (activeCues.Count >= maxCueInstances)
+			lock (activeCues)
 			{
-				if (maxCueBehavior == MaxInstanceBehavior.Fail)
+				if (activeCues.Count >= maxCueInstances)
 				{
-					return false; // Just ignore us...
-				}
-				else if (maxCueBehavior == MaxInstanceBehavior.Queue)
-				{
-					newCue.SetVariable("Volume", 0.0f);
-					queuedCue.Value = newCue;
-					fadingCue.Value = activeCues[0];
-					fadingCueVolume.Value = activeCues[0].GetVariable("Volume");
-					fadeTimer.Reset();
-					fadeTimer.Start();
-					fading.Value = true;
-				}
-				else if (maxCueBehavior == MaxInstanceBehavior.ReplaceOldest)
-				{
-					INTERNAL_removeOldestCue(activeCues[0].Name);
-				}
-				else if (maxCueBehavior == MaxInstanceBehavior.ReplaceQuietest)
-				{
-					float lowestVolume = float.MaxValue;
-					int lowestIndex = -1;
-					for (int i = 0; i < activeCues.Count; i += 1)
+					if (maxCueBehavior == MaxInstanceBehavior.Fail)
 					{
-						if (activeCues[i].GetVariable("Volume") < lowestVolume)
+						return false; // Just ignore us...
+					}
+					else if (maxCueBehavior == MaxInstanceBehavior.Queue)
+					{
+						newCue.SetVariable("Volume", 0.0f);
+						queuedCue.Value = newCue;
+						fadingCue.Value = activeCues[0];
+						fadingCueVolume.Value = activeCues[0].GetVariable("Volume");
+						fadeTimer.Reset();
+						fadeTimer.Start();
+						fading.Value = true;
+					}
+					else if (maxCueBehavior == MaxInstanceBehavior.ReplaceOldest)
+					{
+						INTERNAL_removeOldestCue(activeCues[0].Name);
+					}
+					else if (maxCueBehavior == MaxInstanceBehavior.ReplaceQuietest)
+					{
+						float lowestVolume = float.MaxValue;
+						int lowestIndex = -1;
+						for (int i = 0; i < activeCues.Count; i += 1)
 						{
-							lowestVolume = activeCues[i].GetVariable("Volume");
-							lowestIndex = i;
+							if (activeCues[i].GetVariable("Volume") < lowestVolume)
+							{
+								lowestVolume = activeCues[i].GetVariable("Volume");
+								lowestIndex = i;
+							}
+						}
+						if (lowestIndex > -1)
+						{
+							cueInstanceCounts[activeCues[lowestIndex].Name] -= 1;
+							activeCues[lowestIndex].Stop(AudioStopOptions.AsAuthored);
 						}
 					}
-					if (lowestIndex > -1)
+					else if (maxCueBehavior == MaxInstanceBehavior.ReplaceLowestPriority)
 					{
-						cueInstanceCounts[activeCues[lowestIndex].Name] -= 1;
-						activeCues[lowestIndex].Stop(AudioStopOptions.AsAuthored);
+						// FIXME: Priority?
+						INTERNAL_removeOldestCue(activeCues[0].Name);
 					}
 				}
-				else if (maxCueBehavior == MaxInstanceBehavior.ReplaceLowestPriority)
-				{
-					// FIXME: Priority?
-					INTERNAL_removeOldestCue(activeCues[0].Name);
-				}
+				cueInstanceCounts[newCue.Name] += 1;
+				newCue.SetVariable("NumCueInstances", cueInstanceCounts[newCue.Name]);
+				activeCues.Add(newCue);
 			}
-			cueInstanceCounts[newCue.Name] += 1;
-			newCue.SetVariable("NumCueInstances", cueInstanceCounts[newCue.Name]);
-			activeCues.Add(newCue);
 			return true;
 		}
 
 		internal void INTERNAL_removeLatestCue()
 		{
-			Cue toDie = activeCues[activeCues.Count - 1];
-			cueInstanceCounts[toDie.Name] -= 1;
-			activeCues.RemoveAt(activeCues.Count - 1);
+			lock (activeCues)
+			{
+				Cue toDie = activeCues[activeCues.Count - 1];
+				cueInstanceCounts[toDie.Name] -= 1;
+				activeCues.RemoveAt(activeCues.Count - 1);
+			}
 		}
 
 		internal void INTERNAL_removeOldestCue(string name)
 		{
-			for (int i = 0; i < activeCues.Count; i += 1)
+			lock (activeCues)
 			{
-				if (activeCues[i].Name.Equals(name))
+				for (int i = 0; i < activeCues.Count; i += 1)
 				{
-					activeCues[i].Stop(AudioStopOptions.AsAuthored);
-					return;
+					if (activeCues[i].Name.Equals(name))
+					{
+						activeCues[i].Stop(AudioStopOptions.AsAuthored);
+						return;
+					}
 				}
 			}
 		}
@@ -311,29 +332,38 @@ namespace Microsoft.Xna.Framework.Audio
 			float lowestVolume = float.MaxValue;
 			int lowestIndex = -1;
 
-			for (int i = 0; i < activeCues.Count; i += 1)
+			lock (activeCues)
 			{
-				if (	activeCues[i].Name.Equals(name) &&
-					activeCues[i].GetVariable("Volume") < lowestVolume	)
+				for (int i = 0; i < activeCues.Count; i += 1)
 				{
-					lowestVolume = activeCues[i].GetVariable("Volume");
-					lowestIndex = i;
+					if (	activeCues[i].Name.Equals(name) &&
+						activeCues[i].GetVariable("Volume") < lowestVolume	)
+					{
+						lowestVolume = activeCues[i].GetVariable("Volume");
+						lowestIndex = i;
+					}
 				}
-			}
 
-			if (lowestIndex > -1)
-			{
-				cueInstanceCounts[name] -= 1;
-				activeCues[lowestIndex].Stop(AudioStopOptions.AsAuthored);
+				if (lowestIndex > -1)
+				{
+					cueInstanceCounts[name] -= 1;
+					activeCues[lowestIndex].Stop(AudioStopOptions.AsAuthored);
+				}
 			}
 		}
 
 		internal void INTERNAL_removeActiveCue(Cue cue)
 		{
-			if (activeCues != null && activeCues.Contains(cue))
+			if (activeCues != null)
 			{
-				activeCues.Remove(cue);
-				cueInstanceCounts[cue.Name] -= 1;
+				lock (activeCues)
+				{
+					if (activeCues.Contains(cue))
+					{
+						activeCues.Remove(cue);
+						cueInstanceCounts[cue.Name] -= 1;
+					}
+				}
 			}
 		}
 

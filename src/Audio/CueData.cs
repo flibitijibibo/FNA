@@ -267,36 +267,27 @@ namespace Microsoft.Xna.Framework.Audio
 			HasLoadedTracks = true;
 		}
 
-		public List<SoundEffectInstance> GenerateInstances(
-			List<SoundEffectInstance> result,
-			List<float> volumeResult,
-			List<float> pitchResult
-		) {
-			// Get the SoundEffectInstance List
+		public void GatherEvents(List<XACTEvent> eventList)
+		{
 			foreach (XACTClip curClip in INTERNAL_clips)
 			{
-				curClip.GenerateInstances(result, Volume, Pitch);
+				eventList.AddRange(curClip.Events);
 			}
-
-			// Store completed authored volumes/pitches
-			foreach (SoundEffectInstance sfi in result)
-			{
-				volumeResult.Add(sfi.Volume);
-				pitchResult.Add(sfi.Pitch);
-			}
-
-			return result;
 		}
 	}
 
 	internal class XACTClip
 	{
-		private XACTEvent[] INTERNAL_events;
+		public XACTEvent[] Events
+		{
+			get;
+			private set;
+		}
 
 		public XACTClip(ushort track, byte waveBank)
 		{
-			INTERNAL_events = new XACTEvent[1];
-			INTERNAL_events[0] = new PlayWaveEvent(
+			Events = new XACTEvent[1];
+			Events[0] = new PlayWaveEvent(
 				0,
 				new ushort[] { track },
 				new byte[] { waveBank },
@@ -314,9 +305,9 @@ namespace Microsoft.Xna.Framework.Audio
 		public XACTClip(BinaryReader reader, double clipVolume)
 		{
 			// Number of XACT Events
-			INTERNAL_events = new XACTEvent[reader.ReadByte()];
+			Events = new XACTEvent[reader.ReadByte()];
 
-			for (int i = 0; i < INTERNAL_events.Length; i += 1)
+			for (int i = 0; i < Events.Length; i += 1)
 			{
 				// Full Event information
 				uint eventInfo = reader.ReadUInt32();
@@ -362,7 +353,7 @@ namespace Microsoft.Xna.Framework.Audio
 					reader.ReadUInt16();
 
 					// Finally.
-					INTERNAL_events[i] = new PlayWaveEvent(
+					Events[i] = new PlayWaveEvent(
 						eventTimestamp,
 						new ushort[] { track },
 						new byte[] { waveBank },
@@ -424,7 +415,7 @@ namespace Microsoft.Xna.Framework.Audio
 					}
 
 					// Finally.
-					INTERNAL_events[i] = new PlayWaveEvent(
+					Events[i] = new PlayWaveEvent(
 						eventTimestamp,
 						tracks,
 						waveBanks,
@@ -484,7 +475,7 @@ namespace Microsoft.Xna.Framework.Audio
 					byte filterType = reader.ReadByte();
 					
 					// Finally.
-					INTERNAL_events[i] = new PlayWaveEvent(
+					Events[i] = new PlayWaveEvent(
 						eventTimestamp,
 						new ushort[] { track },
 						new byte[] { waveBank },
@@ -581,7 +572,7 @@ namespace Microsoft.Xna.Framework.Audio
 					}
 
 					// Finally.
-					INTERNAL_events[i] = new PlayWaveEvent(
+					Events[i] = new PlayWaveEvent(
 						eventTimestamp,
 						tracks,
 						waveBanks,
@@ -621,7 +612,7 @@ namespace Microsoft.Xna.Framework.Audio
 					// Unknown values
 					reader.ReadBytes(8);
 
-					INTERNAL_events[i] = new SetVolumeEvent(
+					Events[i] = new SetVolumeEvent(
 						eventTimestamp,
 						XACTCalculator.CalculateAmplitudeRatio(constant)
 					);
@@ -653,7 +644,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public void LoadTracks(AudioEngine audioEngine, List<string> waveBankNames)
 		{
-			foreach (XACTEvent curEvent in INTERNAL_events)
+			foreach (XACTEvent curEvent in Events)
 			{
 				if (curEvent.Type == 1)
 				{
@@ -663,34 +654,6 @@ namespace Microsoft.Xna.Framework.Audio
 					);
 				}
 			}
-		}
-
-		public void GenerateInstances(
-			List<SoundEffectInstance> result,
-			double soundVolume,
-			float soundPitch
-		) {
-			List<SoundEffectInstance> wavs = new List<SoundEffectInstance>();
-			float eventVolume = 1.0f;
-			foreach (XACTEvent curEvent in INTERNAL_events)
-			{
-				if (curEvent.Type == 1)
-				{
-					wavs.Add(((PlayWaveEvent) curEvent).GenerateInstance(
-						soundVolume,
-						soundPitch
-					));
-				}
-				else if (curEvent.Type == 2)
-				{
-					eventVolume *= ((SetVolumeEvent) curEvent).GetVolume();
-				}
-			}
-			foreach (SoundEffectInstance wav in wavs)
-			{
-				wav.Volume *= eventVolume;
-			}
-			result.AddRange(wavs);
 		}
 	}
 
@@ -787,12 +750,17 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public SoundEffectInstance GenerateInstance(
 			double soundVolume,
-			float soundPitch
+			float soundPitch,
+			int currentLoop
 		) {
+			if (currentLoop > INTERNAL_loopCount)
+			{
+				// We've finished all the loops!
+				return null;
+			}
 			INTERNAL_getNextSound();
 			SoundEffectInstance result = INTERNAL_waves[INTERNAL_curWave].CreateInstance();
 			result.INTERNAL_isXACTSource = true;
-			result.INTERNAL_delayMS = Timestamp;
 			result.Volume = XACTCalculator.CalculateAmplitudeRatio(
 				soundVolume + (
 					random.NextDouble() *
@@ -806,7 +774,6 @@ namespace Microsoft.Xna.Framework.Audio
 				) / 1000.0f
 			) + soundPitch;
 			result.FilterType = INTERNAL_filterType;
-			// FIXME: Better looping!
 			result.IsLooped = (INTERNAL_loopCount == 255);
 			return result;
 		}
