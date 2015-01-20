@@ -135,7 +135,7 @@ namespace Microsoft.Xna.Framework.Input
 			}
 
 			// Excluding dead zone from the final output range
-			if (dz != GamePadDeadZone.None)
+			if (dz == GamePadDeadZone.IndependentAxes)
 			{
 				if (left.X < -leftThumbDeadZone)
 				{
@@ -175,6 +175,23 @@ namespace Microsoft.Xna.Framework.Input
 				left.Y /= 1.0f - leftThumbDeadZone;
 				right.X /= 1.0f - rightThumbDeadZone;
 				right.Y /= 1.0f - rightThumbDeadZone;
+			}
+			else if (dz == GamePadDeadZone.Circular)
+			{
+				if (left.LengthSquared() >= leftThumbDeadZone * leftThumbDeadZone)
+				{
+					Vector2 norm = left;
+					norm.Normalize();
+					left = left - norm * leftThumbDeadZone; // Excluding deadzone
+					left = left / leftThumbDeadZone; // Re-range output
+				}
+				if (right.LengthSquared() >= rightThumbDeadZone * rightThumbDeadZone)
+				{
+					Vector2 norm = right;
+					norm.Normalize();
+					right = right - norm * rightThumbDeadZone;
+					right = right / rightThumbDeadZone;
+				}
 			}
 		}
 
