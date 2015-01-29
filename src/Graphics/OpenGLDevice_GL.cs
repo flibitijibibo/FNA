@@ -216,6 +216,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			GL_DEBUG_SEVERITY_HIGH_ARB =		0x9146,
 			GL_DEBUG_SEVERITY_MEDIUM_ARB =		0x9147,
 			GL_DEBUG_SEVERITY_LOW_ARB =		0x9148,
+			GL_DEBUG_SEVERITY_NOTIFICATION_ARB =	0x826B,
 			// Stupid dumk stuff that's stupid
 			GL_CURRENT_PROGRAM =			0x8B8D,
 			GL_FRAGMENT_SHADER =			0x8B30,
@@ -1302,6 +1303,14 @@ namespace Microsoft.Xna.Framework.Graphics
 					GLenum.GL_DONT_CARE,
 					GLenum.GL_DEBUG_TYPE_OTHER_ARB,
 					GLenum.GL_DEBUG_SEVERITY_LOW_ARB,
+					0,
+					IntPtr.Zero,
+					false
+				);
+				glDebugMessageControlARB(
+					GLenum.GL_DONT_CARE,
+					GLenum.GL_DEBUG_TYPE_OTHER_ARB,
+					GLenum.GL_DEBUG_SEVERITY_NOTIFICATION_ARB,
 					0,
 					IntPtr.Zero,
 					false
