@@ -107,7 +107,7 @@ namespace Microsoft.Xna.Framework.Content
 				for (int i = ContentManagers.Count - 1; i >= 0; i -= 1)
 				{
 					WeakReference contentRef = ContentManagers[i];
-					if (Object.ReferenceEquals(contentRef.Target, contentManager))
+					if (ReferenceEquals(contentRef.Target, contentManager))
 					{
 						contains = true;
 					}
@@ -133,7 +133,7 @@ namespace Microsoft.Xna.Framework.Content
 				for (int i = ContentManagers.Count - 1; i >= 0; i -= 1)
 				{
 					WeakReference contentRef = ContentManagers[i];
-					if (!contentRef.IsAlive || Object.ReferenceEquals(contentRef.Target, contentManager))
+					if (!contentRef.IsAlive || ReferenceEquals(contentRef.Target, contentManager))
 					{
 						ContentManagers.RemoveAt(i);
 					}

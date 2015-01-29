@@ -269,16 +269,6 @@ namespace Microsoft.Xna.Framework.Content
 			{
 				construct = parent => property.GetValue(parent, null);
 			}
-			else if (	elementType != typeof(object) &&
-					elementType.IsClass &&
-					!elementType.IsAbstract	)
-			{
-				ConstructorInfo constructor = elementType.GetDefaultConstructor();
-				if (constructor != null)
-				{
-					construct = parent => constructor.Invoke(null);
-				}
-			}
 
 			return (input, parent) =>
 			{
