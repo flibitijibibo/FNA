@@ -126,7 +126,7 @@ namespace Microsoft.Xna.Framework.Audio
 			private set;
 		}
 
-		public uint[] RPCCodes
+		public List<uint[]> RPCCodes
 		{
 			get;
 			private set;
@@ -183,32 +183,30 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 
 			// Parse RPC Properties
-			List<uint> rpcCodeList = new List<uint>();
+			RPCCodes = new List<uint[]>();
 			if ((soundFlags & 0x0E) != 0)
 			{
 				// RPC data length
 				ushort rpcDataLength = reader.ReadUInt16();
 				ushort totalDataRead = 2;
 
-				/* For some reason XACT can have separate sets of codes.
-				 * I dunno why, but I bet we should be separating them too.
-				 * -flibit
-				 */
 				while (totalDataRead < rpcDataLength)
 				{
-					// Number of RPC Presets (in this block)
-					byte numCodes = reader.ReadByte();
+					// Number of RPC Presets (for this track)
+					uint[] codeList = new uint[reader.ReadByte()];
 
 					// Obtain RPC curve codes (in this block)
-					for (byte i = 0; i < numCodes; i += 1)
+					for (int i = 0; i < codeList.Length; i += 1)
 					{
-						rpcCodeList.Add(reader.ReadUInt32());
+						codeList[i] = reader.ReadUInt32();
 					}
 
-					totalDataRead += (ushort) (1 + (4 * numCodes));
+					// Add this track's code list to the master list
+					RPCCodes.Add(codeList);
+
+					totalDataRead += (ushort) (1 + (4 * codeList.Length));
 				}
 			}
-			RPCCodes = rpcCodeList.ToArray(); // Array may be empty! It's okay!
 
 			// Parse DSP Presets
 			DSPCodes = new uint[0]; // Eww... -flibit

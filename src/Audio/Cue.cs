@@ -109,6 +109,10 @@ namespace Microsoft.Xna.Framework.Audio
 		private List<float> INTERNAL_instanceVolumes;
 		private List<float> INTERNAL_instancePitches;
 
+		// RPC data list
+		private List<float> INTERNAL_rpcTrackVolumes;
+		private List<float> INTERNAL_rpcTrackPitches;
+
 		// User-controlled sounds require a bit more trickery.
 		private bool INTERNAL_userControlledPlaying;
 		private float INTERNAL_controlledValue;
@@ -184,6 +188,9 @@ namespace Microsoft.Xna.Framework.Audio
 			INTERNAL_instancePool = new List<SoundEffectInstance>();
 			INTERNAL_instanceVolumes = new List<float>();
 			INTERNAL_instancePitches = new List<float>();
+
+			INTERNAL_rpcTrackVolumes = new List<float>();
+			INTERNAL_rpcTrackPitches = new List<float>();
 		}
 
 		#endregion
@@ -216,6 +223,8 @@ namespace Microsoft.Xna.Framework.Audio
 					INTERNAL_instancePool.Clear();
 					INTERNAL_instanceVolumes.Clear();
 					INTERNAL_instancePitches.Clear();
+					INTERNAL_rpcTrackVolumes.Clear();
+					INTERNAL_rpcTrackPitches.Clear();
 					INTERNAL_timer.Stop();
 				}
 				INTERNAL_category.INTERNAL_removeActiveCue(this);
@@ -379,6 +388,8 @@ namespace Microsoft.Xna.Framework.Audio
 				INTERNAL_instancePool.Clear();
 				INTERNAL_instanceVolumes.Clear();
 				INTERNAL_instancePitches.Clear();
+				INTERNAL_rpcTrackVolumes.Clear();
+				INTERNAL_rpcTrackPitches.Clear();
 				INTERNAL_userControlledPlaying = false;
 				INTERNAL_category.INTERNAL_removeActiveCue(this);
 
@@ -443,6 +454,8 @@ namespace Microsoft.Xna.Framework.Audio
 					INTERNAL_instancePool.RemoveAt(i);
 					INTERNAL_instanceVolumes.RemoveAt(i);
 					INTERNAL_instancePitches.RemoveAt(i);
+					INTERNAL_rpcTrackVolumes.RemoveAt(i);
+					INTERNAL_rpcTrackPitches.RemoveAt(i);
 
 					// Increment the loop counter, try to get another loop
 					INTERNAL_eventLoops[evt] += 1;
@@ -471,6 +484,8 @@ namespace Microsoft.Xna.Framework.Audio
 					INTERNAL_instancePool.Clear();
 					INTERNAL_instanceVolumes.Clear();
 					INTERNAL_instancePitches.Clear();
+					INTERNAL_rpcTrackVolumes.Clear();
+					INTERNAL_rpcTrackPitches.Clear();
 					if (!INTERNAL_calculateNextSound())
 					{
 						// Nothing to play, bail.
@@ -523,52 +538,82 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 
 			// RPC updates
-			float rpcVolumeTotal = 0.0f;
-			int rpcVolumeCount = 0;
 			float rpcVolume = 1.0f;
 			float rpcPitch = 0.0f;
 			float hfGain = 1.0f;
 			float lfGain = 1.0f;
-			foreach (uint curCode in INTERNAL_activeSound.RPCCodes)
+			for (int i = 0; i < INTERNAL_activeSound.RPCCodes.Count; i += 1)
 			{
-				RPC curRPC = INTERNAL_baseEngine.INTERNAL_getRPC(curCode);
-				float result;
-				if (!INTERNAL_baseEngine.INTERNAL_isGlobalVariable(curRPC.Variable))
+				if (i > INTERNAL_instancePool.Count)
 				{
-					result = curRPC.CalculateRPC(GetVariable(curRPC.Variable));
+					break;
 				}
-				else
+				if (i > 0)
 				{
-					// It's a global variable we're looking for!
-					result = curRPC.CalculateRPC(
-						INTERNAL_baseEngine.GetGlobalVariable(
-							curRPC.Variable
-						)
-					);
+					INTERNAL_rpcTrackVolumes[i - 1] = 1.0f;
+					INTERNAL_rpcTrackPitches[i - 1] = 0.0f;
 				}
-				if (curRPC.Parameter == RPCParameter.Volume)
+				foreach (uint curCode in INTERNAL_activeSound.RPCCodes[i])
 				{
-					rpcVolumeTotal += XACTCalculator.CalculateAmplitudeRatio(result / 100.0);
-					rpcVolumeCount += 1;
+					RPC curRPC = INTERNAL_baseEngine.INTERNAL_getRPC(curCode);
+					float result;
+					if (!INTERNAL_baseEngine.INTERNAL_isGlobalVariable(curRPC.Variable))
+					{
+						result = curRPC.CalculateRPC(GetVariable(curRPC.Variable));
+					}
+					else
+					{
+						// It's a global variable we're looking for!
+						result = curRPC.CalculateRPC(
+							INTERNAL_baseEngine.GetGlobalVariable(
+								curRPC.Variable
+							)
+						);
+					}
+					if (curRPC.Parameter == RPCParameter.Volume)
+					{
+						float vol = XACTCalculator.CalculateAmplitudeRatio(result / 100.0);
+						if (i == 0)
+						{
+							rpcVolume *= vol;
+						}
+						else
+						{
+							INTERNAL_rpcTrackVolumes[i - 1] *= vol;
+						}
+					}
+					else if (curRPC.Parameter == RPCParameter.Pitch)
+					{
+						float pitch = result / 1000.0f;
+						if (i == 0)
+						{
+							rpcPitch += pitch;
+						}
+						else
+						{
+							INTERNAL_rpcTrackPitches[i - 1] += pitch;
+						}
+					}
+					else if (curRPC.Parameter == RPCParameter.FilterFrequency)
+					{
+						// FIXME: Just listening to the last RPC!
+						float hf = result / 20000.0f;
+						float lf = 1.0f - hfGain;
+						if (i == 0)
+						{
+							hfGain = hf;
+							lfGain = lf;
+						}
+						else
+						{
+							throw new NotImplementedException("Per-track filter RPCs!");
+						}
+					}
+					else
+					{
+						throw new Exception("RPC Parameter Type: " + curRPC.Parameter.ToString());
+					}
 				}
-				else if (curRPC.Parameter == RPCParameter.Pitch)
-				{
-					rpcPitch += result / 1000.0f;
-				}
-				else if (curRPC.Parameter == RPCParameter.FilterFrequency)
-				{
-					// FIXME: Just listening to the last RPC!
-					hfGain = result / 20000.0f;
-					lfGain = 1.0f - hfGain;
-				}
-				else
-				{
-					throw new Exception("RPC Parameter Type: " + curRPC.Parameter.ToString());
-				}
-			}
-			if (rpcVolumeCount > 0)
-			{
-				rpcVolume = rpcVolumeTotal / (float) rpcVolumeCount;
 			}
 
 			// Sound effect instance updates
@@ -577,12 +622,21 @@ namespace Microsoft.Xna.Framework.Audio
 				/* The final volume should be the combination of the
 				 * authored volume, Volume variable and RPC volume results.
 				 */
-				INTERNAL_instancePool[i].Volume = INTERNAL_instanceVolumes[i] * GetVariable("Volume") * rpcVolume;
+				INTERNAL_instancePool[i].Volume = (
+					INTERNAL_instanceVolumes[i] *
+					GetVariable("Volume") *
+					rpcVolume *
+					INTERNAL_rpcTrackVolumes[i]
+				);
 
 				/* The final pitch should be the combination of the
 				 * authored pitch and RPC pitch results.
 				 */
-				INTERNAL_instancePool[i].Pitch = INTERNAL_instancePitches[i] + rpcPitch;
+				INTERNAL_instancePool[i].Pitch = (
+					INTERNAL_instancePitches[i] +
+					rpcPitch +
+					INTERNAL_rpcTrackPitches[i]
+				);
 
 				/* The final filter is determined by the instance's filter type,
 				 * in addition to our calculation of the HF/LF gain values.
@@ -704,6 +758,8 @@ namespace Microsoft.Xna.Framework.Audio
 				INTERNAL_instanceVolumes.Add(sfi.Volume);
 				INTERNAL_instancePitches.Add(sfi.Pitch);
 				INTERNAL_waveEventSounds.Add(sfi, evt);
+				INTERNAL_rpcTrackVolumes.Add(1.0f);
+				INTERNAL_rpcTrackPitches.Add(0.0f);
 				sfi.Play();
 			}
 		}
