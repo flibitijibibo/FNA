@@ -322,19 +322,19 @@ namespace Microsoft.Xna.Framework
 				"{M11:" + M11.ToString() +
 				" M12:" + M12.ToString() +
 				" M13:" + M13.ToString() +
-				" M14:}" + M14.ToString() +
-				" {M21:" + M21.ToString() +
+				" M14:" + M14.ToString() +
+				"} {M21:" + M21.ToString() +
 				" M22:" + M22.ToString() +
 				" M23:" + M23.ToString() +
-				" M24:}" + M24.ToString() +
-				" {M31:" + M31.ToString() +
+				" M24:" + M24.ToString() +
+				"} {M31:" + M31.ToString() +
 				" M32:" + M32.ToString() +
 				" M33:" + M33.ToString() +
-				" M34:}" + M34.ToString() +
-				" {M41:" + M41.ToString() +
+				" M34:" + M34.ToString() +
+				"} {M41:" + M41.ToString() +
 				" M42:" + M42.ToString() +
 				" M43:" + M43.ToString() +
-				" M44:}" + M44.ToString()
+				" M44:" + M44.ToString() + "}"
 			);
 		}
 
