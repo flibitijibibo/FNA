@@ -375,7 +375,10 @@ namespace Microsoft.Xna.Framework.Input
 			string osConfigFile = String.Empty;
 			if (Game.Instance.Platform.OSVersion.Equals("Windows"))
 			{
-				osConfigFile = "MonoGameJoystick.cfg"; // Oh well.
+				osConfigFile = Path.Combine(
+					TitleContainer.Location,
+					"MonoGameJoystick.cfg"
+				); // Oh well.
 			}
 			else if (Game.Instance.Platform.OSVersion.Equals("Mac OS X"))
 			{
