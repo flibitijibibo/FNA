@@ -435,19 +435,29 @@ namespace Microsoft.Xna.Framework.Input
 				// Since it doesn't exist, we need to generate the default config.
 				INTERNAL_joystickConfig = new MonoGameJoystickConfig();
 
-				// ... but is our directory even there?
-				string osConfigDir = osConfigFile.Substring(0, osConfigFile.IndexOf("MonoGameJoystick.cfg"));
-				if (!String.IsNullOrEmpty(osConfigDir) && !Directory.Exists(osConfigDir))
+				try
 				{
-					// Okay, jeez, we're really starting fresh.
-					Directory.CreateDirectory(osConfigDir);
-				}
+					// ... but is our directory even there?
+					string osConfigDir = osConfigFile.Substring(0, osConfigFile.IndexOf("MonoGameJoystick.cfg"));
+					if (!String.IsNullOrEmpty(osConfigDir) && !Directory.Exists(osConfigDir))
+					{
+						// Okay, jeez, we're really starting fresh.
+						Directory.CreateDirectory(osConfigDir);
+					}
 
-				// Now, create the file.
-				using (FileStream fileOut = File.Open(osConfigFile, FileMode.OpenOrCreate))
+					// Now, create the file.
+					using (FileStream fileOut = File.Open(osConfigFile, FileMode.OpenOrCreate))
+					{
+						XmlSerializer serializer = new XmlSerializer(typeof(MonoGameJoystickConfig));
+						serializer.Serialize(fileOut, INTERNAL_joystickConfig);
+					}
+				}
+				catch(UnauthorizedAccessException e)
 				{
-					XmlSerializer serializer = new XmlSerializer(typeof(MonoGameJoystickConfig));
-					serializer.Serialize(fileOut, INTERNAL_joystickConfig);
+					System.Console.WriteLine(
+						"Failed to create MonoGameJoystick.cfg:\n" +
+						e.ToString()
+					);
 				}
 			}
 		}
