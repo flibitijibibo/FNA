@@ -59,15 +59,12 @@ namespace Microsoft.Xna.Framework.Input
 			int x, y;
 			uint flags = SDL.SDL_GetMouseState(out x, out y);
 
-			// Scale the mouse coordinates for the faux-backbuffer
-			x = (int) ((double) x * Game.Instance.GraphicsDevice.GLDevice.Backbuffer.Width / INTERNAL_WindowWidth);
-			y = (int) ((double) y * Game.Instance.GraphicsDevice.GLDevice.Backbuffer.Height / INTERNAL_WindowHeight);
-
+			// If we warped the mouse, we've already done this in SetPosition.
 			if (!INTERNAL_IsWarped)
 			{
-				// If we warped the mouse, we've already done this.
-				state.X = x;
-				state.Y = y;
+				// Scale the mouse coordinates for the faux-backbuffer
+				state.X = (int) ((double) x * Game.Instance.GraphicsDevice.GLDevice.Backbuffer.Width / INTERNAL_WindowWidth);
+				state.Y = (int) ((double) y * Game.Instance.GraphicsDevice.GLDevice.Backbuffer.Height / INTERNAL_WindowHeight);
 			}
 
 			state.LeftButton =	(ButtonState) (flags & SDL.SDL_BUTTON_LMASK);
@@ -88,12 +85,13 @@ namespace Microsoft.Xna.Framework.Input
 		/// <param name="y">Relative vertical position of the cursor.</param>
 		public static void SetPosition(int x, int y)
 		{
+			// The state should appear to be what they _think_ they're setting first.
+			state.X = x;
+			state.Y = y;
+
 			// Scale the mouse coordinates for the faux-backbuffer
 			x = (int) ((double) x * INTERNAL_WindowWidth / Game.Instance.GraphicsDevice.GLDevice.Backbuffer.Width);
 			y = (int) ((double) y * INTERNAL_WindowHeight / Game.Instance.GraphicsDevice.GLDevice.Backbuffer.Height);
-
-			state.X = x;
-			state.Y = y;
 
 			SDL.SDL_WarpMouseInWindow(WindowHandle, x, y);
 			INTERNAL_IsWarped = true;
