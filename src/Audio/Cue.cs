@@ -617,6 +617,7 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 
 			// Sound effect instance updates
+			float cueVolume = GetVariable("Volume");
 			for (int i = 0; i < INTERNAL_instancePool.Count; i += 1)
 			{
 				/* The final volume should be the combination of the
@@ -624,7 +625,7 @@ namespace Microsoft.Xna.Framework.Audio
 				 */
 				INTERNAL_instancePool[i].Volume = (
 					INTERNAL_instanceVolumes[i] *
-					GetVariable("Volume") *
+					cueVolume *
 					rpcVolume *
 					INTERNAL_rpcTrackVolumes[i]
 				);
