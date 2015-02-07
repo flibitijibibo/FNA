@@ -516,6 +516,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			height = INTERNAL_getSurfaceHeight(surface);
 			pixels = new byte[width * height * 4]; // MUST be SurfaceFormat.Color!
 			Marshal.Copy(INTERNAL_getSurfacePixels(surface), pixels, 0, pixels.Length);
+			SDL.SDL_FreeSurface(surface);
 
 			/* Ensure that the alpha pixels are... well, actual alpha.
 			 * You think this looks stupid, but be assured: Your paint program is
