@@ -186,12 +186,12 @@ namespace Microsoft.Xna.Framework.Content
 					/* There is no ContentSerializerAttribute, so non-public
 					 * properties cannot be deserialized.
 					 */
-					MethodInfo getMethod = property.GetGetMethod();
+					MethodInfo getMethod = property.GetGetMethod(true);
 					if (getMethod == null || !getMethod.IsPublic)
 					{
 						return null;
 					}
-					MethodInfo setMethod = property.GetSetMethod();
+					MethodInfo setMethod = property.GetSetMethod(true);
 					if (setMethod == null || !setMethod.IsPublic)
 					{
 						return null;
