@@ -1290,7 +1290,6 @@ namespace Microsoft.Xna.Framework.Graphics
 					messageControl,
 					typeof(DebugMessageControl)
 				);
-				glDebugMessageCallbackARB(DebugCall, IntPtr.Zero);
 				glDebugMessageControlARB(
 					GLenum.GL_DONT_CARE,
 					GLenum.GL_DONT_CARE,
@@ -1315,6 +1314,7 @@ namespace Microsoft.Xna.Framework.Graphics
 					IntPtr.Zero,
 					false
 				);
+				glDebugMessageCallbackARB(DebugCall, IntPtr.Zero);
 			}
 
 			/* GREMEDY_string_marker, for apitrace */
