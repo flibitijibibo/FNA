@@ -980,7 +980,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			 * We're essentially switching it from a right-handed matrix to a
 			 * left-handed matrix. This allows depths to be accurate for OpenGL
 			 * renderers without having to actually change any data on the game
-			 * side. If you use this in your game, you may have to do this too!
+			 * side. If you use Ortho in your game, you may have to do this too!
 			 * -flibit
 			 */
 			const float depthHand = 1.0f; // Could be -1.0f for D3D!
