@@ -11,7 +11,13 @@ namespace Microsoft.Xna.Framework.Graphics
 {
 	public enum GraphicsProfile
 	{
-		HiDef,
+		/// <summary>
+		/// Use a limited set of graphic features and capabilities, allowing the game to support the widest variety of devices.
+		/// </summary>
 		Reach,
+		/// <summary>
+		/// Use the largest available set of graphic features and capabilities to target devices, that have more enhanced graphic capabilities.
+		/// </summary>
+		HiDef
 	}
 }
