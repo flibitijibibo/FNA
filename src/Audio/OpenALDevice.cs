@@ -62,7 +62,7 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 			catch(DllNotFoundException e)
 			{
-				System.Console.WriteLine("OpenAL not found! Need SDL2-CS.dll.config?");
+				System.Console.WriteLine("OpenAL not found! Need FNA.dll.config?");
 				throw e;
 			}
 			catch(Exception)
