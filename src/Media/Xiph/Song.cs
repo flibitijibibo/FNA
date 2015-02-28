@@ -169,6 +169,7 @@ namespace Microsoft.Xna.Framework.Media
 		private DynamicSoundEffectInstance soundStream;
 		private IntPtr vorbisFile;
 		private byte[] vorbisBuffer = new byte[4096];
+		private bool eof;
 
 #if !NO_STREAM_THREAD
 		private Thread songThread;
@@ -248,8 +249,9 @@ namespace Microsoft.Xna.Framework.Media
 
 		internal void Play()
 		{
-			QueueBuffer(null, null);
-			QueueBuffer(null, null);
+			eof = false;
+			QueueBuffer(null, EventArgs.Empty);
+			QueueBuffer(null, EventArgs.Empty);
 			soundStream.BufferNeeded += QueueBuffer;
 
 #if NO_STREAM_THREAD
@@ -330,6 +332,7 @@ namespace Microsoft.Xna.Framework.Media
 			// If we're at the end of the file, stop!
 			if (totalBuf.Count == 0)
 			{
+				eof = true;
 				if (sender != null)
 				{
 					// If sender's null, we didn't even start playing yet?!
@@ -353,8 +356,25 @@ namespace Microsoft.Xna.Framework.Media
 #if !NO_STREAM_THREAD
 		private void SongThread()
 		{
-			while (!exitThread && soundStream.Update())
+			while (!exitThread)
 			{
+				if (!soundStream.Update())
+				{
+					if (eof)
+					{
+						exitThread = true;
+					}
+					else
+					{
+						System.Console.WriteLine(
+							"Stopped playing Song before EOF!" +
+							" Hasily rebooting playback, expect jitteriness!"
+						);
+						QueueBuffer(null, EventArgs.Empty);
+						QueueBuffer(null, EventArgs.Empty);
+						soundStream.Play(false);
+					}
+				}
 				// Arbitrarily 1 frame in a 15Hz game -flibit
 				Thread.Sleep(67);
 			}
