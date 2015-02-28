@@ -368,7 +368,7 @@ namespace Microsoft.Xna.Framework.Media
 					{
 						System.Console.WriteLine(
 							"Stopped playing Song before EOF!" +
-							" Hasily rebooting playback, expect jitteriness!"
+							" Hastily rebooting playback, expect jitteriness!"
 						);
 						QueueBuffer(null, EventArgs.Empty);
 						QueueBuffer(null, EventArgs.Empty);
