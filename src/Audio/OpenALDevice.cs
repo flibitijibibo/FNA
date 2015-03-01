@@ -184,7 +184,6 @@ namespace Microsoft.Xna.Framework.Audio
 
 		private bool CheckALCError()
 		{
-			bool retVal = false;
 			int err = ALC10.alcGetError(alDevice);
 
 			if (err == ALC10.ALC_NO_ERROR)
