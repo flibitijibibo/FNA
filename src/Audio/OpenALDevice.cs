@@ -80,21 +80,21 @@ namespace Microsoft.Xna.Framework.Audio
 		private OpenALDevice()
 		{
 			alDevice = ALC10.alcOpenDevice(string.Empty);
-			if (CheckALCError("Could not open AL device") || alDevice == IntPtr.Zero)
+			if (CheckALCError() || alDevice == IntPtr.Zero)
 			{
 				throw new Exception("Could not open audio device!");
 			}
 
 			int[] attribute = new int[0];
 			alContext = ALC10.alcCreateContext(alDevice, attribute);
-			if (CheckALCError("Could not create OpenAL context") || alContext == IntPtr.Zero)
+			if (CheckALCError() || alContext == IntPtr.Zero)
 			{
 				Dispose();
 				throw new Exception("Could not create OpenAL context");
 			}
 
 			ALC10.alcMakeContextCurrent(alContext);
-			if (CheckALCError("Could not make OpenAL context current"))
+			if (CheckALCError())
 			{
 				Dispose();
 				throw new Exception("Could not make OpenAL context current");
@@ -182,18 +182,18 @@ namespace Microsoft.Xna.Framework.Audio
 			System.Console.WriteLine("OpenAL Error: " + err.ToString());
 		}
 
-		private bool CheckALCError(string message)
+		private bool CheckALCError()
 		{
 			bool retVal = false;
 			int err = ALC10.alcGetError(alDevice);
 
-			if (err != ALC10.ALC_NO_ERROR)
+			if (err == ALC10.ALC_NO_ERROR)
 			{
-				System.Console.WriteLine("OpenAL Error: " + err.ToString());
-				retVal = true;
+				return false;
 			}
 
-			return retVal;
+			System.Console.WriteLine("OpenAL Device Error: " + err.ToString());
+			return true;
 		}
 
 		#endregion
