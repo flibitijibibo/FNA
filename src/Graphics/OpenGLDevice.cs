@@ -440,6 +440,16 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
+		#region Private Graphics Object Disposal Queues
+
+		private Queue<OpenGLTexture> GCTextures = new Queue<OpenGLTexture>();
+		private Queue<uint> GCDepthBuffers = new Queue<uint>();
+		private Queue<OpenGLBuffer> GCVertexBuffers = new Queue<OpenGLBuffer>();
+		private Queue<OpenGLBuffer> GCIndexBuffers = new Queue<OpenGLBuffer>();
+		private Queue<OpenGLEffect> GCEffects = new Queue<OpenGLEffect>();
+
+		#endregion
+
 		#region Public Constructor
 
 		public OpenGLDevice(
@@ -596,6 +606,90 @@ namespace Microsoft.Xna.Framework.Graphics
 #if !DISABLE_THREADING && !THREADED_GL
 			RunActions();
 #endif
+			while (GCTextures.Count > 0)
+			{
+				DeleteTexture(GCTextures.Dequeue());
+			}
+			while (GCDepthBuffers.Count > 0)
+			{
+				DeleteRenderbuffer(GCDepthBuffers.Dequeue());
+			}
+			while (GCVertexBuffers.Count > 0)
+			{
+				DeleteVertexBuffer(GCVertexBuffers.Dequeue());
+			}
+			while (GCIndexBuffers.Count > 0)
+			{
+				DeleteVertexBuffer(GCIndexBuffers.Dequeue());
+			}
+			while (GCEffects.Count > 0)
+			{
+				DeleteEffect(GCEffects.Dequeue());
+			}
+		}
+
+		#endregion
+
+		#region GL Object Disposal Wrappers
+
+		public void AddDisposeTexture(OpenGLTexture texture)
+		{
+			if (IsOnMainThread())
+			{
+				DeleteTexture(texture);
+			}
+			else
+			{
+				GCTextures.Enqueue(texture);
+			}
+		}
+
+		public void AddDisposeRenderbuffer(uint renderbuffer)
+		{
+			if (IsOnMainThread())
+			{
+				DeleteRenderbuffer(renderbuffer);
+			}
+			else
+			{
+				GCDepthBuffers.Enqueue(renderbuffer);
+			}
+		}
+
+		public void AddDisposeVertexBuffer(OpenGLBuffer buffer)
+		{
+			if (IsOnMainThread())
+			{
+				DeleteVertexBuffer(buffer);
+			}
+			else
+			{
+				GCVertexBuffers.Enqueue(buffer);
+			}
+		}
+
+		public void AddDisposeIndexBuffer(OpenGLBuffer buffer)
+		{
+			if (IsOnMainThread())
+			{
+				DeleteIndexBuffer(buffer);
+			}
+			else
+			{
+				GCIndexBuffers.Enqueue(buffer);
+			}
+		}
+
+		public void AddDisposeEffect(OpenGLEffect effect)
+		{
+			if (IsOnMainThread())
+			{
+				DeleteEffect(effect);
+			}
+			else
+			{
+				GCEffects.Enqueue(effect);
+			}
 		}
 
 		#endregion
@@ -1127,12 +1221,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			return new OpenGLEffect(effect, glEffect);
 		}
 
-		public void DeleteEffect(OpenGLEffect effect)
+		private void DeleteEffect(OpenGLEffect effect)
 		{
-#if !DISABLE_THREADING
-			ForceToMainThread(() => {
-#endif
-
 			if (effect.GLEffectData == currentEffect)
 			{
 				MojoShader.MOJOSHADER_glEffectEndPass(currentEffect);
@@ -1143,10 +1233,6 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			MojoShader.MOJOSHADER_glDeleteEffect(effect.GLEffectData);
 			MojoShader.MOJOSHADER_freeEffect(effect.EffectData);
-
-#if !DISABLE_THREADING
-			});
-#endif
 		}
 
 		public OpenGLEffect CloneEffect(OpenGLEffect cloneSource)
@@ -1632,7 +1718,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region glDeleteBuffers Methods
 
-		public void DeleteVertexBuffer(OpenGLBuffer buffer)
+		private void DeleteVertexBuffer(OpenGLBuffer buffer)
 		{
 			if (buffer.Handle == currentVertexBuffer)
 			{
@@ -1643,7 +1729,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			glDeleteBuffers(1, ref handle);
 		}
 
-		public void DeleteIndexBuffer(OpenGLBuffer buffer)
+		private void DeleteIndexBuffer(OpenGLBuffer buffer)
 		{
 			if (buffer.Handle == currentIndexBuffer)
 			{
@@ -2327,7 +2413,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region glDeleteTexture Method
 
-		public void DeleteTexture(OpenGLTexture texture)
+		private void DeleteTexture(OpenGLTexture texture)
 		{
 			for (int i = 0; i < currentAttachments.Length; i += 1)
 			{
@@ -2526,7 +2612,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			return handle;
 		}
 
-		public void DeleteRenderbuffer(uint renderbuffer)
+		private void DeleteRenderbuffer(uint renderbuffer)
 		{
 			if (renderbuffer == currentRenderbuffer)
 			{

@@ -72,13 +72,11 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			if (!IsDisposed)
 			{
-				GraphicsDevice.AddDisposeAction(() =>
-				{
-					GraphicsDevice.GLDevice.glDeleteQueries(
-						1,
-						ref glQueryId
-					);
-				});
+				// TODO: AddDisposeQuery -flibit
+				GraphicsDevice.GLDevice.glDeleteQueries(
+					1,
+					ref glQueryId
+				);
 			}
 			base.Dispose(disposing);
 		}

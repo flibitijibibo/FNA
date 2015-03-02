@@ -197,16 +197,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
-		#region Internal OpenGL Device Property
-
-		internal OpenGLDevice GLDevice
-		{
-			get;
-			private set;
-		}
-
-		#endregion
-
 		#region Internal RenderTarget Properties
 
 		internal int RenderTargetCount
@@ -217,6 +207,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
+		#region Internal GL Device
+
+		internal readonly OpenGLDevice GLDevice;
+
+		#endregion
+
 		#region Internal Sampler Change Queue
 
 		internal readonly Queue<int> ModifiedSamplers = new Queue<int>();
@@ -224,9 +220,6 @@ namespace Microsoft.Xna.Framework.Graphics
 		#endregion
 
 		#region Private Disposal Variables
-
-		private static List<Action> disposeActions = new List<Action>();
-		private static object disposeActionsLock = new object();
 
 		/* Use WeakReference for the global resources list as we do not
 		 * know when a resource may be disposed and collected. We do not
@@ -396,31 +389,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Internal Resource Management Methods
 
-		/// <summary>
-		/// Adds a dispose action to the list of pending dispose actions. These are executed
-		/// at the end of each call to Present(). This allows GL resources to be disposed
-		/// from other threads, such as the finalizer.
-		/// </summary>
-		/// <param name="disposeAction">The action to execute for the dispose.</param>
-		internal static void AddDisposeAction(Action disposeAction)
-		{
-			if (disposeAction == null)
-			{
-				throw new ArgumentNullException("disposeAction");
-			}
-			if (Game.Instance.GraphicsDevice.GLDevice.IsOnMainThread())
-			{
-				disposeAction();
-			}
-			else
-			{
-				lock (disposeActionsLock)
-				{
-					disposeActions.Add(disposeAction);
-				}
-			}
-		}
-
 		internal void AddResourceReference(WeakReference resourceReference)
 		{
 			lock (resourcesLock)
@@ -443,18 +411,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public void Present()
 		{
-			// Dispose of any GL resources that were disposed in another thread
-			lock (disposeActionsLock)
-			{
-				if (disposeActions.Count > 0)
-				{
-					foreach (Action action in disposeActions)
-					{
-						action();
-					}
-					disposeActions.Clear();
-				}
-			}
 			GLDevice.SwapBuffers(PresentationParameters.DeviceWindowHandle);
 		}
 

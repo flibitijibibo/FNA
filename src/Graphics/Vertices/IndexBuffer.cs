@@ -129,11 +129,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			if (!IsDisposed)
 			{
-				GraphicsDevice.AddDisposeAction(() =>
-				{
-					Game.Instance.GraphicsDevice.GLDevice.DeleteIndexBuffer(Handle);
-					Handle = null;
-				});
+				GraphicsDevice.GLDevice.AddDisposeIndexBuffer(Handle);
 			}
 			base.Dispose(disposing);
 		}

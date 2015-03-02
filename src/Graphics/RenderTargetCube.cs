@@ -195,13 +195,10 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			if (!IsDisposed)
 			{
-				GraphicsDevice.AddDisposeAction(() =>
+				if (glDepthStencilBuffer != 0)
 				{
-					if (glDepthStencilBuffer != 0)
-					{
-						Game.Instance.GraphicsDevice.GLDevice.DeleteRenderbuffer(glDepthStencilBuffer);
-					}
-				});
+					GraphicsDevice.GLDevice.AddDisposeRenderbuffer(glDepthStencilBuffer);
+				}
 				base.Dispose(disposing);
 			}
 		}

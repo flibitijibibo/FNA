@@ -339,7 +339,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			if (!IsDisposed && disposing)
 			{
-				GraphicsDevice.GLDevice.DeleteEffect(glEffect);
+				GraphicsDevice.GLDevice.AddDisposeEffect(glEffect);
 			}
 			base.Dispose(disposing);
 		}

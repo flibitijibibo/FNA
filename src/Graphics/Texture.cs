@@ -44,10 +44,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			if (!IsDisposed)
 			{
-				GraphicsDevice.AddDisposeAction(() =>
-				{
-					Game.Instance.GraphicsDevice.GLDevice.DeleteTexture(texture);
-				});
+				GraphicsDevice.GLDevice.AddDisposeTexture(texture);
 			}
 			base.Dispose(disposing);
 		}
