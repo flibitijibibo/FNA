@@ -54,9 +54,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-#if !DISABLE_THREADING
 using System.Threading;
-#endif
 
 using SDL2;
 #endregion
@@ -460,12 +458,10 @@ namespace Microsoft.Xna.Framework.Graphics
 				presentationParameters.DeviceWindowHandle
 			);
 
-#if !DISABLE_THREADING
 			// Init threaded GL crap where applicable
 			InitThreadedGL(
 				presentationParameters.DeviceWindowHandle
 			);
-#endif
 
 			// Initialize entry points
 			LoadGLEntryPoints();
@@ -3363,18 +3359,37 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Threaded GL Nonsense
 
-		public bool IsOnMainThread()
+		private int mainThreadId;
+
+		private bool IsOnMainThread()
 		{
-#if DISABLE_THREADING
-			return true; // You better be right!
-#else
 			return mainThreadId == Thread.CurrentThread.ManagedThreadId;
+		}
+
+		private void InitThreadedGL(IntPtr window)
+		{
+			mainThreadId = Thread.CurrentThread.ManagedThreadId;
+#if THREADED_GL
+			// Create a background context
+			SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
+			WindowInfo = window;
+			BackgroundContext = new GL_ContextHandle()
+			{
+				context = SDL.SDL_GL_CreateContext(window)
+			};
+
+			// Make the foreground context current.
+			SDL.SDL_GL_MakeCurrent(window, glContext);
+
+			// We're going to need glFlush, so load this entry point.
+			glFlush = (Flush) Marshal.GetDelegateForFunctionPointer(
+				SDL.SDL_GL_GetProcAddress("glFlush"),
+				typeof(Flush)
+			);
 #endif
 		}
 
 #if !DISABLE_THREADING
-
-		private int mainThreadId;
 
 #if THREADED_GL
 		private class GL_ContextHandle
@@ -3400,29 +3415,6 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		}
 #endif
-
-		private void InitThreadedGL(IntPtr window)
-		{
-			mainThreadId = Thread.CurrentThread.ManagedThreadId;
-#if THREADED_GL
-			// Create a background context
-			SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
-			WindowInfo = window;
-			BackgroundContext = new GL_ContextHandle()
-			{
-				context = SDL.SDL_GL_CreateContext(window)
-			};
-
-			// Make the foreground context current.
-			SDL.SDL_GL_MakeCurrent(window, glContext);
-
-			// We're going to need glFlush, so load this entry point.
-			glFlush = (Flush) Marshal.GetDelegateForFunctionPointer(
-				SDL.SDL_GL_GetProcAddress("glFlush"),
-				typeof(Flush)
-			);
-#endif
-		}
 
 		private void ForceToMainThread(Action action)
 		{
