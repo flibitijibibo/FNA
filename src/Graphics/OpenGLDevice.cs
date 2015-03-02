@@ -30,10 +30,22 @@
  * With THREADED_GL we instead allow you to run threaded rendering using
  * multiple GL contexts. This is more flexible, but much more dangerous.
  *
- * Also note that this affects Threading.cs and SDL2/SDL2_GamePlatform.cs!
- * Check THREADED_GL there too.
- *
  * Basically, if you have to enable this, you should feel very bad.
+ * -flibit
+ */
+#endregion
+
+#region DISABLE_THREADING Option
+// #define DISABLE_THREADING
+/* Perhaps you read the above option and thought to yourself:
+ * "Wow, only an idiot would need threads for their graphics code!"
+ *
+ * For those of you who are particularly well-behaved with your renderer and
+ * don't ever call anything on a thread at all, you can enable this define and
+ * cut out a _ton_ of garbage generation that's caused by our attempt to force
+ * things to the main thread.
+ *
+ * Enjoy the boost, you've earned it.
  * -flibit
  */
 #endregion
@@ -42,6 +54,9 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+#if !DISABLE_THREADING
+using System.Threading;
+#endif
 
 using SDL2;
 #endregion
@@ -435,19 +450,11 @@ namespace Microsoft.Xna.Framework.Graphics
 				presentationParameters.DeviceWindowHandle
 			);
 
-#if THREADED_GL
-			// Create a background context
-			SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
-			Threading.WindowInfo = presentationParameters.DeviceWindowHandle;
-			Threading.BackgroundContext = new Threading.GL_ContextHandle()
-			{
-				context = SDL.SDL_GL_CreateContext(
-					presentationParameters.DeviceWindowHandle
-				)
-			};
-
-			// Make the foreground context current.
-			SDL.SDL_GL_MakeCurrent(presentationParameters.DeviceWindowHandle, glContext);
+#if !DISABLE_THREADING
+			// Init threaded GL crap where applicable
+			InitThreadedGL(
+				presentationParameters.DeviceWindowHandle
+			);
 #endif
 
 			// Initialize entry points
@@ -539,7 +546,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			MojoShader.MOJOSHADER_glDestroyContext(shaderContext);
 
 #if THREADED_GL
-			SDL.SDL_GL_DeleteContext(Threading.BackgroundContext.context);
+			SDL.SDL_GL_DeleteContext(BackgroundContext.context);
 #endif
 			SDL.SDL_GL_DeleteContext(glContext);
 		}
@@ -585,6 +592,10 @@ namespace Microsoft.Xna.Framework.Graphics
 				overrideWindowHandle
 			);
 			BindFramebuffer(Backbuffer.Handle);
+
+#if !DISABLE_THREADING && !THREADED_GL
+			RunActions();
+#endif
 		}
 
 		#endregion
@@ -1087,7 +1098,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			IntPtr effect = IntPtr.Zero;
 			IntPtr glEffect = IntPtr.Zero;
 
-			Threading.ForceToMainThread(() => {
+#if !DISABLE_THREADING
+			ForceToMainThread(() => {
+#endif
 
 			effect = MojoShader.MOJOSHADER_parseEffect(
 				shaderProfile,
@@ -1107,14 +1120,18 @@ namespace Microsoft.Xna.Framework.Graphics
 				throw new Exception(MojoShader.MOJOSHADER_glGetError());
 			}
 
+#if !DISABLE_THREADING
 			});
+#endif
 
 			return new OpenGLEffect(effect, glEffect);
 		}
 
 		public void DeleteEffect(OpenGLEffect effect)
 		{
-			Threading.ForceToMainThread(() => {
+#if !DISABLE_THREADING
+			ForceToMainThread(() => {
+#endif
 
 			if (effect.GLEffectData == currentEffect)
 			{
@@ -1127,14 +1144,19 @@ namespace Microsoft.Xna.Framework.Graphics
 			MojoShader.MOJOSHADER_glDeleteEffect(effect.GLEffectData);
 			MojoShader.MOJOSHADER_freeEffect(effect.EffectData);
 
+#if !DISABLE_THREADING
 			});
+#endif
 		}
 
 		public OpenGLEffect CloneEffect(OpenGLEffect cloneSource)
 		{
 			IntPtr effect = IntPtr.Zero;
 			IntPtr glEffect = IntPtr.Zero;
-			Threading.ForceToMainThread(() => {
+
+#if !DISABLE_THREADING
+			ForceToMainThread(() => {
+#endif
 
 			effect = MojoShader.MOJOSHADER_cloneEffect(cloneSource.EffectData);
 			glEffect = MojoShader.MOJOSHADER_glCompileEffect(effect);
@@ -1143,7 +1165,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				throw new Exception(MojoShader.MOJOSHADER_glGetError());
 			}
 
+#if !DISABLE_THREADING
 			});
+#endif
 
 			return new OpenGLEffect(effect, glEffect);
 		}
@@ -1324,7 +1348,9 @@ namespace Microsoft.Xna.Framework.Graphics
 		) {
 			OpenGLBuffer result = null;
 
-			Threading.ForceToMainThread(() => {
+#if !DISABLE_THREADING
+			ForceToMainThread(() => {
+#endif
 
 			uint handle;
 			glGenBuffers(1, out handle);
@@ -1343,7 +1369,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				result.Dynamic
 			);
 
+#if !DISABLE_THREADING
 			});
+#endif
 
 			return result;
 		}
@@ -1355,7 +1383,9 @@ namespace Microsoft.Xna.Framework.Graphics
 		) {
 			OpenGLBuffer result = null;
 
-			Threading.ForceToMainThread(() => {
+#if !DISABLE_THREADING
+			ForceToMainThread(() => {
+#endif
 
 			uint handle;
 			glGenBuffers(1, out handle);
@@ -1374,7 +1404,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				result.Dynamic
 			);
 
+#if !DISABLE_THREADING
 			});
+#endif
 
 			return result;
 		}
@@ -1414,7 +1446,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			int elementCount,
 			SetDataOptions options
 		) where T : struct {
-			Threading.ForceToMainThread(() => {
+#if !DISABLE_THREADING
+			ForceToMainThread(() => {
+#endif
 
 			BindVertexBuffer(handle);
 
@@ -1439,7 +1473,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			dataHandle.Free();
 
+#if !DISABLE_THREADING
 			});
+#endif
 		}
 
 		public void SetIndexBufferData<T>(
@@ -1450,7 +1486,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			int elementCount,
 			SetDataOptions options
 		) where T : struct {
-			Threading.ForceToMainThread(() => {
+#if !DISABLE_THREADING
+			ForceToMainThread(() => {
+#endif
 
 			BindIndexBuffer(handle);
 
@@ -1476,7 +1514,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			dataHandle.Free();
 
+#if !DISABLE_THREADING
 			});
+#endif
 		}
 
 		#endregion
@@ -1491,7 +1531,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			int elementCount,
 			int vertexStride
 		) where T : struct {
-			Threading.ForceToMainThread(() => {
+#if !DISABLE_THREADING
+			ForceToMainThread(() => {
+#endif
 
 			BindVertexBuffer(handle);
 
@@ -1540,7 +1582,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			glUnmapBuffer(GLenum.GL_ARRAY_BUFFER);
 
+#if !DISABLE_THREADING
 			});
+#endif
 		}
 
 		public void GetIndexBufferData<T>(
@@ -1550,7 +1594,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			int startIndex,
 			int elementCount
 		) where T : struct {
-			Threading.ForceToMainThread(() => {
+#if !DISABLE_THREADING
+			ForceToMainThread(() => {
+#endif
 
 			BindIndexBuffer(handle);
 
@@ -1577,7 +1623,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			glUnmapBuffer(GLenum.GL_ELEMENT_ARRAY_BUFFER);
 
+#if !DISABLE_THREADING
 			});
+#endif
 		}
 
 		#endregion
@@ -1673,7 +1721,9 @@ namespace Microsoft.Xna.Framework.Graphics
 		) {
 			OpenGLTexture result = null;
 
-			Threading.ForceToMainThread(() => {
+#if !DISABLE_THREADING
+			ForceToMainThread(() => {
+#endif
 
 			result = CreateTexture(
 				typeof(Texture2D),
@@ -1719,7 +1769,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				}
 			}
 
+#if !DISABLE_THREADING
 			});
+#endif
 
 			return result;
 		}
@@ -1733,7 +1785,9 @@ namespace Microsoft.Xna.Framework.Graphics
 		) {
 			OpenGLTexture result = null;
 
-			Threading.ForceToMainThread(() => {
+#if !DISABLE_THREADING
+			ForceToMainThread(() => {
+#endif
 
 			result = CreateTexture(
 				typeof(Texture3D),
@@ -1759,7 +1813,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				);
 			}
 
+#if !DISABLE_THREADING
 			});
+#endif
 
 			return result;
 		}
@@ -1771,7 +1827,9 @@ namespace Microsoft.Xna.Framework.Graphics
 		) {
 			OpenGLTexture result = null;
 
-			Threading.ForceToMainThread(() => {
+#if !DISABLE_THREADING
+			ForceToMainThread(() => {
+#endif
 
 			result = CreateTexture(
 				typeof(TextureCube),
@@ -1823,7 +1881,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				}
 			}
 
+#if !DISABLE_THREADING
 			});
+#endif
 
 			return result;
 		}
@@ -1844,7 +1904,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			int startIndex,
 			int elementCount
 		) where T : struct {
-			Threading.ForceToMainThread(() => {
+#if !DISABLE_THREADING
+			ForceToMainThread(() => {
+#endif
 
 			GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
 			int elementSizeInBytes = Marshal.SizeOf(typeof(T));
@@ -1924,7 +1986,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				dataHandle.Free();
 			}
 
+#if !DISABLE_THREADING
 			});
+#endif
 		}
 
 		public void SetTextureData3D<T>(
@@ -1941,7 +2005,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			int startIndex,
 			int elementCount
 		) where T : struct {
-			Threading.ForceToMainThread(() => {
+#if !DISABLE_THREADING
+			ForceToMainThread(() => {
+#endif
 
 			GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
 			try
@@ -1966,7 +2032,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				dataHandle.Free();
 			}
 
+#if !DISABLE_THREADING
 			});
+#endif
 		}
 
 		public void SetTextureDataCube<T>(
@@ -1982,7 +2050,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			int startIndex,
 			int elementCount
 		) where T : struct {
-			Threading.ForceToMainThread(() => {
+#if !DISABLE_THREADING
+			ForceToMainThread(() => {
+#endif
 
 			GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
 			int elementSizeInBytes = Marshal.SizeOf(typeof(T));
@@ -2043,7 +2113,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				dataHandle.Free();
 			}
 
+#if !DISABLE_THREADING
 			});
+#endif
 		}
 
 		#endregion
@@ -2061,7 +2133,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			int startIndex,
 			int elementCount
 		) where T : struct {
-			Threading.ForceToMainThread(() => {
+#if !DISABLE_THREADING
+			ForceToMainThread(() => {
+#endif
 
 			if (ReadTargetIfApplicable(texture, level, data, rect))
 			{
@@ -2136,7 +2210,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				}
 			}
 
+#if !DISABLE_THREADING
 			});
+#endif
 		}
 
 		public void GetTextureDataCube<T>(
@@ -2150,7 +2226,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			int startIndex,
 			int elementCount
 		) where T : struct {
-			Threading.ForceToMainThread(() => {
+#if !DISABLE_THREADING
+			ForceToMainThread(() => {
+#endif
 
 			BindTexture(texture);
 			GLenum glFormat = XNAToGL.TextureFormat[format];
@@ -2220,7 +2298,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				}
 			}
 
+#if !DISABLE_THREADING
 			});
+#endif
 		}
 
 		#endregion
@@ -2419,7 +2499,9 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			uint handle = 0;
 
-			Threading.ForceToMainThread(() => {
+#if !DISABLE_THREADING
+			ForceToMainThread(() => {
+#endif
 
 			glGenRenderbuffers(1, out handle);
 			glBindRenderbuffer(
@@ -2437,7 +2519,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				0
 			);
 
+#if !DISABLE_THREADING
 			});
+#endif
 
 			return handle;
 		}
@@ -3188,6 +3272,111 @@ namespace Microsoft.Xna.Framework.Graphics
 #endif
 			}
 		}
+
+		#endregion
+
+		#region Threaded GL Nonsense
+
+		public bool IsOnMainThread()
+		{
+#if DISABLE_THREADING
+			return true; // You better be right!
+#else
+			return mainThreadId == Thread.CurrentThread.ManagedThreadId;
+#endif
+		}
+
+#if !DISABLE_THREADING
+
+		private int mainThreadId;
+
+#if THREADED_GL
+		private class GL_ContextHandle
+		{
+			public IntPtr context;
+		}
+		private GL_ContextHandle BackgroundContext;
+		private IntPtr WindowInfo;
+		public delegate void Flush();
+		public Flush glFlush;
+
+#else
+		private List<Action> actions = new List<Action>();
+		private void RunActions()
+		{
+			lock (actions)
+			{
+				foreach (Action action in actions)
+				{
+					action();
+				}
+				actions.Clear();
+			}
+		}
+#endif
+
+		private void InitThreadedGL(IntPtr window)
+		{
+			mainThreadId = Thread.CurrentThread.ManagedThreadId;
+#if THREADED_GL
+			// Create a background context
+			SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
+			WindowInfo = window;
+			BackgroundContext = new GL_ContextHandle()
+			{
+				context = SDL.SDL_GL_CreateContext(window)
+			};
+
+			// Make the foreground context current.
+			SDL.SDL_GL_MakeCurrent(window, glContext);
+
+			// We're going to need glFlush, so load this entry point.
+			glFlush = (Flush) Marshal.GetDelegateForFunctionPointer(
+				SDL.SDL_GL_GetProcAddress("glFlush"),
+				typeof(Flush)
+			);
+#endif
+		}
+
+		private void ForceToMainThread(Action action)
+		{
+			// If we're already on the main thread, just call the action.
+			if (mainThreadId == Thread.CurrentThread.ManagedThreadId)
+			{
+				action();
+				return;
+			}
+
+#if THREADED_GL
+			lock (BackgroundContext)
+			{
+				// Make the context current on this thread.
+				SDL.SDL_GL_MakeCurrent(WindowInfo, BackgroundContext.context);
+
+				// Execute the action.
+				action();
+
+				// Must flush the GL calls now before we release the context.
+				glFlush();
+
+				// Free the threaded context for the next threaded call...
+				SDL.SDL_GL_MakeCurrent(WindowInfo, IntPtr.Zero);
+			}
+#else
+			ManualResetEventSlim resetEvent = new ManualResetEventSlim(false);
+			lock (actions)
+			{
+				actions.Add(() =>
+				{
+					action();
+					resetEvent.Set();
+				});
+			}
+			resetEvent.Wait();
+#endif
+		}
+
+#endif // !DISABLE_THREADING
 
 		#endregion
 	}

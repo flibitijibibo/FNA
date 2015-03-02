@@ -810,13 +810,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		/* END SHADER FUNCTIONS */
 
-		/* BEGIN STUPID THREADED GL FUNCTIONS */
-
-		public delegate void Flush();
-		public Flush glFlush;
-
-		/* END STUPID THREADED GL FUNCTIONS */
-
 #if DEBUG
 		/* BEGIN DEBUG OUTPUT FUNCTIONS */
 
@@ -1175,10 +1168,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				glBindAttribLocation = (BindAttribLocation) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glBindAttribLocation"),
 					typeof(BindAttribLocation)
-				);
-				glFlush = (Flush) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glFlush"),
-					typeof(Flush)
 				);
 			}
 			catch

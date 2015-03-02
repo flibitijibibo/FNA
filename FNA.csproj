@@ -77,7 +77,6 @@
     <Compile Include="src\Ray.cs" />
     <Compile Include="src\Rectangle.cs" />
     <Compile Include="src\ReusableItemList.cs" />
-    <Compile Include="src\Threading.cs" />
     <Compile Include="src\Vector2.cs" />
     <Compile Include="src\Vector3.cs" />
     <Compile Include="src\Vector4.cs" />

@@ -408,7 +408,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				throw new ArgumentNullException("disposeAction");
 			}
-			if (Threading.IsOnMainThread())
+			if (Game.Instance.GraphicsDevice.GLDevice.IsOnMainThread())
 			{
 				disposeAction();
 			}

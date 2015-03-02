@@ -24,25 +24,6 @@
  */
 #endregion
 
-#region THREADED_GL Option
-// #define THREADED_GL
-/* Ah, so I see you've run into some issues with threaded GL...
- *
- * We use Threading.cs to handle rendering coming from multiple threads, but if
- * you're too wreckless with how many threads are calling the GL, this will
- * hang.
- *
- * With THREADED_GL we instead allow you to run threaded rendering using
- * multiple GL contexts. This is more flexible, but much more dangerous.
- *
- * Also note that this affects Threading.cs and Graphics/OpenGLDevice.cs!
- * Check THREADED_GL there too.
- *
- * Basically, if you have to enable this, you should feel very bad.
- * -flibit
- */
-#endregion
-
 #region WIIU_GAMEPAD Option
 // #define WIIU_GAMEPAD
 /* This is something I added for myself, because I am a complete goof.
@@ -269,9 +250,6 @@ namespace Microsoft.Xna.Framework
 
 			while (INTERNAL_runApplication)
 			{
-#if !THREADED_GL
-				Threading.Run();
-#endif
 				while (SDL.SDL_PollEvent(out evt) == 1)
 				{
 					// Keyboard
