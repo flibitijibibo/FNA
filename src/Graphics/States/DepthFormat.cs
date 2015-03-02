@@ -11,9 +11,9 @@ namespace Microsoft.Xna.Framework.Graphics
 {
 	public enum DepthFormat
 	{
-		None = -1,
-		Depth16 = 54,
-		Depth24 = 51,
-		Depth24Stencil8 = 48,		
+		None,
+		Depth16,
+		Depth24,
+		Depth24Stencil8
 	}
 }
