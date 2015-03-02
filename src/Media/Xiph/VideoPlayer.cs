@@ -733,7 +733,7 @@ namespace Microsoft.Xna.Framework.Media
 			currentDevice.GLDevice.glUseProgram(shaderProgram);
 
 			// We're using client-side arrays like CAVEMEN
-			currentDevice.GLDevice.BindVertexBuffer(OpenGLDevice.OpenGLVertexBuffer.NullBuffer);
+			currentDevice.GLDevice.BindVertexBuffer(OpenGLDevice.OpenGLBuffer.NullBuffer);
 
 			// We're also setting pointers without any checks, like MAVERICKS
 			currentDevice.GLDevice.glVertexAttribPointer(

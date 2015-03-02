@@ -40,7 +40,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Internal Properties
 
-		internal OpenGLDevice.OpenGLIndexBuffer Handle
+		internal OpenGLDevice.OpenGLBuffer Handle
 		{
 			get;
 			private set;
@@ -114,15 +114,11 @@ namespace Microsoft.Xna.Framework.Graphics
 			IndexCount = indexCount;
 			BufferUsage = usage;
 
-			Threading.ForceToMainThread(() =>
-			{
-				Handle = new OpenGLDevice.OpenGLIndexBuffer(
-					GraphicsDevice,
-					dynamic,
-					IndexCount,
-					IndexElementSize
-				);
-			});
+			Handle = GraphicsDevice.GLDevice.GenIndexBuffer(
+				dynamic,
+				IndexCount,
+				IndexElementSize
+			);
 		}
 
 		#endregion
@@ -191,14 +187,12 @@ namespace Microsoft.Xna.Framework.Graphics
 				);
 			}
 
-			Threading.ForceToMainThread(() =>
-				GraphicsDevice.GLDevice.GetIndexBufferData(
-					Handle,
-					offsetInBytes,
-					data,
-					startIndex,
-					elementCount
-				)
+			GraphicsDevice.GLDevice.GetIndexBufferData(
+				Handle,
+				offsetInBytes,
+				data,
+				startIndex,
+				elementCount
 			);
 		}
 
@@ -268,15 +262,13 @@ namespace Microsoft.Xna.Framework.Graphics
 				throw new InvalidOperationException("The array specified in the data parameter is not the correct size for the amount of data requested.");
 			}
 
-			Threading.ForceToMainThread(() =>
-				GraphicsDevice.GLDevice.SetIndexBufferData(
-					Handle,
-					offsetInBytes,
-					data,
-					startIndex,
-					elementCount,
-					options
-				)
+			GraphicsDevice.GLDevice.SetIndexBufferData(
+				Handle,
+				offsetInBytes,
+				data,
+				startIndex,
+				elementCount,
+				options
 			);
 		}
 

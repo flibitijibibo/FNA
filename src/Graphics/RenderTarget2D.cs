@@ -136,14 +136,11 @@ namespace Microsoft.Xna.Framework.Graphics
 				return;
 			}
 
-			Threading.ForceToMainThread(() =>
-			{
-				glDepthStencilBuffer = graphicsDevice.GLDevice.GenRenderbuffer(
-					width,
-					height,
-					preferredDepthFormat
-				);
-			});
+			glDepthStencilBuffer = graphicsDevice.GLDevice.GenRenderbuffer(
+				width,
+				height,
+				preferredDepthFormat
+			);
 		}
 
 		#endregion

@@ -1066,7 +1066,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			ApplyState();
 
 			// Unbind current index buffer.
-			GLDevice.BindIndexBuffer(OpenGLDevice.OpenGLIndexBuffer.NullBuffer);
+			GLDevice.BindIndexBuffer(OpenGLDevice.OpenGLBuffer.NullBuffer);
 
 			// Pin the buffers.
 			GCHandle vbHandle = GCHandle.Alloc(vertexData, GCHandleType.Pinned);
@@ -1130,7 +1130,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			ApplyState();
 
 			// Unbind current index buffer.
-			GLDevice.BindIndexBuffer(OpenGLDevice.OpenGLIndexBuffer.NullBuffer);
+			GLDevice.BindIndexBuffer(OpenGLDevice.OpenGLBuffer.NullBuffer);
 
 			// Pin the buffers.
 			GCHandle vbHandle = GCHandle.Alloc(vertexData, GCHandleType.Pinned);
@@ -1189,7 +1189,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			ApplyState();
 
 			// Unbind current VBOs.
-			GLDevice.BindVertexBuffer(OpenGLDevice.OpenGLVertexBuffer.NullBuffer);
+			GLDevice.BindVertexBuffer(OpenGLDevice.OpenGLBuffer.NullBuffer);
 
 			// Pin the buffers.
 			GCHandle vbHandle = GCHandle.Alloc(vertexData, GCHandleType.Pinned);

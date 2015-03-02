@@ -40,7 +40,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Internal Properties
 
-		internal OpenGLDevice.OpenGLVertexBuffer Handle
+		internal OpenGLDevice.OpenGLBuffer Handle
 		{
 			get;
 			private set;
@@ -105,15 +105,11 @@ namespace Microsoft.Xna.Framework.Graphics
 				vertexDeclaration.GraphicsDevice = graphicsDevice;
 			}
 
-			Threading.ForceToMainThread(() =>
-			{
-				Handle = new OpenGLDevice.OpenGLVertexBuffer(
-					GraphicsDevice,
-					dynamic,
-					VertexCount,
-					VertexDeclaration.VertexStride
-				);
-			});
+			Handle = GraphicsDevice.GLDevice.GenVertexBuffer(
+				dynamic,
+				VertexCount,
+				VertexDeclaration.VertexStride
+			);
 		}
 
 		#endregion
@@ -195,15 +191,13 @@ namespace Microsoft.Xna.Framework.Graphics
 				throw new InvalidOperationException("The array is not the correct size for the amount of data requested.");
 			}
 
-			Threading.ForceToMainThread(() =>
-				GraphicsDevice.GLDevice.GetVertexBufferData(
-					Handle,
-					offsetInBytes,
-					data,
-					startIndex,
-					elementCount,
-					vertexStride
-				)
+			GraphicsDevice.GLDevice.GetVertexBufferData(
+				Handle,
+				offsetInBytes,
+				data,
+				startIndex,
+				elementCount,
+				vertexStride
 			);
 		}
 
@@ -281,7 +275,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 
 			if (	elementCount > 1 &&
-				(elementCount * vertexStride > Handle.BufferSize)	)
+				(elementCount * vertexStride > (int) Handle.BufferSize)	)
 			{
 				throw new InvalidOperationException(
 					"The vertex stride is larger than the vertex buffer."
@@ -302,16 +296,14 @@ namespace Microsoft.Xna.Framework.Graphics
 				);
 			}
 
-			Threading.ForceToMainThread(() =>
-				GraphicsDevice.GLDevice.SetVertexBufferData(
-					Handle,
-					elementSizeInBytes,
-					offsetInBytes,
-					data,
-					startIndex,
-					elementCount,
-					options
-				)
+			GraphicsDevice.GLDevice.SetVertexBufferData(
+				Handle,
+				elementSizeInBytes,
+				offsetInBytes,
+				data,
+				startIndex,
+				elementCount,
+				options
 			);
 		}
 
