@@ -151,7 +151,7 @@
     <Compile Include="src\Graphics\States\BlendState.cs" />
     <Compile Include="src\Graphics\States\CompareFunction.cs" />
     <Compile Include="src\Graphics\States\CullMode.cs" />
-    <Compile Include="src\Graphics\States\DepthFormat.cs" />
+    <Compile Include="src\Graphics\DepthFormat.cs" />
     <Compile Include="src\Graphics\States\DepthStencilState.cs" />
     <Compile Include="src\Graphics\States\FillMode.cs" />
     <Compile Include="src\Graphics\States\RasterizerState.cs" />
