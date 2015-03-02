@@ -66,12 +66,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				private set;
 			}
 
-			public SurfaceFormat Format
-			{
-				get;
-				private set;
-			}
-
 			public bool HasMipmaps
 			{
 				get;
@@ -89,13 +83,11 @@ namespace Microsoft.Xna.Framework.Graphics
 			public OpenGLTexture(
 				uint handle,
 				Type target,
-				SurfaceFormat format,
-				bool hasMipmaps
+				int levelCount
 			) {
 				Handle = handle;
 				Target = XNAToGL.TextureType[target];
-				Format = format;
-				HasMipmaps = hasMipmaps;
+				HasMipmaps = levelCount > 1;
 
 				WrapS = TextureAddressMode.Wrap;
 				WrapT = TextureAddressMode.Wrap;
@@ -1591,17 +1583,18 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
-		#region glCreateTexture Method
+		#region glCreateTexture Methods
 
-		public OpenGLTexture CreateTexture(Type target, SurfaceFormat format, bool hasMipmaps)
-		{
+		private OpenGLTexture CreateTexture(
+			Type target,
+			int levelCount
+		) {
 			uint handle;
 			glGenTextures(1, out handle);
 			OpenGLTexture result = new OpenGLTexture(
 				handle,
 				target,
-				format,
-				hasMipmaps
+				levelCount
 			);
 			BindTexture(result);
 			glTexParameteri(
@@ -1647,11 +1640,569 @@ namespace Microsoft.Xna.Framework.Graphics
 			return result;
 		}
 
+		public OpenGLTexture CreateTexture2D(
+			SurfaceFormat format,
+			int width,
+			int height,
+			int levelCount
+		) {
+			OpenGLTexture result = null;
+
+			Threading.ForceToMainThread(() => {
+
+			result = CreateTexture(
+				typeof(Texture2D),
+				levelCount
+			);
+
+			GLenum glFormat = XNAToGL.TextureFormat[format];
+			GLenum glInternalFormat = XNAToGL.TextureInternalFormat[format];
+			if (glFormat == GLenum.GL_COMPRESSED_TEXTURE_FORMATS)
+			{
+				for (int i = 0; i < levelCount; i += 1)
+				{
+					int levelWidth = Math.Max(width >> i, 1);
+					int levelHeight = Math.Max(height >> i, 1);
+					glCompressedTexImage2D(
+						GLenum.GL_TEXTURE_2D,
+						i,
+						(int) glInternalFormat,
+						levelWidth,
+						levelHeight,
+						0,
+						((levelWidth + 3) / 4) * ((levelHeight + 3) / 4) * Texture.GetFormatSize(format),
+						IntPtr.Zero
+					);
+				}
+			}
+			else
+			{
+				GLenum glType = XNAToGL.TextureDataType[format];
+				for (int i = 0; i < levelCount; i += 1)
+				{
+					glTexImage2D(
+						GLenum.GL_TEXTURE_2D,
+						i,
+						(int) glInternalFormat,
+						Math.Max(width >> i, 1),
+						Math.Max(height >> i, 1),
+						0,
+						glFormat,
+						glType,
+						IntPtr.Zero
+					);
+				}
+			}
+
+			});
+
+			return result;
+		}
+
+		public OpenGLTexture CreateTexture3D(
+			SurfaceFormat format,
+			int width,
+			int height,
+			int depth,
+			int levelCount
+		) {
+			OpenGLTexture result = null;
+
+			Threading.ForceToMainThread(() => {
+
+			result = CreateTexture(
+				typeof(Texture3D),
+				levelCount
+			);
+
+			GLenum glFormat = XNAToGL.TextureFormat[format];
+			GLenum glInternalFormat = XNAToGL.TextureInternalFormat[format];
+			GLenum glType = XNAToGL.TextureDataType[format];
+			for (int i = 0; i < levelCount; i += 1)
+			{
+				glTexImage3D(
+					GLenum.GL_TEXTURE_3D,
+					i,
+					(int) glInternalFormat,
+					Math.Max(width >> i, 1),
+					Math.Max(height >> i, 1),
+					depth,
+					0,
+					glFormat,
+					glType,
+					IntPtr.Zero
+				);
+			}
+
+			});
+
+			return result;
+		}
+
+		public OpenGLTexture CreateTextureCube(
+			SurfaceFormat format,
+			int size,
+			int levelCount
+		) {
+			OpenGLTexture result = null;
+
+			Threading.ForceToMainThread(() => {
+
+			result = CreateTexture(
+				typeof(TextureCube),
+				levelCount
+			);
+
+			GLenum glFormat = XNAToGL.TextureFormat[format];
+			GLenum glInternalFormat = XNAToGL.TextureInternalFormat[format];
+			if (glFormat == GLenum.GL_COMPRESSED_TEXTURE_FORMATS)
+			{
+				for (int i = 0; i < 6; i += 1)
+				{
+					for (int l = 0; l < levelCount; l += 1)
+					{
+						int levelSize = Math.Max(size >> l, 1);
+						glCompressedTexImage2D(
+							GLenum.GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+							l,
+							(int) glInternalFormat,
+							levelSize,
+							levelSize,
+							0,
+							((levelSize + 3) / 4) * ((levelSize + 3) / 4) * Texture.GetFormatSize(format),
+							IntPtr.Zero
+						);
+					}
+				}
+			}
+			else
+			{
+				GLenum glType = XNAToGL.TextureDataType[format];
+				for (int i = 0; i < 6; i += 1)
+				{
+					for (int l = 0; l < levelCount; l += 1)
+					{
+						int levelSize = Math.Max(size >> l, 1);
+						glTexImage2D(
+							GLenum.GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+							l,
+							(int) glInternalFormat,
+							levelSize,
+							levelSize,
+							0,
+							glFormat,
+							glType,
+							IntPtr.Zero
+						);
+					}
+				}
+			}
+
+			});
+
+			return result;
+		}
+
+		#endregion
+
+		#region glTexSubImage Methods
+
+		public void SetTextureData2D<T>(
+			OpenGLTexture texture,
+			SurfaceFormat format,
+			int x,
+			int y,
+			int w,
+			int h,
+			int level,
+			T[] data,
+			int startIndex,
+			int elementCount
+		) where T : struct {
+			Threading.ForceToMainThread(() => {
+
+			GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
+			int elementSizeInBytes = Marshal.SizeOf(typeof(T));
+			int startByte = startIndex * elementSizeInBytes;
+			IntPtr dataPtr = (IntPtr) (dataHandle.AddrOfPinnedObject().ToInt64() + startByte);
+
+			try
+			{
+				BindTexture(texture);
+				GLenum glFormat = XNAToGL.TextureFormat[format];
+				if (glFormat == GLenum.GL_COMPRESSED_TEXTURE_FORMATS)
+				{
+					int dataLength;
+					if (elementCount > 0)
+					{
+						dataLength = elementCount * elementSizeInBytes;
+					}
+					else
+					{
+						dataLength = data.Length - startByte;
+					}
+
+					/* Note that we're using glInternalFormat, not glFormat.
+					 * In this case, they should actually be the same thing,
+					 * but we use glFormat somewhat differently for
+					 * compressed textures.
+					 * -flibit
+					 */
+					glCompressedTexSubImage2D(
+						GLenum.GL_TEXTURE_2D,
+						level,
+						x,
+						y,
+						w,
+						h,
+						XNAToGL.TextureInternalFormat[format],
+						dataLength,
+						dataPtr
+					);
+				}
+				else
+				{
+					// Set pixel alignment to match texel size in bytes
+					int packSize = Texture.GetFormatSize(format);
+					if (packSize != 4)
+					{
+						glPixelStorei(
+							GLenum.GL_UNPACK_ALIGNMENT,
+							packSize
+						);
+					}
+
+					glTexSubImage2D(
+						GLenum.GL_TEXTURE_2D,
+						level,
+						x,
+						y,
+						w,
+						h,
+						glFormat,
+						XNAToGL.TextureDataType[format],
+						dataPtr
+					);
+
+					// Keep this state sane -flibit
+					if (packSize != 4)
+					{
+						glPixelStorei(
+							GLenum.GL_UNPACK_ALIGNMENT,
+							4
+						);
+					}
+				}
+			}
+			finally
+			{
+				dataHandle.Free();
+			}
+
+			});
+		}
+
+		public void SetTextureData3D<T>(
+			OpenGLTexture texture,
+			SurfaceFormat format,
+			int level,
+			int left,
+			int top,
+			int right,
+			int bottom,
+			int front,
+			int back,
+			T[] data,
+			int startIndex,
+			int elementCount
+		) where T : struct {
+			Threading.ForceToMainThread(() => {
+
+			GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
+			try
+			{
+				BindTexture(texture);
+				glTexSubImage3D(
+					GLenum.GL_TEXTURE_3D,
+					level,
+					left,
+					top,
+					front,
+					right - left,
+					bottom - top,
+					back - front,
+					XNAToGL.TextureFormat[format],
+					XNAToGL.TextureDataType[format],
+					(IntPtr) (dataHandle.AddrOfPinnedObject().ToInt64() + startIndex * Marshal.SizeOf(typeof(T)))
+				);
+			}
+			finally
+			{
+				dataHandle.Free();
+			}
+
+			});
+		}
+
+		public void SetTextureDataCube<T>(
+			OpenGLTexture texture,
+			SurfaceFormat format,
+			int xOffset,
+			int yOffset,
+			int width,
+			int height,
+			CubeMapFace cubeMapFace,
+			int level,
+			T[] data,
+			int startIndex,
+			int elementCount
+		) where T : struct {
+			Threading.ForceToMainThread(() => {
+
+			GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
+			int elementSizeInBytes = Marshal.SizeOf(typeof(T));
+			int startByte = startIndex * elementSizeInBytes;
+			IntPtr dataPtr = (IntPtr) (dataHandle.AddrOfPinnedObject().ToInt64() + startByte);
+
+			try
+			{
+				BindTexture(texture);
+				GLenum glFormat = XNAToGL.TextureFormat[format];
+				if (glFormat == GLenum.GL_COMPRESSED_TEXTURE_FORMATS)
+				{
+					int dataLength;
+					if (elementCount > 0)
+					{
+						dataLength = elementCount * elementSizeInBytes;
+					}
+					else
+					{
+						dataLength = data.Length - startByte;
+					}
+
+					/* Note that we're using glInternalFormat, not glFormat.
+					 * In this case, they should actually be the same thing,
+					 * but we use glFormat somewhat differently for
+					 * compressed textures.
+					 * -flibit
+					 */
+					glCompressedTexSubImage2D(
+						GLenum.GL_TEXTURE_CUBE_MAP_POSITIVE_X + (int) cubeMapFace,
+						level,
+						xOffset,
+						yOffset,
+						width,
+						height,
+						XNAToGL.TextureInternalFormat[format],
+						dataLength,
+						dataPtr
+					);
+				}
+				else
+				{
+					glTexSubImage2D(
+						GLenum.GL_TEXTURE_CUBE_MAP_POSITIVE_X + (int) cubeMapFace,
+						level,
+						xOffset,
+						yOffset,
+						width,
+						height,
+						glFormat,
+						XNAToGL.TextureDataType[format],
+						dataPtr
+					);
+				}
+			}
+			finally
+			{
+				dataHandle.Free();
+			}
+
+			});
+		}
+
+		#endregion
+
+		#region glGetTexImage Methods
+
+		public void GetTextureData2D<T>(
+			OpenGLTexture texture,
+			SurfaceFormat format,
+			int width,
+			int height,
+			int level,
+			Rectangle? rect,
+			T[] data,
+			int startIndex,
+			int elementCount
+		) where T : struct {
+			Threading.ForceToMainThread(() => {
+
+			if (ReadTargetIfApplicable(texture, level, data, rect))
+			{
+				return;
+			}
+
+			BindTexture(texture);
+			GLenum glFormat = XNAToGL.TextureFormat[format];
+			if (glFormat == GLenum.GL_COMPRESSED_TEXTURE_FORMATS)
+			{
+				throw new NotImplementedException("GetData, CompressedTexture");
+			}
+			else if (rect == null)
+			{
+				// Just throw the whole texture into the user array.
+				GCHandle ptr = GCHandle.Alloc(data, GCHandleType.Pinned);
+				try
+				{
+					glGetTexImage(
+						GLenum.GL_TEXTURE_2D,
+						0,
+						glFormat,
+						XNAToGL.TextureDataType[format],
+						ptr.AddrOfPinnedObject()
+					);
+				}
+				finally
+				{
+					ptr.Free();
+				}
+			}
+			else
+			{
+				// Get the whole texture...
+				T[] texData = new T[width * height];
+				GCHandle ptr = GCHandle.Alloc(texData, GCHandleType.Pinned);
+				try
+				{
+					glGetTexImage(
+						GLenum.GL_TEXTURE_2D,
+						0,
+						glFormat,
+						XNAToGL.TextureDataType[format],
+						ptr.AddrOfPinnedObject()
+					);
+				}
+				finally
+				{
+					ptr.Free();
+				}
+
+				// Now, blit the rect region into the user array.
+				Rectangle region = rect.Value;
+				int curPixel = -1;
+				for (int row = region.Y; row < region.Y + region.Height; row += 1)
+				{
+					for (int col = region.X; col < region.X + region.Width; col += 1)
+					{
+						curPixel += 1;
+						if (curPixel < startIndex)
+						{
+							// If we're not at the start yet, just keep going...
+							continue;
+						}
+						if (curPixel > elementCount)
+						{
+							// If we're past the end, we're done!
+							return;
+						}
+						data[curPixel - startIndex] = texData[(row * width) + col];
+					}
+				}
+			}
+
+			});
+		}
+
+		public void GetTextureDataCube<T>(
+			OpenGLTexture texture,
+			SurfaceFormat format,
+			int size,
+			CubeMapFace cubeMapFace,
+			int level,
+			Rectangle? rect,
+			T[] data,
+			int startIndex,
+			int elementCount
+		) where T : struct {
+			Threading.ForceToMainThread(() => {
+
+			BindTexture(texture);
+			GLenum glFormat = XNAToGL.TextureFormat[format];
+			if (glFormat == GLenum.GL_COMPRESSED_TEXTURE_FORMATS)
+			{
+				throw new NotImplementedException("GetData, CompressedTexture");
+			}
+			else if (rect == null)
+			{
+				// Just throw the whole texture into the user array.
+				GCHandle ptr = GCHandle.Alloc(data, GCHandleType.Pinned);
+				try
+				{
+					glGetTexImage(
+						GLenum.GL_TEXTURE_CUBE_MAP_POSITIVE_X + (int) cubeMapFace,
+						0,
+						glFormat,
+						XNAToGL.TextureDataType[format],
+						ptr.AddrOfPinnedObject()
+					);
+				}
+				finally
+				{
+					ptr.Free();
+				}
+			}
+			else
+			{
+				// Get the whole texture...
+				T[] texData = new T[size * size];
+				GCHandle ptr = GCHandle.Alloc(texData, GCHandleType.Pinned);
+				try
+				{
+					glGetTexImage(
+						GLenum.GL_TEXTURE_CUBE_MAP_POSITIVE_X + (int) cubeMapFace,
+						0,
+						glFormat,
+						XNAToGL.TextureDataType[format],
+						ptr.AddrOfPinnedObject()
+					);
+				}
+				finally
+				{
+					ptr.Free();
+				}
+
+				// Now, blit the rect region into the user array.
+				Rectangle region = rect.Value;
+				int curPixel = -1;
+				for (int row = region.Y; row < region.Y + region.Height; row += 1)
+				{
+					for (int col = region.X; col < region.X + region.Width; col += 1)
+					{
+						curPixel += 1;
+						if (curPixel < startIndex)
+						{
+							// If we're not at the start yet, just keep going...
+							continue;
+						}
+						if (curPixel > elementCount)
+						{
+							// If we're past the end, we're done!
+							return;
+						}
+						data[curPixel - startIndex] = texData[(row * size) + col];
+					}
+				}
+			}
+
+			});
+		}
+
 		#endregion
 
 		#region glBindTexture Method
 
-		public void BindTexture(OpenGLTexture texture)
+		private void BindTexture(OpenGLTexture texture)
 		{
 			if (texture.Target != Textures[0].Target)
 			{
@@ -2097,6 +2648,76 @@ namespace Microsoft.Xna.Framework.Graphics
 				{ typeof(Texture2D), GLenum.GL_TEXTURE_2D },
 				{ typeof(Texture3D), GLenum.GL_TEXTURE_3D },
 				{ typeof(TextureCube), GLenum.GL_TEXTURE_CUBE_MAP }
+			};
+
+			public static readonly Dictionary<SurfaceFormat, GLenum> TextureFormat = new Dictionary<SurfaceFormat, GLenum>()
+			{
+				{ SurfaceFormat.Color,			GLenum.GL_RGBA },
+				{ SurfaceFormat.Bgr565,			GLenum.GL_RGB },
+				{ SurfaceFormat.Bgra5551,		GLenum.GL_BGRA },
+				{ SurfaceFormat.Bgra4444,		GLenum.GL_BGRA },
+				{ SurfaceFormat.Dxt1,			GLenum.GL_COMPRESSED_TEXTURE_FORMATS },
+				{ SurfaceFormat.Dxt3,			GLenum.GL_COMPRESSED_TEXTURE_FORMATS },
+				{ SurfaceFormat.Dxt5,			GLenum.GL_COMPRESSED_TEXTURE_FORMATS },
+				{ SurfaceFormat.NormalizedByte2,	GLenum.GL_RG }, // Unconfirmed!
+				{ SurfaceFormat.NormalizedByte4,	GLenum.GL_RGBA }, // Unconfirmed!
+				{ SurfaceFormat.Rgba1010102,		GLenum.GL_RGBA },
+				{ SurfaceFormat.Rg32,			GLenum.GL_RG },
+				{ SurfaceFormat.Rgba64,			GLenum.GL_RGBA },
+				{ SurfaceFormat.Alpha8,			GLenum.GL_LUMINANCE },
+				{ SurfaceFormat.Single,			GLenum.GL_RED },
+				{ SurfaceFormat.Vector2,		GLenum.GL_RG },
+				{ SurfaceFormat.Vector4,		GLenum.GL_RGBA },
+				{ SurfaceFormat.HalfSingle,		GLenum.GL_RED },
+				{ SurfaceFormat.HalfVector2,		GLenum.GL_RG },
+				{ SurfaceFormat.HalfVector4,		GLenum.GL_RGBA },
+				{ SurfaceFormat.HdrBlendable,		GLenum.GL_RGBA }
+			};
+
+			public static readonly Dictionary<SurfaceFormat, GLenum> TextureInternalFormat = new Dictionary<SurfaceFormat, GLenum>()
+			{
+				{ SurfaceFormat.Color,			GLenum.GL_RGBA },
+				{ SurfaceFormat.Bgr565,			GLenum.GL_RGB },
+				{ SurfaceFormat.Bgra5551,		GLenum.GL_RGBA },
+				{ SurfaceFormat.Bgra4444,		GLenum.GL_RGBA4 },
+				{ SurfaceFormat.Dxt1,			GLenum.GL_COMPRESSED_RGBA_S3TC_DXT1_EXT },
+				{ SurfaceFormat.Dxt3,			GLenum.GL_COMPRESSED_RGBA_S3TC_DXT3_EXT },
+				{ SurfaceFormat.Dxt5,			GLenum.GL_COMPRESSED_RGBA_S3TC_DXT5_EXT },
+				{ SurfaceFormat.NormalizedByte2,	GLenum.GL_RG8I }, // Unconfirmed!
+				{ SurfaceFormat.NormalizedByte4,	GLenum.GL_RGBA8I }, // Unconfirmed!
+				{ SurfaceFormat.Rgba1010102,		GLenum.GL_RGB10_A2_EXT },
+				{ SurfaceFormat.Rg32,			GLenum.GL_RG16 },
+				{ SurfaceFormat.Rgba64,			GLenum.GL_RGBA16 },
+				{ SurfaceFormat.Alpha8,			GLenum.GL_LUMINANCE },
+				{ SurfaceFormat.Single,			GLenum.GL_R32F },
+				{ SurfaceFormat.Vector2,		GLenum.GL_RG32F },
+				{ SurfaceFormat.Vector4,		GLenum.GL_RGBA32F },
+				{ SurfaceFormat.HalfSingle,		GLenum.GL_R16F },
+				{ SurfaceFormat.HalfVector2,		GLenum.GL_RG16F },
+				{ SurfaceFormat.HalfVector4,		GLenum.GL_RGBA16F },
+				{ SurfaceFormat.HdrBlendable,		GLenum.GL_RGBA16F }
+			};
+
+			public static readonly Dictionary<SurfaceFormat, GLenum> TextureDataType = new Dictionary<SurfaceFormat, GLenum>()
+			{
+				{ SurfaceFormat.Color,			GLenum.GL_UNSIGNED_BYTE },
+				{ SurfaceFormat.Bgr565,			GLenum.GL_UNSIGNED_SHORT_5_6_5 },
+				{ SurfaceFormat.Bgra5551,		GLenum.GL_UNSIGNED_SHORT_5_5_5_1 },
+				{ SurfaceFormat.Bgra4444,		GLenum.GL_UNSIGNED_SHORT_4_4_4_4 },
+				// Ignoring Dxt1, Dxt3, Dxt5
+				{ SurfaceFormat.NormalizedByte2,	GLenum.GL_BYTE }, // Unconfirmed!
+				{ SurfaceFormat.NormalizedByte4,	GLenum.GL_BYTE }, // Unconfirmed!
+				{ SurfaceFormat.Rgba1010102,		GLenum.GL_UNSIGNED_INT_10_10_10_2 },
+				{ SurfaceFormat.Rg32,			GLenum.GL_UNSIGNED_SHORT },
+				{ SurfaceFormat.Rgba64,			GLenum.GL_UNSIGNED_SHORT },
+				{ SurfaceFormat.Alpha8,			GLenum.GL_UNSIGNED_BYTE },
+				{ SurfaceFormat.Single,			GLenum.GL_FLOAT },
+				{ SurfaceFormat.Vector2,		GLenum.GL_FLOAT },
+				{ SurfaceFormat.Vector4,		GLenum.GL_FLOAT },
+				{ SurfaceFormat.HalfSingle,		GLenum.GL_HALF_FLOAT },
+				{ SurfaceFormat.HalfVector2,		GLenum.GL_HALF_FLOAT },
+				{ SurfaceFormat.HalfVector4,		GLenum.GL_HALF_FLOAT },
+				{ SurfaceFormat.HdrBlendable,		GLenum.GL_HALF_FLOAT }
 			};
 
 			public static readonly Dictionary<Blend, GLenum> BlendMode = new Dictionary<Blend, GLenum>()

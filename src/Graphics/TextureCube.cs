@@ -47,58 +47,12 @@ namespace Microsoft.Xna.Framework.Graphics
 			Size = size;
 			LevelCount = mipMap ? CalculateMipLevels(size) : 1;
 			Format = format;
-			GetGLSurfaceFormat();
 
-			Threading.ForceToMainThread(() =>
-			{
-				texture = GraphicsDevice.GLDevice.CreateTexture(
-					typeof(TextureCube),
-					Format,
-					mipMap
-				);
-
-				if (glFormat == OpenGLDevice.GLenum.GL_COMPRESSED_TEXTURE_FORMATS)
-				{
-					for (int i = 0; i < 6; i += 1)
-					{
-						for (int l = 0; l < LevelCount; l += 1)
-						{
-							int levelSize = Math.Max(size >> l, 1);
-							graphicsDevice.GLDevice.glCompressedTexImage2D(
-								OpenGLDevice.GLenum.GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-								l,
-								(int) glInternalFormat,
-								levelSize,
-								levelSize,
-								0,
-								((levelSize + 3) / 4) * ((levelSize + 3) / 4) * GetFormatSize(),
-								IntPtr.Zero
-							);
-						}
-					}
-				}
-				else
-				{
-					for (int i = 0; i < 6; i += 1)
-					{
-						for (int l = 0; l < LevelCount; l += 1)
-						{
-							int levelSize = Math.Max(size >> l, 1);
-							graphicsDevice.GLDevice.glTexImage2D(
-								OpenGLDevice.GLenum.GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-								l,
-								(int) glInternalFormat,
-								levelSize,
-								levelSize,
-								0,
-								glFormat,
-								glType,
-								IntPtr.Zero
-							);
-						}
-					}
-				}
-			});
+			texture = GraphicsDevice.GLDevice.CreateTextureCube(
+				format,
+				size,
+				LevelCount
+			);
 		}
 
 		#endregion
@@ -164,66 +118,19 @@ namespace Microsoft.Xna.Framework.Graphics
 				height = Math.Max(1, Size >> level);
 			}
 
-			Threading.ForceToMainThread(() =>
-			{
-				GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
-				int elementSizeInBytes = Marshal.SizeOf(typeof(T));
-				int startByte = startIndex * elementSizeInBytes;
-				IntPtr dataPtr = (IntPtr) (dataHandle.AddrOfPinnedObject().ToInt64() + startByte);
-
-				try
-				{
-					GraphicsDevice.GLDevice.BindTexture(texture);
-					if (glFormat == OpenGLDevice.GLenum.GL_COMPRESSED_TEXTURE_FORMATS)
-					{
-						int dataLength;
-						if (elementCount > 0)
-						{
-							dataLength = elementCount * elementSizeInBytes;
-						}
-						else
-						{
-							dataLength = data.Length - startByte;
-						}
-
-						/* Note that we're using glInternalFormat, not glFormat.
-						 * In this case, they should actually be the same thing,
-						 * but we use glFormat somewhat differently for
-						 * compressed textures.
-						 * -flibit
-						 */
-						GraphicsDevice.GLDevice.glCompressedTexSubImage2D(
-							OpenGLDevice.GLenum.GL_TEXTURE_CUBE_MAP_POSITIVE_X + (int) cubeMapFace,
-							level,
-							xOffset,
-							yOffset,
-							width,
-							height,
-							glInternalFormat,
-							dataLength,
-							dataPtr
-						);
-					}
-					else
-					{
-						GraphicsDevice.GLDevice.glTexSubImage2D(
-							OpenGLDevice.GLenum.GL_TEXTURE_CUBE_MAP_POSITIVE_X + (int) cubeMapFace,
-							level,
-							xOffset,
-							yOffset,
-							width,
-							height,
-							glFormat,
-							glType,
-							dataPtr
-						);
-					}
-				}
-				finally
-				{
-					dataHandle.Free();
-				}
-			});
+			GraphicsDevice.GLDevice.SetTextureDataCube(
+				texture,
+				Format,
+				xOffset,
+				yOffset,
+				width,
+				height,
+				cubeMapFace,
+				level,
+				data,
+				startIndex,
+				elementCount
+			);
 		}
 
 		#endregion
@@ -280,73 +187,17 @@ namespace Microsoft.Xna.Framework.Graphics
 				);
 			}
 
-			GraphicsDevice.GLDevice.BindTexture(texture);
-
-			if (glFormat == OpenGLDevice.GLenum.GL_COMPRESSED_TEXTURE_FORMATS)
-			{
-				throw new NotImplementedException("GetData, CompressedTexture");
-			}
-			else if (rect == null)
-			{
-				// Just throw the whole texture into the user array.
-				GCHandle ptr = GCHandle.Alloc(data, GCHandleType.Pinned);
-				try
-				{
-					GraphicsDevice.GLDevice.glGetTexImage(
-						OpenGLDevice.GLenum.GL_TEXTURE_CUBE_MAP_POSITIVE_X + (int) cubeMapFace,
-						0,
-						glFormat,
-						glType,
-						ptr.AddrOfPinnedObject()
-					);
-				}
-				finally
-				{
-					ptr.Free();
-				}
-			}
-			else
-			{
-				// Get the whole texture...
-				T[] texData = new T[Size * Size];
-				GCHandle ptr = GCHandle.Alloc(texData, GCHandleType.Pinned);
-				try
-				{
-					GraphicsDevice.GLDevice.glGetTexImage(
-						OpenGLDevice.GLenum.GL_TEXTURE_CUBE_MAP_POSITIVE_X + (int) cubeMapFace,
-						0,
-						glFormat,
-						glType,
-						ptr.AddrOfPinnedObject()
-					);
-				}
-				finally
-				{
-					ptr.Free();
-				}
-
-				// Now, blit the rect region into the user array.
-				Rectangle region = rect.Value;
-				int curPixel = -1;
-				for (int row = region.Y; row < region.Y + region.Height; row += 1)
-				{
-					for (int col = region.X; col < region.X + region.Width; col += 1)
-					{
-						curPixel += 1;
-						if (curPixel < startIndex)
-						{
-							// If we're not at the start yet, just keep going...
-							continue;
-						}
-						if (curPixel > elementCount)
-						{
-							// If we're past the end, we're done!
-							return;
-						}
-						data[curPixel - startIndex] = texData[(row * Size) + col];
-					}
-				}
-			}
+			GraphicsDevice.GLDevice.GetTextureDataCube(
+				texture,
+				Format,
+				Size,
+				cubeMapFace,
+				level,
+				rect,
+				data,
+				startIndex,
+				elementCount
+			);
 		}
 
 		#endregion

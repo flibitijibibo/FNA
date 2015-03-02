@@ -58,34 +58,15 @@ namespace Microsoft.Xna.Framework.Graphics
 			Height = height;
 			Depth = depth;
 			LevelCount = mipMap ? CalculateMipLevels(width, height) : 1;
-
 			Format = format;
-			GetGLSurfaceFormat();
 
-			Threading.ForceToMainThread(() =>
-			{
-				texture = GraphicsDevice.GLDevice.CreateTexture(
-					typeof(Texture3D),
-					Format,
-					mipMap
-				);
-
-				for (int i = 0; i < LevelCount; i += 1)
-				{
-					GraphicsDevice.GLDevice.glTexImage3D(
-						OpenGLDevice.GLenum.GL_TEXTURE_3D,
-						i,
-						(int) glInternalFormat,
-						Math.Max(width >> i, 1),
-						Math.Max(height >> i, 1),
-						depth,
-						0,
-						glFormat,
-						glType,
-						IntPtr.Zero
-					);
-				}
-			});
+			texture = GraphicsDevice.GLDevice.CreateTexture3D(
+				format,
+				width,
+				height,
+				depth,
+				LevelCount
+			);
 		}
 
 		#endregion
@@ -137,31 +118,20 @@ namespace Microsoft.Xna.Framework.Graphics
 				throw new ArgumentNullException("data");
 			}
 
-			Threading.ForceToMainThread(() =>
-			{
-				GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
-				try
-				{
-					GraphicsDevice.GLDevice.BindTexture(texture);
-					GraphicsDevice.GLDevice.glTexSubImage3D(
-						OpenGLDevice.GLenum.GL_TEXTURE_3D,
-						level,
-						left,
-						top,
-						front,
-						right - left,
-						bottom - top,
-						back - front,
-						glFormat,
-						glType,
-						(IntPtr) (dataHandle.AddrOfPinnedObject().ToInt64() + startIndex * Marshal.SizeOf(typeof(T)))
-					);
-				}
-				finally
-				{
-					dataHandle.Free();
-				}
-			});
+			GraphicsDevice.GLDevice.SetTextureData3D(
+				texture,
+				Format,
+				level,
+				left,
+				top,
+				right,
+				bottom,
+				front,
+				back,
+				data,
+				startIndex,
+				elementCount
+			);
 		}
 
 		#endregion

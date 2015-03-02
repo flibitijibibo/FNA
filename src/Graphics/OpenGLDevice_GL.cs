@@ -422,7 +422,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		);
 		public TexSubImage2D glTexSubImage2D;
 
-		public delegate void CompressedTexImage2D(
+		private delegate void CompressedTexImage2D(
 			GLenum target,
 			int level,
 			int internalFormat,
@@ -432,9 +432,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			int imageSize,
 			IntPtr pixels
 		);
-		public CompressedTexImage2D glCompressedTexImage2D;
+		private CompressedTexImage2D glCompressedTexImage2D;
 
-		public delegate void CompressedTexSubImage2D(
+		private delegate void CompressedTexSubImage2D(
 			GLenum target,
 			int level,
 			int xoffset,
@@ -445,9 +445,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			int imageSize,
 			IntPtr pixels
 		);
-		public CompressedTexSubImage2D glCompressedTexSubImage2D;
+		private CompressedTexSubImage2D glCompressedTexSubImage2D;
 
-		public delegate void TexImage3D(
+		private delegate void TexImage3D(
 			GLenum target,
 			int level,
 			int internalFormat,
@@ -459,9 +459,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			GLenum type,
 			IntPtr pixels
 		);
-		public TexImage3D glTexImage3D;
+		private TexImage3D glTexImage3D;
 
-		public delegate void TexSubImage3D(
+		private delegate void TexSubImage3D(
 			GLenum target,
 			int level,
 			int xoffset,
@@ -474,16 +474,16 @@ namespace Microsoft.Xna.Framework.Graphics
 			GLenum type,
 			IntPtr pixels
 		);
-		public TexSubImage3D glTexSubImage3D;
+		private TexSubImage3D glTexSubImage3D;
 
-		public delegate void GetTexImage(
+		private delegate void GetTexImage(
 			GLenum target,
 			int level,
 			GLenum format,
 			GLenum type,
 			IntPtr pixels
 		);
-		public GetTexImage glGetTexImage;
+		private GetTexImage glGetTexImage;
 
 		public delegate void TexParameteri(
 			GLenum target,
@@ -510,15 +510,15 @@ namespace Microsoft.Xna.Framework.Graphics
 		);
 		private GetTexLevelParameteriv glGetTexLevelParameteriv;
 
-		public delegate void PixelStorei(GLenum pname, int param);
-		public PixelStorei glPixelStorei;
+		private delegate void PixelStorei(GLenum pname, int param);
+		private PixelStorei glPixelStorei;
 
 		/* END TEXTURE FUNCTIONS */
 
 		/* BEGIN BUFFER FUNCTIONS */
 
-		public delegate void GenBuffers(int n, out uint buffers);
-		public GenBuffers glGenBuffers;
+		private delegate void GenBuffers(int n, out uint buffers);
+		private GenBuffers glGenBuffers;
 
 		private delegate void DeleteBuffers(
 			int n,
@@ -529,13 +529,13 @@ namespace Microsoft.Xna.Framework.Graphics
 		private delegate void BindBuffer(GLenum target, uint buffer);
 		private BindBuffer glBindBuffer;
 
-		public delegate void BufferData(
+		private delegate void BufferData(
 			GLenum target,
 			IntPtr size,
 			IntPtr data,
 			GLenum usage
 		);
-		public BufferData glBufferData;
+		private BufferData glBufferData;
 
 		private delegate void BufferSubData(
 			GLenum target,
@@ -618,8 +618,8 @@ namespace Microsoft.Xna.Framework.Graphics
 		);
 		public ReadPixels glReadPixels;
 
-		public delegate void GenerateMipmap(GLenum target);
-		public GenerateMipmap glGenerateMipmap;
+		private delegate void GenerateMipmap(GLenum target);
+		private GenerateMipmap glGenerateMipmap;
 
 		public delegate void GenFramebuffers(
 			int n,
@@ -648,16 +648,16 @@ namespace Microsoft.Xna.Framework.Graphics
 		);
 		public FramebufferTexture2D glFramebufferTexture2D;
 
-		public delegate void FramebufferRenderbuffer(
+		private delegate void FramebufferRenderbuffer(
 			GLenum target,
 			GLenum attachment,
 			GLenum renderbuffertarget,
 			uint renderbuffer
 		);
-		public FramebufferRenderbuffer glFramebufferRenderbuffer;
+		private FramebufferRenderbuffer glFramebufferRenderbuffer;
 
 #if !DISABLE_FAUXBACKBUFFER
-		public delegate void BlitFramebuffer(
+		private delegate void BlitFramebuffer(
 			int srcX0,
 			int srcY0,
 			int srcX1,
@@ -669,34 +669,34 @@ namespace Microsoft.Xna.Framework.Graphics
 			GLenum mask,
 			GLenum filter
 		);
-		public BlitFramebuffer glBlitFramebuffer;
+		private BlitFramebuffer glBlitFramebuffer;
 #endif
 
-		public delegate void GenRenderbuffers(
+		private delegate void GenRenderbuffers(
 			int n,
 			out uint renderbuffers
 		);
-		public GenRenderbuffers glGenRenderbuffers;
+		private GenRenderbuffers glGenRenderbuffers;
 
-		public delegate void DeleteRenderbuffers(
+		private delegate void DeleteRenderbuffers(
 			int n,
 			ref uint renderbuffers
 		);
-		public DeleteRenderbuffers glDeleteRenderbuffers;
+		private DeleteRenderbuffers glDeleteRenderbuffers;
 
-		public delegate void BindRenderbuffer(
+		private delegate void BindRenderbuffer(
 			GLenum target,
 			uint renderbuffer
 		);
-		public BindRenderbuffer glBindRenderbuffer;
+		private BindRenderbuffer glBindRenderbuffer;
 
-		public delegate void RenderbufferStorage(
+		private delegate void RenderbufferStorage(
 			GLenum target,
 			GLenum internalformat,
 			int width,
 			int height
 		);
-		public RenderbufferStorage glRenderbufferStorage;
+		private RenderbufferStorage glRenderbufferStorage;
 
 		/* END FRAMEBUFFER FUNCTIONS */
 
@@ -879,7 +879,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		/* END STRING MARKER FUNCTIONS */
 #endif
 
-		public void LoadGLEntryPoints()
+		private void LoadGLEntryPoints()
 		{
 			/* Basic entry points. If you don't have these, you're screwed. */
 			try

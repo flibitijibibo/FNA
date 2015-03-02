@@ -74,56 +74,14 @@ namespace Microsoft.Xna.Framework.Graphics
 			Width = width;
 			Height = height;
 			LevelCount = mipMap ? CalculateMipLevels(width, height) : 1;
-
 			Format = format;
-			GetGLSurfaceFormat();
 
-			Threading.ForceToMainThread(() =>
-			{
-				texture = GraphicsDevice.GLDevice.CreateTexture(
-					typeof(Texture2D),
-					Format,
-					mipMap
-				);
-
-				if (	Format == SurfaceFormat.Dxt1 ||
-					Format == SurfaceFormat.Dxt3 ||
-					Format == SurfaceFormat.Dxt5	)
-				{
-					for (int i = 0; i < LevelCount; i += 1)
-					{
-						int levelWidth = Math.Max(Width >> i, 1);
-						int levelHeight = Math.Max(Height >> i, 1);
-						graphicsDevice.GLDevice.glCompressedTexImage2D(
-							OpenGLDevice.GLenum.GL_TEXTURE_2D,
-							i,
-							(int) glInternalFormat,
-							levelWidth,
-							levelHeight,
-							0,
-							((levelWidth + 3) / 4) * ((levelHeight + 3) / 4) * GetFormatSize(),
-							IntPtr.Zero
-						);
-					}
-				}
-				else
-				{
-					for (int i = 0; i < LevelCount; i += 1)
-					{
-						graphicsDevice.GLDevice.glTexImage2D(
-							OpenGLDevice.GLenum.GL_TEXTURE_2D,
-							i,
-							(int) glInternalFormat,
-							Math.Max(Width >> i, 1),
-							Math.Max(Height >> i, 1),
-							0,
-							glFormat,
-							glType,
-							IntPtr.Zero
-						);
-					}
-				}
-			});
+			texture = GraphicsDevice.GLDevice.CreateTexture2D(
+				Format,
+				Width,
+				Height,
+				LevelCount
+			);
 		}
 
 		#endregion
@@ -183,85 +141,18 @@ namespace Microsoft.Xna.Framework.Graphics
 				h = Math.Max(Height >> level, 1);
 			}
 
-			Threading.ForceToMainThread(() =>
-			{
-				GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
-				int elementSizeInBytes = Marshal.SizeOf(typeof(T));
-				int startByte = startIndex * elementSizeInBytes;
-				IntPtr dataPtr = (IntPtr) (dataHandle.AddrOfPinnedObject().ToInt64() + startByte);
-
-				try
-				{
-					GraphicsDevice.GLDevice.BindTexture(texture);
-					if (glFormat == OpenGLDevice.GLenum.GL_COMPRESSED_TEXTURE_FORMATS)
-					{
-						int dataLength;
-						if (elementCount > 0)
-						{
-							dataLength = elementCount * elementSizeInBytes;
-						}
-						else
-						{
-							dataLength = data.Length - startByte;
-						}
-
-						/* Note that we're using glInternalFormat, not glFormat.
-						 * In this case, they should actually be the same thing,
-						 * but we use glFormat somewhat differently for
-						 * compressed textures.
-						 * -flibit
-						 */
-						GraphicsDevice.GLDevice.glCompressedTexSubImage2D(
-							OpenGLDevice.GLenum.GL_TEXTURE_2D,
-							level,
-							x,
-							y,
-							w,
-							h,
-							glInternalFormat,
-							dataLength,
-							dataPtr
-						);
-					}
-					else
-					{
-						// Set pixel alignment to match texel size in bytes
-						int packSize = GetFormatSize();
-						if (packSize != 4)
-						{
-							GraphicsDevice.GLDevice.glPixelStorei(
-								OpenGLDevice.GLenum.GL_UNPACK_ALIGNMENT,
-								packSize
-							);
-						}
-
-						GraphicsDevice.GLDevice.glTexSubImage2D(
-							OpenGLDevice.GLenum.GL_TEXTURE_2D,
-							level,
-							x,
-							y,
-							w,
-							h,
-							glFormat,
-							glType,
-							dataPtr
-						);
-
-						// Keep this state sane -flibit
-						if (packSize != 4)
-						{
-							GraphicsDevice.GLDevice.glPixelStorei(
-								OpenGLDevice.GLenum.GL_UNPACK_ALIGNMENT,
-								4
-							);
-						}
-					}
-				}
-				finally
-				{
-					dataHandle.Free();
-				}
-			});
+			GraphicsDevice.GLDevice.SetTextureData2D(
+				texture,
+				Format,
+				x,
+				y,
+				w,
+				h,
+				level,
+				data,
+				startIndex,
+				elementCount
+			);
 		}
 
 		#endregion
@@ -312,81 +203,17 @@ namespace Microsoft.Xna.Framework.Graphics
 				);
 			}
 
-			Threading.ForceToMainThread(() =>
-			{
-				if (GraphicsDevice.GLDevice.ReadTargetIfApplicable(texture, level, data, rect))
-				{
-					return;
-				}
-
-				GraphicsDevice.GLDevice.BindTexture(texture);
-
-				if (glFormat == OpenGLDevice.GLenum.GL_COMPRESSED_TEXTURE_FORMATS)
-				{
-					throw new NotImplementedException("GetData, CompressedTexture");
-				}
-				else if (rect == null)
-				{
-					// Just throw the whole texture into the user array.
-					GCHandle ptr = GCHandle.Alloc(data, GCHandleType.Pinned);
-					try
-					{
-						GraphicsDevice.GLDevice.glGetTexImage(
-							OpenGLDevice.GLenum.GL_TEXTURE_2D,
-							0,
-							glFormat,
-							glType,
-							ptr.AddrOfPinnedObject()
-						);
-					}
-					finally
-					{
-						ptr.Free();
-					}
-				}
-				else
-				{
-					// Get the whole texture...
-					T[] texData = new T[Width * Height];
-					GCHandle ptr = GCHandle.Alloc(texData, GCHandleType.Pinned);
-					try
-					{
-						GraphicsDevice.GLDevice.glGetTexImage(
-							OpenGLDevice.GLenum.GL_TEXTURE_2D,
-							0,
-							glFormat,
-							glType,
-							ptr.AddrOfPinnedObject()
-						);
-					}
-					finally
-					{
-						ptr.Free();
-					}
-
-					// Now, blit the rect region into the user array.
-					Rectangle region = rect.Value;
-					int curPixel = -1;
-					for (int row = region.Y; row < region.Y + region.Height; row += 1)
-					{
-						for (int col = region.X; col < region.X + region.Width; col += 1)
-						{
-							curPixel += 1;
-							if (curPixel < startIndex)
-							{
-								// If we're not at the start yet, just keep going...
-								continue;
-							}
-							if (curPixel > elementCount)
-							{
-								// If we're past the end, we're done!
-								return;
-							}
-							data[curPixel - startIndex] = texData[(row * Width) + col];
-						}
-					}
-				}
-			});
+			GraphicsDevice.GLDevice.GetTextureData2D(
+				texture,
+				Format,
+				Width,
+				Height,
+				level,
+				rect,
+				data,
+				startIndex,
+				elementCount
+			);
 		}
 
 		#endregion
