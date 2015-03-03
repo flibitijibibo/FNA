@@ -319,6 +319,13 @@ namespace Microsoft.Xna.Framework.Content
 					assemblyName
 				)
 			);
+			preparedType = preparedType.Replace(
+				", MonoGame.Framework",
+				string.Format(
+					", {0}",
+					assemblyName
+				)
+			);
 			return preparedType;
 		}
 
