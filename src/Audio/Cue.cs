@@ -472,8 +472,8 @@ namespace Microsoft.Xna.Framework.Audio
 				string varName = INTERNAL_data.UserControlVariable;
 				if (	INTERNAL_userControlledPlaying &&
 					(INTERNAL_baseEngine.INTERNAL_isGlobalVariable(varName) ?
-						(INTERNAL_controlledValue != INTERNAL_baseEngine.GetGlobalVariable(varName)) :
-						(INTERNAL_controlledValue != GetVariable(INTERNAL_data.UserControlVariable)))	)
+						!MathHelper.WithinEpsilon(INTERNAL_controlledValue, INTERNAL_baseEngine.GetGlobalVariable(varName)) :
+						!MathHelper.WithinEpsilon(INTERNAL_controlledValue, GetVariable(INTERNAL_data.UserControlVariable)))	)
 				{
 					// TODO: Crossfading
 					foreach (SoundEffectInstance sfi in INTERNAL_instancePool)
