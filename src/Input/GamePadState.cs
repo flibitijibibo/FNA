@@ -145,7 +145,7 @@ namespace Microsoft.Xna.Framework.Input
 		/// </param>
 		public bool IsButtonDown(Buttons button)
 		{
-			return (GetVirtualButtons() & button) == button;
+			return (Buttons.buttons & button) == button;
 		}
 
 		/// <summary>
@@ -158,58 +158,7 @@ namespace Microsoft.Xna.Framework.Input
 		/// </param>
 		public bool IsButtonUp(Buttons button)
 		{
-			return (GetVirtualButtons() & button) != button;
-		}
-
-		#endregion
-
-		#region Private Methods
-
-		/// <summary>
-		/// Gets the button mask along with 'virtual buttons' like LeftThumbstickLeft.
-		/// </summary>
-		private Buttons GetVirtualButtons()
-		{
-			Buttons result = Buttons.buttons;
-			GamePadThumbSticks sticks = ThumbSticks;
-
-			if (sticks.Left.X < 0)
-			{
-				result |= Microsoft.Xna.Framework.Input.Buttons.LeftThumbstickLeft;
-			}
-			else if (sticks.Left.X > 0)
-			{
-				result |= Microsoft.Xna.Framework.Input.Buttons.LeftThumbstickRight;
-			}
-
-			if (sticks.Left.Y < 0)
-			{
-				result |= Microsoft.Xna.Framework.Input.Buttons.LeftThumbstickDown;
-			}
-			else if (sticks.Left.Y > 0)
-			{
-				result |= Microsoft.Xna.Framework.Input.Buttons.LeftThumbstickUp;
-			}
-
-			if (sticks.Right.X < 0)
-			{
-				result |= Microsoft.Xna.Framework.Input.Buttons.RightThumbstickLeft;
-			}
-			else if (sticks.Right.X > 0)
-			{
-				result |= Microsoft.Xna.Framework.Input.Buttons.RightThumbstickRight;
-			}
-
-			if (sticks.Right.Y < 0)
-			{
-				result |= Microsoft.Xna.Framework.Input.Buttons.RightThumbstickDown;
-			}
-			else if (sticks.Right.Y > 0)
-			{
-				result |= Microsoft.Xna.Framework.Input.Buttons.RightThumbstickUp;
-			}
-
-			return result;
+			return (Buttons.buttons & button) != button;
 		}
 
 		#endregion
