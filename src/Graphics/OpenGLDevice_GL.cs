@@ -33,7 +33,7 @@ namespace Microsoft.Xna.Framework.Graphics
 	{
 		#region Private OpenGL Entry Points
 
-		public enum GLenum : int
+		internal enum GLenum : int
 		{
 			// Hint Enum Value
 			GL_DONT_CARE =				0x1100,
@@ -663,16 +663,16 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		/* BEGIN DRAWING FUNCTIONS */
 
-		public delegate void DrawElementsInstanced(
+		private delegate void DrawElementsInstanced(
 			GLenum mode,
 			int count,
 			GLenum type,
 			IntPtr indices,
 			int instanceCount
 		);
-		public DrawElementsInstanced glDrawElementsInstanced;
+		private DrawElementsInstanced glDrawElementsInstanced;
 
-		public delegate void DrawRangeElements(
+		private delegate void DrawRangeElements(
 			GLenum mode,
 			int start,
 			int end,
@@ -680,14 +680,14 @@ namespace Microsoft.Xna.Framework.Graphics
 			GLenum type,
 			IntPtr indices
 		);
-		public DrawRangeElements glDrawRangeElements;
+		private DrawRangeElements glDrawRangeElements;
 
-		public delegate void DrawArrays(
+		private delegate void DrawArrays(
 			GLenum mode,
 			int first,
 			int count
 		);
-		public DrawArrays glDrawArrays;
+		private DrawArrays glDrawArrays;
 
 		/* END DRAWING FUNCTIONS */
 

@@ -878,14 +878,13 @@ namespace Microsoft.Xna.Framework.Graphics
 			int startIndex,
 			int primitiveCount
 		) {
-			// Flush the GL state before moving on!
+			// If this device doesn't have the support, just explode now before it's too late.
+			if (!GLDevice.SupportsHardwareInstancing)
+			{
+				throw new NoSuitableGraphicsDeviceException("Your hardware does not support hardware instancing!");
+			}
+
 			ApplyState();
-
-			// Unsigned short or unsigned int?
-			bool shortIndices = Indices.IndexElementSize == IndexElementSize.SixteenBits;
-
-			// Bind the index buffer
-			GLDevice.BindIndexBuffer(Indices.Handle);
 
 			// Set up the vertex buffers
 			GLDevice.ApplyVertexAttributes(
@@ -896,16 +895,14 @@ namespace Microsoft.Xna.Framework.Graphics
 			);
 			vertexBuffersUpdated = false;
 
-			// Draw!
-			GLDevice.glDrawRangeElements(
-				PrimitiveTypeGL(primitiveType),
+			GLDevice.DrawIndexedPrimitives(
+				primitiveType,
+				baseVertex,
 				minVertexIndex,
-				minVertexIndex + numVertices - 1,
-				GetElementCountArray(primitiveType, primitiveCount),
-				shortIndices ?
-					OpenGLDevice.GLenum.GL_UNSIGNED_SHORT :
-					OpenGLDevice.GLenum.GL_UNSIGNED_INT,
-				(IntPtr) (startIndex * (shortIndices ? 2 : 4))
+				numVertices,
+				startIndex,
+				primitiveCount,
+				Indices
 			);
 		}
 
@@ -918,22 +915,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			int primitiveCount,
 			int instanceCount
 		) {
-			// Note that minVertexIndex and numVertices are NOT used!
-
-			// If this device doesn't have the support, just explode now before it's too late.
-			if (!GLDevice.SupportsHardwareInstancing)
-			{
-				throw new NoSuitableGraphicsDeviceException("Your hardware does not support hardware instancing!");
-			}
-
-			// Flush the GL state before moving on!
 			ApplyState();
-
-			// Unsigned short or unsigned int?
-			bool shortIndices = Indices.IndexElementSize == IndexElementSize.SixteenBits;
-
-			// Bind the index buffer
-			GLDevice.BindIndexBuffer(Indices.Handle);
 
 			// Set up the vertex buffers
 			GLDevice.ApplyVertexAttributes(
@@ -944,15 +926,15 @@ namespace Microsoft.Xna.Framework.Graphics
 			);
 			vertexBuffersUpdated = false;
 
-			// Draw!
-			GLDevice.glDrawElementsInstanced(
-				PrimitiveTypeGL(primitiveType),
-				GetElementCountArray(primitiveType, primitiveCount),
-				shortIndices ?
-					OpenGLDevice.GLenum.GL_UNSIGNED_SHORT :
-					OpenGLDevice.GLenum.GL_UNSIGNED_INT,
-				(IntPtr) (startIndex * (shortIndices ? 2 : 4)),
-				instanceCount
+			GLDevice.DrawInstancedPrimitives(
+				primitiveType,
+				baseVertex,
+				minVertexIndex,
+				numVertices,
+				startIndex,
+				primitiveCount,
+				instanceCount,
+				Indices
 			);
 		}
 
@@ -960,9 +942,11 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region DrawPrimitives: VertexBuffer, No Indices
 
-		public void DrawPrimitives(PrimitiveType primitiveType, int vertexStart, int primitiveCount)
-		{
-			// Flush the GL state before moving on!
+		public void DrawPrimitives(
+			PrimitiveType primitiveType,
+			int vertexStart,
+			int primitiveCount
+		) {
 			ApplyState();
 
 			// Set up the vertex buffers
@@ -974,11 +958,10 @@ namespace Microsoft.Xna.Framework.Graphics
 			);
 			vertexBuffersUpdated = false;
 
-			// Draw!
-			GLDevice.glDrawArrays(
-				PrimitiveTypeGL(primitiveType),
+			GLDevice.DrawPrimitives(
+				primitiveType,
 				vertexStart,
-				GetElementCountArray(primitiveType, primitiveCount)
+				primitiveCount
 			);
 		}
 
@@ -995,16 +978,38 @@ namespace Microsoft.Xna.Framework.Graphics
 			int indexOffset,
 			int primitiveCount
 		) where T : struct, IVertexType {
-			DrawUserIndexedPrimitives<T>(
+			ApplyState();
+
+			// Pin the buffers.
+			GCHandle vbHandle = GCHandle.Alloc(vertexData, GCHandleType.Pinned);
+			GCHandle ibHandle = GCHandle.Alloc(indexData, GCHandleType.Pinned);
+			IntPtr vbPtr = vbHandle.AddrOfPinnedObject();
+			IntPtr ibPtr = ibHandle.AddrOfPinnedObject();
+
+			// Setup the vertex declaration to point at the vertex data.
+			VertexDeclaration vertexDeclaration = VertexDeclarationCache<T>.VertexDeclaration;
+			vertexDeclaration.GraphicsDevice = this;
+			GLDevice.ApplyVertexAttributes(
+				vertexDeclaration,
+				vbPtr,
+				vertexOffset
+			);
+
+			GLDevice.DrawUserIndexedPrimitives(
 				primitiveType,
-				vertexData,
+				vbPtr,
 				vertexOffset,
 				numVertices,
-				indexData,
+				ibPtr,
 				indexOffset,
+				IndexElementSize.SixteenBits,
 				primitiveCount,
-				VertexDeclarationCache<T>.VertexDeclaration
+				vertexDeclaration
 			);
+
+			// Release the handles.
+			ibHandle.Free();
+			vbHandle.Free();
 		}
 
 		public void DrawUserIndexedPrimitives<T>(
@@ -1017,32 +1022,32 @@ namespace Microsoft.Xna.Framework.Graphics
 			int primitiveCount,
 			VertexDeclaration vertexDeclaration
 		) where T : struct {
-			// Flush the GL state before moving on!
 			ApplyState();
-
-			// Unbind current index buffer.
-			GLDevice.BindIndexBuffer(OpenGLDevice.OpenGLBuffer.NullBuffer);
 
 			// Pin the buffers.
 			GCHandle vbHandle = GCHandle.Alloc(vertexData, GCHandleType.Pinned);
 			GCHandle ibHandle = GCHandle.Alloc(indexData, GCHandleType.Pinned);
+			IntPtr vbPtr = vbHandle.AddrOfPinnedObject();
+			IntPtr ibPtr = ibHandle.AddrOfPinnedObject();
 
 			// Setup the vertex declaration to point at the vertex data.
 			vertexDeclaration.GraphicsDevice = this;
 			GLDevice.ApplyVertexAttributes(
 				vertexDeclaration,
-				vbHandle.AddrOfPinnedObject(),
+				vbPtr,
 				vertexOffset
 			);
 
-			// Draw!
-			GLDevice.glDrawRangeElements(
-				PrimitiveTypeGL(primitiveType),
-				0,
-				numVertices - 1,
-				GetElementCountArray(primitiveType, primitiveCount),
-				OpenGLDevice.GLenum.GL_UNSIGNED_SHORT,
-				(IntPtr) (ibHandle.AddrOfPinnedObject().ToInt64() + (indexOffset * sizeof(short)))
+			GLDevice.DrawUserIndexedPrimitives(
+				primitiveType,
+				vbPtr,
+				vertexOffset,
+				numVertices,
+				ibPtr,
+				indexOffset,
+				IndexElementSize.SixteenBits,
+				primitiveCount,
+				vertexDeclaration
 			);
 
 			// Release the handles.
@@ -1059,16 +1064,38 @@ namespace Microsoft.Xna.Framework.Graphics
 			int indexOffset,
 			int primitiveCount
 		) where T : struct, IVertexType {
-			DrawUserIndexedPrimitives<T>(
+			ApplyState();
+
+			// Pin the buffers.
+			GCHandle vbHandle = GCHandle.Alloc(vertexData, GCHandleType.Pinned);
+			GCHandle ibHandle = GCHandle.Alloc(indexData, GCHandleType.Pinned);
+			IntPtr vbPtr = vbHandle.AddrOfPinnedObject();
+			IntPtr ibPtr = ibHandle.AddrOfPinnedObject();
+
+			// Setup the vertex declaration to point at the vertex data.
+			VertexDeclaration vertexDeclaration = VertexDeclarationCache<T>.VertexDeclaration;
+			vertexDeclaration.GraphicsDevice = this;
+			GLDevice.ApplyVertexAttributes(
+				vertexDeclaration,
+				vbPtr,
+				vertexOffset
+			);
+
+			GLDevice.DrawUserIndexedPrimitives(
 				primitiveType,
-				vertexData,
+				vbPtr,
 				vertexOffset,
 				numVertices,
-				indexData,
+				ibPtr,
 				indexOffset,
+				IndexElementSize.ThirtyTwoBits,
 				primitiveCount,
-				VertexDeclarationCache<T>.VertexDeclaration
+				vertexDeclaration
 			);
+
+			// Release the handles.
+			ibHandle.Free();
+			vbHandle.Free();
 		}
 
 		public void DrawUserIndexedPrimitives<T>(
@@ -1081,32 +1108,32 @@ namespace Microsoft.Xna.Framework.Graphics
 			int primitiveCount,
 			VertexDeclaration vertexDeclaration
 		) where T : struct, IVertexType {
-			// Flush the GL state before moving on!
 			ApplyState();
-
-			// Unbind current index buffer.
-			GLDevice.BindIndexBuffer(OpenGLDevice.OpenGLBuffer.NullBuffer);
 
 			// Pin the buffers.
 			GCHandle vbHandle = GCHandle.Alloc(vertexData, GCHandleType.Pinned);
 			GCHandle ibHandle = GCHandle.Alloc(indexData, GCHandleType.Pinned);
+			IntPtr vbPtr = vbHandle.AddrOfPinnedObject();
+			IntPtr ibPtr = ibHandle.AddrOfPinnedObject();
 
 			// Setup the vertex declaration to point at the vertex data.
 			vertexDeclaration.GraphicsDevice = this;
 			GLDevice.ApplyVertexAttributes(
 				vertexDeclaration,
-				vbHandle.AddrOfPinnedObject(),
+				vbPtr,
 				vertexOffset
 			);
 
-			// Draw!
-			GLDevice.glDrawRangeElements(
-				PrimitiveTypeGL(primitiveType),
-				0,
-				numVertices - 1,
-				GetElementCountArray(primitiveType, primitiveCount),
-				OpenGLDevice.GLenum.GL_UNSIGNED_INT,
-				(IntPtr) (ibHandle.AddrOfPinnedObject().ToInt64() + (indexOffset * sizeof(int)))
+			GLDevice.DrawUserIndexedPrimitives(
+				primitiveType,
+				vbPtr,
+				vertexOffset,
+				numVertices,
+				ibPtr,
+				indexOffset,
+				IndexElementSize.ThirtyTwoBits,
+				primitiveCount,
+				vertexDeclaration
 			);
 
 			// Release the handles.
@@ -1124,13 +1151,31 @@ namespace Microsoft.Xna.Framework.Graphics
 			int vertexOffset,
 			int primitiveCount
 		) where T : struct, IVertexType {
-			DrawUserPrimitives(
+			ApplyState();
+
+			// Pin the buffers.
+			GCHandle vbHandle = GCHandle.Alloc(vertexData, GCHandleType.Pinned);
+			IntPtr vbPtr = vbHandle.AddrOfPinnedObject();
+
+			// Setup the vertex declaration to point at the vertex data.
+			VertexDeclaration vertexDeclaration = VertexDeclarationCache<T>.VertexDeclaration;
+			vertexDeclaration.GraphicsDevice = this;
+			GLDevice.ApplyVertexAttributes(
+				vertexDeclaration,
+				vbPtr,
+				0
+			);
+
+			GLDevice.DrawUserPrimitives(
 				primitiveType,
-				vertexData,
+				vbPtr,
 				vertexOffset,
 				primitiveCount,
-				VertexDeclarationCache<T>.VertexDeclaration
+				vertexDeclaration
 			);
+
+			// Release the handles.
+			vbHandle.Free();
 		}
 
 		public void DrawUserPrimitives<T>(
@@ -1140,28 +1185,26 @@ namespace Microsoft.Xna.Framework.Graphics
 			int primitiveCount,
 			VertexDeclaration vertexDeclaration
 		) where T : struct {
-			// Flush the GL state before moving on!
 			ApplyState();
-
-			// Unbind current VBOs.
-			GLDevice.BindVertexBuffer(OpenGLDevice.OpenGLBuffer.NullBuffer);
 
 			// Pin the buffers.
 			GCHandle vbHandle = GCHandle.Alloc(vertexData, GCHandleType.Pinned);
+			IntPtr vbPtr = vbHandle.AddrOfPinnedObject();
 
 			// Setup the vertex declaration to point at the vertex data.
 			vertexDeclaration.GraphicsDevice = this;
 			GLDevice.ApplyVertexAttributes(
 				vertexDeclaration,
-				vbHandle.AddrOfPinnedObject(),
+				vbPtr,
 				0
 			);
 
-			// Draw!
-			GLDevice.glDrawArrays(
-				PrimitiveTypeGL(primitiveType),
+			GLDevice.DrawUserPrimitives(
+				primitiveType,
+				vbPtr,
 				vertexOffset,
-				GetElementCountArray(primitiveType, primitiveCount)
+				primitiveCount,
+				vertexDeclaration
 			);
 
 			// Release the handles.
@@ -1175,44 +1218,6 @@ namespace Microsoft.Xna.Framework.Graphics
 		public void SetStringMarkerEXT(string text)
 		{
 			GLDevice.SetStringMarker(text);
-		}
-
-		#endregion
-
-		#region Private XNA->GL Conversion Methods
-
-		private static int GetElementCountArray(PrimitiveType primitiveType, int primitiveCount)
-		{
-			switch (primitiveType)
-			{
-				case PrimitiveType.LineList:
-					return primitiveCount * 2;
-				case PrimitiveType.LineStrip:
-					return primitiveCount + 1;
-				case PrimitiveType.TriangleList:
-					return primitiveCount * 3;
-				case PrimitiveType.TriangleStrip:
-					return primitiveCount + 2;
-			}
-
-			throw new NotSupportedException();
-		}
-
-		private static OpenGLDevice.GLenum PrimitiveTypeGL(PrimitiveType primitiveType)
-		{
-			switch (primitiveType)
-			{
-				case PrimitiveType.LineList:
-					return OpenGLDevice.GLenum.GL_LINES;
-				case PrimitiveType.LineStrip:
-					return OpenGLDevice.GLenum.GL_LINE_STRIP;
-				case PrimitiveType.TriangleList:
-					return OpenGLDevice.GLenum.GL_TRIANGLES;
-				case PrimitiveType.TriangleStrip:
-					return OpenGLDevice.GLenum.GL_TRIANGLE_STRIP;
-			}
-
-			throw new ArgumentException("Should be a value defined in PrimitiveType", "primitiveType");
 		}
 
 		#endregion

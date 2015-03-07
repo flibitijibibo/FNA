@@ -229,7 +229,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		}
 
-		internal bool alphaBlendEnable = false;
+		private bool alphaBlendEnable = false;
 		private Color blendColor = Color.Transparent;
 		private BlendFunction blendOp = BlendFunction.Add;
 		private BlendFunction blendOpAlpha = BlendFunction.Add;
@@ -246,7 +246,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Depth State Variables
 
-		internal bool zEnable = false;
+		private bool zEnable = false;
 		private bool zWriteEnable = false;
 		private CompareFunction depthFunc = CompareFunction.Less;
 
@@ -310,8 +310,8 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Rasterizer State Variables
 
-		internal bool scissorTestEnable = false;
-		internal CullMode cullFrontFace = CullMode.None;
+		private bool scissorTestEnable = false;
+		private CullMode cullFrontFace = CullMode.None;
 		private FillMode fillMode = FillMode.Solid;
 		private float depthBias = 0.0f;
 		private float slopeScaleDepthBias = 0.0f;
@@ -344,12 +344,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Texture Collection Variables
 
-		// FIXME: This doesn't need to be public. Blame VideoPlayer. -flibit
-		public OpenGLTexture[] Textures
-		{
-			get;
-			private set;
-		}
+		private OpenGLTexture[] Textures;
 
 		#endregion
 
@@ -371,23 +366,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		#region Render Target Cache Variables
 
 		private uint currentReadFramebuffer = 0;
-		public uint CurrentReadFramebuffer
-		{
-			get
-			{
-				return currentReadFramebuffer;
-			}
-		}
-
 		private uint currentDrawFramebuffer = 0;
-		public uint CurrentDrawFramebuffer
-		{
-			get
-			{
-				return currentDrawFramebuffer;
-			}
-		}
-
 		private uint targetFramebuffer = 0;
 		private uint[] currentAttachments;
 		private GLenum[] currentAttachmentFaces;
@@ -422,13 +401,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
-		#region OpenGL Extensions List, Device Capabilities Variables
-
-		public string Extensions
-		{
-			get;
-			private set;
-		}
+		#region OpenGL Device Capabilities
 
 		public bool SupportsDxt1
 		{
@@ -530,16 +503,16 @@ namespace Microsoft.Xna.Framework.Graphics
 			System.Console.WriteLine("MojoShader Profile: " + shaderProfile);
 
 			// Load the extension list, initialize extension-dependent components
-			Extensions = glGetString(GLenum.GL_EXTENSIONS);
+			string extensions = glGetString(GLenum.GL_EXTENSIONS);
 			SupportsS3tc = (
-				Extensions.Contains("GL_EXT_texture_compression_s3tc") ||
-				Extensions.Contains("GL_OES_texture_compression_S3TC") ||
-				Extensions.Contains("GL_EXT_texture_compression_dxt3") ||
-				Extensions.Contains("GL_EXT_texture_compression_dxt5")
+				extensions.Contains("GL_EXT_texture_compression_s3tc") ||
+				extensions.Contains("GL_OES_texture_compression_S3TC") ||
+				extensions.Contains("GL_EXT_texture_compression_dxt3") ||
+				extensions.Contains("GL_EXT_texture_compression_dxt5")
 			);
 			SupportsDxt1 = (
 				SupportsS3tc ||
-				Extensions.Contains("GL_EXT_texture_compression_dxt1")
+				extensions.Contains("GL_EXT_texture_compression_dxt1")
 			);
 
 			// Initialize the faux-backbuffer
@@ -754,6 +727,132 @@ namespace Microsoft.Xna.Framework.Graphics
 			byte[] chars = System.Text.Encoding.ASCII.GetBytes(text);
 			glStringMarkerGREMEDY(chars.Length, chars);
 #endif
+		}
+
+		#endregion
+
+		#region Drawing Methods
+
+		public void DrawIndexedPrimitives(
+			PrimitiveType primitiveType,
+			int baseVertex,
+			int minVertexIndex,
+			int numVertices,
+			int startIndex,
+			int primitiveCount,
+			IndexBuffer indices
+		) {
+			// Unsigned short or unsigned int?
+			bool shortIndices = indices.IndexElementSize == IndexElementSize.SixteenBits;
+
+			// Bind the index buffer
+			BindIndexBuffer(indices.Handle);
+
+			// Draw!
+			glDrawRangeElements(
+				XNAToGL.Primitive[primitiveType],
+				minVertexIndex,
+				minVertexIndex + numVertices - 1,
+				XNAToGL.PrimitiveVerts(primitiveType, primitiveCount),
+				shortIndices ?
+					OpenGLDevice.GLenum.GL_UNSIGNED_SHORT :
+					OpenGLDevice.GLenum.GL_UNSIGNED_INT,
+				(IntPtr) (startIndex * (shortIndices ? 2 : 4))
+			);
+		}
+
+		public void DrawInstancedPrimitives(
+			PrimitiveType primitiveType,
+			int baseVertex,
+			int minVertexIndex,
+			int numVertices,
+			int startIndex,
+			int primitiveCount,
+			int instanceCount,
+			IndexBuffer indices
+		) {
+			// Note that minVertexIndex and numVertices are NOT used!
+
+			// Bind the index buffer
+			BindIndexBuffer(indices.Handle);
+
+			// Unsigned short or unsigned int?
+			bool shortIndices = indices.IndexElementSize == IndexElementSize.SixteenBits;
+
+			// Draw!
+			glDrawElementsInstanced(
+				XNAToGL.Primitive[primitiveType],
+				XNAToGL.PrimitiveVerts(primitiveType, primitiveCount),
+				shortIndices ?
+					OpenGLDevice.GLenum.GL_UNSIGNED_SHORT :
+					OpenGLDevice.GLenum.GL_UNSIGNED_INT,
+				(IntPtr) (startIndex * (shortIndices ? 2 : 4)),
+				instanceCount
+			);
+		}
+
+		public void DrawPrimitives(
+			PrimitiveType primitiveType,
+			int vertexStart,
+			int primitiveCount
+		) {
+			// Draw!
+			glDrawArrays(
+				XNAToGL.Primitive[primitiveType],
+				vertexStart,
+				XNAToGL.PrimitiveVerts(primitiveType, primitiveCount)
+			);
+		}
+
+		public void DrawUserIndexedPrimitives(
+			PrimitiveType primitiveType,
+			IntPtr vertexData,
+			int vertexOffset,
+			int numVertices,
+			IntPtr indexData,
+			int indexOffset,
+			IndexElementSize indexElementSize,
+			int primitiveCount,
+			VertexDeclaration vertexDeclaration
+		) {
+			// Unbind current index buffer.
+			BindIndexBuffer(OpenGLDevice.OpenGLBuffer.NullBuffer);
+
+			// Unsigned short or unsigned int?
+			bool shortIndices = indexElementSize == IndexElementSize.SixteenBits;
+
+			// Draw!
+			glDrawRangeElements(
+				XNAToGL.Primitive[primitiveType],
+				0,
+				numVertices - 1,
+				XNAToGL.PrimitiveVerts(primitiveType, primitiveCount),
+				shortIndices ?
+					OpenGLDevice.GLenum.GL_UNSIGNED_SHORT :
+					OpenGLDevice.GLenum.GL_UNSIGNED_INT,
+				(IntPtr) (
+					indexData.ToInt64() +
+					(indexOffset * (shortIndices ? 2 : 4))
+				)
+			);
+		}
+
+		public void DrawUserPrimitives(
+			PrimitiveType primitiveType,
+			IntPtr vertexData,
+			int vertexOffset,
+			int primitiveCount,
+			VertexDeclaration vertexDeclaration
+		) {
+			// Unbind current VBOs.
+			BindVertexBuffer(OpenGLDevice.OpenGLBuffer.NullBuffer);
+
+			// Draw!
+			glDrawArrays(
+				XNAToGL.Primitive[primitiveType],
+				vertexOffset,
+				XNAToGL.PrimitiveVerts(primitiveType, primitiveCount)
+			);
 		}
 
 		#endregion
@@ -1578,7 +1677,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region glBindBuffer Methods
 
-		public void BindVertexBuffer(OpenGLBuffer buffer)
+		private void BindVertexBuffer(OpenGLBuffer buffer)
 		{
 			if (buffer.Handle != currentVertexBuffer)
 			{
@@ -1587,7 +1686,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		}
 
-		public void BindIndexBuffer(OpenGLBuffer buffer)
+		private void BindIndexBuffer(OpenGLBuffer buffer)
 		{
 			if (buffer.Handle != currentIndexBuffer)
 			{
@@ -2545,7 +2644,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				);
 			}
 
-			uint prevReadBuffer = CurrentReadFramebuffer;
+			uint prevReadBuffer = currentReadFramebuffer;
 			BindReadFramebuffer(Backbuffer.Handle);
 
 			int x;
@@ -2623,7 +2722,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				return false;
 			}
 
-			uint prevReadBuffer = CurrentReadFramebuffer;
+			uint prevReadBuffer = currentReadFramebuffer;
 			BindReadFramebuffer(targetFramebuffer);
 
 			int x;
@@ -2686,7 +2785,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Framebuffer Methods
 
-		public void BindFramebuffer(uint handle)
+		private void BindFramebuffer(uint handle)
 		{
 			if (	currentReadFramebuffer != handle &&
 				currentDrawFramebuffer != handle	)
@@ -2708,7 +2807,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		}
 
-		public void BindReadFramebuffer(uint handle)
+		private void BindReadFramebuffer(uint handle)
 		{
 			if (handle == currentReadFramebuffer)
 			{
@@ -2723,7 +2822,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			currentReadFramebuffer = handle;
 		}
 
-		public void BindDrawFramebuffer(uint handle)
+		private void BindDrawFramebuffer(uint handle)
 		{
 			if (handle == currentDrawFramebuffer)
 			{
@@ -3333,6 +3432,30 @@ namespace Microsoft.Xna.Framework.Graphics
 				}
 				return 0;
 			}
+
+			public static Dictionary<PrimitiveType, GLenum> Primitive = new Dictionary<PrimitiveType, GLenum>()
+			{
+				{ PrimitiveType.LineList,	GLenum.GL_LINES },
+				{ PrimitiveType.LineStrip,	GLenum.GL_LINE_STRIP },
+				{ PrimitiveType.TriangleList,	GLenum.GL_TRIANGLES },
+				{ PrimitiveType.TriangleStrip,	GLenum.GL_TRIANGLE_STRIP }
+			};
+
+			public static int PrimitiveVerts(PrimitiveType primitiveType, int primitiveCount)
+			{
+				switch (primitiveType)
+				{
+					case PrimitiveType.LineList:
+						return primitiveCount * 2;
+					case PrimitiveType.LineStrip:
+						return primitiveCount + 1;
+					case PrimitiveType.TriangleList:
+						return primitiveCount * 3;
+					case PrimitiveType.TriangleStrip:
+						return primitiveCount + 2;
+				}
+				throw new NotSupportedException();
+			}
 		}
 
 		#endregion
@@ -3621,8 +3744,8 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
 		private GL_ContextHandle BackgroundContext;
 		private IntPtr WindowInfo;
-		public delegate void Flush();
-		public Flush glFlush;
+		private delegate void Flush();
+		private Flush glFlush;
 
 #else
 		private List<Action> actions = new List<Action>();
