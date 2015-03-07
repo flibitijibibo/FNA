@@ -21,13 +21,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			get
 			{
-				int resultReady = 0;
-				GraphicsDevice.GLDevice.glGetQueryObjectiv(
-					glQueryId,
-					OpenGLDevice.GLenum.GL_QUERY_RESULT_AVAILABLE,
-					out resultReady
-				);
-				return resultReady != 0;
+				return GraphicsDevice.GLDevice.QueryComplete(query);
 			}
 		}
 
@@ -35,13 +29,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			get
 			{
-				int result = 0;
-				GraphicsDevice.GLDevice.glGetQueryObjectiv(
-					glQueryId,
-					OpenGLDevice.GLenum.GL_QUERY_RESULT,
-					out result
-				);
-				return result;
+				return GraphicsDevice.GLDevice.QueryPixelCount(query);
 			}
 		}
 
@@ -49,7 +37,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Private OpenGL Variables
 
-		private uint glQueryId;
+		private OpenGLDevice.OpenGLQuery query;
 
 		#endregion
 
@@ -58,10 +46,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		public OcclusionQuery(GraphicsDevice graphicsDevice)
 		{
 			GraphicsDevice = graphicsDevice;
-			GraphicsDevice.GLDevice.glGenQueries(
-				1,
-				out glQueryId
-			);
+			query = GraphicsDevice.GLDevice.CreateQuery();
 		}
 
 		#endregion
@@ -72,11 +57,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			if (!IsDisposed)
 			{
-				// TODO: AddDisposeQuery -flibit
-				GraphicsDevice.GLDevice.glDeleteQueries(
-					1,
-					ref glQueryId
-				);
+				GraphicsDevice.GLDevice.AddDisposeQuery(query);
 			}
 			base.Dispose(disposing);
 		}
@@ -87,20 +68,14 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public void Begin()
 		{
-			GraphicsDevice.GLDevice.glBeginQuery(
-				OpenGLDevice.GLenum.GL_SAMPLES_PASSED,
-				glQueryId
-			);
+			GraphicsDevice.GLDevice.QueryBegin(query);
 		}
 
 		public void End()
 		{
-			GraphicsDevice.GLDevice.glEndQuery(
-				OpenGLDevice.GLenum.GL_SAMPLES_PASSED
-			);
+			GraphicsDevice.GLDevice.QueryEnd(query);
 		}
 
 		#endregion
 	}
 }
-

@@ -724,24 +724,24 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		/* BEGIN QUERY FUNCTIONS */
 
-		public delegate void GenQueries(int n, out uint ids);
-		public GenQueries glGenQueries;
+		private delegate void GenQueries(int n, out uint ids);
+		private GenQueries glGenQueries;
 
-		public delegate void DeleteQueries(int n, ref uint ids);
-		public DeleteQueries glDeleteQueries;
+		private delegate void DeleteQueries(int n, ref uint ids);
+		private DeleteQueries glDeleteQueries;
 
-		public delegate void BeginQuery(GLenum target, uint id);
-		public BeginQuery glBeginQuery;
+		private delegate void BeginQuery(GLenum target, uint id);
+		private BeginQuery glBeginQuery;
 
-		public delegate void EndQuery(GLenum target);
-		public EndQuery glEndQuery;
+		private delegate void EndQuery(GLenum target);
+		private EndQuery glEndQuery;
 
-		public delegate void GetQueryObjectiv(
+		private delegate void GetQueryObjectiv(
 			uint id,
 			GLenum pname,
 			out int param
 		);
-		public GetQueryObjectiv glGetQueryObjectiv;
+		private GetQueryObjectiv glGetQueryObjectiv;
 
 		/* END QUERY FUNCTIONS */
 

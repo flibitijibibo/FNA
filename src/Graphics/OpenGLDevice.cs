@@ -188,6 +188,24 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
+		#region OpenGL Query Container Class
+
+		public class OpenGLQuery
+		{
+			public uint Handle
+			{
+				get;
+				private set;
+			}
+
+			public OpenGLQuery(uint handle)
+			{
+				Handle = handle;
+			}
+		}
+
+		#endregion
+
 		#region Alpha Blending State Variables
 
 		internal bool alphaBlendEnable = false;
@@ -445,6 +463,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		private Queue<OpenGLBuffer> GCVertexBuffers = new Queue<OpenGLBuffer>();
 		private Queue<OpenGLBuffer> GCIndexBuffers = new Queue<OpenGLBuffer>();
 		private Queue<OpenGLEffect> GCEffects = new Queue<OpenGLEffect>();
+		private Queue<OpenGLQuery> GCQueries = new Queue<OpenGLQuery>();
 
 		#endregion
 
@@ -622,6 +641,10 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				DeleteEffect(GCEffects.Dequeue());
 			}
+			while (GCQueries.Count > 0)
+			{
+				DeleteQuery(GCQueries.Dequeue());
+			}
 		}
 
 		#endregion
@@ -685,6 +708,18 @@ namespace Microsoft.Xna.Framework.Graphics
 			else
 			{
 				GCEffects.Enqueue(effect);
+			}
+		}
+
+		public void AddDisposeQuery(OpenGLQuery query)
+		{
+			if (IsOnMainThread())
+			{
+				DeleteQuery(query);
+			}
+			else
+			{
+				GCQueries.Enqueue(query);
 			}
 		}
 
@@ -2892,6 +2927,64 @@ namespace Microsoft.Xna.Framework.Graphics
 				}
 				currentRenderbuffer = renderbuffer;
 			}
+		}
+
+		#endregion
+
+		#region Query Object Methods
+
+		public OpenGLQuery CreateQuery()
+		{
+			uint handle;
+			glGenQueries(1, out handle);
+			return new OpenGLQuery(handle);
+		}
+
+		private void DeleteQuery(OpenGLQuery query)
+		{
+			uint handle = query.Handle;
+			glDeleteQueries(
+				1,
+				ref handle
+			);
+		}
+
+		public void QueryBegin(OpenGLQuery query)
+		{
+			glBeginQuery(
+				GLenum.GL_SAMPLES_PASSED,
+				query.Handle
+			);
+		}
+
+		public void QueryEnd(OpenGLQuery query)
+		{
+			// May need to check active queries...?
+			glEndQuery(
+				GLenum.GL_SAMPLES_PASSED
+			);
+		}
+
+		public bool QueryComplete(OpenGLQuery query)
+		{
+			int result;
+			glGetQueryObjectiv(
+				query.Handle,
+				GLenum.GL_QUERY_RESULT_AVAILABLE,
+				out result
+			);
+			return result != 0;
+		}
+
+		public int QueryPixelCount(OpenGLQuery query)
+		{
+			int result;
+			glGetQueryObjectiv(
+				query.Handle,
+				GLenum.GL_QUERY_RESULT,
+				out result
+			);
+			return result;
 		}
 
 		#endregion
