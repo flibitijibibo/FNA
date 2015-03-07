@@ -50,9 +50,14 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
+		#region Internal Variables
+
+		internal OpenGLDevice.OpenGLEffect glEffect;
+
+		#endregion
+
 		#region Private Variables
 
-		private OpenGLDevice.OpenGLEffect glEffect;
 		private Dictionary<string, EffectParameter> samplerMap = new Dictionary<string, EffectParameter>();
 		private MojoShader.MOJOSHADER_effectStateChanges stateChanges = new MojoShader.MOJOSHADER_effectStateChanges();
 

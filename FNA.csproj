@@ -382,6 +382,9 @@
     <EmbeddedResource Include="src\Graphics\Effect\StockEffects\FXB\SpriteEffect.fxb">
       <LogicalName>Microsoft.Xna.Framework.Graphics.Effect.Resources.SpriteEffect.fxb</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="src\Graphics\Effect\YUVToRGBA\YUVToRGBAEffect.fxb">
+      <LogicalName>Microsoft.Xna.Framework.Graphics.Effect.Resources.YUVToRGBAEffect.fxb</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>

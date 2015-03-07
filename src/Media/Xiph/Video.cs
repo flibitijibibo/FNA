@@ -7,15 +7,6 @@
  */
 #endregion
 
-#region VIDEOPLAYER_OPENGL Option
-/* By default we use a small fragment shader to perform the YUV-RGBA conversion.
- * If for some reason you need to use the software converter in TheoraPlay,
- * comment out this define.
- * -flibit
- */
-#define VIDEOPLAYER_OPENGL
-#endregion
-
 #region Using Statements
 using System;
 using System.IO;
@@ -182,12 +173,7 @@ namespace Microsoft.Xna.Framework.Media
 			theoraDecoder = TheoraPlay.THEORAPLAY_startDecodeFile(
 				fileName,
 				150, // Max frames to buffer.  Arbitrarily set 5 seconds, assuming 30fps.
-#if VIDEOPLAYER_OPENGL
 				TheoraPlay.THEORAPLAY_VideoFormat.THEORAPLAY_VIDFMT_IYUV
-#else
-				// Use the TheoraPlay software converter.
-				TheoraPlay.THEORAPLAY_VideoFormat.THEORAPLAY_VIDFMT_RGBA
-#endif
 			);
 
 			// Wait until the decoder is ready.

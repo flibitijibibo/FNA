@@ -236,30 +236,30 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		}
 
-		public delegate void GetIntegerv(GLenum pname, out int param);
-		public GetIntegerv glGetIntegerv;
+		private delegate void GetIntegerv(GLenum pname, out int param);
+		private GetIntegerv glGetIntegerv;
 
 		/* END GET FUNCTIONS */
 
 		/* BEGIN ENABLE/DISABLE FUNCTIONS */
 
-		public delegate void Enable(GLenum cap);
-		public Enable glEnable;
+		private delegate void Enable(GLenum cap);
+		private Enable glEnable;
 
-		public delegate void Disable(GLenum cap);
-		public Disable glDisable;
+		private delegate void Disable(GLenum cap);
+		private Disable glDisable;
 
 		/* END ENABLE/DISABLE FUNCTIONS */
 
 		/* BEGIN VIEWPORT/SCISSOR FUNCTIONS */
 
-		public delegate void G_Viewport(
+		private delegate void G_Viewport(
 			int x,
 			int y,
 			int width,
 			int height
 		);
-		public G_Viewport glViewport;
+		private G_Viewport glViewport;
 
 		private delegate void DepthRange(
 			double near_val,
@@ -381,19 +381,19 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		/* BEGIN TEXTURE FUNCTIONS */
 
-		public delegate void GenTextures(int n, out uint textures);
-		public GenTextures glGenTextures;
+		private delegate void GenTextures(int n, out uint textures);
+		private GenTextures glGenTextures;
 
-		public delegate void DeleteTextures(
+		private delegate void DeleteTextures(
 			int n,
 			ref uint textures
 		);
-		public DeleteTextures glDeleteTextures;
+		private DeleteTextures glDeleteTextures;
 
-		public delegate void G_BindTexture(GLenum target, uint texture);
-		public G_BindTexture glBindTexture;
+		private delegate void G_BindTexture(GLenum target, uint texture);
+		private G_BindTexture glBindTexture;
 
-		public delegate void TexImage2D(
+		private delegate void TexImage2D(
 			GLenum target,
 			int level,
 			int internalFormat,
@@ -404,9 +404,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			GLenum type,
 			IntPtr pixels
 		);
-		public TexImage2D glTexImage2D;
+		private TexImage2D glTexImage2D;
 
-		public delegate void TexSubImage2D(
+		private delegate void TexSubImage2D(
 			GLenum target,
 			int level,
 			int xoffset,
@@ -417,7 +417,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			GLenum type,
 			IntPtr pixels
 		);
-		public TexSubImage2D glTexSubImage2D;
+		private TexSubImage2D glTexSubImage2D;
 
 		private delegate void CompressedTexImage2D(
 			GLenum target,
@@ -482,12 +482,12 @@ namespace Microsoft.Xna.Framework.Graphics
 		);
 		private GetTexImage glGetTexImage;
 
-		public delegate void TexParameteri(
+		private delegate void TexParameteri(
 			GLenum target,
 			GLenum pname,
 			int param
 		);
-		public TexParameteri glTexParameteri;
+		private TexParameteri glTexParameteri;
 
 		private delegate void TexParameterf(
 			GLenum target,
@@ -496,8 +496,8 @@ namespace Microsoft.Xna.Framework.Graphics
 		);
 		private TexParameterf glTexParameterf;
 
-		public delegate void ActiveTexture(GLenum texture);
-		public ActiveTexture glActiveTexture;
+		private delegate void ActiveTexture(GLenum texture);
+		private ActiveTexture glActiveTexture;
 
 		private delegate void PixelStorei(GLenum pname, int param);
 		private PixelStorei glPixelStorei;
@@ -542,34 +542,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		/* END BUFFER FUNCTIONS */
 
-		/* BEGIN VERTEX ATTRIBUTE FUNCTIONS */
-
-		// FIXME: Remove once VideoPlayer uses GraphicsDevice! -flibit
-
-		public delegate void EnableVertexAttribArray(int index);
-		public EnableVertexAttribArray glEnableVertexAttribArray;
-
-		public delegate void DisableVertexAttribArray(int index);
-		public DisableVertexAttribArray glDisableVertexAttribArray;
-
-		public delegate void VertexAttribDivisor(
-			int index,
-			int divisor
-		);
-		public VertexAttribDivisor glVertexAttribDivisor;
-
-		public delegate void G_VertexAttribPointer(
-			int index,
-			int size,
-			GLenum type,
-			bool normalized,
-			int stride,
-			IntPtr pointer
-		);
-		public G_VertexAttribPointer glVertexAttribPointer;
-
-		/* END VERTEX ATTRIBUTE FUNCTIONS */
-
 		/* BEGIN CLEAR FUNCTIONS */
 
 		private delegate void ClearColor(
@@ -610,32 +582,32 @@ namespace Microsoft.Xna.Framework.Graphics
 		private delegate void GenerateMipmap(GLenum target);
 		private GenerateMipmap glGenerateMipmap;
 
-		public delegate void GenFramebuffers(
+		private delegate void GenFramebuffers(
 			int n,
 			out uint framebuffers
 		);
-		public GenFramebuffers glGenFramebuffers;
+		private GenFramebuffers glGenFramebuffers;
 
-		public delegate void DeleteFramebuffers(
+		private delegate void DeleteFramebuffers(
 			int n,
 			ref uint framebuffers
 		);
-		public DeleteFramebuffers glDeleteFramebuffers;
+		private DeleteFramebuffers glDeleteFramebuffers;
 
-		public delegate void G_BindFramebuffer(
+		private delegate void G_BindFramebuffer(
 			GLenum target,
 			uint framebuffer
 		);
-		public G_BindFramebuffer glBindFramebuffer;
+		private G_BindFramebuffer glBindFramebuffer;
 
-		public delegate void FramebufferTexture2D(
+		private delegate void FramebufferTexture2D(
 			GLenum target,
 			GLenum attachment,
 			GLenum textarget,
 			uint texture,
 			int level
 		);
-		public FramebufferTexture2D glFramebufferTexture2D;
+		private FramebufferTexture2D glFramebufferTexture2D;
 
 		private delegate void FramebufferRenderbuffer(
 			GLenum target,
@@ -741,63 +713,6 @@ namespace Microsoft.Xna.Framework.Graphics
 		private GetQueryObjectiv glGetQueryObjectiv;
 
 		/* END QUERY FUNCTIONS */
-
-		/* BEGIN SHADER FUNCTIONS */
-
-		// FIXME: Remove once VideoPlayer uses GraphicsDevice! -flibit
-
-		public delegate uint CreateShader(GLenum type);
-		public CreateShader glCreateShader;
-
-		public delegate void DeleteShader(uint shader);
-		public DeleteShader glDeleteShader;
-
-		public delegate void ShaderSource(
-			uint shader,
-			int count,
-			ref string source,
-			ref int length
-		);
-		public ShaderSource glShaderSource;
-
-		public delegate void CompileShader(uint shader);
-		public CompileShader glCompileShader;
-
-		public delegate uint CreateProgram();
-		public CreateProgram glCreateProgram;
-
-		public delegate void DeleteProgram(uint program);
-		public DeleteProgram glDeleteProgram;
-
-		public delegate void AttachShader(uint program, uint shader);
-		public AttachShader glAttachShader;
-
-		public delegate void DetachShader(uint program, uint shader);
-		public DetachShader glDetachShader;
-
-		public delegate void LinkProgram(uint program);
-		public LinkProgram glLinkProgram;
-
-		public delegate void UseProgram(uint program);
-		public UseProgram glUseProgram;
-
-		public delegate void Uniform1i(int location, int v0);
-		public Uniform1i glUniform1i;
-
-		public delegate int GetUniformLocation(
-			uint program,
-			string name
-		);
-		public GetUniformLocation glGetUniformLocation;
-
-		public delegate void BindAttribLocation(
-			uint program,
-			uint index,
-			string name
-		);
-		public BindAttribLocation glBindAttribLocation;
-
-		/* END SHADER FUNCTIONS */
 
 #if DEBUG
 		/* BEGIN DEBUG OUTPUT FUNCTIONS */
@@ -1038,18 +953,6 @@ namespace Microsoft.Xna.Framework.Graphics
 					SDL.SDL_GL_GetProcAddress("glUnmapBuffer"),
 					typeof(UnmapBuffer)
 				);
-				glEnableVertexAttribArray = (EnableVertexAttribArray) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glEnableVertexAttribArray"),
-					typeof(EnableVertexAttribArray)
-				);
-				glDisableVertexAttribArray = (DisableVertexAttribArray) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glDisableVertexAttribArray"),
-					typeof(DisableVertexAttribArray)
-				);
-				glVertexAttribPointer = (G_VertexAttribPointer) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glVertexAttribPointer"),
-					typeof(G_VertexAttribPointer)
-				);
 				glClearColor = (ClearColor) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glClearColor"),
 					typeof(ClearColor)
@@ -1101,58 +1004,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				glGetQueryObjectiv = (GetQueryObjectiv) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glGetQueryObjectiv"),
 					typeof(GetQueryObjectiv)
-				);
-				glCreateShader = (CreateShader) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glCreateShader"),
-					typeof(CreateShader)
-				);
-				glDeleteShader = (DeleteShader) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glDeleteShader"),
-					typeof(DeleteShader)
-				);
-				glShaderSource = (ShaderSource) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glShaderSource"),
-					typeof(ShaderSource)
-				);
-				glCompileShader = (CompileShader) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glCompileShader"),
-					typeof(CompileShader)
-				);
-				glCreateProgram = (CreateProgram) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glCreateProgram"),
-					typeof(CreateProgram)
-				);
-				glDeleteProgram = (DeleteProgram) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glDeleteProgram"),
-					typeof(DeleteProgram)
-				);
-				glAttachShader = (AttachShader) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glAttachShader"),
-					typeof(AttachShader)
-				);
-				glDetachShader = (DetachShader) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glDetachShader"),
-					typeof(DetachShader)
-				);
-				glLinkProgram = (LinkProgram) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glLinkProgram"),
-					typeof(LinkProgram)
-				);
-				glUseProgram = (UseProgram) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glUseProgram"),
-					typeof(UseProgram)
-				);
-				glUniform1i = (Uniform1i) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glUniform1i"),
-					typeof(Uniform1i)
-				);
-				glGetUniformLocation = (GetUniformLocation) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glGetUniformLocation"),
-					typeof(GetUniformLocation)
-				);
-				glBindAttribLocation = (BindAttribLocation) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glBindAttribLocation"),
-					typeof(BindAttribLocation)
 				);
 			}
 			catch
@@ -1219,10 +1070,6 @@ namespace Microsoft.Xna.Framework.Graphics
 			SupportsHardwareInstancing = true;
 			try
 			{
-				glVertexAttribDivisor = (VertexAttribDivisor) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glVertexAttribDivisor"),
-					typeof(VertexAttribDivisor)
-				);
 				glDrawElementsInstanced = (DrawElementsInstanced) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glDrawElementsInstanced"),
 					typeof(DrawElementsInstanced)

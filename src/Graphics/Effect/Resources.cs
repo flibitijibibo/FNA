@@ -89,6 +89,19 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		}
 
+		/* This Effect is used by the Xiph VideoPlayer. */
+		public static byte[] YUVToRGBAEffect
+		{
+			get
+			{
+				if (yuvToRGBAEffect == null)
+				{
+					yuvToRGBAEffect = GetResource("YUVToRGBAEffect");
+				}
+				return yuvToRGBAEffect;
+			}
+		}
+
 		#endregion
 
 		#region Private Static Variables
@@ -99,6 +112,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		private static byte[] environmentMapEffect;
 		private static byte[] skinnedEffect;
 		private static byte[] spriteEffect;
+		private static byte[] yuvToRGBAEffect;
 
 		#endregion
 

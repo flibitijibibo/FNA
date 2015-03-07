@@ -1352,6 +1352,31 @@ namespace Microsoft.Xna.Framework.Graphics
 			currentPass = pass;
 		}
 
+		public void BeginPassRestore(
+			OpenGLEffect effect,
+			ref MojoShader.MOJOSHADER_effectStateChanges changes
+		) {
+			uint whatever;
+			MojoShader.MOJOSHADER_glEffectBegin(
+				effect.GLEffectData,
+				out whatever,
+				1,
+				ref changes
+			);
+			MojoShader.MOJOSHADER_glEffectBeginPass(
+				effect.GLEffectData,
+				0
+			);
+			effectApplied = true;
+		}
+
+		public void EndPassRestore(OpenGLEffect effect)
+		{
+			MojoShader.MOJOSHADER_glEffectEndPass(effect.GLEffectData);
+			MojoShader.MOJOSHADER_glEffectEnd(effect.GLEffectData);
+			effectApplied = true;
+		}
+
 		#endregion
 
 		#region glVertexAttribPointer/glVertexAttribDivisor Methods
@@ -2045,16 +2070,16 @@ namespace Microsoft.Xna.Framework.Graphics
 #if !DISABLE_THREADING
 			ForceToMainThread(() => {
 #endif
+			BindTexture(texture);
 
 			GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
 			int elementSizeInBytes = Marshal.SizeOf(typeof(T));
 			int startByte = startIndex * elementSizeInBytes;
 			IntPtr dataPtr = (IntPtr) (dataHandle.AddrOfPinnedObject().ToInt64() + startByte);
 
+			GLenum glFormat = XNAToGL.TextureFormat[format];
 			try
 			{
-				BindTexture(texture);
-				GLenum glFormat = XNAToGL.TextureFormat[format];
 				if (glFormat == GLenum.GL_COMPRESSED_TEXTURE_FORMATS)
 				{
 					int dataLength;
@@ -2146,11 +2171,11 @@ namespace Microsoft.Xna.Framework.Graphics
 #if !DISABLE_THREADING
 			ForceToMainThread(() => {
 #endif
+			BindTexture(texture);
 
 			GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
 			try
 			{
-				BindTexture(texture);
 				glTexSubImage3D(
 					GLenum.GL_TEXTURE_3D,
 					level,
@@ -2191,16 +2216,16 @@ namespace Microsoft.Xna.Framework.Graphics
 #if !DISABLE_THREADING
 			ForceToMainThread(() => {
 #endif
+			BindTexture(texture);
 
 			GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
 			int elementSizeInBytes = Marshal.SizeOf(typeof(T));
 			int startByte = startIndex * elementSizeInBytes;
 			IntPtr dataPtr = (IntPtr) (dataHandle.AddrOfPinnedObject().ToInt64() + startByte);
 
+			GLenum glFormat = XNAToGL.TextureFormat[format];
 			try
 			{
-				BindTexture(texture);
-				GLenum glFormat = XNAToGL.TextureFormat[format];
 				if (glFormat == GLenum.GL_COMPRESSED_TEXTURE_FORMATS)
 				{
 					int dataLength;
@@ -2254,6 +2279,24 @@ namespace Microsoft.Xna.Framework.Graphics
 #if !DISABLE_THREADING
 			});
 #endif
+		}
+
+		public void SetTextureData2DPointer(
+			Texture2D texture,
+			IntPtr ptr
+		) {
+			BindTexture(texture.texture);
+			glTexSubImage2D(
+				GLenum.GL_TEXTURE_2D,
+				0,
+				0,
+				0,
+				texture.Width,
+				texture.Height,
+				XNAToGL.TextureFormat[texture.Format],
+				XNAToGL.TextureDataType[texture.Format],
+				ptr
+			);
 		}
 
 		#endregion
