@@ -755,8 +755,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				minVertexIndex + numVertices - 1,
 				XNAToGL.PrimitiveVerts(primitiveType, primitiveCount),
 				shortIndices ?
-					OpenGLDevice.GLenum.GL_UNSIGNED_SHORT :
-					OpenGLDevice.GLenum.GL_UNSIGNED_INT,
+					GLenum.GL_UNSIGNED_SHORT :
+					GLenum.GL_UNSIGNED_INT,
 				(IntPtr) (startIndex * (shortIndices ? 2 : 4))
 			);
 		}
@@ -784,8 +784,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				XNAToGL.Primitive[primitiveType],
 				XNAToGL.PrimitiveVerts(primitiveType, primitiveCount),
 				shortIndices ?
-					OpenGLDevice.GLenum.GL_UNSIGNED_SHORT :
-					OpenGLDevice.GLenum.GL_UNSIGNED_INT,
+					GLenum.GL_UNSIGNED_SHORT :
+					GLenum.GL_UNSIGNED_INT,
 				(IntPtr) (startIndex * (shortIndices ? 2 : 4)),
 				instanceCount
 			);
@@ -816,7 +816,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			VertexDeclaration vertexDeclaration
 		) {
 			// Unbind current index buffer.
-			BindIndexBuffer(OpenGLDevice.OpenGLBuffer.NullBuffer);
+			BindIndexBuffer(OpenGLBuffer.NullBuffer);
 
 			// Unsigned short or unsigned int?
 			bool shortIndices = indexElementSize == IndexElementSize.SixteenBits;
@@ -828,8 +828,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				numVertices - 1,
 				XNAToGL.PrimitiveVerts(primitiveType, primitiveCount),
 				shortIndices ?
-					OpenGLDevice.GLenum.GL_UNSIGNED_SHORT :
-					OpenGLDevice.GLenum.GL_UNSIGNED_INT,
+					GLenum.GL_UNSIGNED_SHORT :
+					GLenum.GL_UNSIGNED_INT,
 				(IntPtr) (
 					indexData.ToInt64() +
 					(indexOffset * (shortIndices ? 2 : 4))
@@ -845,7 +845,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			VertexDeclaration vertexDeclaration
 		) {
 			// Unbind current VBOs.
-			BindVertexBuffer(OpenGLDevice.OpenGLBuffer.NullBuffer);
+			BindVertexBuffer(OpenGLBuffer.NullBuffer);
 
 			// Draw!
 			glDrawArrays(
