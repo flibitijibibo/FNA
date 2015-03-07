@@ -557,41 +557,24 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public void GetBackBufferData<T>(T[] data) where T : struct
 		{
-			// Store off the old frame buffer components
-			uint prevReadBuffer = GLDevice.CurrentReadFramebuffer;
+			GLDevice.ReadBackbuffer(data, 0, data.Length, null);
+		}
 
-			GLDevice.BindReadFramebuffer(GLDevice.Backbuffer.Handle);
-			GCHandle ptr = GCHandle.Alloc(data, GCHandleType.Pinned);
-			try
-			{
-				GLDevice.glReadPixels(
-					0, 0,
-					GLDevice.Backbuffer.Width,
-					GLDevice.Backbuffer.Height,
-					OpenGLDevice.GLenum.GL_RGBA,
-					OpenGLDevice.GLenum.GL_UNSIGNED_BYTE,
-					ptr.AddrOfPinnedObject()
-				);
-			}
-			finally
-			{
-				ptr.Free();
-			}
+		public void GetBackBufferData<T>(
+			T[] data,
+			int startIndex,
+			int elementCount
+		) where T : struct {
+			GLDevice.ReadBackbuffer(data, startIndex, elementCount, null);
+		}
 
-			// Restore old buffer components
-			GLDevice.BindReadFramebuffer(prevReadBuffer);
-
-			// Now we get to do a software-based flip! Yes, really! -flibit
-			int width = GLDevice.Backbuffer.Width;
-			int height = GLDevice.Backbuffer.Height;
-			int pitch = width * 4 / Marshal.SizeOf(typeof(T));
-			T[] tempRow = new T[pitch];
-			for (int row = 0; row < height / 2; row += 1)
-			{
-				Array.Copy(data, row * pitch, tempRow, 0, pitch);
-				Array.Copy(data, (height - row - 1) * pitch, data, row * pitch, pitch);
-				Array.Copy(tempRow, 0, data, (height - row - 1) * pitch, pitch);
-			}
+		public void GetBackBufferData<T>(
+			Rectangle? rect,
+			T[] data,
+			int startIndex,
+			int elementCount
+		) where T : struct {
+			GLDevice.ReadBackbuffer(data, startIndex, elementCount, rect);
 		}
 
 		#endregion

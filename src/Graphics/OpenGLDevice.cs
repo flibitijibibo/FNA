@@ -2219,8 +2219,14 @@ namespace Microsoft.Xna.Framework.Graphics
 			ForceToMainThread(() => {
 #endif
 
-			if (ReadTargetIfApplicable(texture, level, data, rect))
-			{
+			if (ReadTargetIfApplicable(
+				texture,
+				width,
+				height,
+				level,
+				data,
+				rect
+			)) {
 				return;
 			}
 
@@ -2425,84 +2431,144 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
-		#region glReadPixels Method
+		#region glReadPixels Methods
+
+		public void ReadBackbuffer<T>(
+			T[] data,
+			int startIndex,
+			int elementCount,
+			Rectangle? rect
+		) where T : struct {
+			if (startIndex > 0 || elementCount != data.Length)
+			{
+				throw new NotImplementedException(
+					"ReadBackbuffer startIndex/elementCount"
+				);
+			}
+
+			uint prevReadBuffer = CurrentReadFramebuffer;
+			BindReadFramebuffer(Backbuffer.Handle);
+
+			int x;
+			int y;
+			int w;
+			int h;
+			if (!rect.HasValue)
+			{
+				x = rect.Value.X;
+				y = rect.Value.Y;
+				w = rect.Value.Width;
+				h = rect.Value.Height;
+			}
+			else
+			{
+				x = 0;
+				y = 0;
+				w = Backbuffer.Width;
+				h = Backbuffer.Height;
+			}
+
+			GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+			try
+			{
+				glReadPixels(
+					x,
+					y,
+					w,
+					h,
+					GLenum.GL_RGBA,
+					GLenum.GL_UNSIGNED_BYTE,
+					handle.AddrOfPinnedObject()
+				);
+			}
+			finally
+			{
+				handle.Free();
+			}
+
+			BindReadFramebuffer(prevReadBuffer);
+
+			// Now we get to do a software-based flip! Yes, really! -flibit
+			int pitch = w * 4 / Marshal.SizeOf(typeof(T));
+			T[] tempRow = new T[pitch];
+			for (int row = 0; row < h / 2; row += 1)
+			{
+				Array.Copy(data, row * pitch, tempRow, 0, pitch);
+				Array.Copy(data, (h - row - 1) * pitch, data, row * pitch, pitch);
+				Array.Copy(tempRow, 0, data, (h - row - 1) * pitch, pitch);
+			}
+		}
 
 		/// <summary>
 		/// Attempts to read the texture data directly from the FBO using glReadPixels
 		/// </summary>
 		/// <typeparam name="T">Texture data type</typeparam>
 		/// <param name="texture">The texture to read from</param>
+		/// <param name="width">The texture width</param>
+		/// <param name="height">The texture height</param>
 		/// <param name="level">The texture level</param>
 		/// <param name="data">The texture data array</param>
 		/// <param name="rect">The portion of the image to read from</param>
 		/// <returns>True if we successfully read the texture data</returns>
-		public bool ReadTargetIfApplicable<T>(
+		private bool ReadTargetIfApplicable<T>(
 			OpenGLTexture texture,
+			int width,
+			int height,
 			int level,
 			T[] data,
 			Rectangle? rect
 		) where T : struct {
-			if (	currentDrawBuffers == 1 &&
-				currentAttachments != null &&				
-				currentAttachments[0] == texture.Handle	)
+			if (	currentDrawBuffers != 1 ||
+				currentAttachments[0] != texture.Handle	)
 			{
-				uint oldReadFramebuffer = CurrentReadFramebuffer;
-				if (oldReadFramebuffer != targetFramebuffer)
-				{
-					BindReadFramebuffer(targetFramebuffer);
-				}
-
-				/* glReadPixels should be faster than reading
-				 * back from the render target if we are already bound.
-				 */
-				GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
-				// FIXME: Try/Catch with the GCHandle -flibit
-				if (rect.HasValue)
-				{
-					glReadPixels(
-						rect.Value.Left,
-						rect.Value.Top,
-						rect.Value.Width,
-						rect.Value.Height,
-						GLenum.GL_RGBA, // FIXME: Assumption!
-						GLenum.GL_UNSIGNED_BYTE,
-						handle.AddrOfPinnedObject()
-					);
-				}
-				else
-				{
-					// FIXME: Using two glGet calls here! D:
-					int width = 0;
-					int height = 0;
-					BindTexture(texture);
-					glGetTexLevelParameteriv(
-						texture.Target,
-						level,
-						GLenum.GL_TEXTURE_WIDTH,
-						out width
-					);
-					glGetTexLevelParameteriv(
-						texture.Target,
-						level,
-						GLenum.GL_TEXTURE_HEIGHT,
-						out height
-					);
-
-					glReadPixels(
-						0,
-						0,
-						width,
-						height,
-						GLenum.GL_RGBA, // FIXME: Assumption
-						GLenum.GL_UNSIGNED_BYTE,
-						handle.AddrOfPinnedObject()
-					);
-				}
-				handle.Free();
-				BindReadFramebuffer(oldReadFramebuffer);
-				return true;
+				return false;
 			}
-			return false;
+
+			uint prevReadBuffer = CurrentReadFramebuffer;
+			BindReadFramebuffer(targetFramebuffer);
+
+			int x;
+			int y;
+			int w;
+			int h;
+			if (rect.HasValue)
+			{
+				x = rect.Value.X;
+				y = rect.Value.Y;
+				w = rect.Value.Width;
+				h = rect.Value.Height;
+			}
+			else
+			{
+				x = 0;
+				y = 0;
+				w = width;
+				h = height;
+			}
+
+			/* glReadPixels should be faster than reading
+			 * back from the render target if we are already bound.
+			 */
+			GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+			try
+			{
+				glReadPixels(
+					x,
+					y,
+					w,
+					h,
+					GLenum.GL_RGBA, // FIXME: Assumption!
+					GLenum.GL_UNSIGNED_BYTE,
+					handle.AddrOfPinnedObject()
+				);
+			}
+			finally
+			{
+				handle.Free();
+			}
+
+			BindReadFramebuffer(prevReadBuffer);
+			return true;
 		}
 
 		#endregion

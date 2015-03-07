@@ -502,14 +502,6 @@ namespace Microsoft.Xna.Framework.Graphics
 		public delegate void ActiveTexture(GLenum texture);
 		public ActiveTexture glActiveTexture;
 
-		private delegate void GetTexLevelParameteriv(
-			GLenum target,
-			int level,
-			GLenum pname,
-			out int param
-		);
-		private GetTexLevelParameteriv glGetTexLevelParameteriv;
-
 		private delegate void PixelStorei(GLenum pname, int param);
 		private PixelStorei glPixelStorei;
 
@@ -607,7 +599,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		private delegate void DrawBuffers(int n, GLenum[] bufs);
 		private DrawBuffers glDrawBuffers;
 
-		public delegate void ReadPixels(
+		private delegate void ReadPixels(
 			int x,
 			int y,
 			int width,
@@ -616,7 +608,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			GLenum type,
 			IntPtr pixels
 		);
-		public ReadPixels glReadPixels;
+		private ReadPixels glReadPixels;
 
 		private delegate void GenerateMipmap(GLenum target);
 		private GenerateMipmap glGenerateMipmap;
@@ -1016,10 +1008,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				glActiveTexture = (ActiveTexture) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glActiveTexture"),
 					typeof(ActiveTexture)
-				);
-				glGetTexLevelParameteriv = (GetTexLevelParameteriv) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glGetTexLevelParameteriv"),
-					typeof(GetTexLevelParameteriv)
 				);
 				glPixelStorei = (PixelStorei) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glPixelStorei"),
