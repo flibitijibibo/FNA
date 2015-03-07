@@ -169,6 +169,22 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		}
 
+		public Color BlendFactor
+		{
+			get
+			{
+				return GLDevice.BlendFactor;
+			}
+			set
+			{
+				/* FIXME: Does this affect the value found in
+				 * BlendState?
+				 * -flibit
+				 */
+				GLDevice.BlendFactor = value;
+			}
+		}
+
 		public int ReferenceStencil
 		{
 			get

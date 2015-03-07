@@ -208,6 +208,27 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Alpha Blending State Variables
 
+		public Color BlendFactor
+		{
+			get
+			{
+				return blendColor;
+			}
+			set
+			{
+				if (value != blendColor)
+				{
+					blendColor = value;
+					glBlendColor(
+						blendColor.R / 255.0f,
+						blendColor.G / 255.0f,
+						blendColor.B / 255.0f,
+						blendColor.A / 255.0f
+					);
+				}
+			}
+		}
+
 		internal bool alphaBlendEnable = false;
 		private Color blendColor = Color.Transparent;
 		private BlendFunction blendOp = BlendFunction.Add;
