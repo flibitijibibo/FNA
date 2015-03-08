@@ -29,7 +29,7 @@ using SDL2;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
-	internal partial class OpenGLDevice
+	internal partial class OpenGLDevice : IGLDevice
 	{
 		#region Private OpenGL Entry Points
 

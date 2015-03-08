@@ -48,7 +48,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		#region IRenderTarget Properties
 
 		/// <inheritdoc/>
-		uint IRenderTarget.DepthStencilBuffer
+		IGLRenderbuffer IRenderTarget.DepthStencilBuffer
 		{
 			get
 			{
@@ -60,7 +60,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Private Variables
 
-		private uint glDepthStencilBuffer;
+		private IGLRenderbuffer glDepthStencilBuffer;
 
 		#endregion
 
@@ -151,7 +151,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			if (!IsDisposed)
 			{
-				if (glDepthStencilBuffer != 0)
+				if (glDepthStencilBuffer != null)
 				{
 					GraphicsDevice.GLDevice.AddDisposeRenderbuffer(glDepthStencilBuffer);
 				}

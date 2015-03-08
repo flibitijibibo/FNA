@@ -40,11 +40,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Internal Properties
 
-		internal OpenGLDevice.OpenGLBuffer Handle
-		{
-			get;
-			private set;
-		}
+		internal IGLBuffer buffer;
 
 		#endregion
 
@@ -105,7 +101,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				vertexDeclaration.GraphicsDevice = graphicsDevice;
 			}
 
-			Handle = GraphicsDevice.GLDevice.GenVertexBuffer(
+			buffer = GraphicsDevice.GLDevice.GenVertexBuffer(
 				dynamic,
 				VertexCount,
 				VertexDeclaration.VertexStride
@@ -120,7 +116,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			if (!IsDisposed)
 			{
-				GraphicsDevice.GLDevice.AddDisposeVertexBuffer(Handle);
+				GraphicsDevice.GLDevice.AddDisposeVertexBuffer(buffer);
 			}
 			base.Dispose(disposing);
 		}
@@ -188,7 +184,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 
 			GraphicsDevice.GLDevice.GetVertexBufferData(
-				Handle,
+				buffer,
 				offsetInBytes,
 				data,
 				startIndex,
@@ -271,7 +267,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 
 			if (	elementCount > 1 &&
-				(elementCount * vertexStride > (int) Handle.BufferSize)	)
+				(elementCount * vertexStride > (int) buffer.BufferSize)	)
 			{
 				throw new InvalidOperationException(
 					"The vertex stride is larger than the vertex buffer."
@@ -293,7 +289,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 
 			GraphicsDevice.GLDevice.SetVertexBufferData(
-				Handle,
+				buffer,
 				elementSizeInBytes,
 				offsetInBytes,
 				data,

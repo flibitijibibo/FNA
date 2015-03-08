@@ -225,7 +225,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Internal GL Device
 
-		internal readonly OpenGLDevice GLDevice;
+		internal readonly IGLDevice GLDevice;
 
 		#endregion
 
@@ -650,7 +650,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			RenderTargetUsage clearTarget;
 			if (renderTargets == null || renderTargets.Length == 0)
 			{
-				GLDevice.SetRenderTargets(null, 0, DepthFormat.None);
+				GLDevice.SetRenderTargets(null, null, DepthFormat.None);
 
 				// Set the viewport/scissor to the size of the backbuffer.
 				newWidth = PresentationParameters.BackBufferWidth;

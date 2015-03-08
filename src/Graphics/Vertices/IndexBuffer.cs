@@ -40,11 +40,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Internal Properties
 
-		internal OpenGLDevice.OpenGLBuffer Handle
-		{
-			get;
-			private set;
-		}
+		internal IGLBuffer buffer;
 
 		#endregion
 
@@ -114,7 +110,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			IndexCount = indexCount;
 			BufferUsage = usage;
 
-			Handle = GraphicsDevice.GLDevice.GenIndexBuffer(
+			buffer = GraphicsDevice.GLDevice.GenIndexBuffer(
 				dynamic,
 				IndexCount,
 				IndexElementSize
@@ -129,7 +125,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			if (!IsDisposed)
 			{
-				GraphicsDevice.GLDevice.AddDisposeIndexBuffer(Handle);
+				GraphicsDevice.GLDevice.AddDisposeIndexBuffer(buffer);
 			}
 			base.Dispose(disposing);
 		}
@@ -184,7 +180,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 
 			GraphicsDevice.GLDevice.GetIndexBufferData(
-				Handle,
+				buffer,
 				offsetInBytes,
 				data,
 				startIndex,
@@ -259,7 +255,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 
 			GraphicsDevice.GLDevice.SetIndexBufferData(
-				Handle,
+				buffer,
 				offsetInBytes,
 				data,
 				startIndex,

@@ -34,7 +34,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Internal Variables
 
-		internal OpenGLDevice.OpenGLTexture texture;
+		internal IGLTexture texture;
 
 		#endregion
 

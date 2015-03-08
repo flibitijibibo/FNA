@@ -37,7 +37,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Private OpenGL Variables
 
-		private OpenGLDevice.OpenGLQuery query;
+		private IGLQuery query;
 
 		#endregion
 

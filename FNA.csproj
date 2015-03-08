@@ -300,6 +300,7 @@
     <Compile Include="src\Graphics\DeviceLostException.cs" />
     <Compile Include="src\Graphics\DeviceNotResetException.cs" />
     <Compile Include="src\Graphics\NoSuitableGraphicsDeviceException.cs" />
+    <Compile Include="src\Graphics\IGLDevice.cs" />
     <Compile Include="src\Graphics\OpenGLDevice.cs" />
     <Compile Include="src\Graphics\OpenGLDevice_GL.cs" />
     <Compile Include="src\Graphics\OcclusionQuery.cs" />

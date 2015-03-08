@@ -155,7 +155,7 @@ namespace Microsoft.Xna.Framework.Media
 			oldTargets = currentDevice.GetRenderTargets();
 			currentDevice.GLDevice.SetRenderTargets(
 				videoTexture,
-				0,
+				null,
 				DepthFormat.None
 			);
 
@@ -192,7 +192,7 @@ namespace Microsoft.Xna.Framework.Media
 			{
 				currentDevice.GLDevice.SetRenderTargets(
 					null,
-					0,
+					null,
 					DepthFormat.None
 				);
 			}

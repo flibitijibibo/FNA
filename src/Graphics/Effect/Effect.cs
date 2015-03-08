@@ -52,7 +52,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Internal Variables
 
-		internal OpenGLDevice.OpenGLEffect glEffect;
+		internal IGLEffect glEffect;
 
 		#endregion
 

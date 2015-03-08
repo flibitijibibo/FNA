@@ -54,7 +54,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		/// Gets the handle of the depth-stencil buffer.
 		/// </summary>
 		/// <value>The depth-stencil buffer handle.</value>
-		uint DepthStencilBuffer
+		IGLRenderbuffer DepthStencilBuffer
 		{
 			get;
 		}
