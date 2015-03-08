@@ -3092,7 +3092,15 @@ namespace Microsoft.Xna.Framework.Graphics
 			 * Use XNAToGL.DepthStencilAttachment when this isn't a problem.
 			 * -flibit
 			 */
-			uint handle = (renderbuffer as OpenGLRenderbuffer).Handle;
+			uint handle;
+			if (renderbuffer == null)
+			{
+				handle = 0;
+			}
+			else
+			{
+				handle = (renderbuffer as OpenGLRenderbuffer).Handle;
+			}
 			if (handle != currentRenderbuffer)
 			{
 				if (currentDepthStencilFormat == DepthFormat.Depth24Stencil8)
