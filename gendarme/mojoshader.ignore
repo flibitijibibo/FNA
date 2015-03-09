@@ -286,9 +286,6 @@ M: System.Void MojoShader::MOJOSHADER_glDeleteProgram(System.IntPtr)
 M: System.Void MojoShader::MOJOSHADER_glDeleteShader(System.IntPtr)
 M: System.Void MojoShader::MOJOSHADER_glDestroyContext(System.IntPtr)
 
-R: Gendarme.Rules.Design.ConsiderUsingStaticTypeRule
-T: MojoShader
-
 R: Gendarme.Rules.Naming.DoNotPrefixValuesWithEnumNameRule
 T: MojoShader/MOJOSHADER_usage
 T: MojoShader/MOJOSHADER_stencilOp

@@ -40,9 +40,6 @@ M: System.Void TheoraPlay::THEORAPLAY_freeAudio(System.IntPtr)
 M: System.IntPtr TheoraPlay::THEORAPLAY_getVideo(System.IntPtr)
 M: System.Void TheoraPlay::THEORAPLAY_freeVideo(System.IntPtr)
 
-R: Gendarme.Rules.Design.ConsiderUsingStaticTypeRule
-T: TheoraPlay
-
 R: Gendarme.Rules.Design.MarkAssemblyWithAssemblyVersionRule
 A: TheoraPlay-CS, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
 
