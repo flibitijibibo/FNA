@@ -91,6 +91,10 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public Vector2 MeasureString(string text)
 		{
+			/* FIXME: This method is a duplicate of MeasureString(StringBuilder)!
+			 * The only difference is how we iterate through the string.
+			 * -flibit
+			 */
 			if (text == null)
 			{
 				throw new ArgumentNullException("text");
@@ -178,11 +182,96 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public Vector2 MeasureString(StringBuilder text)
 		{
+			/* FIXME: This method is a duplicate of MeasureString(string)!
+			 * The only difference is how we iterate through the StringBuilder.
+			 * We don't use ToString() since it generates garbage.
+			 * -flibit
+			 */
 			if (text == null)
 			{
 				throw new ArgumentNullException("text");
 			}
-			return MeasureString(text.ToString());
+			if (text.Length == 0)
+			{
+				return Vector2.Zero;
+			}
+
+			// FIXME: This needs an accuracy check! -flibit
+
+			Vector2 result = Vector2.Zero;
+			float curLineWidth = 0.0f;
+			float finalLineHeight = LineSpacing;
+			bool firstInLine = true;
+
+			for (int i = 0; i < text.Length; i += 1)
+			{
+				char c = text[i];
+
+				// Special characters
+				if (c == '\r')
+				{
+					continue;
+				}
+				if (c == '\n')
+				{
+					result.X = Math.Max(result.X, curLineWidth);
+					result.Y += LineSpacing;
+					curLineWidth = 0.0f;
+					finalLineHeight = LineSpacing;
+					firstInLine = true;
+					continue;
+				}
+
+				/* Get the List index from the character map, defaulting to the
+				 * DefaultCharacter if it's set.
+				 */
+				int index = characterMap.IndexOf(c);
+				if (index == -1)
+				{
+					if (!DefaultCharacter.HasValue)
+					{
+						throw new ArgumentException(
+							"Text contains characters that cannot be" +
+							" resolved by this SpriteFont.",
+							"text"
+						);
+					}
+					index = characterMap.IndexOf(DefaultCharacter.Value);
+				}
+
+				/* For the first character in a line, always push the width
+				 * rightward, even if the kerning pushes the character to the
+				 * left.
+				 */
+				if (firstInLine)
+				{
+					curLineWidth += Math.Abs(kerning[index].X);
+					firstInLine = false;
+				}
+				else
+				{
+					curLineWidth += Spacing + kerning[index].X;
+				}
+
+				/* Add the character width and right-side bearing to the line
+				 * width.
+				 */
+				curLineWidth += kerning[index].Y + kerning[index].Z;
+
+				/* If a character is taller than the default line height,
+				 * increase the height to that of the line's tallest character.
+				 */
+				if (croppingData[index].Height > finalLineHeight)
+				{
+					finalLineHeight = croppingData[index].Height;
+				}
+			}
+
+			// Calculate the final width/height of the text box
+			result.X = Math.Max(result.X, curLineWidth);
+			result.Y += finalLineHeight;
+
+			return result;
 		}
 
 		#endregion

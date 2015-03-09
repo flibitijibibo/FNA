@@ -476,7 +476,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			DrawString(
 				spriteFont,
-				text.ToString(),
+				text,
 				position,
 				color,
 				0.0f,
@@ -504,7 +504,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			DrawString(
 				spriteFont,
-				text.ToString(),
+				text,
 				position,
 				color,
 				rotation,
@@ -526,21 +526,116 @@ namespace Microsoft.Xna.Framework.Graphics
 			SpriteEffects effects,
 			float layerDepth
 		) {
+			/* FIXME: This method is a duplicate of DrawString(string)!
+			 * The only difference is how we iterate through the StringBuilder.
+			 * We don't use ToString() since it generates garbage.
+			 * -flibit
+			 */
+			CheckBegin("DrawString");
 			if (text == null)
 			{
 				throw new ArgumentNullException("text");
 			}
-			DrawString(
-				spriteFont,
-				text.ToString(),
-				position,
-				color,
-				rotation,
-				origin,
-				scale,
-				effects,
-				layerDepth
-			);
+			if (text.Length == 0)
+			{
+				return;
+			}
+
+			// FIXME: This needs an accuracy check! -flibit
+
+			// Calculate offset, using the string size for flipped text
+			Vector2 baseOffset = origin;
+			if (effects != SpriteEffects.None)
+			{
+				baseOffset -= spriteFont.MeasureString(text) * axisIsMirrored[(int) effects];
+			}
+
+			Vector2 curOffset = Vector2.Zero;
+			bool firstInLine = true;
+			for (int i = 0; i < text.Length; i += 1)
+			{
+				char c = text[i];
+
+				// Special characters
+				if (c == '\r')
+				{
+					continue;
+				}
+				if (c == '\n')
+				{
+					curOffset.X = 0.0f;
+					curOffset.Y += spriteFont.LineSpacing;
+					firstInLine = true;
+					continue;
+				}
+
+				/* Get the List index from the character map, defaulting to the
+				 * DefaultCharacter if it's set.
+				 */
+				int index = spriteFont.characterMap.IndexOf(c);
+				if (index == -1)
+				{
+					if (!spriteFont.DefaultCharacter.HasValue)
+					{
+						throw new ArgumentException(
+							"Text contains characters that cannot be" +
+							" resolved by this SpriteFont.",
+							"text"
+						);
+					}
+					index = spriteFont.characterMap.IndexOf(
+						spriteFont.DefaultCharacter.Value
+					);
+				}
+
+				/* For the first character in a line, always push the width
+				 * rightward, even if the kerning pushes the character to the
+				 * left.
+				 */
+				if (firstInLine)
+				{
+					curOffset.X += Math.Abs(spriteFont.kerning[index].X);
+					firstInLine = false;
+				}
+				else
+				{
+					curOffset.X += spriteFont.Spacing + spriteFont.kerning[index].X;
+				}
+
+				// Calculate the character origin
+				Vector2 offset = baseOffset;
+				offset.X += (curOffset.X + spriteFont.croppingData[index].X) * axisDirection[(int) effects].X;
+				offset.Y += (curOffset.Y + spriteFont.croppingData[index].Y) * axisDirection[(int) effects].Y;
+				if (effects != SpriteEffects.None)
+				{
+					offset += new Vector2(
+						spriteFont.glyphData[index].Width,
+						spriteFont.glyphData[index].Height
+					) * axisIsMirrored[(int) effects];
+				}
+
+				// Draw!
+				PushSprite(
+					spriteFont.textureValue,
+					spriteFont.glyphData[index],
+					new Vector4(
+						position.X,
+						position.Y,
+						scale.X,
+						scale.Y
+					),
+					color,
+					offset,
+					rotation,
+					layerDepth,
+					(byte) effects
+				);
+
+				/* Add the character width and right-side bearing to the line
+				 * width.
+				 */
+				curOffset.X += spriteFont.kerning[index].Y + spriteFont.kerning[index].Z;
+			}
 		}
 
 		public void DrawString(
@@ -597,6 +692,10 @@ namespace Microsoft.Xna.Framework.Graphics
 			SpriteEffects effects,
 			float layerDepth
 		) {
+			/* FIXME: This method is a duplicate of DrawString(StringBuilder)!
+			 * The only difference is how we iterate through the string.
+			 * -flibit
+			 */
 			CheckBegin("DrawString");
 			if (text == null)
 			{
