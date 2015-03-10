@@ -721,6 +721,73 @@ namespace Microsoft.Xna.Framework
 			result.W = w;
 		}
 
+		public static void Transform(
+			Vector4[] sourceArray,
+			ref Matrix matrix,
+			Vector4[] destinationArray
+		) {
+			if (sourceArray == null)
+			{
+				throw new ArgumentNullException("sourceArray");
+			}
+			if (destinationArray == null)
+			{
+				throw new ArgumentNullException("destinationArray");
+			}
+			if (destinationArray.Length < sourceArray.Length)
+			{
+				throw new ArgumentException(
+					"destinationArray is too small to contain the result."
+				);
+			}
+			for (int i = 0; i < sourceArray.Length; i += 1)
+			{
+				Transform(
+					ref sourceArray[i],
+					ref matrix,
+					out destinationArray[i]
+				);
+			}
+		}
+
+		public static void Transform(
+			Vector4[] sourceArray,
+			int sourceIndex,
+			ref Matrix matrix,
+			Vector4[] destinationArray,
+			int destinationIndex,
+			int length
+		) {
+			if (sourceArray == null)
+			{
+				throw new ArgumentNullException("sourceArray");
+			}
+			if (destinationArray == null)
+			{
+				throw new ArgumentNullException("destinationArray");
+			}
+			if (destinationIndex + length > destinationArray.Length)
+			{
+				throw new ArgumentException(
+					"destinationArray is too small to contain the result."
+				);
+			}
+			if (sourceIndex + length > sourceArray.Length)
+			{
+				throw new ArgumentException(
+					"The combination of sourceIndex and length was greater than sourceArray.Length."
+				);
+			}
+			for (int i = 0; i < length; i += 1)
+			{
+				Transform(
+					ref sourceArray[i + sourceIndex],
+					ref matrix,
+					out destinationArray[i + destinationIndex]
+				);
+			}
+		}
+
 		#endregion
 
 		#region Public Static Operators
