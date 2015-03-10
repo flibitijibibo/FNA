@@ -605,15 +605,49 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Window SwapBuffers Method
 
-		public void SwapBuffers(IntPtr overrideWindowHandle)
-		{
+		public void SwapBuffers(
+			Rectangle? sourceRectangle,
+			Rectangle? destinationRectangle,
+			IntPtr overrideWindowHandle
+		) {
 #if !DISABLE_FAUXBACKBUFFER
-			int windowWidth, windowHeight;
-			SDL.SDL_GetWindowSize(
-				overrideWindowHandle,
-				out windowWidth,
-				out windowHeight
-			);
+			/* Only the faux-backbuffer supports presenting
+			 * specific regions given to Present().
+			 * -flibit
+			 */
+			int srcX, srcY, srcW, srcH;
+			int dstX, dstY, dstW, dstH;
+			if (sourceRectangle.HasValue)
+			{
+				srcX = sourceRectangle.Value.X;
+				srcY = sourceRectangle.Value.Y;
+				srcW = sourceRectangle.Value.Width;
+				srcH = sourceRectangle.Value.Height;
+			}
+			else
+			{
+				srcX = 0;
+				srcY = 0;
+				srcW = backbuffer.Width;
+				srcH = backbuffer.Height;
+			}
+			if (destinationRectangle.HasValue)
+			{
+				dstX = destinationRectangle.Value.X;
+				dstY = destinationRectangle.Value.Y;
+				dstW = destinationRectangle.Value.Width;
+				dstH = destinationRectangle.Value.Height;
+			}
+			else
+			{
+				dstX = 0;
+				dstY = 0;
+				SDL.SDL_GetWindowSize(
+					overrideWindowHandle,
+					out dstW,
+					out dstH
+				);
+			}
 
 			if (scissorTestEnable)
 			{
@@ -624,8 +658,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			BindDrawFramebuffer(0);
 
 			glBlitFramebuffer(
-				0, 0, backbuffer.Width, backbuffer.Height,
-				0, 0, windowWidth, windowHeight,
+				srcX, srcY, srcW, srcH,
+				dstX, dstY, dstW, dstH,
 				GLenum.GL_COLOR_BUFFER_BIT,
 				GLenum.GL_LINEAR
 			);

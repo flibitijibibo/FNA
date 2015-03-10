@@ -427,7 +427,23 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public void Present()
 		{
-			GLDevice.SwapBuffers(PresentationParameters.DeviceWindowHandle);
+			GLDevice.SwapBuffers(
+				null,
+				null,
+				PresentationParameters.DeviceWindowHandle
+			);
+		}
+
+		public void Present(
+			Rectangle? sourceRectangle,
+			Rectangle? destinationRectangle,
+			IntPtr overrideWindowHandle
+		) {
+			GLDevice.SwapBuffers(
+				sourceRectangle,
+				destinationRectangle,
+				overrideWindowHandle
+			);
 		}
 
 		#endregion

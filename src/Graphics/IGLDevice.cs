@@ -59,7 +59,11 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		void Dispose();
 
-		void SwapBuffers(IntPtr overrideWindowHandle);
+		void SwapBuffers(
+			Rectangle? sourceRectangle,
+			Rectangle? destinationRectangle,
+			IntPtr overrideWindowHandle
+		);
 		void SetStringMarker(string text);
 
 		void DrawIndexedPrimitives(
