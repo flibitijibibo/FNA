@@ -9,6 +9,7 @@
 
 #region Using Statements
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 #endregion
 
@@ -106,7 +107,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			ColumnCount = columnCount;
 			if (elementCount > 0)
 			{
-				EffectParameter[] elements = new EffectParameter[elementCount];
+				List<EffectParameter> elements = new List<EffectParameter>(elementCount);
 				for (int i = 0; i < elementCount; i += 1)
 				{
 					// FIXME: Probably incomplete? -flibit

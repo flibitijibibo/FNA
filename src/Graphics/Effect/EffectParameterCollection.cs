@@ -22,7 +22,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			get
 			{
-				return elements.Length;
+				return elements.Count;
 			}
 		}
 
@@ -53,13 +53,13 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Private Variables
 
-		private EffectParameter[] elements;
+		private List<EffectParameter> elements;
 
 		#endregion
 
 		#region Internal Constructor
 
-		internal EffectParameterCollection(EffectParameter[] value)
+		internal EffectParameterCollection(List<EffectParameter> value)
 		{
 			elements = value;
 		}
@@ -68,9 +68,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Public Methods
 
-		public IEnumerator<EffectParameter> GetEnumerator()
+		public List<EffectParameter>.Enumerator GetEnumerator()
 		{
-			return ((IEnumerable<EffectParameter>) elements).GetEnumerator();
+			return elements.GetEnumerator();
 		}
 
 		public EffectParameter GetParameterBySemantic(string semantic)
@@ -90,6 +90,11 @@ namespace Microsoft.Xna.Framework.Graphics
 		#region IEnumerator Methods
 
 		IEnumerator System.Collections.IEnumerable.GetEnumerator()
+		{
+			return elements.GetEnumerator();
+		}
+
+		IEnumerator<EffectParameter> System.Collections.Generic.IEnumerable<EffectParameter>.GetEnumerator()
 		{
 			return elements.GetEnumerator();
 		}

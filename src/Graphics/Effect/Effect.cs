@@ -1083,19 +1083,19 @@ namespace Microsoft.Xna.Framework.Graphics
 					param.value.values
 				));
 			}
-			Parameters = new EffectParameterCollection(parameters.ToArray());
+			Parameters = new EffectParameterCollection(parameters);
 
 			// Set up Techniques
 			MojoShader.MOJOSHADER_effectTechnique* techPtr = (MojoShader.MOJOSHADER_effectTechnique*) effectPtr->techniques;
-			EffectTechnique[] techniques = new EffectTechnique[effectPtr->technique_count];
-			for (int i = 0; i < techniques.Length; i += 1)
+			List<EffectTechnique> techniques = new List<EffectTechnique>(effectPtr->technique_count);
+			for (int i = 0; i < techniques.Count; i += 1)
 			{
 				MojoShader.MOJOSHADER_effectTechnique tech = techPtr[i];
 
 				// Set up Passes
 				MojoShader.MOJOSHADER_effectPass* passPtr = (MojoShader.MOJOSHADER_effectPass*) tech.passes;
-				EffectPass[] passes = new EffectPass[tech.pass_count];
-				for (int j = 0; j < passes.Length; j += 1)
+				List<EffectPass> passes = new List<EffectPass>((int) tech.pass_count);
+				for (int j = 0; j < passes.Count; j += 1)
 				{
 					MojoShader.MOJOSHADER_effectPass pass = passPtr[j];
 					passes[j] = new EffectPass(
@@ -1127,7 +1127,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			uint numAnnotations
 		) {
 			MojoShader.MOJOSHADER_effectAnnotation* annoPtr = (MojoShader.MOJOSHADER_effectAnnotation*) rawAnnotations;
-			EffectAnnotation[] annotations = new EffectAnnotation[numAnnotations];
+			List<EffectAnnotation> annotations = new List<EffectAnnotation>((int) numAnnotations);
 			for (int i = 0; i < numAnnotations; i += 1)
 			{
 				MojoShader.MOJOSHADER_effectAnnotation anno = annoPtr[i];

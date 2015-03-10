@@ -22,7 +22,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			get
 			{
-				return elements.Length;
+				return elements.Count;
 			}
 		}
 
@@ -53,13 +53,13 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Private Variables
 
-		private EffectPass[] elements;
+		private List<EffectPass> elements;
 
 		#endregion
 
 		#region Internal Constructor
 
-		internal EffectPassCollection(EffectPass[] value)
+		internal EffectPassCollection(List<EffectPass> value)
 		{
 			elements = value;
 		}
@@ -68,9 +68,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Public Methods
 
-		public IEnumerator<EffectPass> GetEnumerator()
+		public List<EffectPass>.Enumerator GetEnumerator()
 		{
-			return ((IEnumerable<EffectPass>) elements).GetEnumerator();
+			return elements.GetEnumerator();
 		}
 
 		#endregion
@@ -78,6 +78,11 @@ namespace Microsoft.Xna.Framework.Graphics
 		#region IEnumerator Methods
 
 		IEnumerator System.Collections.IEnumerable.GetEnumerator()
+		{
+			return elements.GetEnumerator();
+		}
+
+		IEnumerator<EffectPass> System.Collections.Generic.IEnumerable<EffectPass>.GetEnumerator()
 		{
 			return elements.GetEnumerator();
 		}

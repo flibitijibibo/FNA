@@ -22,7 +22,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			get
 			{
-				return elements.Length;
+				return elements.Count;
 			}
 		}
 
@@ -53,13 +53,13 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Private Variables
 
-		private EffectAnnotation[] elements;
+		private List<EffectAnnotation> elements;
 
 		#endregion
 
 		#region Internal Constructor
 
-		internal EffectAnnotationCollection(EffectAnnotation[] value)
+		internal EffectAnnotationCollection(List<EffectAnnotation> value)
 		{
 			elements = value;
 		}
@@ -68,9 +68,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Public Methods
 
-		public IEnumerator<EffectAnnotation> GetEnumerator()
+		public List<EffectAnnotation>.Enumerator GetEnumerator()
 		{
-			return ((IEnumerable<EffectAnnotation>) elements).GetEnumerator();
+			return elements.GetEnumerator();
 		}
 
 		#endregion
@@ -78,6 +78,11 @@ namespace Microsoft.Xna.Framework.Graphics
 		#region IEnumerator Methods
 
 		IEnumerator System.Collections.IEnumerable.GetEnumerator()
+		{
+			return elements.GetEnumerator();
+		}
+
+		IEnumerator<EffectAnnotation> System.Collections.Generic.IEnumerable<EffectAnnotation>.GetEnumerator()
 		{
 			return elements.GetEnumerator();
 		}

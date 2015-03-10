@@ -22,7 +22,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			get
 			{
-				return elements.Length;
+				return elements.Count;
 			}
 		}
 
@@ -53,13 +53,13 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Private Variables
 
-		private EffectTechnique[] elements;
+		private List<EffectTechnique> elements;
 
 		#endregion
 
 		#region Internal Constructor
 
-		internal EffectTechniqueCollection(EffectTechnique[] value)
+		internal EffectTechniqueCollection(List<EffectTechnique> value)
 		{
 			elements = value;
 		}
@@ -68,9 +68,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Public Methods
 
-		public IEnumerator<EffectTechnique> GetEnumerator()
+		public List<EffectTechnique>.Enumerator GetEnumerator()
 		{
-			return ((IEnumerable<EffectTechnique>) elements).GetEnumerator();
+			return elements.GetEnumerator();
 		}
 
 		#endregion
@@ -78,6 +78,11 @@ namespace Microsoft.Xna.Framework.Graphics
 		#region IEnumerator Methods
 
 		IEnumerator System.Collections.IEnumerable.GetEnumerator()
+		{
+			return elements.GetEnumerator();
+		}
+
+		IEnumerator<EffectTechnique> System.Collections.Generic.IEnumerable<EffectTechnique>.GetEnumerator()
 		{
 			return elements.GetEnumerator();
 		}
