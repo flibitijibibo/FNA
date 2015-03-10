@@ -790,10 +790,21 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public void SetValue(int value)
 		{
-			unsafe
+			if (ParameterType == EffectParameterType.Single)
 			{
-				int* dstPtr = (int*) values;
-				*dstPtr = value;
+				unsafe
+				{
+					float *dstPtr = (float*) values;
+					*dstPtr = (float) value;
+				}
+			}
+			else
+			{
+				unsafe
+				{
+					int* dstPtr = (int*) values;
+					*dstPtr = value;
+				}
 			}
 		}
 
