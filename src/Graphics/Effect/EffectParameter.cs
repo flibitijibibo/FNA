@@ -111,7 +111,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				for (int i = 0; i < elementCount; i += 1)
 				{
 					// FIXME: Probably incomplete? -flibit
-					elements[i] = new EffectParameter(
+					elements.Add(new EffectParameter(
 						null,
 						null,
 						rowCount,
@@ -124,7 +124,7 @@ namespace Microsoft.Xna.Framework.Graphics
 						new IntPtr(
 							data.ToInt64() + (i * rowCount * columnCount)
 						)
-					);
+					));
 				}
 				Elements = new EffectParameterCollection(elements);
 			}

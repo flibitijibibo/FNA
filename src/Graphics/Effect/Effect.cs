@@ -1088,17 +1088,17 @@ namespace Microsoft.Xna.Framework.Graphics
 			// Set up Techniques
 			MojoShader.MOJOSHADER_effectTechnique* techPtr = (MojoShader.MOJOSHADER_effectTechnique*) effectPtr->techniques;
 			List<EffectTechnique> techniques = new List<EffectTechnique>(effectPtr->technique_count);
-			for (int i = 0; i < techniques.Count; i += 1)
+			for (int i = 0; i < techniques.Capacity; i += 1)
 			{
 				MojoShader.MOJOSHADER_effectTechnique tech = techPtr[i];
 
 				// Set up Passes
 				MojoShader.MOJOSHADER_effectPass* passPtr = (MojoShader.MOJOSHADER_effectPass*) tech.passes;
 				List<EffectPass> passes = new List<EffectPass>((int) tech.pass_count);
-				for (int j = 0; j < passes.Count; j += 1)
+				for (int j = 0; j < passes.Capacity; j += 1)
 				{
 					MojoShader.MOJOSHADER_effectPass pass = passPtr[j];
-					passes[j] = new EffectPass(
+					passes.Add(new EffectPass(
 						Marshal.PtrToStringAnsi(pass.name),
 						INTERNAL_readAnnotations(
 							pass.annotations,
@@ -1106,10 +1106,10 @@ namespace Microsoft.Xna.Framework.Graphics
 						),
 						this,
 						(uint) j
-					);
+					));
 				}
 
-				techniques[i] = new EffectTechnique(
+				techniques.Add(new EffectTechnique(
 					Marshal.PtrToStringAnsi(tech.name),
 					(IntPtr) (techPtr + i),
 					new EffectPassCollection(passes),
@@ -1117,7 +1117,7 @@ namespace Microsoft.Xna.Framework.Graphics
 						tech.annotations,
 						tech.annotation_count
 					)
-				);
+				));
 			}
 			Techniques = new EffectTechniqueCollection(techniques);
 		}
@@ -1131,7 +1131,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			for (int i = 0; i < numAnnotations; i += 1)
 			{
 				MojoShader.MOJOSHADER_effectAnnotation anno = annoPtr[i];
-				annotations[i] = new EffectAnnotation(
+				annotations.Add(new EffectAnnotation(
 					Marshal.PtrToStringAnsi(anno.name),
 					Marshal.PtrToStringAnsi(anno.semantic),
 					(int) anno.row_count,
@@ -1139,7 +1139,7 @@ namespace Microsoft.Xna.Framework.Graphics
 					XNAClass[anno.value_class],
 					XNAType[anno.value_type],
 					anno.values
-				);
+				));
 			}
 			return new EffectAnnotationCollection(annotations);
 		}
