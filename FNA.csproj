@@ -233,6 +233,11 @@
     <Compile Include="src\Content\ContentReaders\VertexDeclarationReader.cs" />
     <Compile Include="src\Content\ContentReaders\VideoReader.cs" />
     <Compile Include="src\Graphics\PackedVector\Bgr565.cs" />
+    <Compile Include="src\Graphics\PackedVector\Alpha8.cs" />
+    <Compile Include="src\Graphics\PackedVector\Bgra5551.cs" />
+    <Compile Include="src\Graphics\PackedVector\Rg32.cs" />
+    <Compile Include="src\Graphics\PackedVector\Rgba1010102.cs" />
+    <Compile Include="src\Graphics\PackedVector\Rgba64.cs" />
     <Compile Include="src\Graphics\PackedVector\Bgra4444.cs" />
     <Compile Include="src\Graphics\PackedVector\Byte4.cs" />
     <Compile Include="src\Graphics\PackedVector\IPackedVector.cs" />
