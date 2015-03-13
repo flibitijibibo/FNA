@@ -87,6 +87,18 @@ namespace Microsoft.Xna.Framework.Graphics
 			private set;
 		}
 
+		public TextureCollection VertexTextures
+		{
+			get;
+			private set;
+		}
+
+		public SamplerStateCollection VertexSamplerStates
+		{
+			get;
+			private set;
+		}
+
 		private BlendState INTERNAL_blendState;
 		public BlendState BlendState
 		{
@@ -231,7 +243,8 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Internal Sampler Change Queue
 
-		internal readonly Queue<int> ModifiedSamplers = new Queue<int>();
+		private readonly Queue<int> modifiedSamplers = new Queue<int>();
+		private readonly Queue<int> modifiedVertexSamplers = new Queue<int>();
 
 		#endregion
 
@@ -346,8 +359,22 @@ namespace Microsoft.Xna.Framework.Graphics
 			RasterizerState = RasterizerState.CullCounterClockwise;
 
 			// Initialize the Texture/Sampler state containers
-			Textures = new TextureCollection(this);
-			SamplerStates = new SamplerStateCollection(this);
+			Textures = new TextureCollection(
+				GLDevice.MaxTextureSlots,
+				modifiedSamplers
+			);
+			SamplerStates = new SamplerStateCollection(
+				GLDevice.MaxTextureSlots,
+				modifiedSamplers
+			);
+			VertexTextures = new TextureCollection(
+				GLDevice.MaxVertexTextureSlots,
+				modifiedVertexSamplers
+			);
+			VertexSamplerStates = new SamplerStateCollection(
+				GLDevice.MaxVertexTextureSlots,
+				modifiedVertexSamplers
+			);
 
 			// Set the default viewport and scissor rect.
 			Viewport = new Viewport(PresentationParameters.Bounds);
@@ -1248,13 +1275,22 @@ namespace Microsoft.Xna.Framework.Graphics
 				RenderTargetCount > 0
 			);
 
-			while (ModifiedSamplers.Count > 0)
+			while (modifiedSamplers.Count > 0)
 			{
-				int sampler = ModifiedSamplers.Dequeue();
+				int sampler = modifiedSamplers.Dequeue();
 				GLDevice.VerifySampler(
 					sampler,
 					Textures[sampler],
 					SamplerStates[sampler]
+				);
+			}
+			while (modifiedVertexSamplers.Count > 0)
+			{
+				int sampler = modifiedVertexSamplers.Dequeue();
+				GLDevice.VerifyVertexSampler(
+					sampler,
+					VertexTextures[sampler],
+					VertexSamplerStates[sampler]
 				);
 			}
 		}

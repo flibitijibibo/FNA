@@ -52,6 +52,11 @@ namespace Microsoft.Xna.Framework.Graphics
 			get;
 		}
 
+		int MaxVertexTextureSlots
+		{
+			get;
+		}
+
 		IGLBackbuffer Backbuffer
 		{
 			get;
@@ -121,6 +126,11 @@ namespace Microsoft.Xna.Framework.Graphics
 			bool renderTargetBound
 		);
 		void VerifySampler(
+			int index,
+			Texture texture,
+			SamplerState sampler
+		);
+		void VerifyVertexSampler(
 			int index,
 			Texture texture,
 			SamplerState sampler

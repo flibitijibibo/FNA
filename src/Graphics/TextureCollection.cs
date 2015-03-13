@@ -7,6 +7,10 @@
  */
 #endregion
 
+#region Using Statements
+using System.Collections.Generic;
+#endregion
+
 namespace Microsoft.Xna.Framework.Graphics
 {
 	public sealed class TextureCollection
@@ -21,14 +25,10 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			set
 			{
-				// FIXME: Bring this back after the IGLDevice is established.
-				// if (textures[index] != value)
+				textures[index] = value;
+				if (!modifiedSamplers.Contains(index))
 				{
-					textures[index] = value;
-					if (!graphicsDevice.ModifiedSamplers.Contains(index))
-					{
-						graphicsDevice.ModifiedSamplers.Enqueue(index);
-					}
+					modifiedSamplers.Enqueue(index);
 				}
 			}
 		}
@@ -38,16 +38,18 @@ namespace Microsoft.Xna.Framework.Graphics
 		#region Private Variables
 
 		private readonly Texture[] textures;
-		private GraphicsDevice graphicsDevice;
+		private readonly Queue<int> modifiedSamplers;
 
 		#endregion
 
 		#region Internal Constructor
 
-		internal TextureCollection(GraphicsDevice parentDevice)
-		{
-			textures = new Texture[parentDevice.GLDevice.MaxTextureSlots];
-			graphicsDevice = parentDevice;
+		internal TextureCollection(
+			int slots,
+			Queue<int> modSamplers
+		) {
+			textures = new Texture[slots];
+			modifiedSamplers = modSamplers;
 			for (int i = 0; i < textures.Length; i += 1)
 			{
 				textures[i] = null;

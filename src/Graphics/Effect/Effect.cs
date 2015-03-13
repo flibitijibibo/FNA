@@ -792,6 +792,13 @@ namespace Microsoft.Xna.Framework.Graphics
 						// Nothing to do
 						continue;
 					}
+
+					/* TODO: Check for vertex/pixel stages!
+					 * If there are vertex sampler registers that can be used in
+					 * HLSL, we need to determine whether or not to write to the
+					 * vertex sampler collections or the standard collections.
+					 * -flibit
+					 */
 					int register = (int) registers[i].sampler_register;
 
 					/* We're going to store this state locally, then generate a

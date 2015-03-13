@@ -7,6 +7,10 @@
  */
 #endregion
 
+#region Using Statements
+using System.Collections.Generic;
+#endregion
+
 namespace Microsoft.Xna.Framework.Graphics
 {
 	public sealed class SamplerStateCollection
@@ -21,14 +25,10 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			set
 			{
-				// FIXME: Bring this back after the IGLDevice is established.
-				// if (samplers[index] != value)
+				samplers[index] = value;
+				if (!modifiedSamplers.Contains(index))
 				{
-					samplers[index] = value;
-					if (!graphicsDevice.ModifiedSamplers.Contains(index))
-					{
-						graphicsDevice.ModifiedSamplers.Enqueue(index);
-					}
+					modifiedSamplers.Enqueue(index);
 				}
 			}
 		}
@@ -38,16 +38,18 @@ namespace Microsoft.Xna.Framework.Graphics
 		#region Private Variables
 
 		private readonly SamplerState[] samplers;
-		private readonly GraphicsDevice graphicsDevice;
+		private readonly Queue<int> modifiedSamplers;
 
 		#endregion
 
 		#region Internal Constructor
 
-		internal SamplerStateCollection(GraphicsDevice parentDevice)
-		{
-			samplers = new SamplerState[parentDevice.GLDevice.MaxTextureSlots];
-			graphicsDevice = parentDevice;
+		internal SamplerStateCollection(
+			int slots,
+			Queue<int> modSamplers
+		) {
+			samplers = new SamplerState[slots];
+			modifiedSamplers = modSamplers;
 			for (int i = 0; i < samplers.Length; i += 1)
 			{
 				samplers[i] = SamplerState.LinearWrap;

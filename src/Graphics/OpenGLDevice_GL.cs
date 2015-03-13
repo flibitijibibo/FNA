@@ -174,6 +174,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			// Multitexture
 			GL_TEXTURE0 =				0x84C0,
 			GL_MAX_TEXTURE_IMAGE_UNITS =		0x8872,
+			GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS =	0x8B4C,
 			// Buffer objects
 			GL_ARRAY_BUFFER =			0x8892,
 			GL_ELEMENT_ARRAY_BUFFER =		0x8893,
