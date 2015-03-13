@@ -331,6 +331,18 @@ namespace Microsoft.Xna.Framework
 			}
 		}
 
+		public float? Intersects(Ray ray)
+		{
+			float? result;
+			Intersects(ref ray, out result);
+			return result;
+		}
+
+		public void Intersects(ref Ray ray, out float? result)
+		{
+			throw new NotImplementedException();
+		}
+
 		#endregion
 
 		#region Private Methods

@@ -192,6 +192,13 @@ namespace Microsoft.Xna.Framework
 			return result;
 		}
 
+		public float? Intersects(BoundingFrustum frustum)
+		{
+			float? result;
+			frustum.Intersects(ref this, out result);
+			return result;
+		}
+
 		public void Intersects(ref Plane plane, out float? result)
 		{
 			float den = Vector3.Dot(Direction, plane.Normal);
