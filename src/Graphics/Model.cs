@@ -145,6 +145,38 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		}
 
+		public void CopyBoneTransformsFrom(Matrix[] sourceBoneTransforms)
+		{
+			if (sourceBoneTransforms == null)
+			{
+				throw new ArgumentNullException("sourceBoneTransforms");
+			}
+			if (sourceBoneTransforms.Length < Bones.Count)
+			{
+				throw new ArgumentOutOfRangeException("sourceBoneTransforms");
+			}
+			for (int i = 0; i < sourceBoneTransforms.Length; i += 1)
+			{
+				Bones[i].Transform = sourceBoneTransforms[i];
+			}
+		}
+
+		public void CopyBoneTransformsTo(Matrix[] destinationBoneTransforms)
+		{
+			if (destinationBoneTransforms == null)
+			{
+				throw new ArgumentNullException("destinationBoneTransforms");
+			}
+			if (destinationBoneTransforms.Length < Bones.Count)
+			{
+				throw new ArgumentOutOfRangeException("destinationBoneTransforms");
+			}
+			for (int i = 0; i < destinationBoneTransforms.Length; i += 1)
+			{
+				destinationBoneTransforms[i] = Bones[i].Transform;
+			}
+		}
+
 		#endregion
 
 		#region Internal Methods
