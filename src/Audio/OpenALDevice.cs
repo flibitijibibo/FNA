@@ -10,6 +10,8 @@
 #region Using Statements
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Runtime.InteropServices;
 
 using OpenAL;
 #endregion
@@ -25,6 +27,12 @@ namespace Microsoft.Xna.Framework.Audio
 			get;
 			private set;
 		}
+
+		#endregion
+
+		#region Public Static Variables
+
+		public static ReadOnlyCollection<RendererDetail> Renderers = GetDevices();
 
 		#endregion
 
@@ -79,7 +87,17 @@ namespace Microsoft.Xna.Framework.Audio
 
 		private OpenALDevice()
 		{
-			alDevice = ALC10.alcOpenDevice(string.Empty);
+			string envDevice = Environment.GetEnvironmentVariable("FNA_AUDIO_DEVICE_NAME");
+			if (String.IsNullOrEmpty(envDevice))
+			{
+				/* Be sure ALC won't explode if the variable doesn't exist.
+				 * But, fail if the device name is wrong. The user needs to know
+				 * if their environment variable was incorrect.
+				 * -flibit
+				 */
+				envDevice = String.Empty;
+			}
+			alDevice = ALC10.alcOpenDevice(envDevice);
 			if (CheckALCError() || alDevice == IntPtr.Zero)
 			{
 				throw new Exception("Could not open audio device!");
@@ -193,6 +211,31 @@ namespace Microsoft.Xna.Framework.Audio
 
 			System.Console.WriteLine("OpenAL Device Error: " + err.ToString());
 			return true;
+		}
+
+		#endregion
+
+		#region Private Static Variables
+
+		private static ReadOnlyCollection<RendererDetail> GetDevices()
+		{
+			IntPtr deviceList = ALC10.alcGetString(IntPtr.Zero, ALEXT.ALC_ALL_DEVICES_SPECIFIER);
+			List<RendererDetail> renderers = new List<RendererDetail>();
+
+			int i = 0;
+			string curString = Marshal.PtrToStringAnsi(deviceList);
+			while (!String.IsNullOrEmpty(curString))
+			{
+				renderers.Add(new RendererDetail(
+					curString,
+					i.ToString()
+				));
+				i += 1;
+				deviceList += curString.Length + 1;
+				curString = Marshal.PtrToStringAnsi(deviceList);
+			}
+
+			return new ReadOnlyCollection<RendererDetail>(renderers);
 		}
 
 		#endregion

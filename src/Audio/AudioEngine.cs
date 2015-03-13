@@ -10,6 +10,7 @@
 #region Using Statements
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 #endregion
 
@@ -25,6 +26,14 @@ namespace Microsoft.Xna.Framework.Audio
 		#endregion
 
 		#region Public Properties
+
+		public ReadOnlyCollection<RendererDetail> RendererDetails
+		{
+			get
+			{
+				return OpenALDevice.Renderers;
+			}
+		}
 
 		public bool IsDisposed
 		{
@@ -440,6 +449,10 @@ namespace Microsoft.Xna.Framework.Audio
 			TimeSpan lookAheadTime,
 			string rendererId
 		) {
+			/* TODO: May require either resetting the ALDevice,
+			 * or adding a second AL device/context for this engine.
+			 * -flibit
+			 */
 			throw new NotSupportedException();
 		}
 
