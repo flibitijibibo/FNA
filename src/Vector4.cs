@@ -788,6 +788,118 @@ namespace Microsoft.Xna.Framework
 			}
 		}
 
+		public static Vector4 Transform(Vector2 value, Quaternion rotation)
+		{
+			Vector4 result;
+			Transform(ref value, ref rotation, out result);
+			return result;
+		}
+
+		public static Vector4 Transform(Vector3 value, Quaternion rotation)
+		{
+			Vector4 result;
+			Transform(ref value, ref rotation, out result);
+			return result;
+		}
+
+		public static Vector4 Transform(Vector4 value, Quaternion rotation)
+		{
+			Vector4 result;
+			Transform(ref value, ref rotation, out result);
+			return result;
+		}
+
+		public static void Transform(
+			ref Vector2 value,
+			ref Quaternion rotation,
+			out Vector4 result
+		) {
+			throw new NotImplementedException("Quaternions?");
+		}
+
+		public static void Transform(
+			ref Vector3 value,
+			ref Quaternion rotation,
+			out Vector4 result
+		) {
+			throw new NotImplementedException("Quaternions?");
+		}
+
+		public static void Transform(
+			ref Vector4 value,
+			ref Quaternion rotation,
+			out Vector4 result
+		) {
+			throw new NotImplementedException("Quaternions?");
+		}
+
+		public static void Transform(
+			Vector4[] sourceArray,
+			ref Quaternion rotation,
+			Vector4[] destinationArray
+		) {
+			if (sourceArray == null)
+			{
+				throw new ArgumentException("sourceArray");
+			}
+			if (destinationArray == null)
+			{
+				throw new ArgumentException("destinationArray");
+			}
+			if (destinationArray.Length < sourceArray.Length)
+			{
+				throw new ArgumentException(
+					"destinationArray is too small to contain the result."
+				);
+			}
+			for (int i = 0; i < sourceArray.Length; i += 1)
+			{
+				Transform(
+					ref sourceArray[i],
+					ref rotation,
+					out destinationArray[i]
+				);
+			}
+		}
+
+		public static void Transform(
+			Vector4[] sourceArray,
+			int sourceIndex,
+			ref Quaternion rotation,
+			Vector4[] destinationArray,
+			int destinationIndex,
+			int length
+		) {
+			if (sourceArray == null)
+			{
+				throw new ArgumentException("sourceArray");
+			}
+			if (destinationArray == null)
+			{
+				throw new ArgumentException("destinationArray");
+			}
+			if (destinationIndex + length > destinationArray.Length)
+			{
+				throw new ArgumentException(
+					"destinationArray is too small to contain the result."
+				);
+			}
+			if (sourceIndex + length > sourceArray.Length)
+			{
+				throw new ArgumentException(
+					"The combination of sourceIndex and length was greater than sourceArray.Length."
+				);
+			}
+			for (int i = 0; i < length; i += 1)
+			{
+				Transform(
+					ref sourceArray[i + sourceIndex],
+					ref rotation,
+					out destinationArray[i + destinationIndex]
+				);
+			}
+		}
+
 		#endregion
 
 		#region Public Static Operators
