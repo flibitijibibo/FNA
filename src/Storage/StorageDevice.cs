@@ -37,10 +37,13 @@ namespace Microsoft.Xna.Framework.Storage
 				{
 					return new DriveInfo(storageRoot).AvailableFreeSpace;
 				}
-				catch
+				catch(Exception e)
 				{
 					// Storage root was invalid or unavailable.
-					return 0;
+					throw new StorageDeviceNotConnectedException(
+						"The storage device bound to the container is not connected.",
+						e
+					);
 				}
 			}
 		}
@@ -87,10 +90,13 @@ namespace Microsoft.Xna.Framework.Storage
 				{
 					return new DriveInfo(storageRoot).TotalSize;
 				}
-				catch
+				catch(Exception e)
 				{
-					// Storage root is invalid or removed.
-					return 0;
+					// Storage root was invalid or unavailable.
+					throw new StorageDeviceNotConnectedException(
+						"The storage device bound to the container is not connected.",
+						e
+					);
 				}
 			}
 		}

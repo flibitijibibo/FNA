@@ -102,6 +102,7 @@
     <Compile Include="src\Properties\AssemblyInfo.cs" />
     <Compile Include="src\Storage\StorageContainer.cs" />
     <Compile Include="src\Storage\StorageDevice.cs" />
+    <Compile Include="src\Storage\StorageDeviceNotConnectedException.cs" />
     <Compile Include="src\Input\TextInputEXT.cs" />
     <Compile Include="src\Audio\AudioChannels.cs" />
     <Compile Include="src\Media\MediaPlayer.cs" />
