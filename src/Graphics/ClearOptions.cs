@@ -13,11 +13,23 @@ using System;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
+	/// <summary>
+	/// Defines the buffers for clearing when calling <see cref="GraphicsDevice.Clear"/> operation.
+	/// </summary>
 	[Flags]
 	public enum ClearOptions
 	{
+		/// <summary>
+		/// Color buffer.
+		/// </summary>
 		Target = 1,
+		/// <summary>
+		/// Depth buffer.
+		/// </summary>
 		DepthBuffer = 2,
+		/// <summary>
+		/// Stencil buffer.
+		/// </summary>
 		Stencil = 4
 	}
 }
