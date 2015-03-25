@@ -442,12 +442,6 @@ namespace Microsoft.Xna.Framework.Graphics
 			private set;
 		}
 
-		public bool SupportsAccurateDepthClipping
-		{
-			get;
-			private set;
-		}
-
 		public int MaxTextureSlots
 		{
 			get;
@@ -534,10 +528,6 @@ namespace Microsoft.Xna.Framework.Graphics
 			System.Console.WriteLine("OpenGL Driver: " + glGetString(GLenum.GL_VERSION));
 			System.Console.WriteLine("OpenGL Vendor: " + glGetString(GLenum.GL_VENDOR));
 			System.Console.WriteLine("MojoShader Profile: " + shaderProfile);
-			if (SupportsAccurateDepthClipping)
-			{
-				System.Console.WriteLine("ARB_clip_control: Using zero-to-one depth mode!");
-			}
 
 			// Load the extension list, initialize extension-dependent components
 			string extensions = glGetString(GLenum.GL_EXTENSIONS);

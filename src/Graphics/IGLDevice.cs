@@ -42,11 +42,6 @@ namespace Microsoft.Xna.Framework.Graphics
 			get;
 		}
 
-		bool SupportsAccurateDepthClipping
-		{
-			get;
-		}
-
 		int MaxTextureSlots
 		{
 			get;

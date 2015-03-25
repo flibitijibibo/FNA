@@ -196,9 +196,6 @@ namespace Microsoft.Xna.Framework.Graphics
 			GL_QUERY_RESULT =			0x8866,
 			GL_QUERY_RESULT_AVAILABLE =		0x8867,
 			GL_SAMPLES_PASSED =			0x8914,
-			// Clip control
-			GL_LOWER_LEFT =				0x8CA1,
-			GL_ZERO_TO_ONE =			0x935F,
 			// Source Enum Values
 			GL_DEBUG_SOURCE_API_ARB =		0x8246,
 			GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB =	0x8247,
@@ -712,13 +709,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		/* END QUERY FUNCTIONS */
 
-		/* BEGIN CLIP CONTROL FUNCTIONS */
-
-		private delegate void ClipControl(GLenum origin, GLenum depth);
-		private ClipControl glClipControl;
-
-		/* END CLIP CONTROL FUNCTIONS */
-
 #if DEBUG
 		/* BEGIN DEBUG OUTPUT FUNCTIONS */
 
@@ -1096,25 +1086,6 @@ namespace Microsoft.Xna.Framework.Graphics
 			catch
 			{
 				// FIXME: SupportsIndependentWriteMasks? -flibit
-			}
-
-			/* ARB_clip_control is only available in OpenGL 4.5.
-			 * This is a D3D9 compatibility function.
-			 * Do not think about the timeline. Just... don't. >_<
-			 * -flibit
-			 */
-			SupportsAccurateDepthClipping = true;
-			try
-			{
-				glClipControl = (ClipControl) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glClipControl"),
-					typeof(ClipControl)
-				);
-				glClipControl(GLenum.GL_LOWER_LEFT, GLenum.GL_ZERO_TO_ONE);
-			}
-			catch
-			{
-				SupportsAccurateDepthClipping = false;
 			}
 
 #if DEBUG
