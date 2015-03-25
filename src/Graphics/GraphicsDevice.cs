@@ -1046,8 +1046,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				ibPtr,
 				indexOffset,
 				IndexElementSize.SixteenBits,
-				primitiveCount,
-				vertexDeclaration
+				primitiveCount
 			);
 
 			// Release the handles.
@@ -1089,8 +1088,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				ibPtr,
 				indexOffset,
 				IndexElementSize.SixteenBits,
-				primitiveCount,
-				vertexDeclaration
+				primitiveCount
 			);
 
 			// Release the handles.
@@ -1132,8 +1130,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				ibPtr,
 				indexOffset,
 				IndexElementSize.ThirtyTwoBits,
-				primitiveCount,
-				vertexDeclaration
+				primitiveCount
 			);
 
 			// Release the handles.
@@ -1175,8 +1172,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				ibPtr,
 				indexOffset,
 				IndexElementSize.ThirtyTwoBits,
-				primitiveCount,
-				vertexDeclaration
+				primitiveCount
 			);
 
 			// Release the handles.
@@ -1213,8 +1209,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				primitiveType,
 				vbPtr,
 				vertexOffset,
-				primitiveCount,
-				vertexDeclaration
+				primitiveCount
 			);
 
 			// Release the handles.
@@ -1246,8 +1241,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				primitiveType,
 				vbPtr,
 				vertexOffset,
-				primitiveCount,
-				vertexDeclaration
+				primitiveCount
 			);
 
 			// Release the handles.

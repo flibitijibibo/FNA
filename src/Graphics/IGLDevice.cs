@@ -103,15 +103,13 @@ namespace Microsoft.Xna.Framework.Graphics
 			IntPtr indexData,
 			int indexOffset,
 			IndexElementSize indexElementSize,
-			int primitiveCount,
-			VertexDeclaration vertexDeclaration
+			int primitiveCount
 		);
 		void DrawUserPrimitives(
 			PrimitiveType primitiveType,
 			IntPtr vertexData,
 			int vertexOffset,
-			int primitiveCount,
-			VertexDeclaration vertexDeclaration
+			int primitiveCount
 		);
 
 		void SetViewport(Viewport vp, bool renderTargetBound);

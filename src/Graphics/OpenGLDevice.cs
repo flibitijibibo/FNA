@@ -887,8 +887,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			IntPtr indexData,
 			int indexOffset,
 			IndexElementSize indexElementSize,
-			int primitiveCount,
-			VertexDeclaration vertexDeclaration
+			int primitiveCount
 		) {
 			// Unbind current index buffer.
 			BindIndexBuffer(OpenGLBuffer.NullBuffer);
@@ -916,12 +915,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			PrimitiveType primitiveType,
 			IntPtr vertexData,
 			int vertexOffset,
-			int primitiveCount,
-			VertexDeclaration vertexDeclaration
+			int primitiveCount
 		) {
-			// Unbind current VBOs.
-			BindVertexBuffer(OpenGLBuffer.NullBuffer);
-
 			// Draw!
 			glDrawArrays(
 				XNAToGL.Primitive[primitiveType],
