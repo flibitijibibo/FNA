@@ -906,7 +906,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		/// A hint of the lowest vertex indexed relative to baseVertex.
 		/// </param>
 		/// <param name="numVertices">
-		/// An hint of the maximum vertex indexed.
+		/// A hint of the maximum vertex indexed.
 		/// </param>
 		/// <param name="startIndex">
 		/// The index within the index buffer to start drawing from.
