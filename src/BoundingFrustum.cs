@@ -19,11 +19,17 @@ using System.Text;
 
 namespace Microsoft.Xna.Framework
 {
+	/// <summary>
+	/// Defines a viewing frustum for intersection operations.
+	/// </summary>
 	[DebuggerDisplay("{DebugDisplayString,nq}")]
 	public class BoundingFrustum : IEquatable<BoundingFrustum>
 	{
 		#region Public Properties
 
+		/// <summary>
+		/// Gets or sets the <see cref="Matrix"/> of the frustum.
+		/// </summary>
 		public Matrix Matrix
 		{
 			get
@@ -41,6 +47,9 @@ namespace Microsoft.Xna.Framework
 			}
 		}
 
+		/// <summary>
+		/// Gets the near plane of the frustum.
+		/// </summary>
 		public Plane Near
 		{
 			get
@@ -49,6 +58,9 @@ namespace Microsoft.Xna.Framework
 			}
 		}
 
+		/// <summary>
+		/// Gets the far plane of the frustum.
+		/// </summary>
 		public Plane Far
 		{
 			get
@@ -57,6 +69,9 @@ namespace Microsoft.Xna.Framework
 			}
 		}
 
+		/// <summary>
+		/// Gets the left plane of the frustum.
+		/// </summary>
 		public Plane Left
 		{
 			get
@@ -65,6 +80,9 @@ namespace Microsoft.Xna.Framework
 			}
 		}
 
+		/// <summary>
+		/// Gets the right plane of the frustum.
+		/// </summary>
 		public Plane Right
 		{
 			get
@@ -73,6 +91,9 @@ namespace Microsoft.Xna.Framework
 			}
 		}
 
+		/// <summary>
+		/// Gets the top plane of the frustum.
+		/// </summary>
 		public Plane Top
 		{
 			get
@@ -81,6 +102,9 @@ namespace Microsoft.Xna.Framework
 			}
 		}
 
+		/// <summary>
+		/// Gets the bottom plane of the frustum.
+		/// </summary>
 		public Plane Bottom
 		{
 			get
@@ -112,6 +136,9 @@ namespace Microsoft.Xna.Framework
 
 		#region Public Fields
 
+		/// <summary>
+		/// The number of corner points in the frustum.
+		/// </summary>
 		public const int CornerCount = 8;
 
 		#endregion
@@ -122,12 +149,19 @@ namespace Microsoft.Xna.Framework
 		private readonly Vector3[] corners = new Vector3[CornerCount];
 		private readonly Plane[] planes = new Plane[PlaneCount];
 
+		/// <summary>
+		/// The number of planes in the frustum.
+		/// </summary>
 		private const int PlaneCount = 6;
 
 		#endregion
 
 		#region Public Constructors
 
+		/// <summary>
+		/// Creates a new instance of <see cref="BoundingFrustum"/> class.
+		/// </summary>
+		/// <param name="value">Combined matrix which usually is (View * Projection).</param>
 		public BoundingFrustum(Matrix value)
 		{
 			this.matrix = value;
@@ -139,6 +173,11 @@ namespace Microsoft.Xna.Framework
 
 		#region Public Methods
 
+		/// <summary>
+		/// Containment test between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingFrustum"/>.
+		/// </summary>
+		/// <param name="frustum">A <see cref="BoundingFrustum"/> for testing.</param>
+		/// <returns>Result of testing for containment between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingFrustum"/>.</returns>
 		public ContainmentType Contains(BoundingFrustum frustum)
 		{
 			if (this == frustum)
@@ -162,6 +201,11 @@ namespace Microsoft.Xna.Framework
 			return intersects ? ContainmentType.Intersects : ContainmentType.Contains;
 		}
 
+		/// <summary>
+		/// Containment test between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingBox"/>.
+		/// </summary>
+		/// <param name="box">A <see cref="BoundingBox"/> for testing.</param>
+		/// <returns>Result of testing for containment between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingBox"/>.</returns>
 		public ContainmentType Contains(BoundingBox box)
 		{
 			ContainmentType result = default(ContainmentType);
@@ -169,6 +213,11 @@ namespace Microsoft.Xna.Framework
 			return result;
 		}
 
+		/// <summary>
+		/// Containment test between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingBox"/>.
+		/// </summary>
+		/// <param name="box">A <see cref="BoundingBox"/> for testing.</param>
+		/// <param name="result">Result of testing for containment between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingBox"/> as an output parameter.</param>
 		public void Contains(ref BoundingBox box, out ContainmentType result)
 		{
 			bool intersects = false;
@@ -189,6 +238,11 @@ namespace Microsoft.Xna.Framework
 			result = intersects ? ContainmentType.Intersects : ContainmentType.Contains;
 		}
 
+		/// <summary>
+		/// Containment test between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingSphere"/>.
+		/// </summary>
+		/// <param name="sphere">A <see cref="BoundingSphere"/> for testing.</param>
+		/// <returns>Result of testing for containment between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingSphere"/>.</returns>
 		public ContainmentType Contains(BoundingSphere sphere)
 		{
 			ContainmentType result = default(ContainmentType);
@@ -196,6 +250,11 @@ namespace Microsoft.Xna.Framework
 			return result;
 		}
 
+		/// <summary>
+		/// Containment test between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingSphere"/>.
+		/// </summary>
+		/// <param name="sphere">A <see cref="BoundingSphere"/> for testing.</param>
+		/// <param name="result">Result of testing for containment between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingSphere"/> as an output parameter.</param>
 		public void Contains(ref BoundingSphere sphere, out ContainmentType result)
 		{
 			bool intersects = false;
@@ -218,6 +277,11 @@ namespace Microsoft.Xna.Framework
 			result = intersects ? ContainmentType.Intersects : ContainmentType.Contains;
 		}
 
+		/// <summary>
+		/// Containment test between this <see cref="BoundingFrustum"/> and specified <see cref="Vector3"/>.
+		/// </summary>
+		/// <param name="point">A <see cref="Vector3"/> for testing.</param>
+		/// <returns>Result of testing for containment between this <see cref="BoundingFrustum"/> and specified <see cref="Vector3"/>.</returns>
 		public ContainmentType Contains(Vector3 point)
 		{
 			ContainmentType result = default(ContainmentType);
@@ -225,6 +289,11 @@ namespace Microsoft.Xna.Framework
 			return result;
 		}
 
+		/// <summary>
+		/// Containment test between this <see cref="BoundingFrustum"/> and specified <see cref="Vector3"/>.
+		/// </summary>
+		/// <param name="point">A <see cref="Vector3"/> for testing.</param>
+		/// <param name="result">Result of testing for containment between this <see cref="BoundingFrustum"/> and specified <see cref="Vector3"/> as an output parameter.</param>
 		public void Contains(ref Vector3 point, out ContainmentType result)
 		{
 			bool intersects = false;
@@ -250,16 +319,19 @@ namespace Microsoft.Xna.Framework
 			result = intersects ? ContainmentType.Intersects : ContainmentType.Contains;
 		}
 
-		public bool Equals(BoundingFrustum other)
-		{
-			return (this == other);
-		}
-
+		/// <summary>
+		/// Returns a copy of internal corners array.
+		/// </summary>
+		/// <returns>The array of corners.</returns>
 		public Vector3[] GetCorners()
 		{
 			return (Vector3[]) this.corners.Clone();
 		}
 
+		/// <summary>
+		/// Returns a copy of internal corners array.
+		/// </summary>
+		/// <param name="corners">The array which values will be replaced to corner values of this instance. It must have size of <see cref="BoundingFrustum.CornerCount"/>.</param>
 		public void GetCorners(Vector3[] corners)
 		{
 			if (corners == null)
@@ -274,16 +346,21 @@ namespace Microsoft.Xna.Framework
 			this.corners.CopyTo(corners, 0);
 		}
 
-		public override int GetHashCode()
-		{
-			return this.matrix.GetHashCode();
-		}
-
+		/// <summary>
+		/// Gets whether or not a specified <see cref="BoundingFrustum"/> intersects with this <see cref="BoundingFrustum"/>.
+		/// </summary>
+		/// <param name="frustum">An other <see cref="BoundingFrustum"/> for intersection test.</param>
+		/// <returns><c>true</c> if other <see cref="BoundingFrustum"/> intersects with this <see cref="BoundingFrustum"/>; <c>false</c> otherwise.</returns>
 		public bool Intersects(BoundingFrustum frustum)
 		{
 			return (Contains(frustum) != ContainmentType.Disjoint);
 		}
 
+		/// <summary>
+		/// Gets whether or not a specified <see cref="BoundingBox"/> intersects with this <see cref="BoundingFrustum"/>.
+		/// </summary>
+		/// <param name="box">A <see cref="BoundingBox"/> for intersection test.</param>
+		/// <returns><c>true</c> if specified <see cref="BoundingBox"/> intersects with this <see cref="BoundingFrustum"/>; <c>false</c> otherwise.</returns>
 		public bool Intersects(BoundingBox box)
 		{
 			bool result = false;
@@ -291,6 +368,11 @@ namespace Microsoft.Xna.Framework
 			return result;
 		}
 
+		/// <summary>
+		/// Gets whether or not a specified <see cref="BoundingBox"/> intersects with this <see cref="BoundingFrustum"/>.
+		/// </summary>
+		/// <param name="box">A <see cref="BoundingBox"/> for intersection test.</param>
+		/// <param name="result"><c>true</c> if specified <see cref="BoundingBox"/> intersects with this <see cref="BoundingFrustum"/>; <c>false</c> otherwise as an output parameter.</param>
 		public void Intersects(ref BoundingBox box, out bool result)
 		{
 			ContainmentType containment = default(ContainmentType);
@@ -298,6 +380,11 @@ namespace Microsoft.Xna.Framework
 			result = containment != ContainmentType.Disjoint;
 		}
 
+		/// <summary>
+		/// Gets whether or not a specified <see cref="BoundingSphere"/> intersects with this <see cref="BoundingFrustum"/>.
+		/// </summary>
+		/// <param name="sphere">A <see cref="BoundingSphere"/> for intersection test.</param>
+		/// <returns><c>true</c> if specified <see cref="BoundingSphere"/> intersects with this <see cref="BoundingFrustum"/>; <c>false</c> otherwise.</returns>
 		public bool Intersects(BoundingSphere sphere)
 		{
 			bool result = default(bool);
@@ -305,6 +392,11 @@ namespace Microsoft.Xna.Framework
 			return result;
 		}
 
+		/// <summary>
+		/// Gets whether or not a specified <see cref="BoundingSphere"/> intersects with this <see cref="BoundingFrustum"/>.
+		/// </summary>
+		/// <param name="sphere">A <see cref="BoundingSphere"/> for intersection test.</param>
+		/// <param name="result"><c>true</c> if specified <see cref="BoundingSphere"/> intersects with this <see cref="BoundingFrustum"/>; <c>false</c> otherwise as an output parameter.</param>
 		public void Intersects(ref BoundingSphere sphere, out bool result)
 		{
 			ContainmentType containment = default(ContainmentType);
@@ -312,6 +404,11 @@ namespace Microsoft.Xna.Framework
 			result = containment != ContainmentType.Disjoint;
 		}
 
+		/// <summary>
+		/// Gets type of intersection between specified <see cref="Plane"/> and this <see cref="BoundingFrustum"/>.
+		/// </summary>
+		/// <param name="plane">A <see cref="Plane"/> for intersection test.</param>
+		/// <returns>A plane intersection type.</returns>
 		public PlaneIntersectionType Intersects(Plane plane)
 		{
 			PlaneIntersectionType result;
@@ -319,6 +416,11 @@ namespace Microsoft.Xna.Framework
 			return result;
 		}
 
+		/// <summary>
+		/// Gets type of intersection between specified <see cref="Plane"/> and this <see cref="BoundingFrustum"/>.
+		/// </summary>
+		/// <param name="plane">A <see cref="Plane"/> for intersection test.</param>
+		/// <param name="result">A plane intersection type as an output parameter.</param>
 		public void Intersects(ref Plane plane, out PlaneIntersectionType result)
 		{
 			result = plane.Intersects(ref corners[0]);
@@ -331,6 +433,11 @@ namespace Microsoft.Xna.Framework
 			}
 		}
 
+		/// <summary>
+		/// Gets the distance of intersection of <see cref="Ray"/> and this <see cref="BoundingFrustum"/> or null if no intersection happens.
+		/// </summary>
+		/// <param name="ray">A <see cref="Ray"/> for intersection test.</param>
+		/// <returns>Distance at which ray intersects with this <see cref="BoundingFrustum"/> or null if no intersection happens.</returns>
 		public float? Intersects(Ray ray)
 		{
 			float? result;
@@ -338,9 +445,89 @@ namespace Microsoft.Xna.Framework
 			return result;
 		}
 
+		/// <summary>
+		/// Gets the distance of intersection of <see cref="Ray"/> and this <see cref="BoundingFrustum"/> or null if no intersection happens.
+		/// </summary>
+		/// <param name="ray">A <see cref="Ray"/> for intersection test.</param>
+		/// <param name="result">Distance at which ray intersects with this <see cref="BoundingFrustum"/> or null if no intersection happens as an output parameter.</param>
 		public void Intersects(ref Ray ray, out float? result)
 		{
-			throw new NotImplementedException();
+			ContainmentType ctype;
+			Contains(ref ray.Position, out ctype);
+
+			if (ctype == ContainmentType.Disjoint)
+			{
+				result = null;
+				return;
+			}
+			if (ctype == ContainmentType.Contains)
+			{
+				result = 0.0f;
+				return;
+			}
+			if (ctype != ContainmentType.Intersects)
+			{
+				throw new ArgumentOutOfRangeException("ctype");
+			}
+
+			// TODO: Needs additional test for not 0.0 and null results.
+			result = null;
+			float min = float.MinValue;
+			float max = float.MaxValue;
+			foreach (Plane plane in planes)
+			{
+				Vector3 normal = plane.Normal;
+				float result2;
+				Vector3.Dot(ref ray.Direction, ref normal, out result2);
+				float result3;
+				Vector3.Dot(ref ray.Position, ref normal, out result3);
+				result3 += plane.D;
+				if ((double) Math.Abs(result2) < 9.99999974737875E-06)
+				{
+					if ((double) result3 > 0.0)
+					{
+						return;
+					}
+				}
+				else
+				{
+					float result4 = -result3 / result2;
+					if ((double) result2 < 0.0)
+					{
+						if ((double) result4 > (double) max)
+						{
+							return;
+						}
+						if ((double) result4 > (double) min)
+						{
+							min = result4;
+						}
+					}
+					else
+					{
+						if ((double) result4 < (double) min)
+						{
+							return;
+						}
+						if ((double) result4 < (double) max)
+						{
+							max = result4;
+						}
+					}
+				}
+				float? distance = ray.Intersects(plane);
+				if (distance.HasValue)
+				{
+					min = Math.Min(min, distance.Value);
+					max = Math.Max(max, distance.Value);
+				}
+			}
+			float temp = min >= 0.0 ? min : max;
+			if (temp < 0.0)
+			{
+				return;
+			}
+			result = temp;
 		}
 
 		#endregion
@@ -506,6 +693,12 @@ namespace Microsoft.Xna.Framework
 
 		#region Public Static Operators and Override Methods
 
+		/// <summary>
+		/// Compares whether two <see cref="BoundingFrustum"/> instances are equal.
+		/// </summary>
+		/// <param name="a"><see cref="BoundingFrustum"/> instance on the left of the equal sign.</param>
+		/// <param name="b"><see cref="BoundingFrustum"/> instance on the right of the equal sign.</param>
+		/// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
 		public static bool operator ==(BoundingFrustum a, BoundingFrustum b)
 		{
 			if (object.Equals(a, null))
@@ -521,17 +714,43 @@ namespace Microsoft.Xna.Framework
 			return a.matrix == (b.matrix);
 		}
 
+		/// <summary>
+		/// Compares whether two <see cref="BoundingFrustum"/> instances are not equal.
+		/// </summary>
+		/// <param name="a"><see cref="BoundingFrustum"/> instance on the left of the not equal sign.</param>
+		/// <param name="b"><see cref="BoundingFrustum"/> instance on the right of the not equal sign.</param>
+		/// <returns><c>true</c> if the instances are not equal; <c>false</c> otherwise.</returns>
 		public static bool operator !=(BoundingFrustum a, BoundingFrustum b)
 		{
 			return !(a == b);
 		}
 
+		/// <summary>
+		/// Compares whether current instance is equal to specified <see cref="BoundingFrustum"/>.
+		/// </summary>
+		/// <param name="other">The <see cref="BoundingFrustum"/> to compare.</param>
+		/// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
+		public bool Equals(BoundingFrustum other)
+		{
+			return (this == other);
+		}
+
+		/// <summary>
+		/// Compares whether current instance is equal to specified <see cref="BoundingFrustum"/>.
+		/// </summary>
+		/// <param name="obj">The <see cref="Object"/> to compare.</param>
+		/// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
 		public override bool Equals(object obj)
 		{
 			BoundingFrustum f = obj as BoundingFrustum;
 			return (object.Equals(f, null)) ? false : (this == f);
 		}
 
+		/// <summary>
+		/// Returns a <see cref="String"/> representation of this <see cref="BoundingFrustum"/> in the format:
+		/// {Near:[nearPlane] Far:[farPlane] Left:[leftPlane] Right:[rightPlane] Top:[topPlane] Bottom:[bottomPlane]}
+		/// </summary>
+		/// <returns><see cref="String"/> representation of this <see cref="BoundingFrustum"/>.</returns>
 		public override string ToString()
 		{
 			StringBuilder sb = new StringBuilder(256);
@@ -549,6 +768,15 @@ namespace Microsoft.Xna.Framework
 			sb.Append(this.planes[5].ToString());
 			sb.Append("}");
 			return sb.ToString();
+		}
+
+		/// <summary>
+		/// Gets the hash code of this <see cref="BoundingFrustum"/>.
+		/// </summary>
+		/// <returns>Hash code of this <see cref="BoundingFrustum"/>.</returns>
+		public override int GetHashCode()
+		{
+			return this.matrix.GetHashCode();
 		}
 
 		#endregion
