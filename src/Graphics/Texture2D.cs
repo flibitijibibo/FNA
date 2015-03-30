@@ -10,7 +10,6 @@
 #region Using Statements
 using System;
 using System.IO;
-using System.Runtime.InteropServices;
 #endregion
 
 namespace Microsoft.Xna.Framework.Graphics

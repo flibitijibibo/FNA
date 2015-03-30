@@ -9,7 +9,6 @@
 
 #region Using Statements
 using System;
-using System.Diagnostics;
 #endregion
 
 namespace Microsoft.Xna.Framework.Graphics
