@@ -279,11 +279,8 @@
     <Compile Include="src\Input\MouseState.cs" />
     <Compile Include="src\TitleContainer.cs" />
     <Compile Include="src\Input\Keyboard.cs" />
-    <Compile Include="src\Media\MediaLibrary.cs" />
     <Compile Include="src\Media\MediaSource.cs" />
     <Compile Include="src\Media\MediaQueue.cs" />
-    <Compile Include="src\Media\Playlist.cs" />
-    <Compile Include="src\Media\PlaylistCollection.cs" />
     <Compile Include="src\Media\SongCollection.cs" />
     <Compile Include="src\Content\ContentReaders\EffectMaterialReader.cs" />
     <Compile Include="src\Content\ContentReaders\ExternalReferenceReader.cs" />
@@ -344,10 +341,6 @@
     <Compile Include="src\Graphics\Effect\StockEffects\EnvironmentMapEffect.cs" />
     <Compile Include="src\Graphics\Effect\StockEffects\SkinnedEffect.cs" />
     <Compile Include="src\Graphics\Effect\StockEffects\SpriteEffect.cs" />
-    <Compile Include="src\Media\Album.cs" />
-    <Compile Include="src\Media\AlbumCollection.cs" />
-    <Compile Include="src\Media\Artist.cs" />
-    <Compile Include="src\Media\Genre.cs" />
     <Compile Include="src\Design\ColorConverter.cs" />
     <Compile Include="src\Design\PointConverter.cs" />
     <Compile Include="src\Design\Vector2Converter.cs" />

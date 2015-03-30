@@ -61,14 +61,6 @@ namespace Microsoft.Xna.Framework.Media
 			set;
 		}
 
-		public static bool IsVisualizationEnabled
-		{
-			get
-			{
-				return false;
-			}
-		}
-
 		public static TimeSpan PlayPosition
 		{
 			get
@@ -203,12 +195,17 @@ namespace Microsoft.Xna.Framework.Media
 			}
 		}
 
-		public static void Play(SongCollection collection, int index = 0)
+		public static void Play(SongCollection songs)
+		{
+			Play(songs, 0);
+		}
+
+		public static void Play(SongCollection songs, int index)
 		{
 			Queue.Clear();
 			numSongsInQueuePlayed = 0;
 
-			foreach (Song song in collection)
+			foreach (Song song in songs)
 			{
 				Queue.Add(song);
 			}

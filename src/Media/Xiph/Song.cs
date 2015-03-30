@@ -48,42 +48,6 @@ namespace Microsoft.Xna.Framework.Media
 			private set;
 		}
 
-		/// <summary>
-		/// Gets the Album on which the Song appears.
-		/// </summary>
-		// TODO: vorbis_comment ALBUM
-		public Album Album
-		{
-			get
-			{
-				return null;
-			}
-		}
-
-		/// <summary>
-		/// Gets the Artist of the Song.
-		/// </summary>
-		// TODO: vorbis_comment ARTIST
-		public Artist Artist
-		{
-			get
-			{
-				return null;
-			}
-		}
-
-		/// <summary>
-		/// Gets the Genre of the Song.
-		/// </summary>
-		// TODO: vorbis_comment GENRE
-		public Genre Genre
-		{
-			get
-			{
-				return null;
-			}
-		}
-
 		#endregion
 
 		#region Public Stream Properties
