@@ -9,6 +9,7 @@
 
 #region Using Statements
 using System;
+using System.IO;
 
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -286,6 +287,22 @@ namespace Microsoft.Xna.Framework
 		internal abstract void SetPresentationInterval(PresentInterval interval);
 
 		internal abstract bool HasTouch();
+
+		internal abstract void TextureDataFromStream(
+			Stream stream,
+			out int width,
+			out int height,
+			out byte[] pixels
+		);
+
+		internal abstract void SavePNG(
+			Stream stream,
+			int width,
+			int height,
+			int imgWidth,
+			int imgHeight,
+			byte[] data
+		);
 
 		#endregion
 

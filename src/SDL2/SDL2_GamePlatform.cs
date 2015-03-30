@@ -35,6 +35,7 @@
 
 #region Using Statements
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
@@ -633,6 +634,125 @@ namespace Microsoft.Xna.Framework
 			return SDL.SDL_GetNumTouchDevices() > 0;
 		}
 
+		internal override void TextureDataFromStream(
+			Stream stream,
+			out int width,
+			out int height,
+			out byte[] pixels
+		) {
+			// Load the Stream into an SDL_RWops*
+			byte[] mem = new byte[stream.Length];
+			stream.Read(mem, 0, mem.Length);
+			IntPtr rwops = SDL.SDL_RWFromMem(mem, mem.Length);
+
+			// Load the SDL_Surface* from RWops, get the image data
+			IntPtr surface = SDL_image.IMG_Load_RW(rwops, 1);
+			surface = INTERNAL_convertSurfaceFormat(surface);
+			unsafe
+			{
+				SDL_Surface* surPtr = (SDL_Surface*) surface;
+				width = surPtr->w;
+				height = surPtr->h;
+				pixels = new byte[width * height * 4]; // MUST be SurfaceFormat.Color!
+				Marshal.Copy(surPtr->pixels, pixels, 0, pixels.Length);
+			}
+			SDL.SDL_FreeSurface(surface);
+
+			/* Ensure that the alpha pixels are... well, actual alpha.
+			 * You think this looks stupid, but be assured: Your paint program is
+			 * almost certainly even stupider.
+			 * -flibit
+			 */
+			for (int i = 0; i < pixels.Length; i += 4)
+			{
+				if (pixels[i + 3] == 0)
+				{
+					pixels[i] = 0;
+					pixels[i + 1] = 0;
+					pixels[i + 2] = 0;
+				}
+			}
+		}
+
+		internal override void SavePNG(
+			Stream stream,
+			int width,
+			int height,
+			int imgWidth,
+			int imgHeight,
+			byte[] data
+		) {
+			// Create an SDL_Surface*, write the pixel data
+			IntPtr surface = SDL.SDL_CreateRGBSurface(
+				0,
+				imgWidth,
+				imgHeight,
+				32,
+				0x000000FF,
+				0x0000FF00,
+				0x00FF0000,
+				0xFF000000
+			);
+			SDL.SDL_LockSurface(surface);
+			unsafe
+			{
+				SDL_Surface* surPtr = (SDL_Surface*) surface;
+				Marshal.Copy(
+					data,
+					0,
+					surPtr->pixels,
+					data.Length
+				);
+			}
+			SDL.SDL_UnlockSurface(surface);
+			data = null; // We're done with the original pixel data.
+
+			// Blit to a scaled surface of the size we want, if needed.
+			if (width != imgWidth || height != imgHeight)
+			{
+				IntPtr scaledSurface = SDL.SDL_CreateRGBSurface(
+					0,
+					width,
+					height,
+					32,
+					0x000000FF,
+					0x0000FF00,
+					0x00FF0000,
+					0xFF000000
+				);
+				SDL.SDL_BlitScaled(
+					surface,
+					IntPtr.Zero,
+					scaledSurface,
+					IntPtr.Zero
+				);
+				SDL.SDL_FreeSurface(surface);
+				surface = scaledSurface;
+			}
+
+			// Create an SDL_RWops*, save PNG to RWops
+			const int pngHeaderSize = 41;
+			const int pngFooterSize = 57;
+			byte[] pngOut = new byte[
+				(width * height * 4) +
+				pngHeaderSize +
+				pngFooterSize +
+				256 // FIXME: Arbitrary zlib data padding for low-res images
+			]; // Max image size
+			IntPtr dst = SDL.SDL_RWFromMem(pngOut, pngOut.Length);
+			SDL_image.IMG_SavePNG_RW(surface, dst, 1);
+			SDL.SDL_FreeSurface(surface); // We're done with the surface.
+
+			// Get PNG size, write to Stream
+			int size = (
+				(pngOut[33] << 24) |
+				(pngOut[34] << 16) |
+				(pngOut[35] << 8) |
+				(pngOut[36])
+			) + pngHeaderSize + pngFooterSize;
+			stream.Write(pngOut, 0, size);
+		}
+
 		#endregion
 
 		#region Protected GamePlatform Methods
@@ -793,6 +913,48 @@ namespace Microsoft.Xna.Framework
 			{
 				TextInputEXT.OnTextInput((char) 22);
 			}
+		}
+
+		#endregion
+
+		#region Private Static SDL_Surface Interop
+
+		[StructLayout(LayoutKind.Sequential)]
+		private struct SDL_Surface
+		{
+#pragma warning disable 0169
+			UInt32 flags;
+			public IntPtr format;
+			public Int32 w;
+			public Int32 h;
+			Int32 pitch;
+			public IntPtr pixels;
+			IntPtr userdata;
+			Int32 locked;
+			IntPtr lock_data;
+			SDL.SDL_Rect clip_rect;
+			IntPtr map;
+			Int32 refcount;
+#pragma warning restore 0169
+		}
+
+		private static unsafe IntPtr INTERNAL_convertSurfaceFormat(IntPtr surface)
+		{
+			IntPtr result = surface;
+			unsafe
+			{
+				SDL_Surface* surPtr = (SDL_Surface*) surface;
+				SDL.SDL_PixelFormat* pixelFormatPtr = (SDL.SDL_PixelFormat*) surPtr->format;
+
+				// SurfaceFormat.Color is SDL_PIXELFORMAT_ABGR8888
+				if (pixelFormatPtr->format != SDL.SDL_PIXELFORMAT_ABGR8888)
+				{
+					// Create a properly formatted copy, free the old surface
+					result = SDL.SDL_ConvertSurfaceFormat(surface, SDL.SDL_PIXELFORMAT_ABGR8888, 0);
+					SDL.SDL_FreeSurface(surface);
+				}
+			}
+			return result;
 		}
 
 		#endregion
