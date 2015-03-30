@@ -197,6 +197,22 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		}
 
+		public int MultiSampleMask
+		{
+			get
+			{
+				return GLDevice.MultiSampleMask;
+			}
+			set
+			{
+				/* FIXME: Does this affect the value found in
+				 * BlendState?
+				 * -flibit
+				 */
+				GLDevice.MultiSampleMask = value;
+			}
+		}
+
 		public int ReferenceStencil
 		{
 			get

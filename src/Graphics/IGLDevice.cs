@@ -21,6 +21,12 @@ namespace Microsoft.Xna.Framework.Graphics
 			set;
 		}
 
+		int MultiSampleMask
+		{
+			get;
+			set;
+		}
+
 		int ReferenceStencil
 		{
 			get;

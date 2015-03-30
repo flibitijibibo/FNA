@@ -224,7 +224,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
-		#region Alpha Blending State Variables
+		#region Blending State Variables
 
 		public Color BlendFactor
 		{
@@ -247,6 +247,25 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		}
 
+		public int MultiSampleMask
+		{
+			get
+			{
+				// return multisampleMask;
+				throw new NotImplementedException("MultiSampleMask!");
+			}
+			set
+			{
+				/* TODO: MultiSampleMask! -flibit
+				if (value != multisampleMask)
+				{
+					multisampleMask = value;
+				}
+				*/
+				throw new NotImplementedException("MultiSampleMask!");
+			}
+		}
+
 		private bool alphaBlendEnable = false;
 		private Color blendColor = Color.Transparent;
 		private BlendFunction blendOp = BlendFunction.Add;
@@ -259,6 +278,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		private ColorWriteChannels colorWriteEnable1 = ColorWriteChannels.All;
 		private ColorWriteChannels colorWriteEnable2 = ColorWriteChannels.All;
 		private ColorWriteChannels colorWriteEnable3 = ColorWriteChannels.All;
+		// TODO: MultiSampleMask! private int multisampleMask = -1; // AKA 0xFFFFFFFF
 
 		#endregion
 
@@ -1076,6 +1096,13 @@ namespace Microsoft.Xna.Framework.Graphics
 					(colorWriteEnable3 & ColorWriteChannels.Alpha) != 0
 				);
 			}
+
+			/* TODO: MultiSampleMask! -flibit
+			if (blendState.MultiSampleMask != multisampleMask)
+			{
+				multisampleMask = blendState.MultiSampleMask;
+			}
+			*/
 		}
 
 		public void SetDepthStencilState(DepthStencilState depthStencilState)
