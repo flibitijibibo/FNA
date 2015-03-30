@@ -107,7 +107,6 @@
     <Compile Include="src\Audio\AudioChannels.cs" />
     <Compile Include="src\Media\MediaPlayer.cs" />
     <Compile Include="src\Media\MediaState.cs" />
-    <Compile Include="src\Media\MediaSourceType.cs" />
     <Compile Include="src\Content\ContentReader.cs" />
     <Compile Include="src\Graphics\IGraphicsDeviceService.cs" />
     <Compile Include="src\Content\ContentTypeReader.cs" />
@@ -279,7 +278,6 @@
     <Compile Include="src\Input\MouseState.cs" />
     <Compile Include="src\TitleContainer.cs" />
     <Compile Include="src\Input\Keyboard.cs" />
-    <Compile Include="src\Media\MediaSource.cs" />
     <Compile Include="src\Media\MediaQueue.cs" />
     <Compile Include="src\Media\SongCollection.cs" />
     <Compile Include="src\Content\ContentReaders\EffectMaterialReader.cs" />
