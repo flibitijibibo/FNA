@@ -127,6 +127,8 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 		}
 
+		#endregion
+
 		#region Public Static GenBuffer Methods
 
 		public static IALBuffer GenBuffer()
