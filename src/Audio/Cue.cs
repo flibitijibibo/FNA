@@ -751,7 +751,7 @@ namespace Microsoft.Xna.Framework.Audio
 				foreach (uint curDSP in INTERNAL_activeSound.DSPCodes)
 				{
 					// FIXME: This only applies the last DSP!
-					sfi.INTERNAL_applyEffect(
+					sfi.INTERNAL_applyReverb(
 						INTERNAL_baseEngine.INTERNAL_getDSP(curDSP)
 					);
 				}

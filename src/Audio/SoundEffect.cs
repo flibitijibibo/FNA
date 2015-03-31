@@ -10,8 +10,6 @@
 #region Using Statements
 using System;
 using System.IO;
-
-using OpenAL;
 #endregion
 
 namespace Microsoft.Xna.Framework.Audio
@@ -23,8 +21,10 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public TimeSpan Duration
 		{
-			get;
-			private set;
+			get
+			{
+				return INTERNAL_buffer.Duration;
+			}
 		}
 
 		public bool IsDisposed
@@ -111,7 +111,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region Internal Audio Data
 
-		internal uint INTERNAL_buffer;
+		internal IALBuffer INTERNAL_buffer;
 
 		#endregion
 
@@ -122,7 +122,7 @@ namespace Microsoft.Xna.Framework.Audio
 			int sampleRate,
 			AudioChannels channels
 		) {
-			INTERNAL_bufferData(
+			INTERNAL_buffer = AudioDevice.GenBuffer(
 				buffer,
 				(uint) sampleRate,
 				(uint) channels,
@@ -154,7 +154,7 @@ namespace Microsoft.Xna.Framework.Audio
 				sendBuf = buffer;
 			}
 
-			INTERNAL_bufferData(
+			INTERNAL_buffer = AudioDevice.GenBuffer(
 				sendBuf,
 				(uint) sampleRate,
 				(uint) channels,
@@ -207,7 +207,7 @@ namespace Microsoft.Xna.Framework.Audio
 			uint formatParameter
 		) {
 			Name = name;
-			INTERNAL_bufferData(
+			INTERNAL_buffer = AudioDevice.GenBuffer(
 				buffer,
 				sampleRate,
 				channels,
@@ -235,7 +235,7 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			if (!IsDisposed)
 			{
-				AL10.alDeleteBuffers((IntPtr) 1, ref INTERNAL_buffer);
+				AudioDevice.ALDevice.DeleteBuffer(INTERNAL_buffer);
 				IsDisposed = true;
 			}
 		}
@@ -277,13 +277,13 @@ namespace Microsoft.Xna.Framework.Audio
 				instance.Dispose();
 				return false;
 			}
-			OpenALDevice.Instance.instancePool.Add(instance);
+			AudioDevice.InstancePool.Add(instance);
 			return true;
 		}
 
 		#endregion
 
-		#region Private OpenAL Loading Methods
+		#region Private WAV Loading Method
 
 		private void INTERNAL_loadAudioStream(Stream s)
 		{
@@ -364,7 +364,7 @@ namespace Microsoft.Xna.Framework.Audio
 				data = reader.ReadBytes(waveDataLength);
 			}
 
-			INTERNAL_bufferData(
+			INTERNAL_buffer = AudioDevice.GenBuffer(
 				data,
 				sampleRate,
 				numChannels,
@@ -373,94 +373,6 @@ namespace Microsoft.Xna.Framework.Audio
 				isADPCM,
 				formatParameter
 			);
-		}
-
-		private void INTERNAL_bufferData(
-			byte[] data,
-			uint sampleRate,
-			uint channels,
-			uint loopStart,
-			uint loopEnd,
-			bool isADPCM,
-			uint formatParameter
-		) {
-			if (OpenALDevice.Instance == null)
-			{
-				throw new NoAudioHardwareException();
-			}
-
-			// Generate the buffer now, in case we need to perform alBuffer ops.
-			AL10.alGenBuffers((IntPtr) 1, out INTERNAL_buffer);
-
-			int format;
-			if (isADPCM)
-			{
-				format = (channels == 2) ?
-					ALEXT.AL_FORMAT_STEREO_MSADPCM_SOFT :
-					ALEXT.AL_FORMAT_MONO_MSADPCM_SOFT;
-				AL10.alBufferi(
-					INTERNAL_buffer,
-					ALEXT.AL_UNPACK_BLOCK_ALIGNMENT_SOFT,
-					(int) formatParameter
-				);
-			}
-			else
-			{
-				if (formatParameter == 1)
-				{
-					format = (channels == 2) ?
-						AL10.AL_FORMAT_STEREO16:
-						AL10.AL_FORMAT_MONO16;
-				}
-				else
-				{
-					format = (channels == 2) ?
-						AL10.AL_FORMAT_STEREO8:
-						AL10.AL_FORMAT_MONO8;
-				}
-			}
-
-			// Load it!
-			AL10.alBufferData(
-				INTERNAL_buffer,
-				format,
-				data,
-				(IntPtr) data.Length,
-				(IntPtr) sampleRate
-			);
-
-			// Calculate the duration now, after we've unpacked the buffer
-			int bufLen, bits;
-			AL10.alGetBufferi(
-				INTERNAL_buffer,
-				AL10.AL_SIZE,
-				out bufLen
-			);
-			AL10.alGetBufferi(
-				INTERNAL_buffer,
-				AL10.AL_BITS,
-				out bits
-			);
-			Duration = TimeSpan.FromSeconds(
-				bufLen /
-				(bits / 8) /
-				channels /
-				((double) sampleRate)
-			);
-
-			// Set the loop points, if applicable
-			if (loopStart > 0 || loopEnd > 0)
-			{
-				AL10.alBufferiv(
-					INTERNAL_buffer,
-					ALEXT.AL_LOOP_POINTS_SOFT,
-					new int[]
-					{
-						(int) loopStart,
-						(int) loopEnd
-					}
-				);
-			}
 		}
 
 		#endregion

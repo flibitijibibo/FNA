@@ -41,7 +41,6 @@ using System.Runtime.InteropServices;
 
 using SDL2;
 
-using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Input.Touch;
@@ -202,9 +201,6 @@ namespace Microsoft.Xna.Framework
 			{
 				INTERNAL_useFullscreenSpaces = false;
 			}
-
-			// Create the OpenAL device
-			OpenALDevice.Initialize();
 
 			// Initialize Active Key List
 			keys = new List<Keys>();
@@ -503,12 +499,6 @@ namespace Microsoft.Xna.Framework
 
 		public override bool BeforeUpdate(GameTime gameTime)
 		{
-			// Update our OpenAL context
-			if (OpenALDevice.Instance != null)
-			{
-				OpenALDevice.Instance.Update();
-			}
-
 			return true;
 		}
 
@@ -782,11 +772,6 @@ namespace Microsoft.Xna.Framework
 					SDL.SDL_DestroyWindow(Window.Handle);
 
 					Window = null;
-				}
-
-				if (OpenALDevice.Instance != null)
-				{
-					OpenALDevice.Instance.Dispose();
 				}
 
 #if WIIU_GAMEPAD

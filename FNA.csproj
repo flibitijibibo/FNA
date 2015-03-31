@@ -309,8 +309,8 @@
     <Compile Include="src\Input\Touch\TouchPanelState.cs" />
     <Compile Include="src\Audio\DynamicSoundEffectInstance.cs" />
     <Compile Include="src\FrameworkDispatcher.cs" />
-    <Compile Include="src\Audio\DSPEffect.cs" />
-    <Compile Include="src\Audio\DSPFilter.cs" />
+    <Compile Include="src\Audio\IALDevice.cs" />
+    <Compile Include="src\Audio\AudioDevice.cs" />
     <Compile Include="src\Utilities\AssemblyHelper.cs" />
     <Compile Include="src\Utilities\FileHelpers.cs" />
     <Compile Include="src\Content\ContentSerializerRuntimeTypeAttribute.cs" />

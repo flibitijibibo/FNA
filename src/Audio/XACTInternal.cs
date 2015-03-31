@@ -330,7 +330,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 	internal class DSPPreset
 	{
-		public DSPEffect Effect
+		public IALReverb Effect
 		{
 			get;
 			private set;
@@ -356,107 +356,106 @@ namespace Microsoft.Xna.Framework.Audio
 			Parameters = parameters;
 
 			// FIXME: Did XACT ever go past Reverb? -flibit
-			Effect = new DSPReverbEffect(Parameters);
+			Effect = AudioDevice.ALDevice.GenReverb(Parameters);
 		}
 
 		public void Dispose()
 		{
-			Effect.Dispose();
+			AudioDevice.ALDevice.DeleteReverb(Effect);
 		}
 
 		public void SetParameter(int index, float value)
 		{
 			Parameters[index].Value = value;
-			DSPReverbEffect effect = (DSPReverbEffect) Effect;
 
-			// Apply the value to the parameter
+			// Apply the value to the effect
 			if (index == 0)
 			{
-				effect.SetReflectionsDelay(Parameters[index].Value);
+				AudioDevice.ALDevice.SetReverbReflectionsDelay(Effect, Parameters[index].Value);
 			}
 			else if (index == 1)
 			{
-				effect.SetReverbDelay(Parameters[index].Value);
+				AudioDevice.ALDevice.SetReverbDelay(Effect, Parameters[index].Value);
 			}
 			else if (index == 2)
 			{
-				effect.SetPositionLeft(Parameters[index].Value);
+				AudioDevice.ALDevice.SetReverbPositionLeft(Effect, Parameters[index].Value);
 			}
 			else if (index == 3)
 			{
-				effect.SetPositionRight(Parameters[index].Value);
+				AudioDevice.ALDevice.SetReverbPositionRight(Effect, Parameters[index].Value);
 			}
 			else if (index == 4)
 			{
-				effect.SetPositionLeftMatrix(Parameters[index].Value);
+				AudioDevice.ALDevice.SetReverbPositionLeftMatrix(Effect, Parameters[index].Value);
 			}
 			else if (index == 5)
 			{
-				effect.SetPositionRightMatrix(Parameters[index].Value);
+				AudioDevice.ALDevice.SetReverbPositionRightMatrix(Effect, Parameters[index].Value);
 			}
 			else if (index == 6)
 			{
-				effect.SetEarlyDiffusion(Parameters[index].Value);
+				AudioDevice.ALDevice.SetReverbEarlyDiffusion(Effect, Parameters[index].Value);
 			}
 			else if (index == 7)
 			{
-				effect.SetLateDiffusion(Parameters[index].Value);
+				AudioDevice.ALDevice.SetReverbLateDiffusion(Effect, Parameters[index].Value);
 			}
 			else if (index == 8)
 			{
-				effect.SetLowEQGain(Parameters[index].Value);
+				AudioDevice.ALDevice.SetReverbLowEQGain(Effect, Parameters[index].Value);
 			}
 			else if (index == 9)
 			{
-				effect.SetLowEQCutoff(Parameters[index].Value);
+				AudioDevice.ALDevice.SetReverbLowEQCutoff(Effect, Parameters[index].Value);
 			}
 			else if (index == 10)
 			{
-				effect.SetHighEQGain(Parameters[index].Value);
+				AudioDevice.ALDevice.SetReverbHighEQGain(Effect, Parameters[index].Value);
 			}
 			else if (index == 11)
 			{
-				effect.SetHighEQCutoff(Parameters[index].Value);
+				AudioDevice.ALDevice.SetReverbHighEQCutoff(Effect, Parameters[index].Value);
 			}
 			else if (index == 12)
 			{
-				effect.SetRearDelay(Parameters[index].Value);
+				AudioDevice.ALDevice.SetReverbRearDelay(Effect, Parameters[index].Value);
 			}
 			else if (index == 13)
 			{
-				effect.SetRoomFilterFrequency(Parameters[index].Value);
+				AudioDevice.ALDevice.SetReverbRoomFilterFrequency(Effect, Parameters[index].Value);
 			}
 			else if (index == 14)
 			{
-				effect.SetRoomFilterMain(Parameters[index].Value);
+				AudioDevice.ALDevice.SetReverbRoomFilterMain(Effect, Parameters[index].Value);
 			}
 			else if (index == 15)
 			{
-				effect.SetRoomFilterHighFrequency(Parameters[index].Value);
+				AudioDevice.ALDevice.SetReverbRoomFilterHighFrequency(Effect, Parameters[index].Value);
 			}
 			else if (index == 16)
 			{
-				effect.SetReflectionsGain(Parameters[index].Value);
+				AudioDevice.ALDevice.SetReverbReflectionsGain(Effect, Parameters[index].Value);
 			}
 			else if (index == 17)
 			{
-				effect.SetReverbGain(Parameters[index].Value);
+				AudioDevice.ALDevice.SetReverbGain(Effect, Parameters[index].Value);
 			}
 			else if (index == 18)
 			{
-				effect.SetDecayTime(Parameters[index].Value);
+				AudioDevice.ALDevice.SetReverbDecayTime(Effect, Parameters[index].Value);
 			}
 			else if (index == 19)
 			{
-				effect.SetDensity(Parameters[index].Value);
+				AudioDevice.ALDevice.SetReverbDensity(Effect, Parameters[index].Value);
 			}
 			else if (index == 20)
 			{
-				effect.SetRoomSize(Parameters[index].Value);
+				AudioDevice.ALDevice.SetReverbRoomSize(Effect, Parameters[index].Value);
 			}
 			else if (index == 21)
 			{
-				effect.SetWetDryMix(Parameters[index].Value);
+				AudioDevice.ALDevice.SetReverbWetDryMix(Effect, Parameters[index].Value);
 			}
 			else
 			{

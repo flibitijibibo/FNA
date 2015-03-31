@@ -31,7 +31,7 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			get
 			{
-				return OpenALDevice.Renderers;
+				return AudioDevice.Renderers;
 			}
 		}
 
@@ -45,7 +45,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region Internal Properties
 
-		internal DSPFilter Filter
+		internal IALFilter Filter
 		{
 			get;
 			private set;
@@ -438,7 +438,7 @@ namespace Microsoft.Xna.Framework.Audio
 			INTERNAL_waveBanks = new Dictionary<string, WaveBank>();
 
 			// Create the device filter
-			Filter = new DSPFilter();
+			Filter = AudioDevice.ALDevice.GenFilter();
 
 			// Finally.
 			IsDisposed = false;
@@ -490,7 +490,7 @@ namespace Microsoft.Xna.Framework.Audio
 				INTERNAL_dspParameters.Clear();
 				INTERNAL_variables.Clear();
 				INTERNAL_RPCs.Clear();
-				Filter.Dispose();
+				AudioDevice.ALDevice.DeleteFilter(Filter);
 				IsDisposed = true;
 			}
 		}
@@ -578,7 +578,7 @@ namespace Microsoft.Xna.Framework.Audio
 			// Apply all DSP changes once they have been made
 			foreach (DSPPreset curDSP in INTERNAL_dspPresets.Values)
 			{
-				curDSP.Effect.CommitChanges();
+				AudioDevice.ALDevice.CommitReverbChanges(curDSP.Effect);
 			}
 
 			// Update Cues
@@ -617,7 +617,7 @@ namespace Microsoft.Xna.Framework.Audio
 			return INTERNAL_RPCs[code];
 		}
 
-		internal DSPEffect INTERNAL_getDSP(uint code)
+		internal IALReverb INTERNAL_getDSP(uint code)
 		{
 			return INTERNAL_dspPresets[code].Effect;
 		}
