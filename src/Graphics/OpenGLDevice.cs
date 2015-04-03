@@ -3428,38 +3428,41 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			public static readonly Dictionary<TextureFilter, GLenum> MagFilter = new Dictionary<TextureFilter, GLenum>()
 			{
-				{ TextureFilter.Point,				GLenum.GL_NEAREST },
 				{ TextureFilter.Linear,				GLenum.GL_LINEAR },
+				{ TextureFilter.Point,				GLenum.GL_NEAREST },
 				{ TextureFilter.Anisotropic,			GLenum.GL_LINEAR },
 				{ TextureFilter.LinearMipPoint,			GLenum.GL_LINEAR },
-				{ TextureFilter.MinPointMagLinearMipPoint,	GLenum.GL_LINEAR },
-				{ TextureFilter.MinPointMagLinearMipLinear,	GLenum.GL_LINEAR },
+				{ TextureFilter.PointMipLinear,			GLenum.GL_NEAREST },
+				{ TextureFilter.MinLinearMagPointMipLinear,	GLenum.GL_NEAREST },
 				{ TextureFilter.MinLinearMagPointMipPoint,	GLenum.GL_NEAREST },
-				{ TextureFilter.MinLinearMagPointMipLinear,	GLenum.GL_NEAREST }
+				{ TextureFilter.MinPointMagLinearMipLinear,	GLenum.GL_LINEAR },
+				{ TextureFilter.MinPointMagLinearMipPoint,	GLenum.GL_LINEAR }
 			};
 
 			public static readonly Dictionary<TextureFilter, GLenum> MinMipFilter = new Dictionary<TextureFilter, GLenum>()
 			{
-				{ TextureFilter.Point,				GLenum.GL_NEAREST_MIPMAP_NEAREST },
 				{ TextureFilter.Linear,				GLenum.GL_LINEAR_MIPMAP_LINEAR },
+				{ TextureFilter.Point,				GLenum.GL_NEAREST_MIPMAP_NEAREST },
 				{ TextureFilter.Anisotropic,			GLenum.GL_LINEAR_MIPMAP_LINEAR },
 				{ TextureFilter.LinearMipPoint,			GLenum.GL_LINEAR_MIPMAP_NEAREST },
-				{ TextureFilter.MinPointMagLinearMipPoint,	GLenum.GL_NEAREST_MIPMAP_NEAREST },
-				{ TextureFilter.MinPointMagLinearMipLinear,	GLenum.GL_NEAREST_MIPMAP_LINEAR },
+				{ TextureFilter.PointMipLinear,			GLenum.GL_NEAREST_MIPMAP_LINEAR },
+				{ TextureFilter.MinLinearMagPointMipLinear,	GLenum.GL_LINEAR_MIPMAP_LINEAR },
 				{ TextureFilter.MinLinearMagPointMipPoint,	GLenum.GL_LINEAR_MIPMAP_NEAREST },
-				{ TextureFilter.MinLinearMagPointMipLinear,	GLenum.GL_LINEAR_MIPMAP_LINEAR }
+				{ TextureFilter.MinPointMagLinearMipLinear,	GLenum.GL_NEAREST_MIPMAP_LINEAR },
+				{ TextureFilter.MinPointMagLinearMipPoint,	GLenum.GL_NEAREST_MIPMAP_NEAREST }
 			};
 
 			public static readonly Dictionary<TextureFilter, GLenum> MinFilter = new Dictionary<TextureFilter, GLenum>()
 			{
-				{ TextureFilter.Point,				GLenum.GL_NEAREST },
 				{ TextureFilter.Linear,				GLenum.GL_LINEAR },
+				{ TextureFilter.Point,				GLenum.GL_NEAREST },
 				{ TextureFilter.Anisotropic,			GLenum.GL_LINEAR },
 				{ TextureFilter.LinearMipPoint,			GLenum.GL_LINEAR },
-				{ TextureFilter.MinPointMagLinearMipPoint,	GLenum.GL_NEAREST },
-				{ TextureFilter.MinPointMagLinearMipLinear,	GLenum.GL_NEAREST },
+				{ TextureFilter.PointMipLinear,			GLenum.GL_NEAREST },
+				{ TextureFilter.MinLinearMagPointMipLinear,	GLenum.GL_LINEAR },
 				{ TextureFilter.MinLinearMagPointMipPoint,	GLenum.GL_LINEAR },
-				{ TextureFilter.MinLinearMagPointMipLinear,	GLenum.GL_LINEAR }
+				{ TextureFilter.MinPointMagLinearMipLinear,	GLenum.GL_NEAREST },
+				{ TextureFilter.MinPointMagLinearMipPoint,	GLenum.GL_NEAREST }
 			};
 
 			public static readonly Dictionary<DepthFormat, GLenum> DepthStencilAttachment = new Dictionary<DepthFormat, GLenum>()
