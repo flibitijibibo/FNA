@@ -70,7 +70,7 @@ namespace Microsoft.Xna.Framework.Content
 			Effect existingInstance
 		) {
 			int length = input.ReadInt32();
-			input.ReadInt32(); // ???
+			input.ReadInt32(); // 0xBCF00BCF
 			int offset = input.ReadInt32();
 			input.ReadBytes(offset - 8); // ???
 			Effect effect = new Effect(
