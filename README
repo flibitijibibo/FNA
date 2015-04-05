@@ -24,6 +24,12 @@ project license. See unxwb.LICENSE for details.
 FNA uses code from the Mono.Xna project, released under the MIT license.
 See monoxna.LICENSE for details.
 
+Documentation
+-------------
+Documentation for FNA can be found on the FNA wiki:
+
+https://github.com/flibitijibibo/FNA/wiki
+
 Roadmap
 -------
 To see the current roadmap for FNA, see the Github issues page:
