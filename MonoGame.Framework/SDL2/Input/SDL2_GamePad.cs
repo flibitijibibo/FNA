@@ -40,6 +40,7 @@ purpose and non-infringement.
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Runtime.InteropServices;
 
 using SDL2;
@@ -69,6 +70,14 @@ namespace Microsoft.Xna.Framework.Input
         private static IntPtr[] INTERNAL_devices = new IntPtr[4];
         private static IntPtr[] INTERNAL_haptics = new IntPtr[4];
         private static HapticType[] INTERNAL_hapticTypes = new HapticType[4];
+        private static string[] INTERNAL_guids = new string[]
+        {
+            String.Empty, String.Empty, String.Empty, String.Empty
+        };
+        private static string[] INTERNAL_lightBars = new string[]
+        {
+            String.Empty, String.Empty, String.Empty, String.Empty
+        };
 
         // We use this to apply XInput-like rumble effects.
         internal static SDL.SDL_HapticEffect INTERNAL_leftRightEffect = new SDL.SDL_HapticEffect
@@ -146,10 +155,11 @@ namespace Microsoft.Xna.Framework.Input
                 if (SDL.SDL_IsGameController(x) == SDL.SDL_bool.SDL_TRUE)
                 {
                     INTERNAL_devices[x] = SDL.SDL_GameControllerOpen(x);
+                    IntPtr thisJoystick = SDL.SDL_GameControllerGetJoystick(INTERNAL_devices[x]);
 
-                    if (SDL.SDL_JoystickIsHaptic(SDL.SDL_GameControllerGetJoystick(INTERNAL_devices[x])) == 1)
+                    if (SDL.SDL_JoystickIsHaptic(thisJoystick) == 1)
                     {
-                        INTERNAL_haptics[x] = SDL.SDL_HapticOpenFromJoystick(SDL.SDL_GameControllerGetJoystick(INTERNAL_devices[x]));
+                        INTERNAL_haptics[x] = SDL.SDL_HapticOpenFromJoystick(thisJoystick);
                     }
                     if (INTERNAL_haptics[x] != IntPtr.Zero)
                     {
@@ -175,6 +185,100 @@ namespace Microsoft.Xna.Framework.Input
                             // We can't even play simple rumble, this haptic device is useless to us.
                             SDL.SDL_HapticClose(INTERNAL_haptics[x]);
                             INTERNAL_haptics[x] = IntPtr.Zero;
+                        }
+                    }
+
+                    // Store the GUID string for this device
+                    StringBuilder result = new StringBuilder();
+                    byte[] resChar = new byte[33]; // FIXME: Sort of arbitrary.
+                    SDL.SDL_JoystickGetGUIDString(
+                        SDL.SDL_JoystickGetGUID(thisJoystick),
+                        resChar,
+                        resChar.Length
+                    );
+                    if (SDL.SDL_GetPlatform().Equals("Linux"))
+                    {
+                        result.Append((char) resChar[8]);
+                        result.Append((char) resChar[9]);
+                        result.Append((char) resChar[10]);
+                        result.Append((char) resChar[11]);
+                        result.Append((char) resChar[16]);
+                        result.Append((char) resChar[17]);
+                        result.Append((char) resChar[18]);
+                        result.Append((char) resChar[19]);
+                    }
+                    else if (SDL.SDL_GetPlatform().Equals("Mac OS X"))
+                    {
+                        result.Append((char) resChar[0]);
+                        result.Append((char) resChar[1]);
+                        result.Append((char) resChar[2]);
+                        result.Append((char) resChar[3]);
+                        result.Append((char) resChar[16]);
+                        result.Append((char) resChar[17]);
+                        result.Append((char) resChar[18]);
+                        result.Append((char) resChar[19]);
+                    }
+                    else if (SDL.SDL_GetPlatform().Equals("Windows"))
+                    {
+                        bool isXInput = true;
+                        foreach (byte b in resChar)
+                        {
+                            if (((char) b) != '0' && b != 0)
+                            {
+                                isXInput = false;
+                                break;
+                            }
+                        }
+                        if (isXInput)
+                        {
+                            result.Append("xinput");
+                        }
+                        else
+                        {
+                            result.Append((char) resChar[0]);
+                            result.Append((char) resChar[1]);
+                            result.Append((char) resChar[2]);
+                            result.Append((char) resChar[3]);
+                            result.Append((char) resChar[4]);
+                            result.Append((char) resChar[5]);
+                            result.Append((char) resChar[6]);
+                            result.Append((char) resChar[7]);
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("SDL2_GamePad: Platform.OSVersion not handled!");
+                    }
+                    INTERNAL_guids[x] = result.ToString();
+
+                    // Initialize light bar
+                    if (    SDL.SDL_GetPlatform().Equals("Linux") &&
+                            INTERNAL_guids[x].Equals("4c05c405")    )
+                    {
+                        // Get all of the individual PS4 LED instances
+                        List<string> ledList = new List<string>();
+                        string[] dirs = Directory.GetDirectories("/sys/class/leds/");
+                        foreach (string dir in dirs)
+                        {
+                            if (    dir.Contains("054C:05C4") &&
+                                    dir.EndsWith("blue")    )
+                            {
+                                ledList.Add(dir.Substring(0, dir.LastIndexOf(':') + 1));
+                            }
+                        }
+                        // Find how many of these are already in use
+                        int numLights = 0;
+                        for (int i = 0; i < INTERNAL_lightBars.Length; i += 1)
+                        {
+                            if (!String.IsNullOrEmpty(INTERNAL_lightBars[i]))
+                            {
+                                numLights += 1;
+                            }
+                        }
+                        // If all are not already in use, use the first unused light
+                        if (numLights < ledList.Count)
+                        {
+                            INTERNAL_lightBars[x] = ledList[numLights];
                         }
                     }
 
@@ -531,6 +635,27 @@ namespace Microsoft.Xna.Framework.Input
                     Math.Max(leftMotor, rightMotor),
                     SDL.SDL_HAPTIC_INFINITY // Oh dear...
                 );
+            }
+        }
+
+        public static void SetLightBarEXT(PlayerIndex playerIndex, Color color)
+        {
+            if (String.IsNullOrEmpty(INTERNAL_lightBars[(int) playerIndex]))
+            {
+                return;
+            }
+
+            string baseDir = INTERNAL_lightBars[(int) playerIndex];
+            try
+            {
+                File.WriteAllText(baseDir + "red/brightness", color.R.ToString());
+                File.WriteAllText(baseDir + "green/brightness", color.G.ToString());
+                File.WriteAllText(baseDir + "blue/brightness", color.B.ToString());
+            }
+            catch
+            {
+                // If something went wrong, assume the worst and just remove it.
+                INTERNAL_lightBars[(int) playerIndex] = String.Empty;
             }
         }
     }
