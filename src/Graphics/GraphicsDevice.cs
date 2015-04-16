@@ -938,12 +938,6 @@ namespace Microsoft.Xna.Framework.Graphics
 			int startIndex,
 			int primitiveCount
 		) {
-			// If this device doesn't have the support, just explode now before it's too late.
-			if (!GLDevice.SupportsHardwareInstancing)
-			{
-				throw new NoSuitableGraphicsDeviceException("Your hardware does not support hardware instancing!");
-			}
-
 			ApplyState();
 
 			// Set up the vertex buffers
@@ -975,6 +969,12 @@ namespace Microsoft.Xna.Framework.Graphics
 			int primitiveCount,
 			int instanceCount
 		) {
+			// If this device doesn't have the support, just explode now before it's too late.
+			if (!GLDevice.SupportsHardwareInstancing)
+			{
+				throw new NoSuitableGraphicsDeviceException("Your hardware does not support hardware instancing!");
+			}
+
 			ApplyState();
 
 			// Set up the vertex buffers
