@@ -8,7 +8,7 @@
 #endregion
 
 #region RESIZABLE_WINDOW Option
-// #define RESIZABLE_WINDOW
+#define RESIZABLE_WINDOW
 /* So we've got this silly issue in SDL2's video API at the moment. We can't
  * add/remove the resizable property to the SDL_Window*!
  *
