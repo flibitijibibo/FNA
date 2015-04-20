@@ -135,6 +135,12 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public void SubmitBuffer(byte[] buffer, int offset, int count)
 		{
+			// TODO: Change this to IsDisposed! -flibit
+			if (AudioDevice.ALDevice == null)
+			{
+				return;
+			}
+
 			// Generate a buffer if we don't have any to use.
 			if (availableBuffers.Count == 0)
 			{
@@ -264,6 +270,12 @@ namespace Microsoft.Xna.Framework.Audio
 				return false;
 			}
 
+			// Can't update if audio's been closed!
+			if (AudioDevice.ALDevice == null)
+			{
+				return false;
+			}
+
 			// Get the number of processed buffers.
 			int finishedBuffers = AudioDevice.ALDevice.CheckProcessedBuffers(
 				INTERNAL_alSource
@@ -314,6 +326,12 @@ namespace Microsoft.Xna.Framework.Audio
 			 * We currently use this for the VideoPlayer.
 			 * -flibit
 			 */
+
+			// TODO: Change this to IsDisposed! -flibit
+			if (AudioDevice.ALDevice == null)
+			{
+				return;
+			}
 
 			// Generate a buffer if we don't have any to use.
 			if (availableBuffers.Count == 0)
