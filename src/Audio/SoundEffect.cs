@@ -235,7 +235,7 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			if (!IsDisposed)
 			{
-				AudioDevice.ALDevice.DeleteBuffer(INTERNAL_buffer);
+				AudioDevice.DeleteBuffer(INTERNAL_buffer);
 				IsDisposed = true;
 			}
 		}

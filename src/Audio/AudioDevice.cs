@@ -129,7 +129,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#endregion
 
-		#region Public Static GenBuffer Methods
+		#region Public Static Buffer Methods
 
 		public static IALBuffer GenBuffer()
 		{
@@ -162,6 +162,15 @@ namespace Microsoft.Xna.Framework.Audio
 				isADPCM,
 				formatParameter
 			);
+		}
+
+		public static void DeleteBuffer(IALBuffer buffer)
+		{
+			// TODO: GraphicsResource-like reference management -flibit
+			if (ALDevice != null)
+			{
+				ALDevice.DeleteBuffer(buffer);
+			}
 		}
 
 		#endregion
