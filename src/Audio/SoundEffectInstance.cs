@@ -306,7 +306,11 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			if (INTERNAL_alSource != null)
 			{
-				AudioDevice.ALDevice.StopAndDisposeSource(INTERNAL_alSource);
+				// TODO: GraphicsResource-like reference management -flibit
+				if (AudioDevice.ALDevice != null)
+				{
+					AudioDevice.ALDevice.StopAndDisposeSource(INTERNAL_alSource);
+				}
 				INTERNAL_alSource = null;
 			}
 		}
