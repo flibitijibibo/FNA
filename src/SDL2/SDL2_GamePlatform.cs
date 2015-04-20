@@ -165,6 +165,16 @@ namespace Microsoft.Xna.Framework
 				SDL.SDL_INIT_HAPTIC
 			);
 
+			// Set any hints to match XNA4 behavior...
+			string hint = SDL.SDL_GetHint(SDL.SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS);
+			if (String.IsNullOrEmpty(hint))
+			{
+				SDL.SDL_SetHint(
+					SDL.SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS,
+					"1"
+				);
+			}
+
 			// Set and initialize the SDL2 window
 			Window = new SDL2_GameWindow();
 
@@ -194,7 +204,7 @@ namespace Microsoft.Xna.Framework
 			// OSX has some fancy fullscreen features, let's use them!
 			if (OSVersion.Equals("Mac OS X"))
 			{
-				string hint = SDL.SDL_GetHint(SDL.SDL_HINT_VIDEO_MAC_FULLSCREEN_SPACES);
+				hint = SDL.SDL_GetHint(SDL.SDL_HINT_VIDEO_MAC_FULLSCREEN_SPACES);
 				INTERNAL_useFullscreenSpaces = (String.IsNullOrEmpty(hint) || hint.Equals("1"));
 			}
 			else
