@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using System.Runtime.InteropServices;
 
 using Microsoft.Xna.Framework.Audio;
 #endregion
@@ -132,8 +133,12 @@ namespace Microsoft.Xna.Framework.Media
 
 		private DynamicSoundEffectInstance soundStream;
 		private IntPtr vorbisFile;
-		private byte[] vorbisBuffer = new byte[4096];
 		private bool eof;
+
+		private const int MAX_SAMPLES = 2 * 2 * 48000;
+		private static byte[] vorbisBuffer = new byte[MAX_SAMPLES];
+		private static GCHandle bufferHandle = GCHandle.Alloc(vorbisBuffer, GCHandleType.Pinned);
+		private static IntPtr bufferPtr = bufferHandle.AddrOfPinnedObject();
 
 #if !NO_STREAM_THREAD
 		private Thread songThread;
@@ -265,36 +270,25 @@ namespace Microsoft.Xna.Framework.Media
 
 		internal void QueueBuffer(object sender, EventArgs args)
 		{
-			// Fill a List (ugh) with a series of ov_read blocks.
-			List<byte> totalBuf = new List<byte>();
 			int bs;
-			long len = 0;
+			int cur = 0;
+			int total = 0;
 			do
 			{
-				len = (long) Vorbisfile.ov_read(
+				cur = (int) Vorbisfile.ov_read(
 					vorbisFile,
-					vorbisBuffer,
-					vorbisBuffer.Length,
+					bufferPtr + total,
+					4096,
 					0,
 					2,
 					1,
 					out bs
 				);
-				if (len == vorbisBuffer.Length)
-				{
-					totalBuf.AddRange(vorbisBuffer);
-				}
-				else if (len > 0)
-				{
-					// UGH -flibit
-					byte[] smallBuf = new byte[len];
-					Array.Copy(vorbisBuffer, smallBuf, len);
-					totalBuf.AddRange(smallBuf);
-				}
-			} while (len > 0 && totalBuf.Count < 16384); // 8192 16-bit samples
+				total += cur;
+			} while (cur > 0 && total < (MAX_SAMPLES - 4096));
 
 			// If we're at the end of the file, stop!
-			if (totalBuf.Count == 0)
+			if (total == 0)
 			{
 				eof = true;
 				if (sender != null)
@@ -307,9 +301,9 @@ namespace Microsoft.Xna.Framework.Media
 
 			// Send the filled buffer to the stream.
 			soundStream.SubmitBuffer(
-				totalBuf.ToArray(),
+				vorbisBuffer,
 				0,
-				totalBuf.Count
+				total
 			);
 		}
 
