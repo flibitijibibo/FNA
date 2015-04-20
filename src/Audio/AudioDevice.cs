@@ -49,7 +49,7 @@ namespace Microsoft.Xna.Framework.Audio
 			// We should only have one of these!
 			if (ALDevice != null)
 			{
-				throw new Exception("ALDevice already created!");
+				System.Console.WriteLine("ALDevice already exists, overwriting!");
 			}
 			try
 			{
@@ -92,7 +92,7 @@ namespace Microsoft.Xna.Framework.Audio
 				InstancePool.Clear();
 				DynamicInstancePool.Clear();
 				ALDevice.Dispose();
-				ALDevice = null;
+				// ALDevice = null; <- May cause Exceptions!
 			}
 		}
 
@@ -162,15 +162,6 @@ namespace Microsoft.Xna.Framework.Audio
 				isADPCM,
 				formatParameter
 			);
-		}
-
-		public static void DeleteBuffer(IALBuffer buffer)
-		{
-			// TODO: GraphicsResource-like reference management -flibit
-			if (ALDevice != null)
-			{
-				ALDevice.DeleteBuffer(buffer);
-			}
 		}
 
 		#endregion
