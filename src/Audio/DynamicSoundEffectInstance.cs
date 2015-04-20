@@ -84,17 +84,17 @@ namespace Microsoft.Xna.Framework.Audio
 				// Delete all known buffer objects
 				while (queuedBuffers.Count > 0)
 				{
-					AudioDevice.ALDevice.DeleteBuffer(queuedBuffers.Dequeue());
+					AudioDevice.DeleteBuffer(queuedBuffers.Dequeue());
 				}
 				queuedBuffers = null;
 				while (availableBuffers.Count > 0)
 				{
-					AudioDevice.ALDevice.DeleteBuffer(availableBuffers.Dequeue());
+					AudioDevice.DeleteBuffer(availableBuffers.Dequeue());
 				}
 				availableBuffers = null;
 				while (buffersToQueue.Count > 0)
 				{
-					AudioDevice.ALDevice.DeleteBuffer(buffersToQueue.Dequeue());
+					AudioDevice.DeleteBuffer(buffersToQueue.Dequeue());
 				}
 				buffersToQueue = null;
 
