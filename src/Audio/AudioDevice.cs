@@ -77,7 +77,7 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 			else
 			{
-				Renderers = new ReadOnlyCollection<RendererDetail>(null);
+				Renderers = new ReadOnlyCollection<RendererDetail>(new List<RendererDetail>());
 			}
 		}
 
