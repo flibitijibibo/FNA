@@ -103,6 +103,13 @@ non-infringement.
  */
 #endregion
 
+#region DISABLE_FAUXBACKBUFFER Option
+// #define DISABLE_FAUXBACKBUFFER
+/* Not really needed for FEZ, but other platforms might care.
+ * -flibit
+ */
+#endregion
+
 #region Using Statements
 using System;
 using System.ComponentModel;
@@ -208,15 +215,16 @@ namespace Microsoft.Xna.Framework
         
         #region Internal OpenGL Framebuffer
         
+#if !DISABLE_FAUXBACKBUFFER
         private int INTERNAL_glFramebuffer;
         private int INTERNAL_glColorAttachment;
         private int INTERNAL_glDepthStencilAttachment;
+        private DepthFormat INTERNAL_depthFormat;
+#endif
 
         // These are internal for the SDL2_GamePlatform and GraphicsAdapter.
         internal int INTERNAL_glFramebufferWidth;
         internal int INTERNAL_glFramebufferHeight;
-        
-        private DepthFormat INTERNAL_depthFormat;
         
         #endregion
         
@@ -405,8 +413,10 @@ namespace Microsoft.Xna.Framework
         
         public void INTERNAL_RunLoop()
         {
+#if !DISABLE_FAUXBACKBUFFER
             // Now that we're in the game loop, this should be safe.
             Game.GraphicsDevice.glFramebuffer = INTERNAL_glFramebuffer;
+#endif
 
             SDL.SDL_ShowWindow(INTERNAL_sdlWindow);
             
@@ -615,6 +625,9 @@ namespace Microsoft.Xna.Framework
         
         public void INTERNAL_SwapBuffers()
         {
+#if DISABLE_FAUXBACKBUFFER
+            SDL.SDL_GL_SwapWindow(INTERNAL_sdlWindow);
+#else
             Rectangle windowRect = ClientBounds;
             GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, INTERNAL_glFramebuffer);
             GL.BindFramebuffer(FramebufferTarget.DrawFramebuffer, 0);
@@ -627,6 +640,7 @@ namespace Microsoft.Xna.Framework
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
             SDL.SDL_GL_SwapWindow(INTERNAL_sdlWindow);
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, INTERNAL_glFramebuffer);
+#endif
 
 #if WIIU_GAMEPAD
             if (wiiuStream != IntPtr.Zero)
@@ -660,9 +674,11 @@ namespace Microsoft.Xna.Framework
         
         public void INTERNAL_Destroy()
         {
+#if !DISABLE_FAUXBACKBUFFER
             GL.DeleteFramebuffer(INTERNAL_glFramebuffer);
             GL.DeleteTexture(INTERNAL_glColorAttachment);
             GL.DeleteTexture(INTERNAL_glDepthStencilAttachment);
+#endif
 
             /* Some window managers might try to minimize the window as we're
              * destroying it. This looks pretty stupid and could cause problems,
@@ -787,6 +803,7 @@ namespace Microsoft.Xna.Framework
             SDL.SDL_GL_MakeCurrent(INTERNAL_sdlWindow, INTERNAL_GLContext);
 #endif
             
+#if !DISABLE_FAUXBACKBUFFER
             // Create an FBO, use this as our "backbuffer".
             GL.GenFramebuffers(1, out INTERNAL_glFramebuffer);
             GL.GenTextures(1, out INTERNAL_glColorAttachment);
@@ -831,13 +848,13 @@ namespace Microsoft.Xna.Framework
                 0
             );
             GL.BindTexture(TextureTarget.Texture2D, 0);
+            INTERNAL_depthFormat = DepthFormat.Depth16;
+#endif
             INTERNAL_glFramebufferWidth = 800;
             INTERNAL_glFramebufferHeight = 600;
             Mouse.INTERNAL_BackbufferWidth = 800;
             Mouse.INTERNAL_BackbufferHeight = 600;
             
-            INTERNAL_depthFormat = DepthFormat.Depth16;
-
             // Setup Text Input Control Character Arrays (Only 4 control keys supported at this time)
             INTERNAL_TextInputControlDown = new bool[4];
             INTERNAL_TextInputControlRepeat = new int[4];
@@ -939,6 +956,7 @@ namespace Microsoft.Xna.Framework
                 clientHeight
             );
             
+#if !DISABLE_FAUXBACKBUFFER
             // Update our color attachment to the new resolution
             GL.BindTexture(TextureTarget.Texture2D, INTERNAL_glColorAttachment);
             GL.TexImage2D(
@@ -1034,6 +1052,7 @@ namespace Microsoft.Xna.Framework
                 
                 INTERNAL_depthFormat = backbufferFormat;
             }
+#endif
             
             INTERNAL_glFramebufferWidth = clientWidth;
             INTERNAL_glFramebufferHeight = clientHeight;
