@@ -3298,8 +3298,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				{ SurfaceFormat.Dxt1,			GLenum.GL_COMPRESSED_TEXTURE_FORMATS },
 				{ SurfaceFormat.Dxt3,			GLenum.GL_COMPRESSED_TEXTURE_FORMATS },
 				{ SurfaceFormat.Dxt5,			GLenum.GL_COMPRESSED_TEXTURE_FORMATS },
-				{ SurfaceFormat.NormalizedByte2,	GLenum.GL_RG }, // Unconfirmed!
-				{ SurfaceFormat.NormalizedByte4,	GLenum.GL_RGBA }, // Unconfirmed!
+				{ SurfaceFormat.NormalizedByte2,	GLenum.GL_RG },
+				{ SurfaceFormat.NormalizedByte4,	GLenum.GL_RGBA },
 				{ SurfaceFormat.Rgba1010102,		GLenum.GL_RGBA },
 				{ SurfaceFormat.Rg32,			GLenum.GL_RG },
 				{ SurfaceFormat.Rgba64,			GLenum.GL_RGBA },
@@ -3322,8 +3322,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				{ SurfaceFormat.Dxt1,			GLenum.GL_COMPRESSED_RGBA_S3TC_DXT1_EXT },
 				{ SurfaceFormat.Dxt3,			GLenum.GL_COMPRESSED_RGBA_S3TC_DXT3_EXT },
 				{ SurfaceFormat.Dxt5,			GLenum.GL_COMPRESSED_RGBA_S3TC_DXT5_EXT },
-				{ SurfaceFormat.NormalizedByte2,	GLenum.GL_RG8I }, // Unconfirmed!
-				{ SurfaceFormat.NormalizedByte4,	GLenum.GL_RGBA8I }, // Unconfirmed!
+				{ SurfaceFormat.NormalizedByte2,	GLenum.GL_RG },
+				{ SurfaceFormat.NormalizedByte4,	GLenum.GL_RGBA },
 				{ SurfaceFormat.Rgba1010102,		GLenum.GL_RGB10_A2_EXT },
 				{ SurfaceFormat.Rg32,			GLenum.GL_RG16 },
 				{ SurfaceFormat.Rgba64,			GLenum.GL_RGBA16 },
@@ -3344,8 +3344,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				{ SurfaceFormat.Bgra5551,		GLenum.GL_UNSIGNED_SHORT_5_5_5_1 },
 				{ SurfaceFormat.Bgra4444,		GLenum.GL_UNSIGNED_SHORT_4_4_4_4 },
 				// Ignoring Dxt1, Dxt3, Dxt5
-				{ SurfaceFormat.NormalizedByte2,	GLenum.GL_BYTE }, // Unconfirmed!
-				{ SurfaceFormat.NormalizedByte4,	GLenum.GL_BYTE }, // Unconfirmed!
+				{ SurfaceFormat.NormalizedByte2,	GLenum.GL_BYTE },
+				{ SurfaceFormat.NormalizedByte4,	GLenum.GL_BYTE },
 				{ SurfaceFormat.Rgba1010102,		GLenum.GL_UNSIGNED_INT_10_10_10_2 },
 				{ SurfaceFormat.Rg32,			GLenum.GL_UNSIGNED_SHORT },
 				{ SurfaceFormat.Rgba64,			GLenum.GL_UNSIGNED_SHORT },
