@@ -7,16 +7,6 @@
  */
 #endregion
 
-#region RESIZABLE_WINDOW Option
-// #define RESIZABLE_WINDOW
-/* So we've got this silly issue in SDL2's video API at the moment. We can't
- * add/remove the resizable property to the SDL_Window*!
- *
- * So, if you want to have your GameWindow be resizable, uncomment this define.
- * -flibit
- */
-#endregion
-
 #region Using Statements
 using System;
 using System.Collections.Generic;
@@ -37,17 +27,15 @@ namespace Microsoft.Xna.Framework
 		public override bool AllowUserResizing
 		{
 			/* FIXME: This change should happen immediately. However, SDL2 does
-			 * not yet have an SDL_SetWindowResizable, so we mostly just have
-			 * this for the #define we've got at the top of this file.
+			 * not yet have an SDL_SetWindowResizable, so for now this is
+			 * basically just a check for when the window is first made.
 			 * -flibit
 			 */
 			get
 			{
-#if RESIZABLE_WINDOW
-				return true;
-#else
-				return false;
-#endif
+				return Environment.GetEnvironmentVariable(
+					"FNA_WORKAROUND_WINDOW_RESIZABLE"
+				) == "1";
 			}
 			set
 			{
