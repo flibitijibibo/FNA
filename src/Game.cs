@@ -684,6 +684,7 @@ namespace Microsoft.Xna.Framework
 				Window.Title,
 				exception.Message
 			);
+			return true; // FIXME: ???
 		}
 
 		#endregion
