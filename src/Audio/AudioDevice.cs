@@ -135,7 +135,7 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			if (ALDevice == null)
 			{
-				throw new NoAudioHardwareException();
+				ThrowNoAudioException();
 			}
 			return ALDevice.GenBuffer();
 		}
@@ -151,7 +151,7 @@ namespace Microsoft.Xna.Framework.Audio
 		) {
 			if (ALDevice == null)
 			{
-				throw new NoAudioHardwareException();
+				ThrowNoAudioException();
 			}
 			return ALDevice.GenBuffer(
 				data,
@@ -162,6 +162,22 @@ namespace Microsoft.Xna.Framework.Audio
 				isADPCM,
 				formatParameter
 			);
+		}
+
+		#endregion
+
+		#region Private Static Error Method
+
+		private static void ThrowNoAudioException()
+		{
+			Game.Instance.Platform.ShowRuntimeError(
+				Game.Instance.Window.Title,
+				"Could not find a suitable audio device. " +
+				" Verify that a sound card is\ninstalled," +
+				" and check the driver properties to make" +
+				" sure it is not disabled."
+			);
+			throw new NoAudioHardwareException();
 		}
 
 		#endregion
