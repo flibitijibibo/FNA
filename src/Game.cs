@@ -678,6 +678,14 @@ namespace Microsoft.Xna.Framework
 			Raise(Deactivated, args);
 		}
 
+		protected virtual bool ShowMissingRequirementMessage(Exception exception)
+		{
+			Platform.ShowRuntimeError(
+				Window.Title,
+				exception.Message
+			);
+		}
+
 		#endregion
 
 		#region Event Handlers
