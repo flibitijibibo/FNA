@@ -179,19 +179,6 @@ namespace Microsoft.Xna.Framework
 
 		#region Internal Properties
 
-		/* FIXME: Internal members should be eliminated.
-		 * Currently Game.Initialized is used by the Mac game window class to
-		 * determine whether to raise DeviceResetting and DeviceReset on
-		 * GraphicsDeviceManager.
-		 */
-		internal bool Initialized
-		{
-			get
-			{
-				return _initialized;
-			}
-		}
-
 		internal GraphicsDeviceManager graphicsDeviceManager
 		{
 			get
@@ -214,19 +201,9 @@ namespace Microsoft.Xna.Framework
 
 		#endregion
 
-		#region Internal Static Properties
-
-		internal static Game Instance
-		{
-			get
-			{
-				return Game._instance;
-			}
-		}
-
-		#endregion
-
 		#region Internal Fields
+
+		internal static Game Instance = null;
 
 		internal GamePlatform Platform;
 
@@ -272,15 +249,13 @@ namespace Microsoft.Xna.Framework
 
 		private bool _suppressDraw;
 
-		private static Game _instance = null;
-
 		#endregion
 
 		#region Public Constructors
 
 		public Game()
 		{
-			_instance = this;
+			Instance = this;
 
 			AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 
@@ -366,7 +341,7 @@ namespace Microsoft.Xna.Framework
 				AppDomain.CurrentDomain.UnhandledException -= OnUnhandledException;
 
 				_isDisposed = true;
-				_instance = null;
+				Instance = null;
 			}
 		}
 
@@ -467,7 +442,9 @@ namespace Microsoft.Xna.Framework
 			Platform.RunLoop();
 
 			EndRun();
-			DoExiting();
+
+			OnExiting(this, EventArgs.Empty);
+			UnloadContent();
 		}
 
 		private TimeSpan _accumulatedElapsedTime;
@@ -582,7 +559,15 @@ namespace Microsoft.Xna.Framework
 			}
 			else
 			{
-				DoDraw(_gameTime);
+				/* Draw/EndDraw should not be called if BeginDraw returns false.
+				 * http://stackoverflow.com/questions/4054936/manual-control-over-when-to-redraw-the-screen/4057180#4057180
+				 * http://stackoverflow.com/questions/4235439/xna-3-1-to-4-0-requires-constant-redraw-or-will-display-a-purple-screen
+				 */
+				if (Platform.BeforeDraw(_gameTime) && BeginDraw())
+				{
+					Draw(_gameTime);
+					EndDraw();
+				}
 			}
 		}
 
@@ -709,28 +694,6 @@ namespace Microsoft.Xna.Framework
 
 		#endregion
 
-		#region Event Handlers
-
-		private void Components_ComponentAdded(
-			object sender,
-			GameComponentCollectionEventArgs e
-		) {
-			/* Since we only subscribe to ComponentAdded after the graphics
-			 * devices are set up, it is safe to just blindly call Initialize.
-			 */
-			e.GameComponent.Initialize();
-			CategorizeComponent(e.GameComponent);
-		}
-
-		private void Components_ComponentRemoved(
-			object sender,
-			GameComponentCollectionEventArgs e
-		) {
-			DecategorizeComponent(e.GameComponent);
-		}
-
-		#endregion
-
 		#region Internal Methods
 
 		[Conditional("DEBUG")]
@@ -742,12 +705,16 @@ namespace Microsoft.Xna.Framework
 			}
 		}
 
+		#endregion
+
+		#region Private Methods
+
 		/* FIXME: We should work toward eliminating internal methods. They
 		 * could eliminate the possibility that additional platforms could
 		 * be added by third parties without changing FNA itself.
 		 */
 
-		internal void DoUpdate(GameTime gameTime)
+		private void DoUpdate(GameTime gameTime)
 		{
 			AssertNotDisposed();
 			if (Platform.BeforeUpdate(gameTime))
@@ -763,21 +730,7 @@ namespace Microsoft.Xna.Framework
 			}
 		}
 
-		internal void DoDraw(GameTime gameTime)
-		{
-			AssertNotDisposed();
-			/* Draw and EndDraw should not be called if BeginDraw returns false.
-			 * http://stackoverflow.com/questions/4054936/manual-control-over-when-to-redraw-the-screen/4057180#4057180
-			 * http://stackoverflow.com/questions/4235439/xna-3-1-to-4-0-requires-constant-redraw-or-will-display-a-purple-screen
-			 */
-			if (Platform.BeforeDraw(gameTime) && BeginDraw())
-			{
-				Draw(gameTime);
-				EndDraw();
-			}
-		}
-
-		internal void DoInitialize()
+		private void DoInitialize()
 		{
 			AssertNotDisposed();
 			Platform.BeforeInitialize();
@@ -793,16 +746,6 @@ namespace Microsoft.Xna.Framework
 			_components.ComponentAdded += Components_ComponentAdded;
 			_components.ComponentRemoved += Components_ComponentRemoved;
 		}
-
-		internal void DoExiting()
-		{
-			OnExiting(this, EventArgs.Empty);
-			UnloadContent();
-		}
-
-		#endregion
-
-		#region Private Methods
 
 		private void CategorizeComponents()
 		{
@@ -868,8 +811,32 @@ namespace Microsoft.Xna.Framework
 			}
 		}
 
-		private void OnUnhandledException(object sender, UnhandledExceptionEventArgs args)
-		{
+		#endregion
+
+		#region Private Event Handlers
+
+		private void Components_ComponentAdded(
+			object sender,
+			GameComponentCollectionEventArgs e
+		) {
+			/* Since we only subscribe to ComponentAdded after the graphics
+			 * devices are set up, it is safe to just blindly call Initialize.
+			 */
+			e.GameComponent.Initialize();
+			CategorizeComponent(e.GameComponent);
+		}
+
+		private void Components_ComponentRemoved(
+			object sender,
+			GameComponentCollectionEventArgs e
+		) {
+			DecategorizeComponent(e.GameComponent);
+		}
+
+		private void OnUnhandledException(
+			object sender,
+			UnhandledExceptionEventArgs args
+		) {
 			ShowMissingRequirementMessage(args.ExceptionObject as Exception);
 		}
 
