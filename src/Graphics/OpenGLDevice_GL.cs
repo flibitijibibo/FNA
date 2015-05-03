@@ -1149,15 +1149,10 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		private IntPtr TryGetFramebufferEP(string ep)
 		{
-			IntPtr result;
-			result = SDL.SDL_GL_GetProcAddress(ep);
+			IntPtr result = SDL.SDL_GL_GetProcAddress(ep);
 			if (result == IntPtr.Zero)
 			{
 				result = SDL.SDL_GL_GetProcAddress(ep + "EXT");
-				if (result == IntPtr.Zero)
-				{
-					throw new NoSuitableGraphicsDeviceException();
-				}
 			}
 			return result;
 		}
