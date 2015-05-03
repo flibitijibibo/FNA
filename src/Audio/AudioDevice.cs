@@ -147,7 +147,7 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			if (ALDevice == null)
 			{
-				ThrowNoAudioException();
+				throw new NoAudioHardwareException();
 			}
 			return ALDevice.GenBuffer();
 		}
@@ -163,7 +163,7 @@ namespace Microsoft.Xna.Framework.Audio
 		) {
 			if (ALDevice == null)
 			{
-				ThrowNoAudioException();
+				throw new NoAudioHardwareException();
 			}
 			return ALDevice.GenBuffer(
 				data,
@@ -178,18 +178,15 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#endregion
 
-		#region Private Static Error Method
+		#region Public Static Reverb Methods
 
-		private static void ThrowNoAudioException()
+		public static IALReverb GenReverb(DSPParameter[] parameters)
 		{
-			Game.Instance.Platform.ShowRuntimeError(
-				Game.Instance.Window.Title,
-				"Could not find a suitable audio device. " +
-				" Verify that a sound card is\ninstalled," +
-				" and check the driver properties to make" +
-				" sure it is not disabled."
-			);
-			throw new NoAudioHardwareException();
+			if (ALDevice == null)
+			{
+				throw new NoAudioHardwareException();
+			}
+			return ALDevice.GenReverb(parameters);
 		}
 
 		#endregion

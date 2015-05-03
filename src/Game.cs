@@ -282,6 +282,8 @@ namespace Microsoft.Xna.Framework
 		{
 			_instance = this;
 
+			AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+
 			LaunchParameters = new LaunchParameters();
 			_services = new GameServiceContainer();
 			_components = new GameComponentCollection();
@@ -360,6 +362,8 @@ namespace Microsoft.Xna.Framework
 
 					ContentTypeReaderManager.ClearTypeCreators();
 				}
+
+				AppDomain.CurrentDomain.UnhandledException -= OnUnhandledException;
 
 				_isDisposed = true;
 				_instance = null;
@@ -680,11 +684,27 @@ namespace Microsoft.Xna.Framework
 
 		protected virtual bool ShowMissingRequirementMessage(Exception exception)
 		{
-			Platform.ShowRuntimeError(
-				Window.Title,
-				exception.Message
-			);
-			return true; // FIXME: ???
+			if (exception is NoAudioHardwareException)
+			{
+				Platform.ShowRuntimeError(
+					Window.Title,
+					"Could not find a suitable audio device. " +
+					" Verify that a sound card is\ninstalled," +
+					" and check the driver properties to make" +
+					" sure it is not disabled."
+				);
+				return true;
+			}
+			if (exception is NoSuitableGraphicsDeviceException)
+			{
+				Platform.ShowRuntimeError(
+					Window.Title,
+					"Could not find a suitable graphics device." +
+					" More information:\n\n" + exception.Message
+				);
+				return true;
+			}
+			return false;
 		}
 
 		#endregion
@@ -846,6 +866,11 @@ namespace Microsoft.Xna.Framework
 			{
 				handler(this, e);
 			}
+		}
+
+		private void OnUnhandledException(object sender, UnhandledExceptionEventArgs args)
+		{
+			ShowMissingRequirementMessage(args.ExceptionObject as Exception);
 		}
 
 		#endregion

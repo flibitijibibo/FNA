@@ -356,7 +356,7 @@ namespace Microsoft.Xna.Framework.Audio
 			Parameters = parameters;
 
 			// FIXME: Did XACT ever go past Reverb? -flibit
-			Effect = AudioDevice.ALDevice.GenReverb(Parameters);
+			Effect = AudioDevice.GenReverb(Parameters);
 		}
 
 		public void Dispose()
