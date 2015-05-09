@@ -1059,8 +1059,12 @@ namespace Microsoft.Xna.Framework.Graphics
 				throw new NoSuitableGraphicsDeviceException("OpenGL framebuffer support is required!");
 			}
 
-			/* ARB_instanced_arrays/ARB_draw_instanced are almost optional. */
-			SupportsHardwareInstancing = true;
+			/* ARB_instanced_arrays/ARB_draw_instanced are almost optional.
+			 * While we do not directly call glVertexAttribDivisor ourselves,
+			 * we still need to check for ARB_instanced_arrays support.
+			 * -flibit
+			 */
+			SupportsHardwareInstancing = SDL.SDL_GL_GetProcAddress("glVertexAttribDivisor") != IntPtr.Zero;
 			try
 			{
 				glDrawElementsInstanced = (DrawElementsInstanced) Marshal.GetDelegateForFunctionPointer(
