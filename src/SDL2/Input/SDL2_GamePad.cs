@@ -180,6 +180,7 @@ namespace Microsoft.Xna.Framework.Input
 
 			// Start with a fresh state.
 			INTERNAL_states[which] = InitializedState;
+			INTERNAL_states[which].IsConnected = true;
 
 			// Initialize the haptics for the joystick, if applicable.
 			if (SDL.SDL_JoystickIsHaptic(thisJoystick) == 1)
@@ -882,6 +883,7 @@ namespace Microsoft.Xna.Framework.Input
 					gc_buttons,
 					gc_dpad
 				);
+				gc_builtState.IsConnected = true;
 				gc_builtState.PacketNumber = INTERNAL_states[(int) playerIndex].PacketNumber;
 				if (gc_builtState != INTERNAL_states[(int) playerIndex])
 				{
@@ -958,6 +960,7 @@ namespace Microsoft.Xna.Framework.Input
 				buttons,
 				dpad
 			);
+			builtState.IsConnected = true;
 			builtState.PacketNumber = INTERNAL_states[(int) playerIndex].PacketNumber;
 			if (builtState != INTERNAL_states[(int) playerIndex])
 			{

@@ -51,20 +51,32 @@ namespace Microsoft.Xna.Framework.Audio
 			{
 				System.Console.WriteLine("ALDevice already exists, overwriting!");
 			}
-			try
+
+			bool disableSound = Environment.GetEnvironmentVariable(
+				"FNA_AUDIO_DISABLE_SOUND"
+			) == "1";
+
+			if (disableSound)
 			{
-				ALDevice = new OpenALDevice();
+				ALDevice = new NullDevice();
 			}
-			catch(DllNotFoundException e)
+			else
 			{
-				System.Console.WriteLine("OpenAL not found! Need FNA.dll.config?");
-				throw e;
-			}
-			catch(Exception)
-			{
-				/* We ignore and device creation exceptions,
-				 * as they are handled down the line with Instance != null
-				 */
+				try
+				{
+					ALDevice = new OpenALDevice();
+				}
+				catch(DllNotFoundException e)
+				{
+					System.Console.WriteLine("OpenAL not found! Need FNA.dll.config?");
+					throw e;
+				}
+				catch(Exception)
+				{
+					/* We ignore and device creation exceptions,
+					 * as they are handled down the line with Instance != null
+					 */
+				}
 			}
 
 			// Populate device list
@@ -162,6 +174,19 @@ namespace Microsoft.Xna.Framework.Audio
 				isADPCM,
 				formatParameter
 			);
+		}
+
+		#endregion
+
+		#region Public Static Reverb Methods
+
+		public static IALReverb GenReverb(DSPParameter[] parameters)
+		{
+			if (ALDevice == null)
+			{
+				throw new NoAudioHardwareException();
+			}
+			return ALDevice.GenReverb(parameters);
 		}
 
 		#endregion

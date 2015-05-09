@@ -14,13 +14,16 @@ using System.Collections.Generic;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
+	/// <summary>
+	/// A basic 3D model with per mesh parent bones.
+	/// </summary>
 	public class Model
 	{
 		#region Public Properties
 
 		/// <summary>
-		/// Gets a collection of ModelBone objects which describe how each mesh in the
-		/// Meshes collection for this model relates to its parent mesh.
+		/// A collection of <see cref="ModelBone"/> objects which describe how each mesh in the
+		/// mesh collection for this model relates to its parent mesh.
 		/// </summary>
 		public ModelBoneCollection Bones
 		{
@@ -29,9 +32,9 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
 
 		/// <summary>
-		/// Gets a collection of ModelMesh objects which compose the model. Each ModelMesh
+		/// A collection of <see cref="ModelMesh"/> objects which compose the model. Each <see cref="ModelMesh"/>
 		/// in a model may be moved independently and may be composed of multiple materials
-		/// identified as ModelMeshPart objects.
+		/// identified as <see cref="ModelMeshPart"/> objects.
 		/// </summary>
 		public ModelMeshCollection Meshes
 		{
@@ -40,7 +43,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
 
 		/// <summary>
-		/// Gets the root bone for this model.
+		/// Root bone for this model.
 		/// </summary>
 		public ModelBone Root
 		{
@@ -49,7 +52,10 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
 
 		/// <summary>
-		/// Gets or sets an object identifying this model.
+		/// Custom attached object.
+		/// <remarks>
+		/// Skinning data is example of attached object for model.
+		/// </remarks>
 		/// </summary>
 		public object Tag
 		{
@@ -65,13 +71,15 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
-		#region Public Constructors
+		#region Internal Constructor
 
-		public Model()
-		{
-		}
-
-		public Model(GraphicsDevice graphicsDevice, List<ModelBone> bones, List<ModelMesh> meshes)
+		/// <summary>
+		/// Constructs a model.
+		/// </summary>
+		/// <param name="graphicsDevice">A valid reference to <see cref="GraphicsDevice"/>.</param>
+		/// <param name="bones">The collection of bones.</param>
+		/// <param name="meshes">The collection of meshes.</param>
+		internal Model(GraphicsDevice graphicsDevice, List<ModelBone> bones, List<ModelMesh> meshes)
 		{
 			Bones = new ModelBoneCollection(bones);
 			Meshes = new ModelMeshCollection(meshes);
@@ -81,6 +89,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Public Methods
 
+		/// <summary>
+		/// Draws the model meshes.
+		/// </summary>
+		/// <param name="world">The world transform.</param>
+		/// <param name="view">The view transform.</param>
+		/// <param name="projection">The projection transform.</param>
 		public void Draw(Matrix world, Matrix view, Matrix projection)
 		{
 			int boneCount = Bones.Count;
@@ -113,6 +127,10 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		}
 
+		/// <summary>
+		/// Copies bone transforms relative to all parent bones of the each bone from this model to a given array.
+		/// </summary>
+		/// <param name="destinationBoneTransforms">The array receiving the transformed bones.</param>
 		public void CopyAbsoluteBoneTransformsTo(Matrix[] destinationBoneTransforms)
 		{
 			if (destinationBoneTransforms == null)
@@ -145,6 +163,10 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		}
 
+		/// <summary>
+		/// Copies bone transforms relative to <see cref="Model.Root"/> bone from a given array to this model.
+		/// </summary>
+		/// <param name="sourceBoneTransforms">The array of prepared bone transform data.</param>
 		public void CopyBoneTransformsFrom(Matrix[] sourceBoneTransforms)
 		{
 			if (sourceBoneTransforms == null)
@@ -161,6 +183,10 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		}
 
+		/// <summary>
+		/// Copies bone transforms relative to <see cref="Model.Root"/> bone from this model to a given array.
+		/// </summary>
+		/// <param name="destinationBoneTransforms">The array receiving the transformed bones.</param>
 		public void CopyBoneTransformsTo(Matrix[] destinationBoneTransforms)
 		{
 			if (destinationBoneTransforms == null)

@@ -286,6 +286,7 @@
     <Compile Include="src\Media\VideoSoundtrackType.cs" />
     <Compile Include="src\Audio\RendererDetail.cs" />
     <Compile Include="src\Audio\OpenALDevice.cs" />
+    <Compile Include="src\Audio\NullDevice.cs" />
     <Compile Include="src\Audio\SoundEffect.cs" />
     <Compile Include="src\Audio\SoundEffectInstance.cs" />
     <Compile Include="src\SDL2\Input\SDL2_GamePad.cs" />
