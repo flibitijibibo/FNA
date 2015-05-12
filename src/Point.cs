@@ -75,14 +75,14 @@ namespace Microsoft.Xna.Framework
 
 		#region Private Static Variables
 
-		private static Point zeroPoint = new Point();
+		private static readonly Point zeroPoint = new Point();
 
 		#endregion
 
 		#region Public Constructors
 
 		/// <summary>
-		/// Creates a new instance of <see cref="Point"/> struct, with the specified position.
+		/// Constructs a point with X and Y from two values.
 		/// </summary>
 		/// <param name="x">The x coordinate in 2d-space.</param>
 		/// <param name="y">The y coordinate in 2d-space.</param>

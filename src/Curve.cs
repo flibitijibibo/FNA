@@ -38,7 +38,7 @@ namespace Microsoft.Xna.Framework
 		}
 
 		/// <summary>
-		/// Gets the collection of curve keys.
+		/// The collection of curve keys.
 		/// </summary>
 		public CurveKeyCollection Keys
 		{
@@ -47,7 +47,7 @@ namespace Microsoft.Xna.Framework
 		}
 
 		/// <summary>
-		/// Gets or sets how to handle weighting values that are greater than the last control point in the curve.
+		/// Defines how to handle weighting values that are greater than the last control point in the curve.
 		/// </summary>
 		public CurveLoopType PostLoop
 		{
@@ -56,7 +56,7 @@ namespace Microsoft.Xna.Framework
 		}
 
 		/// <summary>
-		/// Gets or sets how to handle weighting values that are less than the first control point in the curve.
+		/// Defines how to handle weighting values that are less than the first control point in the curve.
 		/// </summary>
 		public CurveLoopType PreLoop
 		{
@@ -69,7 +69,7 @@ namespace Microsoft.Xna.Framework
 		#region Public Constructors
 
 		/// <summary>
-		/// Creates a new instance of <see cref="Curve"/> class.
+		/// Constructs a curve.
 		/// </summary>
 		public Curve()
 		{

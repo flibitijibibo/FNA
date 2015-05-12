@@ -148,11 +148,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			GL_R32F =				0x822E,
 			GL_RG16F =				0x822F,
 			GL_RG32F =				0x8230,
-			GL_RG8I =				0x8237,
 			GL_RGBA32F =				0x8814,
 			GL_RGBA16F =				0x881A,
 			GL_DEPTH24_STENCIL8 =			0x88F0,
-			GL_RGBA8I =				0x8D8E,
 			GL_COMPRESSED_TEXTURE_FORMATS =		0x86A3,
 			GL_COMPRESSED_RGBA_S3TC_DXT1_EXT =	0x83F1,
 			GL_COMPRESSED_RGBA_S3TC_DXT3_EXT =	0x83F2,
@@ -1061,8 +1059,12 @@ namespace Microsoft.Xna.Framework.Graphics
 				throw new NoSuitableGraphicsDeviceException("OpenGL framebuffer support is required!");
 			}
 
-			/* ARB_instanced_arrays/ARB_draw_instanced are almost optional. */
-			SupportsHardwareInstancing = true;
+			/* ARB_instanced_arrays/ARB_draw_instanced are almost optional.
+			 * While we do not directly call glVertexAttribDivisor ourselves,
+			 * we still need to check for ARB_instanced_arrays support.
+			 * -flibit
+			 */
+			SupportsHardwareInstancing = SDL.SDL_GL_GetProcAddress("glVertexAttribDivisor") != IntPtr.Zero;
 			try
 			{
 				glDrawElementsInstanced = (DrawElementsInstanced) Marshal.GetDelegateForFunctionPointer(
@@ -1151,15 +1153,10 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		private IntPtr TryGetFramebufferEP(string ep)
 		{
-			IntPtr result;
-			result = SDL.SDL_GL_GetProcAddress(ep);
+			IntPtr result = SDL.SDL_GL_GetProcAddress(ep);
 			if (result == IntPtr.Zero)
 			{
 				result = SDL.SDL_GL_GetProcAddress(ep + "EXT");
-				if (result == IntPtr.Zero)
-				{
-					throw new NoSuitableGraphicsDeviceException();
-				}
 			}
 			return result;
 		}

@@ -1075,16 +1075,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			Viewport viewport = GraphicsDevice.Viewport;
 
-			/* FIXME: The following const value is OpenGL-specific!
-			 * We're essentially switching it from a right-handed matrix to a
-			 * left-handed matrix. This allows depths to be accurate for OpenGL
-			 * renderers without having to actually change any data on the game
-			 * side. If you use Ortho in your game, you may have to do this too!
-			 * -flibit
-			 */
-			const float depthHand = 1.0f; // Could be -1.0f for D3D!
-
-			// Inlined CreateOrthoGraphicOffCenter
+			// Inlined CreateOrthographicOffCenter
 			Matrix projection = new Matrix(
 				(float) (2.0 / (double) viewport.Width),
 				0.0f,
@@ -1096,7 +1087,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				0.0f,
 				0.0f,
 				0.0f,
-				depthHand,
+				1.0f,
 				0.0f,
 				-1.0f,
 				1.0f,
