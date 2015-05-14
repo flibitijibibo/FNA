@@ -2761,7 +2761,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			int y;
 			int w;
 			int h;
-			if (!rect.HasValue)
+			if (rect != null)
 			{
 				x = rect.Value.X;
 				y = rect.Value.Y;
