@@ -179,7 +179,7 @@ namespace Microsoft.Xna.Framework
 			string mappingsDB = Path.Combine(
 				TitleContainer.Location,
 				"gamecontrollerdb.txt"
-			);;
+			);
 			if (File.Exists(mappingsDB))
 			{
 				SDL.SDL_GameControllerAddMappingsFromFile(
