@@ -175,6 +175,18 @@ namespace Microsoft.Xna.Framework
 				);
 			}
 
+			// If available, load the SDL_GameControllerDB
+			string mappingsDB = Path.Combine(
+				TitleContainer.Location,
+				"gamecontrollerdb.txt"
+			);;
+			if (File.Exists(mappingsDB))
+			{
+				SDL.SDL_GameControllerAddMappingsFromFile(
+					mappingsDB
+				);
+			}
+
 			// Set and initialize the SDL2 window
 			Window = new SDL2_GameWindow();
 
