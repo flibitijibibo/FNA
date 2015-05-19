@@ -177,30 +177,6 @@ namespace Microsoft.Xna.Framework
 
 		#endregion
 
-		#region Internal Properties
-
-		internal GraphicsDeviceManager graphicsDeviceManager
-		{
-			get
-			{
-				if (_graphicsDeviceManager == null)
-				{
-					_graphicsDeviceManager = (IGraphicsDeviceManager)
-						Services.GetService(typeof(IGraphicsDeviceManager));
-
-					if (_graphicsDeviceManager == null)
-					{
-						throw new InvalidOperationException(
-							"No Graphics Device Manager"
-						);
-					}
-				}
-				return (GraphicsDeviceManager)_graphicsDeviceManager;
-			}
-		}
-
-		#endregion
-
 		#region Internal Fields
 
 		internal static Game Instance = null;

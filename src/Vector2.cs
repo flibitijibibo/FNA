@@ -259,7 +259,7 @@ namespace Microsoft.Xna.Framework
 		/// <param name="value3">The third vector of 2d-triangle.</param>
 		/// <param name="amount1">Barycentric scalar <c>b2</c> which represents a weighting factor towards second vector of 2d-triangle.</param>
 		/// <param name="amount2">Barycentric scalar <c>b3</c> which represents a weighting factor towards third vector of 2d-triangle.</param>
-		/// <returns>A cartesian translation of barycentric coordinates.</returns>
+		/// <returns>The cartesian translation of barycentric coordinates.</returns>
 		public static Vector2 Barycentric(
 			Vector2 value1,
 			Vector2 value2,
@@ -281,7 +281,7 @@ namespace Microsoft.Xna.Framework
 		/// <param name="value3">The third vector of 2d-triangle.</param>
 		/// <param name="amount1">Barycentric scalar <c>b2</c> which represents a weighting factor towards second vector of 2d-triangle.</param>
 		/// <param name="amount2">Barycentric scalar <c>b3</c> which represents a weighting factor towards third vector of 2d-triangle.</param>
-		/// <param name="result">A cartesian translation of barycentric coordinates as an output parameter.</param>
+		/// <param name="result">The cartesian translation of barycentric coordinates as an output parameter.</param>
 		public static void Barycentric(
 			ref Vector2 value1,
 			ref Vector2 value2,
@@ -372,8 +372,8 @@ namespace Microsoft.Xna.Framework
 		/// <summary>
 		/// Returns the distance between two vectors.
 		/// </summary>
-		/// <param name="value1">The first <see cref="Vector2"/>.</param>
-		/// <param name="value2">The second <see cref="Vector2"/>.</param>
+		/// <param name="value1">The first vector.</param>
+		/// <param name="value2">The second vector.</param>
 		/// <returns>The distance between two vectors.</returns>
 		public static float Distance(Vector2 value1, Vector2 value2)
 		{
@@ -384,8 +384,8 @@ namespace Microsoft.Xna.Framework
 		/// <summary>
 		/// Returns the distance between two vectors.
 		/// </summary>
-		/// <param name="value1">The first <see cref="Vector2"/>.</param>
-		/// <param name="value2">The second <see cref="Vector2"/>.</param>
+		/// <param name="value1">The first vector.</param>
+		/// <param name="value2">The second vector.</param>
 		/// <param name="result">The distance between two vectors as an output parameter.</param>
 		public static void Distance(ref Vector2 value1, ref Vector2 value2, out float result)
 		{
@@ -396,8 +396,8 @@ namespace Microsoft.Xna.Framework
 		/// <summary>
 		/// Returns the squared distance between two vectors.
 		/// </summary>
-		/// <param name="value1">The first <see cref="Vector2"/>.</param>
-		/// <param name="value2">The second <see cref="Vector2"/>.</param>
+		/// <param name="value1">The first vector.</param>
+		/// <param name="value2">The second vector.</param>
 		/// <returns>The squared distance between two vectors.</returns>
 		public static float DistanceSquared(Vector2 value1, Vector2 value2)
 		{
@@ -408,8 +408,8 @@ namespace Microsoft.Xna.Framework
 		/// <summary>
 		/// Returns the squared distance between two vectors.
 		/// </summary>
-		/// <param name="value1">The first <see cref="Vector2"/>.</param>
-		/// <param name="value2">The second <see cref="Vector2"/>.</param>
+		/// <param name="value1">The first vector.</param>
+		/// <param name="value2">The second vector.</param>
 		/// <param name="result">The squared distance between two vectors as an output parameter.</param>
 		public static void DistanceSquared(
 			ref Vector2 value1,
@@ -475,8 +475,8 @@ namespace Microsoft.Xna.Framework
 		/// <summary>
 		/// Returns a dot product of two vectors.
 		/// </summary>
-		/// <param name="value1">The first <see cref="Vector2"/>.</param>
-		/// <param name="value2">The second <see cref="Vector2"/>.</param>
+		/// <param name="value1">The first vector.</param>
+		/// <param name="value2">The second vector.</param>
 		/// <returns>The dot product of two vectors.</returns>
 		public static float Dot(Vector2 value1, Vector2 value2)
 		{
@@ -486,8 +486,8 @@ namespace Microsoft.Xna.Framework
 		/// <summary>
 		/// Returns a dot product of two vectors.
 		/// </summary>
-		/// <param name="value1">The first <see cref="Vector2"/>.</param>
-		/// <param name="value2">The second <see cref="Vector2"/>.</param>
+		/// <param name="value1">The first vector.</param>
+		/// <param name="value2">The second vector.</param>
 		/// <param name="result">The dot product of two vectors as an output parameter.</param>
 		public static void Dot(ref Vector2 value1, ref Vector2 value2, out float result)
 		{
@@ -539,8 +539,8 @@ namespace Microsoft.Xna.Framework
 		/// <summary>
 		/// Creates a new <see cref="Vector2"/> that contains linear interpolation of the specified vectors.
 		/// </summary>
-		/// <param name="value1">The first <see cref="Vector2"/>.</param>
-		/// <param name="value2">The second <see cref="Vector2"/>.</param>
+		/// <param name="value1">The first vector.</param>
+		/// <param name="value2">The second vector.</param>
 		/// <param name="amount">Weighting value(between 0.0 and 1.0).</param>
 		/// <returns>The result of linear interpolation of the specified vectors.</returns>
 		public static Vector2 Lerp(Vector2 value1, Vector2 value2, float amount)
@@ -554,8 +554,8 @@ namespace Microsoft.Xna.Framework
 		/// <summary>
 		/// Creates a new <see cref="Vector2"/> that contains linear interpolation of the specified vectors.
 		/// </summary>
-		/// <param name="value1">The first <see cref="Vector2"/>.</param>
-		/// <param name="value2">The second <see cref="Vector2"/>.</param>
+		/// <param name="value1">The first vector.</param>
+		/// <param name="value2">The second vector.</param>
 		/// <param name="amount">Weighting value(between 0.0 and 1.0).</param>
 		/// <param name="result">The result of linear interpolation of the specified vectors as an output parameter.</param>
 		public static void Lerp(
@@ -571,8 +571,8 @@ namespace Microsoft.Xna.Framework
 		/// <summary>
 		/// Creates a new <see cref="Vector2"/> that contains a maximal values from the two vectors.
 		/// </summary>
-		/// <param name="value1">The first <see cref="Vector2"/>.</param>
-		/// <param name="value2">The second <see cref="Vector2"/>.</param>
+		/// <param name="value1">The first vector.</param>
+		/// <param name="value2">The second vector.</param>
 		/// <returns>The <see cref="Vector2"/> with maximal values from the two vectors.</returns>
 		public static Vector2 Max(Vector2 value1, Vector2 value2)
 		{
@@ -585,8 +585,8 @@ namespace Microsoft.Xna.Framework
 		/// <summary>
 		/// Creates a new <see cref="Vector2"/> that contains a maximal values from the two vectors.
 		/// </summary>
-		/// <param name="value1">The first <see cref="Vector2"/>.</param>
-		/// <param name="value2">The second <see cref="Vector2"/>.</param>
+		/// <param name="value1">The first vector.</param>
+		/// <param name="value2">The second vector.</param>
 		/// <param name="result">The <see cref="Vector2"/> with maximal values from the two vectors as an output parameter.</param>
 		public static void Max(ref Vector2 value1, ref Vector2 value2, out Vector2 result)
 		{
@@ -597,8 +597,8 @@ namespace Microsoft.Xna.Framework
 		/// <summary>
 		/// Creates a new <see cref="Vector2"/> that contains a minimal values from the two vectors.
 		/// </summary>
-		/// <param name="value1">The first <see cref="Vector2"/>.</param>
-		/// <param name="value2">The second <see cref="Vector2"/>.</param>
+		/// <param name="value1">The first vector.</param>
+		/// <param name="value2">The second vector.</param>
 		/// <returns>The <see cref="Vector2"/> with minimal values from the two vectors.</returns>
 		public static Vector2 Min(Vector2 value1, Vector2 value2)
 		{
@@ -611,8 +611,8 @@ namespace Microsoft.Xna.Framework
 		/// <summary>
 		/// Creates a new <see cref="Vector2"/> that contains a minimal values from the two vectors.
 		/// </summary>
-		/// <param name="value1">The first <see cref="Vector2"/>.</param>
-		/// <param name="value2">The second <see cref="Vector2"/>.</param>
+		/// <param name="value1">The first vector.</param>
+		/// <param name="value2">The second vector.</param>
 		/// <param name="result">The <see cref="Vector2"/> with minimal values from the two vectors as an output parameter.</param>
 		public static void Min(ref Vector2 value1, ref Vector2 value2, out Vector2 result)
 		{
@@ -625,7 +625,7 @@ namespace Microsoft.Xna.Framework
 		/// </summary>
 		/// <param name="value1">Source <see cref="Vector2"/>.</param>
 		/// <param name="value2">Source <see cref="Vector2"/>.</param>
-		/// <returns>Result of the vector multiplication.</returns>
+		/// <returns>The result of the vector multiplication.</returns>
 		public static Vector2 Multiply(Vector2 value1, Vector2 value2)
 		{
 			value1.X *= value2.X;
@@ -638,7 +638,7 @@ namespace Microsoft.Xna.Framework
 		/// </summary>
 		/// <param name="value1">Source <see cref="Vector2"/>.</param>
 		/// <param name="scaleFactor">Scalar value.</param>
-		/// <returns>Result of the vector multiplication with a scalar.</returns>
+		/// <returns>The result of the vector multiplication with a scalar.</returns>
 		public static Vector2 Multiply(Vector2 value1, float scaleFactor)
 		{
 			value1.X *= scaleFactor;
@@ -651,7 +651,7 @@ namespace Microsoft.Xna.Framework
 		/// </summary>
 		/// <param name="value1">Source <see cref="Vector2"/>.</param>
 		/// <param name="scaleFactor">Scalar value.</param>
-		/// <param name="result">Result of the multiplication with a scalar as an output parameter.</param>
+		/// <param name="result">The result of the multiplication with a scalar as an output parameter.</param>
 		public static void Multiply(ref Vector2 value1, float scaleFactor, out Vector2 result)
 		{
 			result.X = value1.X * scaleFactor;
@@ -663,7 +663,7 @@ namespace Microsoft.Xna.Framework
 		/// </summary>
 		/// <param name="value1">Source <see cref="Vector2"/>.</param>
 		/// <param name="value2">Source <see cref="Vector2"/>.</param>
-		/// <param name="result">Result of the vector multiplication as an output parameter.</param>
+		/// <param name="result">The result of the vector multiplication as an output parameter.</param>
 		public static void Multiply(ref Vector2 value1, ref Vector2 value2, out Vector2 result)
 		{
 			result.X = value1.X * value2.X;
@@ -675,7 +675,7 @@ namespace Microsoft.Xna.Framework
 		/// direction of <paramref name="value"/>.
 		/// </summary>
 		/// <param name="value">Source <see cref="Vector2"/>.</param>
-		/// <returns>Result of the vector inversion.</returns>
+		/// <returns>The result of the vector inversion.</returns>
 		public static Vector2 Negate(Vector2 value)
 		{
 			value.X = -value.X;
@@ -688,7 +688,7 @@ namespace Microsoft.Xna.Framework
 		/// direction of <paramref name="value"/> in <paramref name="result"/>.
 		/// </summary>
 		/// <param name="value">Source <see cref="Vector2"/>.</param>
-		/// <param name="result">Result of the vector inversion as an output parameter.</param>
+		/// <param name="result">The result of the vector inversion as an output parameter.</param>
 		public static void Negate(ref Vector2 value, out Vector2 result)
 		{
 			result.X = -value.X;
@@ -783,8 +783,8 @@ namespace Microsoft.Xna.Framework
 		/// <summary>
 		/// Creates a new <see cref="Vector2"/> that contains subtraction of on <see cref="Vector2"/> from a another.
 		/// </summary>
-		/// <param name="value1">The first <see cref="Vector2"/>.</param>
-		/// <param name="value2">The second <see cref="Vector2"/>.</param>
+		/// <param name="value1">Source <see cref="Vector2"/>.</param>
+		/// <param name="value2">Source <see cref="Vector2"/>.</param>
 		/// <returns>The result of the vector subtraction.</returns>
 		public static Vector2 Subtract(Vector2 value1, Vector2 value2)
 		{
@@ -796,8 +796,8 @@ namespace Microsoft.Xna.Framework
 		/// <summary>
 		/// Creates a new <see cref="Vector2"/> that contains subtraction of on <see cref="Vector2"/> from a another.
 		/// </summary>
-		/// <param name="value1">The first <see cref="Vector2"/>.</param>
-		/// <param name="value2">The second <see cref="Vector2"/>.</param>
+		/// <param name="value1">Source <see cref="Vector2"/>.</param>
+		/// <param name="value2">Source <see cref="Vector2"/>.</param>
 		/// <param name="result">The result of the vector subtraction as an output parameter.</param>
 		public static void Subtract(ref Vector2 value1, ref Vector2 value2, out Vector2 result)
 		{

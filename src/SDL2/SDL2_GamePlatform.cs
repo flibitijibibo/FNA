@@ -175,6 +175,18 @@ namespace Microsoft.Xna.Framework
 				);
 			}
 
+			// If available, load the SDL_GameControllerDB
+			string mappingsDB = Path.Combine(
+				TitleContainer.Location,
+				"gamecontrollerdb.txt"
+			);
+			if (File.Exists(mappingsDB))
+			{
+				SDL.SDL_GameControllerAddMappingsFromFile(
+					mappingsDB
+				);
+			}
+
 			// Set and initialize the SDL2 window
 			Window = new SDL2_GameWindow();
 
@@ -382,17 +394,21 @@ namespace Microsoft.Xna.Framework
 							Mouse.INTERNAL_WindowHeight = evt.window.data2;
 
 							// Need to reset the graphics device any time the window size changes
-							if (Game.graphicsDeviceManager.IsFullScreen)
+							GraphicsDeviceManager gdm = Game.Services.GetService(
+								typeof(IGraphicsDeviceService)
+							) as GraphicsDeviceManager;
+							// FIXME: gdm == null? -flibit
+							if (gdm.IsFullScreen)
 							{
 								GraphicsDevice device = Game.GraphicsDevice;
-								Game.graphicsDeviceManager.INTERNAL_ResizeGraphicsDevice(
+								gdm.INTERNAL_ResizeGraphicsDevice(
 									device.GLDevice.Backbuffer.Width,
 									device.GLDevice.Backbuffer.Height
 								);
 							}
 							else
 							{
-								Game.graphicsDeviceManager.INTERNAL_ResizeGraphicsDevice(
+								gdm.INTERNAL_ResizeGraphicsDevice(
 									evt.window.data1,
 									evt.window.data2
 								);
