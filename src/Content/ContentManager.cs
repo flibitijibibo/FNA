@@ -80,7 +80,7 @@ namespace Microsoft.Xna.Framework.Content
 			'm', // WindowsPhone
 			'i', // iOS
 			'a', // Android
-			'l', // Linux
+			'd', // DesktopGL
 			'X', // MacOSX
 			'W', // WindowsStoreApp
 			'n', // NativeClient
@@ -89,7 +89,8 @@ namespace Microsoft.Xna.Framework.Content
 			'M', // WindowsPhone8
 			'r', // RaspberryPi
 			'P', // Playstation 4
-			'g', // Windows (OpenGL)
+			'g', // WindowsGL (deprecated for DesktopGL)
+			'l', // Linux (deprecated for DesktopGL)
 		};
 
 		#endregion
