@@ -12,7 +12,7 @@ using System.Resources;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("FNA")]
-[assembly: AssemblyCopyright("Copyright (c) 2011-2014")]
+[assembly: AssemblyCopyright("Copyright (c) 2011-2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
