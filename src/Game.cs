@@ -166,7 +166,6 @@ namespace Microsoft.Xna.Framework
 			}
 		}
 
-		[CLSCompliant(false)]
 		public GameWindow Window
 		{
 			get
