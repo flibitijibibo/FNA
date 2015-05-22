@@ -154,7 +154,7 @@ namespace Microsoft.Xna.Framework.Audio
 			);
 
 			// If we're already playing, queue immediately.
-			if (State == SoundState.Playing)
+			if (INTERNAL_alSource != null)
 			{
 				AudioDevice.ALDevice.QueueSourceBuffer(
 					INTERNAL_alSource,
@@ -235,17 +235,17 @@ namespace Microsoft.Xna.Framework.Audio
 			IsLooped = IsLooped;
 			Pitch = Pitch;
 
+			// ... but wait! What if we need moar buffers?
+			if (PendingBufferCount <= 2 && BufferNeeded != null)
+			{
+				BufferNeeded(this, null);
+			}
+
 			// Finally.
 			AudioDevice.ALDevice.PlaySource(INTERNAL_alSource);
 			if (isManaged)
 			{
 				AudioDevice.DynamicInstancePool.Add(this);
-			}
-
-			// ... but wait! What if we need moar buffers?
-			if (PendingBufferCount <= 2 && BufferNeeded != null)
-			{
-				BufferNeeded(this, null);
 			}
 		}
 
@@ -331,7 +331,7 @@ namespace Microsoft.Xna.Framework.Audio
 			);
 
 			// If we're already playing, queue immediately.
-			if (State == SoundState.Playing)
+			if (INTERNAL_alSource != null)
 			{
 				AudioDevice.ALDevice.QueueSourceBuffer(
 					INTERNAL_alSource,
