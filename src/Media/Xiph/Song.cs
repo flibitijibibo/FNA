@@ -218,8 +218,6 @@ namespace Microsoft.Xna.Framework.Media
 		internal void Play()
 		{
 			eof = false;
-			QueueBuffer(null, EventArgs.Empty);
-			QueueBuffer(null, EventArgs.Empty);
 			soundStream.BufferNeeded += QueueBuffer;
 
 #if NO_STREAM_THREAD
@@ -327,8 +325,6 @@ namespace Microsoft.Xna.Framework.Media
 							"Stopped playing Song before EOF!" +
 							" Hastily rebooting playback, expect jitteriness!"
 						);
-						QueueBuffer(null, EventArgs.Empty);
-						QueueBuffer(null, EventArgs.Empty);
 						soundStream.Play(false);
 					}
 				}

@@ -32,6 +32,8 @@ namespace Microsoft.Xna.Framework.Audio
 		private int sampleRate;
 		private AudioChannels channels;
 
+		private const int MINIMUM_BUFFER_CHECK = 3;
+
 		#endregion
 
 		#region Private AL Variables
@@ -199,6 +201,7 @@ namespace Microsoft.Xna.Framework.Audio
 			while (queuedBuffers.Count > 0)
 			{
 				availableBuffers.Enqueue(queuedBuffers.Dequeue());
+				PendingBufferCount -= 1;
 			}
 
 			INTERNAL_alSource = AudioDevice.ALDevice.GenSource();
@@ -236,8 +239,11 @@ namespace Microsoft.Xna.Framework.Audio
 			Pitch = Pitch;
 
 			// ... but wait! What if we need moar buffers?
-			if (PendingBufferCount <= 2 && BufferNeeded != null)
-			{
+			for (
+				int i = MINIMUM_BUFFER_CHECK - PendingBufferCount;
+				(i > 0) && BufferNeeded != null;
+				i -= 1
+			) {
 				BufferNeeded(this, null);
 			}
 
@@ -295,8 +301,11 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 
 			// Do we need even moar buffers?
-			if (PendingBufferCount <= 2 && BufferNeeded != null)
-			{
+			for (
+				int i = MINIMUM_BUFFER_CHECK - PendingBufferCount;
+				(i > 0) && BufferNeeded != null;
+				i -= 1
+			) {
 				BufferNeeded(this, null);
 			}
 
