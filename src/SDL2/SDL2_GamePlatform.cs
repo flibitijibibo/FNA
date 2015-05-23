@@ -769,6 +769,11 @@ namespace Microsoft.Xna.Framework
 			stream.Write(pngOut, 0, size);
 		}
 
+		internal override Keys GetKeyFromScancode(Keys scancode)
+		{
+			return SDL2_KeyboardUtil.KeyFromScancode(scancode);
+		}
+
 		#endregion
 
 		#region Protected GamePlatform Methods

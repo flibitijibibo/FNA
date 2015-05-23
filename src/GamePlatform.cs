@@ -304,6 +304,8 @@ namespace Microsoft.Xna.Framework
 			byte[] data
 		);
 
+		internal abstract Keys GetKeyFromScancode(Keys scancode);
+
 		#endregion
 
 		#region Private Methods

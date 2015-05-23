@@ -26,6 +26,7 @@ namespace Microsoft.Xna.Framework.Input
 		 */
 		private static Dictionary<int, Keys> INTERNAL_keyMap;
 		private static Dictionary<int, Keys> INTERNAL_scanMap;
+		private static Dictionary<int, SDL.SDL_Scancode> INTERNAL_xnaMap;
 
 		#endregion
 
@@ -36,6 +37,7 @@ namespace Microsoft.Xna.Framework.Input
 			// Create the dictionaries...
 			INTERNAL_keyMap = new Dictionary<int, Keys>();
 			INTERNAL_scanMap = new Dictionary<int, Keys>();
+			INTERNAL_xnaMap = new Dictionary<int, SDL.SDL_Scancode>();
 
 			// Then fill them with known keys that match up to XNA Keys.
 
@@ -280,11 +282,131 @@ namespace Microsoft.Xna.Framework.Input
 			INTERNAL_scanMap.Add((int) SDL.SDL_Scancode.SDL_SCANCODE_TAB,		Keys.Tab);
 			INTERNAL_scanMap.Add((int) SDL.SDL_Scancode.SDL_SCANCODE_GRAVE,		Keys.OemTilde);
 			INTERNAL_scanMap.Add((int) SDL.SDL_Scancode.SDL_SCANCODE_UNKNOWN,	Keys.None);
+
+			// Also, fill up another with the reverse, for scancode->keycode lookups
+
+			INTERNAL_xnaMap.Add((int) Keys.A,			SDL.SDL_Scancode.SDL_SCANCODE_A);
+			INTERNAL_xnaMap.Add((int) Keys.B,			SDL.SDL_Scancode.SDL_SCANCODE_B);
+			INTERNAL_xnaMap.Add((int) Keys.C,			SDL.SDL_Scancode.SDL_SCANCODE_C);
+			INTERNAL_xnaMap.Add((int) Keys.D,			SDL.SDL_Scancode.SDL_SCANCODE_D);
+			INTERNAL_xnaMap.Add((int) Keys.E,			SDL.SDL_Scancode.SDL_SCANCODE_E);
+			INTERNAL_xnaMap.Add((int) Keys.F,			SDL.SDL_Scancode.SDL_SCANCODE_F);
+			INTERNAL_xnaMap.Add((int) Keys.G,			SDL.SDL_Scancode.SDL_SCANCODE_G);
+			INTERNAL_xnaMap.Add((int) Keys.H,			SDL.SDL_Scancode.SDL_SCANCODE_H);
+			INTERNAL_xnaMap.Add((int) Keys.I,			SDL.SDL_Scancode.SDL_SCANCODE_I);
+			INTERNAL_xnaMap.Add((int) Keys.J,			SDL.SDL_Scancode.SDL_SCANCODE_J);
+			INTERNAL_xnaMap.Add((int) Keys.K,			SDL.SDL_Scancode.SDL_SCANCODE_K);
+			INTERNAL_xnaMap.Add((int) Keys.L,			SDL.SDL_Scancode.SDL_SCANCODE_L);
+			INTERNAL_xnaMap.Add((int) Keys.M,			SDL.SDL_Scancode.SDL_SCANCODE_M);
+			INTERNAL_xnaMap.Add((int) Keys.N,			SDL.SDL_Scancode.SDL_SCANCODE_N);
+			INTERNAL_xnaMap.Add((int) Keys.O,			SDL.SDL_Scancode.SDL_SCANCODE_O);
+			INTERNAL_xnaMap.Add((int) Keys.P,			SDL.SDL_Scancode.SDL_SCANCODE_P);
+			INTERNAL_xnaMap.Add((int) Keys.Q,			SDL.SDL_Scancode.SDL_SCANCODE_Q);
+			INTERNAL_xnaMap.Add((int) Keys.R,			SDL.SDL_Scancode.SDL_SCANCODE_R);
+			INTERNAL_xnaMap.Add((int) Keys.S,			SDL.SDL_Scancode.SDL_SCANCODE_S);
+			INTERNAL_xnaMap.Add((int) Keys.T,			SDL.SDL_Scancode.SDL_SCANCODE_T);
+			INTERNAL_xnaMap.Add((int) Keys.U,			SDL.SDL_Scancode.SDL_SCANCODE_U);
+			INTERNAL_xnaMap.Add((int) Keys.V,			SDL.SDL_Scancode.SDL_SCANCODE_V);
+			INTERNAL_xnaMap.Add((int) Keys.W,			SDL.SDL_Scancode.SDL_SCANCODE_W);
+			INTERNAL_xnaMap.Add((int) Keys.X,			SDL.SDL_Scancode.SDL_SCANCODE_X);
+			INTERNAL_xnaMap.Add((int) Keys.Y,			SDL.SDL_Scancode.SDL_SCANCODE_Y);
+			INTERNAL_xnaMap.Add((int) Keys.Z,			SDL.SDL_Scancode.SDL_SCANCODE_Z);
+			INTERNAL_xnaMap.Add((int) Keys.D0,			SDL.SDL_Scancode.SDL_SCANCODE_0);
+			INTERNAL_xnaMap.Add((int) Keys.D1,			SDL.SDL_Scancode.SDL_SCANCODE_1);
+			INTERNAL_xnaMap.Add((int) Keys.D2,			SDL.SDL_Scancode.SDL_SCANCODE_2);
+			INTERNAL_xnaMap.Add((int) Keys.D3,			SDL.SDL_Scancode.SDL_SCANCODE_3);
+			INTERNAL_xnaMap.Add((int) Keys.D4,			SDL.SDL_Scancode.SDL_SCANCODE_4);
+			INTERNAL_xnaMap.Add((int) Keys.D5,			SDL.SDL_Scancode.SDL_SCANCODE_5);
+			INTERNAL_xnaMap.Add((int) Keys.D6,			SDL.SDL_Scancode.SDL_SCANCODE_6);
+			INTERNAL_xnaMap.Add((int) Keys.D7,			SDL.SDL_Scancode.SDL_SCANCODE_7);
+			INTERNAL_xnaMap.Add((int) Keys.D8,			SDL.SDL_Scancode.SDL_SCANCODE_8);
+			INTERNAL_xnaMap.Add((int) Keys.D9,			SDL.SDL_Scancode.SDL_SCANCODE_9);
+			INTERNAL_xnaMap.Add((int) Keys.NumPad0,			SDL.SDL_Scancode.SDL_SCANCODE_KP_0);
+			INTERNAL_xnaMap.Add((int) Keys.NumPad1,			SDL.SDL_Scancode.SDL_SCANCODE_KP_1);
+			INTERNAL_xnaMap.Add((int) Keys.NumPad2,			SDL.SDL_Scancode.SDL_SCANCODE_KP_2);
+			INTERNAL_xnaMap.Add((int) Keys.NumPad3,			SDL.SDL_Scancode.SDL_SCANCODE_KP_3);
+			INTERNAL_xnaMap.Add((int) Keys.NumPad4,			SDL.SDL_Scancode.SDL_SCANCODE_KP_4);
+			INTERNAL_xnaMap.Add((int) Keys.NumPad5,			SDL.SDL_Scancode.SDL_SCANCODE_KP_5);
+			INTERNAL_xnaMap.Add((int) Keys.NumPad6,			SDL.SDL_Scancode.SDL_SCANCODE_KP_6);
+			INTERNAL_xnaMap.Add((int) Keys.NumPad7,			SDL.SDL_Scancode.SDL_SCANCODE_KP_7);
+			INTERNAL_xnaMap.Add((int) Keys.NumPad8,			SDL.SDL_Scancode.SDL_SCANCODE_KP_8);
+			INTERNAL_xnaMap.Add((int) Keys.NumPad9,			SDL.SDL_Scancode.SDL_SCANCODE_KP_9);
+			INTERNAL_xnaMap.Add((int) Keys.OemClear,		SDL.SDL_Scancode.SDL_SCANCODE_KP_CLEAR);
+			INTERNAL_xnaMap.Add((int) Keys.Decimal,			SDL.SDL_Scancode.SDL_SCANCODE_KP_DECIMAL);
+			INTERNAL_xnaMap.Add((int) Keys.Divide,			SDL.SDL_Scancode.SDL_SCANCODE_KP_DIVIDE);
+			INTERNAL_xnaMap.Add((int) Keys.Multiply,		SDL.SDL_Scancode.SDL_SCANCODE_KP_MULTIPLY);
+			INTERNAL_xnaMap.Add((int) Keys.Add,			SDL.SDL_Scancode.SDL_SCANCODE_KP_PLUS);
+			INTERNAL_xnaMap.Add((int) Keys.F1,			SDL.SDL_Scancode.SDL_SCANCODE_F1);
+			INTERNAL_xnaMap.Add((int) Keys.F2,			SDL.SDL_Scancode.SDL_SCANCODE_F2);
+			INTERNAL_xnaMap.Add((int) Keys.F3,			SDL.SDL_Scancode.SDL_SCANCODE_F3);
+			INTERNAL_xnaMap.Add((int) Keys.F4,			SDL.SDL_Scancode.SDL_SCANCODE_F4);
+			INTERNAL_xnaMap.Add((int) Keys.F5,			SDL.SDL_Scancode.SDL_SCANCODE_F5);
+			INTERNAL_xnaMap.Add((int) Keys.F6,			SDL.SDL_Scancode.SDL_SCANCODE_F6);
+			INTERNAL_xnaMap.Add((int) Keys.F7,			SDL.SDL_Scancode.SDL_SCANCODE_F7);
+			INTERNAL_xnaMap.Add((int) Keys.F8,			SDL.SDL_Scancode.SDL_SCANCODE_F8);
+			INTERNAL_xnaMap.Add((int) Keys.F9,			SDL.SDL_Scancode.SDL_SCANCODE_F9);
+			INTERNAL_xnaMap.Add((int) Keys.F10,			SDL.SDL_Scancode.SDL_SCANCODE_F10);
+			INTERNAL_xnaMap.Add((int) Keys.F11,			SDL.SDL_Scancode.SDL_SCANCODE_F11);
+			INTERNAL_xnaMap.Add((int) Keys.F12,			SDL.SDL_Scancode.SDL_SCANCODE_F12);
+			INTERNAL_xnaMap.Add((int) Keys.F13,			SDL.SDL_Scancode.SDL_SCANCODE_F13);
+			INTERNAL_xnaMap.Add((int) Keys.F14,			SDL.SDL_Scancode.SDL_SCANCODE_F14);
+			INTERNAL_xnaMap.Add((int) Keys.F15,			SDL.SDL_Scancode.SDL_SCANCODE_F15);
+			INTERNAL_xnaMap.Add((int) Keys.F16,			SDL.SDL_Scancode.SDL_SCANCODE_F16);
+			INTERNAL_xnaMap.Add((int) Keys.F17,			SDL.SDL_Scancode.SDL_SCANCODE_F17);
+			INTERNAL_xnaMap.Add((int) Keys.F18,			SDL.SDL_Scancode.SDL_SCANCODE_F18);
+			INTERNAL_xnaMap.Add((int) Keys.F19,			SDL.SDL_Scancode.SDL_SCANCODE_F19);
+			INTERNAL_xnaMap.Add((int) Keys.F20,			SDL.SDL_Scancode.SDL_SCANCODE_F20);
+			INTERNAL_xnaMap.Add((int) Keys.F21,			SDL.SDL_Scancode.SDL_SCANCODE_F21);
+			INTERNAL_xnaMap.Add((int) Keys.F22,			SDL.SDL_Scancode.SDL_SCANCODE_F22);
+			INTERNAL_xnaMap.Add((int) Keys.F23,			SDL.SDL_Scancode.SDL_SCANCODE_F23);
+			INTERNAL_xnaMap.Add((int) Keys.F24,			SDL.SDL_Scancode.SDL_SCANCODE_F24);
+			INTERNAL_xnaMap.Add((int) Keys.Space,			SDL.SDL_Scancode.SDL_SCANCODE_SPACE);
+			INTERNAL_xnaMap.Add((int) Keys.Up,			SDL.SDL_Scancode.SDL_SCANCODE_UP);
+			INTERNAL_xnaMap.Add((int) Keys.Down,			SDL.SDL_Scancode.SDL_SCANCODE_DOWN);
+			INTERNAL_xnaMap.Add((int) Keys.Left,			SDL.SDL_Scancode.SDL_SCANCODE_LEFT);
+			INTERNAL_xnaMap.Add((int) Keys.Right,			SDL.SDL_Scancode.SDL_SCANCODE_RIGHT);
+			INTERNAL_xnaMap.Add((int) Keys.LeftAlt,			SDL.SDL_Scancode.SDL_SCANCODE_LALT);
+			INTERNAL_xnaMap.Add((int) Keys.RightAlt,		SDL.SDL_Scancode.SDL_SCANCODE_RALT);
+			INTERNAL_xnaMap.Add((int) Keys.LeftControl,		SDL.SDL_Scancode.SDL_SCANCODE_LCTRL);
+			INTERNAL_xnaMap.Add((int) Keys.RightControl,		SDL.SDL_Scancode.SDL_SCANCODE_RCTRL);
+			INTERNAL_xnaMap.Add((int) Keys.LeftWindows,		SDL.SDL_Scancode.SDL_SCANCODE_LGUI);
+			INTERNAL_xnaMap.Add((int) Keys.RightWindows,		SDL.SDL_Scancode.SDL_SCANCODE_RGUI);
+			INTERNAL_xnaMap.Add((int) Keys.LeftShift,		SDL.SDL_Scancode.SDL_SCANCODE_LSHIFT);
+			INTERNAL_xnaMap.Add((int) Keys.RightShift,		SDL.SDL_Scancode.SDL_SCANCODE_RSHIFT);
+			INTERNAL_xnaMap.Add((int) Keys.Apps,			SDL.SDL_Scancode.SDL_SCANCODE_APPLICATION);
+			INTERNAL_xnaMap.Add((int) Keys.OemQuestion,		SDL.SDL_Scancode.SDL_SCANCODE_SLASH);
+			INTERNAL_xnaMap.Add((int) Keys.OemBackslash,		SDL.SDL_Scancode.SDL_SCANCODE_BACKSLASH);
+			INTERNAL_xnaMap.Add((int) Keys.OemOpenBrackets,		SDL.SDL_Scancode.SDL_SCANCODE_LEFTBRACKET);
+			INTERNAL_xnaMap.Add((int) Keys.OemCloseBrackets,	SDL.SDL_Scancode.SDL_SCANCODE_RIGHTBRACKET);
+			INTERNAL_xnaMap.Add((int) Keys.CapsLock,		SDL.SDL_Scancode.SDL_SCANCODE_CAPSLOCK);
+			INTERNAL_xnaMap.Add((int) Keys.OemComma,		SDL.SDL_Scancode.SDL_SCANCODE_COMMA);
+			INTERNAL_xnaMap.Add((int) Keys.Delete,			SDL.SDL_Scancode.SDL_SCANCODE_DELETE);
+			INTERNAL_xnaMap.Add((int) Keys.End,			SDL.SDL_Scancode.SDL_SCANCODE_END);
+			INTERNAL_xnaMap.Add((int) Keys.Back,			SDL.SDL_Scancode.SDL_SCANCODE_BACKSPACE);
+			INTERNAL_xnaMap.Add((int) Keys.Enter,			SDL.SDL_Scancode.SDL_SCANCODE_RETURN);
+			INTERNAL_xnaMap.Add((int) Keys.Escape,			SDL.SDL_Scancode.SDL_SCANCODE_ESCAPE);
+			INTERNAL_xnaMap.Add((int) Keys.Home,			SDL.SDL_Scancode.SDL_SCANCODE_HOME);
+			INTERNAL_xnaMap.Add((int) Keys.Insert,			SDL.SDL_Scancode.SDL_SCANCODE_INSERT);
+			INTERNAL_xnaMap.Add((int) Keys.OemMinus,		SDL.SDL_Scancode.SDL_SCANCODE_MINUS);
+			INTERNAL_xnaMap.Add((int) Keys.NumLock,			SDL.SDL_Scancode.SDL_SCANCODE_NUMLOCKCLEAR);
+			INTERNAL_xnaMap.Add((int) Keys.PageUp,			SDL.SDL_Scancode.SDL_SCANCODE_PAGEUP);
+			INTERNAL_xnaMap.Add((int) Keys.PageDown,		SDL.SDL_Scancode.SDL_SCANCODE_PAGEDOWN);
+			INTERNAL_xnaMap.Add((int) Keys.Pause,			SDL.SDL_Scancode.SDL_SCANCODE_PAUSE);
+			INTERNAL_xnaMap.Add((int) Keys.OemPeriod,		SDL.SDL_Scancode.SDL_SCANCODE_PERIOD);
+			INTERNAL_xnaMap.Add((int) Keys.OemPlus,			SDL.SDL_Scancode.SDL_SCANCODE_EQUALS);
+			INTERNAL_xnaMap.Add((int) Keys.PrintScreen,		SDL.SDL_Scancode.SDL_SCANCODE_PRINTSCREEN);
+			INTERNAL_xnaMap.Add((int) Keys.OemQuotes,		SDL.SDL_Scancode.SDL_SCANCODE_APOSTROPHE);
+			INTERNAL_xnaMap.Add((int) Keys.Scroll,			SDL.SDL_Scancode.SDL_SCANCODE_SCROLLLOCK);
+			INTERNAL_xnaMap.Add((int) Keys.OemSemicolon,		SDL.SDL_Scancode.SDL_SCANCODE_SEMICOLON);
+			INTERNAL_xnaMap.Add((int) Keys.Sleep,			SDL.SDL_Scancode.SDL_SCANCODE_SLEEP);
+			INTERNAL_xnaMap.Add((int) Keys.Tab,			SDL.SDL_Scancode.SDL_SCANCODE_TAB);
+			INTERNAL_xnaMap.Add((int) Keys.OemTilde,		SDL.SDL_Scancode.SDL_SCANCODE_GRAVE);
+			INTERNAL_xnaMap.Add((int) Keys.None,			SDL.SDL_Scancode.SDL_SCANCODE_UNKNOWN);
 		}
 
 		#endregion
 
-		#region Public SDL2->XNA Key Conversion Methods
+		#region Public SDL2<->XNA Key Conversion Methods
 
 		public static Keys ToXNA(SDL.SDL_Keycode key)
 		{
@@ -310,6 +432,20 @@ namespace Microsoft.Xna.Framework.Input
 			else
 			{
 				System.Console.WriteLine("SCANCODE MISSING FROM SDL2->XNA DICTIONARY: " + key.ToString());
+				return Keys.None;
+			}
+		}
+
+		public static Keys KeyFromScancode(Keys scancode)
+		{
+			SDL.SDL_Scancode retVal;
+			if (INTERNAL_xnaMap.TryGetValue((int) scancode, out retVal))
+			{
+				return INTERNAL_keyMap[(int) SDL.SDL_GetKeyFromScancode(retVal)];
+			}
+			else
+			{
+				System.Console.WriteLine("SCANCODE MISSING FROM XNA->SDL2 DICTIONARY: " + scancode.ToString());
 				return Keys.None;
 			}
 		}
