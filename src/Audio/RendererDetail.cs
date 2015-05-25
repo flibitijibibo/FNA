@@ -64,12 +64,12 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region Public Static Operator Overloads
 
-		public static bool op_Equality(RendererDetail left, RendererDetail right)
+		public static bool operator==(RendererDetail left, RendererDetail right)
 		{
 			return left.RendererId.Equals(right.RendererId);
 		}
 
-		public static bool op_Inequality(RendererDetail left, RendererDetail right)
+		public static bool operator!=(RendererDetail left, RendererDetail right)
 		{
 			return !left.RendererId.Equals(right.RendererId);
 		}
