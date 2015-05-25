@@ -468,12 +468,6 @@ namespace Microsoft.Xna.Framework.Graphics
 			private set;
 		}
 
-		public int MaxVertexTextureSlots
-		{
-			get;
-			private set;
-		}
-
 		#endregion
 
 		#region Private MojoShader Interop
@@ -579,10 +573,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				Textures[i] = OpenGLTexture.NullTexture;
 			}
 			MaxTextureSlots = numSamplers;
-
-			// Initialize MaxVertexTextureSlots, but no array. You'll see why...
-			glGetIntegerv(GLenum.GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, out numSamplers);
-			MaxVertexTextureSlots = numSamplers;
 
 			// Initialize render target FBO and state arrays
 			int numAttachments;
@@ -1421,20 +1411,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				// Keep this state sane. -flibit
 				glActiveTexture(GLenum.GL_TEXTURE0);
 			}
-		}
-
-		public void VerifyVertexSampler(int index, Texture texture, SamplerState sampler)
-		{
-			/* TODO: Yup, these two are no different right now!
-			 * This is really tough to fix, since the sampler registers
-			 * are shared by the vertex and fragment shaders. This could in
-			 * theory make sense if the vertex shader uses the regular sampler
-			 * registers, but there are of course the vertex sampler registers
-			 * to worry about. When someone actually uses them, fix that case
-			 * and odds are you'll figure out the rest as well.
-			 * -flibit
-			 */
-			VerifySampler(index, texture, sampler);
 		}
 
 		#endregion

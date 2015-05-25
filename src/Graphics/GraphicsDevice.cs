@@ -256,6 +256,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
+		#region Private Vertex Sampler Offset Variable
+
+		private int vertexSamplerStart;
+
+		#endregion
+
 		#region Internal Sampler Change Queue
 
 		private readonly Queue<int> modifiedSamplers = new Queue<int>();
@@ -374,20 +380,23 @@ namespace Microsoft.Xna.Framework.Graphics
 			RasterizerState = RasterizerState.CullCounterClockwise;
 
 			// Initialize the Texture/Sampler state containers
+			int maxTextures = Math.Min(GLDevice.MaxTextureSlots, 16); // Per XNA4 spec
+			int maxVertexTextures = Math.Min(GLDevice.MaxTextureSlots - 16, 4); // Per XNA4 HiDef spec
+			vertexSamplerStart = maxTextures - maxVertexTextures;
 			Textures = new TextureCollection(
-				GLDevice.MaxTextureSlots,
+				maxTextures,
 				modifiedSamplers
 			);
 			SamplerStates = new SamplerStateCollection(
-				GLDevice.MaxTextureSlots,
+				maxTextures,
 				modifiedSamplers
 			);
 			VertexTextures = new TextureCollection(
-				GLDevice.MaxVertexTextureSlots,
+				maxVertexTextures,
 				modifiedVertexSamplers
 			);
 			VertexSamplerStates = new SamplerStateCollection(
-				GLDevice.MaxVertexTextureSlots,
+				maxVertexTextures,
 				modifiedVertexSamplers
 			);
 
@@ -1308,9 +1317,15 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			while (modifiedVertexSamplers.Count > 0)
 			{
+				/* Believe it or not, this is actually how VertexTextures are
+				 * stored in XNA4! Their D3D9 renderer just uses the last 4
+				 * slots available in the device's sampler array. So that's what
+				 * we get to do.
+				 * -flibit
+				 */
 				int sampler = modifiedVertexSamplers.Dequeue();
-				GLDevice.VerifyVertexSampler(
-					sampler,
+				GLDevice.VerifySampler(
+					vertexSamplerStart + sampler,
 					VertexTextures[sampler],
 					VertexSamplerStates[sampler]
 				);
