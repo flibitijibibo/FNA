@@ -99,37 +99,27 @@ namespace Microsoft.Xna.Framework.Graphics
 			private set;
 		}
 
-		private BlendState INTERNAL_blendState;
 		public BlendState BlendState
 		{
 			get
 			{
-				return INTERNAL_blendState;
+				return nextBlend;
 			}
 			set
 			{
-				if (value != INTERNAL_blendState)
-				{
-					GLDevice.SetBlendState(value);
-					INTERNAL_blendState = value;
-				}
+				nextBlend = value;
 			}
 		}
 
-		private DepthStencilState INTERNAL_depthStencilState;
 		public DepthStencilState DepthStencilState
 		{
 			get
 			{
-				return INTERNAL_depthStencilState;
+				return nextDepthStencil;
 			}
 			set
 			{
-				if (value != INTERNAL_depthStencilState)
-				{
-					GLDevice.SetDepthStencilState(value);
-					INTERNAL_depthStencilState = value;
-				}
+				nextDepthStencil = value;
 			}
 		}
 
@@ -254,6 +244,15 @@ namespace Microsoft.Xna.Framework.Graphics
 		#region Internal GL Device
 
 		internal readonly IGLDevice GLDevice;
+
+		#endregion
+
+		#region Private State Shadowing Variables
+
+		private BlendState currentBlend;
+		private BlendState nextBlend;
+		private DepthStencilState currentDepthStencil;
+		private DepthStencilState nextDepthStencil;
 
 		#endregion
 
@@ -1280,7 +1279,19 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		private void ApplyState()
 		{
-			// Apply RasterizerState now, as it depends on other device states
+			// Update Blend/DepthStencil, if applicable
+			if (currentBlend != nextBlend)
+			{
+				GLDevice.SetBlendState(nextBlend);
+				currentBlend = nextBlend;
+			}
+			if (currentDepthStencil != nextDepthStencil)
+			{
+				GLDevice.SetDepthStencilState(nextDepthStencil);
+				currentDepthStencil = nextDepthStencil;
+			}
+
+			// Always update RasterizerState, as it depends on other device states
 			GLDevice.ApplyRasterizerState(
 				RasterizerState,
 				RenderTargetCount > 0
