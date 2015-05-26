@@ -188,7 +188,11 @@ namespace Microsoft.Xna.Framework
 			}
 
 			// Set and initialize the SDL2 window
-			Window = new SDL2_GameWindow();
+			Window = new SDL2_GameWindow(
+				OSVersion.Equals("Emscripten") ||
+				OSVersion.Equals("Android") ||
+				OSVersion.Equals("iOS")
+			);
 
 			// Create the DisplayMode list
 			displayIndex = SDL.SDL_GetWindowDisplayIndex(
