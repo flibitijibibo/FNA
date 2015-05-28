@@ -188,7 +188,11 @@ namespace Microsoft.Xna.Framework
 			}
 
 			// Set and initialize the SDL2 window
+			bool forceES2 = Environment.GetEnvironmentVariable(
+				"FNA_OPENGL_FORCE_ES2"
+			) == "1";
 			Window = new SDL2_GameWindow(
+				forceES2 ||
 				OSVersion.Equals("Emscripten") ||
 				OSVersion.Equals("Android") ||
 				OSVersion.Equals("iOS")

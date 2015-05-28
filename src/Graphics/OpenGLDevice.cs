@@ -502,6 +502,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
+		#region Private GLES-specific Variables
+
+		private bool useES2;
+
+		#endregion
+
 		#region Public Constructor
 
 		public OpenGLDevice(
@@ -512,6 +518,12 @@ namespace Microsoft.Xna.Framework.Graphics
 				presentationParameters.DeviceWindowHandle
 			);
 
+			// Check for a possible ES context
+			int flags;
+			int es2Flag = (int) SDL.SDL_GLprofile.SDL_GL_CONTEXT_PROFILE_ES;
+			SDL.SDL_GL_GetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_PROFILE_MASK, out flags);
+			useES2 = (flags & es2Flag) == es2Flag;
+
 			// Init threaded GL crap where applicable
 			InitThreadedGL(
 				presentationParameters.DeviceWindowHandle
@@ -520,13 +532,21 @@ namespace Microsoft.Xna.Framework.Graphics
 			// Initialize entry points
 			LoadGLEntryPoints();
 
-			shaderProfile = MojoShader.MOJOSHADER_glBestProfile(
-				GLGetProcAddress,
-				IntPtr.Zero,
-				null,
-				null,
-				IntPtr.Zero
-			);
+			if (useES2)
+			{
+				// Force #version 110, ES2 is incompatible with #version 120
+				shaderProfile = MojoShader.MOJOSHADER_PROFILE_GLSL;
+			}
+			else
+			{
+				shaderProfile = MojoShader.MOJOSHADER_glBestProfile(
+					GLGetProcAddress,
+					IntPtr.Zero,
+					null,
+					null,
+					IntPtr.Zero
+				);
+			}
 			shaderContext = MojoShader.MOJOSHADER_glCreateContext(
 				shaderProfile,
 				GLGetProcAddress,
@@ -1398,6 +1418,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			if (sampler.MipMapLevelOfDetailBias != tex.LODBias)
 			{
+				System.Diagnostics.Debug.Assert(!useES2);
 				tex.LODBias = sampler.MipMapLevelOfDetailBias;
 				glTexParameterf(
 					tex.Target,
@@ -2052,11 +2073,14 @@ namespace Microsoft.Xna.Framework.Graphics
 				GLenum.GL_TEXTURE_BASE_LEVEL,
 				result.MaxMipmapLevel
 			);
-			glTexParameterf(
-				result.Target,
-				GLenum.GL_TEXTURE_LOD_BIAS,
-				result.LODBias
-			);
+			if (!useES2)
+			{
+				glTexParameterf(
+					result.Target,
+					GLenum.GL_TEXTURE_LOD_BIAS,
+					result.LODBias
+				);
+			}
 			return result;
 		}
 
