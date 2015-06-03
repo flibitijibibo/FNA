@@ -288,11 +288,7 @@ namespace Microsoft.Xna.Framework.Media
 			if (total == 0)
 			{
 				eof = true;
-				if (sender != null)
-				{
-					// If sender's null, we didn't even start playing yet?!
-					soundStream.BufferNeeded -= QueueBuffer;
-				}
+				soundStream.BufferNeeded -= QueueBuffer;
 				return;
 			}
 
