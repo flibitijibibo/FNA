@@ -512,7 +512,7 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 			else // Includes 0x1 - XMA, 0x3 - WMA
 			{
-				throw new NotSupportedException();
+				throw new NotSupportedException("Rebuild your WaveBanks with ADPCM!");
 			}
 		}
 
