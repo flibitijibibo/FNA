@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2014 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2015 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -64,12 +64,12 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region Public Static Operator Overloads
 
-		public static bool op_Equality(RendererDetail left, RendererDetail right)
+		public static bool operator==(RendererDetail left, RendererDetail right)
 		{
 			return left.RendererId.Equals(right.RendererId);
 		}
 
-		public static bool op_Inequality(RendererDetail left, RendererDetail right)
+		public static bool operator!=(RendererDetail left, RendererDetail right)
 		{
 			return !left.RendererId.Equals(right.RendererId);
 		}

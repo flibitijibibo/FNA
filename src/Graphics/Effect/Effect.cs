@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2014 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2015 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -784,241 +784,257 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			if (stateChanges.sampler_state_change_count > 0)
 			{
-				MojoShader.MOJOSHADER_samplerStateRegister* registers = (MojoShader.MOJOSHADER_samplerStateRegister*) stateChanges.sampler_state_changes;
-				for (int i = 0; i < stateChanges.sampler_state_change_count; i += 1)
+				INTERNAL_updateSamplers(
+					stateChanges.sampler_state_change_count,
+					(MojoShader.MOJOSHADER_samplerStateRegister*) stateChanges.sampler_state_changes,
+					GraphicsDevice.Textures,
+					GraphicsDevice.SamplerStates
+				);
+			}
+			if (stateChanges.vertex_sampler_state_change_count > 0)
+			{
+				INTERNAL_updateSamplers(
+					stateChanges.vertex_sampler_state_change_count,
+					(MojoShader.MOJOSHADER_samplerStateRegister*) stateChanges.vertex_sampler_state_changes,
+					GraphicsDevice.VertexTextures,
+					GraphicsDevice.VertexSamplerStates
+				);
+			}
+		}
+
+		private unsafe void INTERNAL_updateSamplers(
+			uint changeCount,
+			MojoShader.MOJOSHADER_samplerStateRegister* registers,
+			TextureCollection textures,
+			SamplerStateCollection samplers
+		) {
+			for (int i = 0; i < changeCount; i += 1)
+			{
+				if (registers[i].sampler_state_count == 0)
 				{
-					if (registers[i].sampler_state_count == 0)
+					// Nothing to do
+					continue;
+				}
+
+				int register = (int) registers[i].sampler_register;
+
+				/* We're going to store this state locally, then generate a
+				 * new object later if needed. Otherwise the GC loses its
+				 * mind.
+				 * -flibit
+				 */
+				SamplerState oldSampler = samplers[register];
+
+				// Used to prevent redundant sampler changes
+				bool samplerChanged = false;
+				bool filterChanged = false;
+
+				// Current sampler state
+				TextureAddressMode addressU = oldSampler.AddressU;
+				TextureAddressMode addressV = oldSampler.AddressV;
+				TextureAddressMode addressW = oldSampler.AddressW;
+				int maxAnisotropy = oldSampler.MaxAnisotropy;
+				int maxMipLevel = oldSampler.MaxMipLevel;
+				float mipMapLODBias = oldSampler.MipMapLevelOfDetailBias;
+
+				// Current sampler filter
+				TextureFilter filter = oldSampler.Filter;
+				MojoShader.MOJOSHADER_textureFilterType magFilter = XNAMag[filter];
+				MojoShader.MOJOSHADER_textureFilterType minFilter = XNAMin[filter];
+				MojoShader.MOJOSHADER_textureFilterType mipFilter = XNAMip[filter];
+
+				MojoShader.MOJOSHADER_effectSamplerState* states = (MojoShader.MOJOSHADER_effectSamplerState*) registers[i].sampler_states;
+				for (int j = 0; j < registers[i].sampler_state_count; j += 1)
+				{
+					MojoShader.MOJOSHADER_samplerStateType type = states[j].type;
+					if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_TEXTURE)
 					{
-						// Nothing to do
-						continue;
-					}
-
-					/* TODO: Check for vertex/pixel stages!
-					 * If there are vertex sampler registers that can be used in
-					 * HLSL, we need to determine whether or not to write to the
-					 * vertex sampler collections or the standard collections.
-					 * -flibit
-					 */
-					int register = (int) registers[i].sampler_register;
-
-					/* We're going to store this state locally, then generate a
-					 * new object later if needed. Otherwise the GC loses its
-					 * mind.
-					 * -flibit
-					 */
-					SamplerState oldSampler = GraphicsDevice.SamplerStates[register];
-
-					// Used to prevent redundant sampler changes
-					bool samplerChanged = false;
-					bool filterChanged = false;
-
-					// Current sampler state
-					TextureAddressMode addressU = oldSampler.AddressU;
-					TextureAddressMode addressV = oldSampler.AddressV;
-					TextureAddressMode addressW = oldSampler.AddressW;
-					int maxAnisotropy = oldSampler.MaxAnisotropy;
-					int maxMipLevel = oldSampler.MaxMipLevel;
-					float mipMapLODBias = oldSampler.MipMapLevelOfDetailBias;
-
-					// Current sampler filter
-					TextureFilter filter = oldSampler.Filter;
-					MojoShader.MOJOSHADER_textureFilterType magFilter = XNAMag[filter];
-					MojoShader.MOJOSHADER_textureFilterType minFilter = XNAMin[filter];
-					MojoShader.MOJOSHADER_textureFilterType mipFilter = XNAMip[filter];
-
-					MojoShader.MOJOSHADER_effectSamplerState* states = (MojoShader.MOJOSHADER_effectSamplerState*) registers[i].sampler_states;
-					for (int j = 0; j < registers[i].sampler_state_count; j += 1)
-					{
-						MojoShader.MOJOSHADER_samplerStateType type = states[j].type;
-						if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_TEXTURE)
+						string samplerName = Marshal.PtrToStringAnsi(
+							registers[i].sampler_name
+						);
+						if (samplerMap.ContainsKey(samplerName))
 						{
-							string samplerName = Marshal.PtrToStringAnsi(
-								registers[i].sampler_name
-							);
-							if (samplerMap.ContainsKey(samplerName))
+							Texture texture = samplerMap[samplerName].texture;
+							if (texture != null)
 							{
-								Texture texture = samplerMap[samplerName].texture;
-								if (texture != null)
-								{
-									GraphicsDevice.Textures[register] = texture;
-								}
+								textures[register] = texture;
 							}
-						}
-						else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_ADDRESSU)
-						{
-							MojoShader.MOJOSHADER_textureAddress* val = (MojoShader.MOJOSHADER_textureAddress*) states[j].value.values;
-							addressU = XNAAddress[*val];
-							samplerChanged = true;
-						}
-						else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_ADDRESSV)
-						{
-							MojoShader.MOJOSHADER_textureAddress* val = (MojoShader.MOJOSHADER_textureAddress*) states[j].value.values;
-							addressV = XNAAddress[*val];
-							samplerChanged = true;
-						}
-						else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_ADDRESSW)
-						{
-							MojoShader.MOJOSHADER_textureAddress* val = (MojoShader.MOJOSHADER_textureAddress*) states[j].value.values;
-							addressW = XNAAddress[*val];
-							samplerChanged = true;
-						}
-						else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_MAGFILTER)
-						{
-							MojoShader.MOJOSHADER_textureFilterType* val = (MojoShader.MOJOSHADER_textureFilterType*) states[j].value.values;
-							magFilter = *val;
-							filterChanged = true;
-						}
-						else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_MINFILTER)
-						{
-							MojoShader.MOJOSHADER_textureFilterType* val = (MojoShader.MOJOSHADER_textureFilterType*) states[j].value.values;
-							minFilter = *val;
-							filterChanged = true;
-						}
-						else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_MIPFILTER)
-						{
-							MojoShader.MOJOSHADER_textureFilterType* val = (MojoShader.MOJOSHADER_textureFilterType*) states[j].value.values;
-							mipFilter = *val;
-							filterChanged = true;
-						}
-						else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_MIPMAPLODBIAS)
-						{
-							float* val = (float*) states[i].value.values;
-							mipMapLODBias = *val;
-							samplerChanged = true;
-						}
-						else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_MAXMIPLEVEL)
-						{
-							int* val = (int*) states[i].value.values;
-							maxMipLevel = *val;
-							samplerChanged = true;
-						}
-						else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_MAXANISOTROPY)
-						{
-							int* val = (int*) states[i].value.values;
-							maxAnisotropy = *val;
-							samplerChanged = true;
-						}
-						else
-						{
-							throw new Exception("Unhandled sampler state!");
 						}
 					}
-					if (filterChanged)
+					else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_ADDRESSU)
 					{
-						if (	magFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_ANISOTROPIC ||
-							minFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_ANISOTROPIC ||
-							mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_ANISOTROPIC	)
-						{
-							// Just assume we wanted Anisotropic if any of these qualify.
-							filter = TextureFilter.Anisotropic;
-						}
-						else if (magFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT)
-						{
-							if (minFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT)
-							{
-								if (	mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_NONE ||
-									mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT	)
-								{
-									filter = TextureFilter.Point;
-								}
-								else if (mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR)
-								{
-									filter = TextureFilter.PointMipLinear;
-								}
-								else
-								{
-									throw new NotImplementedException("Unhandled mipfilter type!");
-								}
-							}
-							else if (minFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR)
-							{
-								if (	mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_NONE ||
-									mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT	)
-								{
-									filter = TextureFilter.MinLinearMagPointMipPoint;
-								}
-								else if (mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR)
-								{
-									filter = TextureFilter.MinLinearMagPointMipLinear;
-								}
-								else
-								{
-									throw new NotImplementedException("Unhandled mipfilter type!");
-								}
-							}
-							else
-							{
-								throw new NotImplementedException("Unhandled minfilter type!");
-							}
-						}
-						else if (magFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR)
-						{
-							if (minFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT)
-							{
-								if (	mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_NONE ||
-									mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT	)
-								{
-									filter = TextureFilter.MinPointMagLinearMipPoint;
-								}
-								else if (mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR)
-								{
-									filter = TextureFilter.MinPointMagLinearMipLinear;
-								}
-								else
-								{
-									throw new NotImplementedException("Unhandled mipfilter type!");
-								}
-							}
-							else if (minFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR)
-							{
-								if (	mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_NONE ||
-									mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT	)
-								{
-									filter = TextureFilter.LinearMipPoint;
-								}
-								else if (mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR)
-								{
-									filter = TextureFilter.Linear;
-								}
-								else
-								{
-									throw new NotImplementedException("Unhandled mipfilter type!");
-								}
-							}
-							else
-							{
-								throw new NotImplementedException("Unhandled minfilter type!");
-							}
-						}
-						else
-						{
-							throw new NotImplementedException("Unhandled magfilter type!");
-						}
+						MojoShader.MOJOSHADER_textureAddress* val = (MojoShader.MOJOSHADER_textureAddress*) states[j].value.values;
+						addressU = XNAAddress[*val];
 						samplerChanged = true;
 					}
-
-					if (samplerChanged)
+					else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_ADDRESSV)
 					{
-						// FIXME: This is part of the state cache hack! -flibit
-						SamplerState newSampler;
-						if (GraphicsDevice.SamplerStates[register] == samplerCache[register])
+						MojoShader.MOJOSHADER_textureAddress* val = (MojoShader.MOJOSHADER_textureAddress*) states[j].value.values;
+						addressV = XNAAddress[*val];
+						samplerChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_ADDRESSW)
+					{
+						MojoShader.MOJOSHADER_textureAddress* val = (MojoShader.MOJOSHADER_textureAddress*) states[j].value.values;
+						addressW = XNAAddress[*val];
+						samplerChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_MAGFILTER)
+					{
+						MojoShader.MOJOSHADER_textureFilterType* val = (MojoShader.MOJOSHADER_textureFilterType*) states[j].value.values;
+						magFilter = *val;
+						filterChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_MINFILTER)
+					{
+						MojoShader.MOJOSHADER_textureFilterType* val = (MojoShader.MOJOSHADER_textureFilterType*) states[j].value.values;
+						minFilter = *val;
+						filterChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_MIPFILTER)
+					{
+						MojoShader.MOJOSHADER_textureFilterType* val = (MojoShader.MOJOSHADER_textureFilterType*) states[j].value.values;
+						mipFilter = *val;
+						filterChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_MIPMAPLODBIAS)
+					{
+						float* val = (float*) states[i].value.values;
+						mipMapLODBias = *val;
+						samplerChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_MAXMIPLEVEL)
+					{
+						int* val = (int*) states[i].value.values;
+						maxMipLevel = *val;
+						samplerChanged = true;
+					}
+					else if (type == MojoShader.MOJOSHADER_samplerStateType.MOJOSHADER_SAMP_MAXANISOTROPY)
+					{
+						int* val = (int*) states[i].value.values;
+						maxAnisotropy = *val;
+						samplerChanged = true;
+					}
+					else
+					{
+						throw new Exception("Unhandled sampler state!");
+					}
+				}
+				if (filterChanged)
+				{
+					if (	magFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_ANISOTROPIC ||
+						minFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_ANISOTROPIC ||
+						mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_ANISOTROPIC	)
+					{
+						// Just assume we wanted Anisotropic if any of these qualify.
+						filter = TextureFilter.Anisotropic;
+					}
+					else if (magFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT)
+					{
+						if (minFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT)
 						{
-							// FIXME: 30 is arbitrary! -flibit
-							newSampler = samplerCache[register + 30];
+							if (	mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_NONE ||
+								mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT	)
+							{
+								filter = TextureFilter.Point;
+							}
+							else if (mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR)
+							{
+								filter = TextureFilter.PointMipLinear;
+							}
+							else
+							{
+								throw new NotImplementedException("Unhandled mipfilter type!");
+							}
+						}
+						else if (minFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR)
+						{
+							if (	mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_NONE ||
+								mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT	)
+							{
+								filter = TextureFilter.MinLinearMagPointMipPoint;
+							}
+							else if (mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR)
+							{
+								filter = TextureFilter.MinLinearMagPointMipLinear;
+							}
+							else
+							{
+								throw new NotImplementedException("Unhandled mipfilter type!");
+							}
 						}
 						else
 						{
-							newSampler = samplerCache[register];
+							throw new NotImplementedException("Unhandled minfilter type!");
 						}
-						newSampler.Filter = filter;
-						newSampler.AddressU = addressU;
-						newSampler.AddressV = addressV;
-						newSampler.AddressW = addressW;
-						newSampler.MaxAnisotropy = maxAnisotropy;
-						newSampler.MaxMipLevel = maxMipLevel;
-						newSampler.MipMapLevelOfDetailBias = mipMapLODBias;
-						GraphicsDevice.SamplerStates[register] = newSampler;
 					}
+					else if (magFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR)
+					{
+						if (minFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT)
+						{
+							if (	mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_NONE ||
+								mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT	)
+							{
+								filter = TextureFilter.MinPointMagLinearMipPoint;
+							}
+							else if (mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR)
+							{
+								filter = TextureFilter.MinPointMagLinearMipLinear;
+							}
+							else
+							{
+								throw new NotImplementedException("Unhandled mipfilter type!");
+							}
+						}
+						else if (minFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR)
+						{
+							if (	mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_NONE ||
+								mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_POINT	)
+							{
+								filter = TextureFilter.LinearMipPoint;
+							}
+							else if (mipFilter == MojoShader.MOJOSHADER_textureFilterType.MOJOSHADER_TEXTUREFILTER_LINEAR)
+							{
+								filter = TextureFilter.Linear;
+							}
+							else
+							{
+								throw new NotImplementedException("Unhandled mipfilter type!");
+							}
+						}
+						else
+						{
+							throw new NotImplementedException("Unhandled minfilter type!");
+						}
+					}
+					else
+					{
+						throw new NotImplementedException("Unhandled magfilter type!");
+					}
+					samplerChanged = true;
+				}
+
+				if (samplerChanged)
+				{
+					// FIXME: This is part of the state cache hack! -flibit
+					SamplerState newSampler;
+					if (samplers[register] == samplerCache[register])
+					{
+						// FIXME: 30 is arbitrary! -flibit
+						newSampler = samplerCache[register + 30];
+					}
+					else
+					{
+						newSampler = samplerCache[register];
+					}
+					newSampler.Filter = filter;
+					newSampler.AddressU = addressU;
+					newSampler.AddressV = addressV;
+					newSampler.AddressW = addressW;
+					newSampler.MaxAnisotropy = maxAnisotropy;
+					newSampler.MaxMipLevel = maxMipLevel;
+					newSampler.MipMapLevelOfDetailBias = mipMapLODBias;
+					samplers[register] = newSampler;
 				}
 			}
 		}

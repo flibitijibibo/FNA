@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2014 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2015 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -218,8 +218,6 @@ namespace Microsoft.Xna.Framework.Media
 		internal void Play()
 		{
 			eof = false;
-			QueueBuffer(null, EventArgs.Empty);
-			QueueBuffer(null, EventArgs.Empty);
 			soundStream.BufferNeeded += QueueBuffer;
 
 #if NO_STREAM_THREAD
@@ -290,11 +288,7 @@ namespace Microsoft.Xna.Framework.Media
 			if (total == 0)
 			{
 				eof = true;
-				if (sender != null)
-				{
-					// If sender's null, we didn't even start playing yet?!
-					soundStream.BufferNeeded -= QueueBuffer;
-				}
+				soundStream.BufferNeeded -= QueueBuffer;
 				return;
 			}
 
@@ -327,8 +321,6 @@ namespace Microsoft.Xna.Framework.Media
 							"Stopped playing Song before EOF!" +
 							" Hastily rebooting playback, expect jitteriness!"
 						);
-						QueueBuffer(null, EventArgs.Empty);
-						QueueBuffer(null, EventArgs.Empty);
 						soundStream.Play(false);
 					}
 				}

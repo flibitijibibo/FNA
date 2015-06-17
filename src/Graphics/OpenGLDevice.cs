@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2014 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2015 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -468,12 +468,6 @@ namespace Microsoft.Xna.Framework.Graphics
 			private set;
 		}
 
-		public int MaxVertexTextureSlots
-		{
-			get;
-			private set;
-		}
-
 		#endregion
 
 		#region Private MojoShader Interop
@@ -508,6 +502,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
+		#region Private GLES-specific Variables
+
+		private bool useES2;
+
+		#endregion
+
 		#region Public Constructor
 
 		public OpenGLDevice(
@@ -518,6 +518,12 @@ namespace Microsoft.Xna.Framework.Graphics
 				presentationParameters.DeviceWindowHandle
 			);
 
+			// Check for a possible ES context
+			int flags;
+			int es2Flag = (int) SDL.SDL_GLprofile.SDL_GL_CONTEXT_PROFILE_ES;
+			SDL.SDL_GL_GetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_PROFILE_MASK, out flags);
+			useES2 = (flags & es2Flag) == es2Flag;
+
 			// Init threaded GL crap where applicable
 			InitThreadedGL(
 				presentationParameters.DeviceWindowHandle
@@ -526,13 +532,21 @@ namespace Microsoft.Xna.Framework.Graphics
 			// Initialize entry points
 			LoadGLEntryPoints();
 
-			shaderProfile = MojoShader.MOJOSHADER_glBestProfile(
-				GLGetProcAddress,
-				IntPtr.Zero,
-				null,
-				null,
-				IntPtr.Zero
-			);
+			if (useES2)
+			{
+				// Force #version 110, ES2 is incompatible with #version 120
+				shaderProfile = MojoShader.MOJOSHADER_PROFILE_GLSL;
+			}
+			else
+			{
+				shaderProfile = MojoShader.MOJOSHADER_glBestProfile(
+					GLGetProcAddress,
+					IntPtr.Zero,
+					null,
+					null,
+					IntPtr.Zero
+				);
+			}
 			shaderContext = MojoShader.MOJOSHADER_glCreateContext(
 				shaderProfile,
 				GLGetProcAddress,
@@ -579,10 +593,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				Textures[i] = OpenGLTexture.NullTexture;
 			}
 			MaxTextureSlots = numSamplers;
-
-			// Initialize MaxVertexTextureSlots, but no array. You'll see why...
-			glGetIntegerv(GLenum.GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, out numSamplers);
-			MaxVertexTextureSlots = numSamplers;
 
 			// Initialize render target FBO and state arrays
 			int numAttachments;
@@ -1408,6 +1418,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			if (sampler.MipMapLevelOfDetailBias != tex.LODBias)
 			{
+				System.Diagnostics.Debug.Assert(!useES2);
 				tex.LODBias = sampler.MipMapLevelOfDetailBias;
 				glTexParameterf(
 					tex.Target,
@@ -1421,20 +1432,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				// Keep this state sane. -flibit
 				glActiveTexture(GLenum.GL_TEXTURE0);
 			}
-		}
-
-		public void VerifyVertexSampler(int index, Texture texture, SamplerState sampler)
-		{
-			/* TODO: Yup, these two are no different right now!
-			 * This is really tough to fix, since the sampler registers
-			 * are shared by the vertex and fragment shaders. This could in
-			 * theory make sense if the vertex shader uses the regular sampler
-			 * registers, but there are of course the vertex sampler registers
-			 * to worry about. When someone actually uses them, fix that case
-			 * and odds are you'll figure out the rest as well.
-			 * -flibit
-			 */
-			VerifySampler(index, texture, sampler);
 		}
 
 		#endregion
@@ -2076,11 +2073,14 @@ namespace Microsoft.Xna.Framework.Graphics
 				GLenum.GL_TEXTURE_BASE_LEVEL,
 				result.MaxMipmapLevel
 			);
-			glTexParameterf(
-				result.Target,
-				GLenum.GL_TEXTURE_LOD_BIAS,
-				result.LODBias
-			);
+			if (!useES2)
+			{
+				glTexParameterf(
+					result.Target,
+					GLenum.GL_TEXTURE_LOD_BIAS,
+					result.LODBias
+				);
+			}
 			return result;
 		}
 

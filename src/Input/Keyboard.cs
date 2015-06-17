@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2014 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2015 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -25,7 +25,7 @@ namespace Microsoft.Xna.Framework.Input
 
 		#endregion
 
-		#region Public Methods
+		#region Public Static Methods
 
 		/// <summary>
 		/// Returns the current keyboard state.
@@ -36,10 +36,6 @@ namespace Microsoft.Xna.Framework.Input
 			return new KeyboardState(keys);
 		}
 
-		#endregion
-
-		#region Public Static Methods
-
 		/// <summary>
 		/// Returns the current keyboard state for a given player.
 		/// </summary>
@@ -49,6 +45,15 @@ namespace Microsoft.Xna.Framework.Input
 		public static KeyboardState GetState(PlayerIndex playerIndex)
 		{
 			return new KeyboardState(keys);
+		}
+
+		#endregion
+
+		#region Public Static FNA Extensions
+
+		public static Keys GetKeyFromScancodeEXT(Keys scancode)
+		{
+			return Game.Instance.Platform.GetKeyFromScancode(scancode);
 		}
 
 		#endregion

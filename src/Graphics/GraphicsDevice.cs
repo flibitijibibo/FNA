@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2014 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2015 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -99,37 +99,27 @@ namespace Microsoft.Xna.Framework.Graphics
 			private set;
 		}
 
-		private BlendState INTERNAL_blendState;
 		public BlendState BlendState
 		{
 			get
 			{
-				return INTERNAL_blendState;
+				return nextBlend;
 			}
 			set
 			{
-				if (value != INTERNAL_blendState)
-				{
-					GLDevice.SetBlendState(value);
-					INTERNAL_blendState = value;
-				}
+				nextBlend = value;
 			}
 		}
 
-		private DepthStencilState INTERNAL_depthStencilState;
 		public DepthStencilState DepthStencilState
 		{
 			get
 			{
-				return INTERNAL_depthStencilState;
+				return nextDepthStencil;
 			}
 			set
 			{
-				if (value != INTERNAL_depthStencilState)
-				{
-					GLDevice.SetDepthStencilState(value);
-					INTERNAL_depthStencilState = value;
-				}
+				nextDepthStencil = value;
 			}
 		}
 
@@ -257,6 +247,21 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
+		#region Private State Shadowing Variables
+
+		private BlendState currentBlend;
+		private BlendState nextBlend;
+		private DepthStencilState currentDepthStencil;
+		private DepthStencilState nextDepthStencil;
+
+		#endregion
+
+		#region Private Vertex Sampler Offset Variable
+
+		private int vertexSamplerStart;
+
+		#endregion
+
 		#region Internal Sampler Change Queue
 
 		private readonly Queue<int> modifiedSamplers = new Queue<int>();
@@ -375,20 +380,23 @@ namespace Microsoft.Xna.Framework.Graphics
 			RasterizerState = RasterizerState.CullCounterClockwise;
 
 			// Initialize the Texture/Sampler state containers
+			int maxTextures = Math.Min(GLDevice.MaxTextureSlots, 16); // Per XNA4 spec
+			int maxVertexTextures = Math.Min(GLDevice.MaxTextureSlots - 16, 4); // Per XNA4 HiDef spec
+			vertexSamplerStart = GLDevice.MaxTextureSlots - maxVertexTextures;
 			Textures = new TextureCollection(
-				GLDevice.MaxTextureSlots,
+				maxTextures,
 				modifiedSamplers
 			);
 			SamplerStates = new SamplerStateCollection(
-				GLDevice.MaxTextureSlots,
+				maxTextures,
 				modifiedSamplers
 			);
 			VertexTextures = new TextureCollection(
-				GLDevice.MaxVertexTextureSlots,
+				maxVertexTextures,
 				modifiedVertexSamplers
 			);
 			VertexSamplerStates = new SamplerStateCollection(
-				GLDevice.MaxVertexTextureSlots,
+				maxVertexTextures,
 				modifiedVertexSamplers
 			);
 
@@ -1280,7 +1288,19 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		private void ApplyState()
 		{
-			// Apply RasterizerState now, as it depends on other device states
+			// Update Blend/DepthStencil, if applicable
+			if (currentBlend != nextBlend)
+			{
+				GLDevice.SetBlendState(nextBlend);
+				currentBlend = nextBlend;
+			}
+			if (currentDepthStencil != nextDepthStencil)
+			{
+				GLDevice.SetDepthStencilState(nextDepthStencil);
+				currentDepthStencil = nextDepthStencil;
+			}
+
+			// Always update RasterizerState, as it depends on other device states
 			GLDevice.ApplyRasterizerState(
 				RasterizerState,
 				RenderTargetCount > 0
@@ -1297,9 +1317,15 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			while (modifiedVertexSamplers.Count > 0)
 			{
+				/* Believe it or not, this is actually how VertexTextures are
+				 * stored in XNA4! Their D3D9 renderer just uses the last 4
+				 * slots available in the device's sampler array. So that's what
+				 * we get to do.
+				 * -flibit
+				 */
 				int sampler = modifiedVertexSamplers.Dequeue();
-				GLDevice.VerifyVertexSampler(
-					sampler,
+				GLDevice.VerifySampler(
+					vertexSamplerStart + sampler,
 					VertexTextures[sampler],
 					VertexSamplerStates[sampler]
 				);

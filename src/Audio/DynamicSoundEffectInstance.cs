@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2014 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2015 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -31,6 +31,8 @@ namespace Microsoft.Xna.Framework.Audio
 
 		private int sampleRate;
 		private AudioChannels channels;
+
+		private const int MINIMUM_BUFFER_CHECK = 3;
 
 		#endregion
 
@@ -154,7 +156,7 @@ namespace Microsoft.Xna.Framework.Audio
 			);
 
 			// If we're already playing, queue immediately.
-			if (State == SoundState.Playing)
+			if (INTERNAL_alSource != null)
 			{
 				AudioDevice.ALDevice.QueueSourceBuffer(
 					INTERNAL_alSource,
@@ -199,6 +201,7 @@ namespace Microsoft.Xna.Framework.Audio
 			while (queuedBuffers.Count > 0)
 			{
 				availableBuffers.Enqueue(queuedBuffers.Dequeue());
+				PendingBufferCount -= 1;
 			}
 
 			INTERNAL_alSource = AudioDevice.ALDevice.GenSource();
@@ -235,17 +238,20 @@ namespace Microsoft.Xna.Framework.Audio
 			IsLooped = IsLooped;
 			Pitch = Pitch;
 
+			// ... but wait! What if we need moar buffers?
+			for (
+				int i = MINIMUM_BUFFER_CHECK - PendingBufferCount;
+				(i > 0) && BufferNeeded != null;
+				i -= 1
+			) {
+				BufferNeeded(this, null);
+			}
+
 			// Finally.
 			AudioDevice.ALDevice.PlaySource(INTERNAL_alSource);
 			if (isManaged)
 			{
 				AudioDevice.DynamicInstancePool.Add(this);
-			}
-
-			// ... but wait! What if we need moar buffers?
-			if (PendingBufferCount <= 2 && BufferNeeded != null)
-			{
-				BufferNeeded(this, null);
 			}
 		}
 
@@ -295,8 +301,11 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 
 			// Do we need even moar buffers?
-			if (PendingBufferCount <= 2 && BufferNeeded != null)
-			{
+			for (
+				int i = MINIMUM_BUFFER_CHECK - PendingBufferCount;
+				(i > 0) && BufferNeeded != null;
+				i -= 1
+			) {
 				BufferNeeded(this, null);
 			}
 
@@ -331,7 +340,7 @@ namespace Microsoft.Xna.Framework.Audio
 			);
 
 			// If we're already playing, queue immediately.
-			if (State == SoundState.Playing)
+			if (INTERNAL_alSource != null)
 			{
 				AudioDevice.ALDevice.QueueSourceBuffer(
 					INTERNAL_alSource,
