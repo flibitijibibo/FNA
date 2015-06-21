@@ -453,13 +453,13 @@ namespace Microsoft.Xna.Framework
 					}
 
 					// Controller device management
-					else if (evt.type == SDL.SDL_EventType.SDL_JOYDEVICEADDED)
+					else if (evt.type == SDL.SDL_EventType.SDL_CONTROLLERDEVICEADDED)
 					{
-						GamePad.INTERNAL_AddInstance(evt.jdevice.which);
+						GamePad.INTERNAL_AddInstance(evt.cdevice.which);
 					}
-					else if (evt.type == SDL.SDL_EventType.SDL_JOYDEVICEREMOVED)
+					else if (evt.type == SDL.SDL_EventType.SDL_CONTROLLERDEVICEREMOVED)
 					{
-						GamePad.INTERNAL_RemoveInstance(evt.jdevice.which);
+						GamePad.INTERNAL_RemoveInstance(evt.cdevice.which);
 					}
 
 					// Text Input
@@ -521,14 +521,11 @@ namespace Microsoft.Xna.Framework
 				evt,
 				1,
 				SDL.SDL_eventaction.SDL_GETEVENT,
-				SDL.SDL_EventType.SDL_JOYDEVICEADDED,
-				SDL.SDL_EventType.SDL_JOYDEVICEADDED
+				SDL.SDL_EventType.SDL_CONTROLLERDEVICEADDED,
+				SDL.SDL_EventType.SDL_CONTROLLERDEVICEADDED
 			) == 1) {
-				GamePad.INTERNAL_AddInstance(evt[0].jdevice.which);
+				GamePad.INTERNAL_AddInstance(evt[0].cdevice.which);
 			}
-
-			// Also, initialize the MonoGameJoystick.cfg file.
-			GamePad.INTERNAL_InitMonoGameJoystick();
 		}
 
 		public override bool BeforeUpdate(GameTime gameTime)
