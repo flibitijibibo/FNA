@@ -103,7 +103,10 @@ namespace Microsoft.Xna.Framework.Graphics
 		public void Dispose()
 		{
 			// Dispose of managed objects as well
-			Dispose(true);
+			if (this.Name != "Shaders/DeferredRendering/DeferredParticleEffect")
+			{
+				Dispose(true);
+			}
 			// Since we have been manually disposed, do not call the finalizer on this object
 			GC.SuppressFinalize(this);
 		}
