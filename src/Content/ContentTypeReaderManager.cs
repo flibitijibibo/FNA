@@ -125,6 +125,7 @@ namespace Microsoft.Xna.Framework.Content
 				ExternalReferenceReader hExternalReferenceReader = new ExternalReferenceReader();
 				SoundEffectReader hSoundEffectReader = new SoundEffectReader();
 				SongReader hSongReader = new SongReader();
+				ModelReader hModelReader = new ModelReader();
 			}
 #pragma warning restore 0219, 0649
 

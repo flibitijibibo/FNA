@@ -553,9 +553,11 @@ namespace Microsoft.Xna.Framework
 		/// <returns>The squared distance between two vectors.</returns>
 		public static float DistanceSquared(Vector3 value1, Vector3 value2)
 		{
-			float result;
-			DistanceSquared(ref value1, ref value2, out result);
-			return result;
+			return (
+				(value1.X - value2.X) * (value1.X - value2.X) +
+				(value1.Y - value2.Y) * (value1.Y - value2.Y) +
+				(value1.Z - value2.Z) * (value1.Z - value2.Z)
+			);
 		}
 
 		/// <summary>
@@ -873,10 +875,10 @@ namespace Microsoft.Xna.Framework
 		/// </summary>
 		/// <param name="value">Source <see cref="Vector3"/>.</param>
 		/// <returns>Unit vector.</returns>
-		public static Vector3 Normalize(Vector3 vector)
+		public static Vector3 Normalize(Vector3 value)
 		{
-			Normalize(ref vector, out vector);
-			return vector;
+			Normalize(ref value, out value);
+			return value;
 		}
 
 		/// <summary>
@@ -888,7 +890,7 @@ namespace Microsoft.Xna.Framework
 		{
 			float factor;
 			Distance(ref value, ref zero, out factor);
-			factor = 1f / factor;
+			factor = 1.0f / factor;
 			result.X = value.X * factor;
 			result.Y = value.Y * factor;
 			result.Z = value.Z * factor;
@@ -1001,7 +1003,7 @@ namespace Microsoft.Xna.Framework
 		}
 
 		/// <summary>
-		/// Creates a new <see cref="Vector3"/> that contains a transformation of vector(position.X,position.Y,position.Z,1) by the specified <see cref="Matrix"/>.
+		/// Creates a new <see cref="Vector3"/> that contains a transformation of 3d-vector by the specified <see cref="Matrix"/>.
 		/// </summary>
 		/// <param name="position">Source <see cref="Vector3"/>.</param>
 		/// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
@@ -1013,7 +1015,7 @@ namespace Microsoft.Xna.Framework
 		}
 
 		/// <summary>
-		/// Creates a new <see cref="Vector3"/> that contains a transformation of vector(position.X,position.Y,position.Z,1) by the specified <see cref="Matrix"/>.
+		/// Creates a new <see cref="Vector3"/> that contains a transformation of 3d-vector by the specified <see cref="Matrix"/>.
 		/// </summary>
 		/// <param name="position">Source <see cref="Vector3"/>.</param>
 		/// <param name="matrix">The transformation <see cref="Matrix"/>.</param>
@@ -1126,7 +1128,7 @@ namespace Microsoft.Xna.Framework
 		}
 
 		/// <summary>
-		/// Creates a new <see cref="Vector3"/> that contains a transformation of vector(position.X,position.Y,position.Z,0) by the specified <see cref="Quaternion"/>, representing the rotation.
+		/// Creates a new <see cref="Vector3"/> that contains a transformation of 3d-vector by the specified <see cref="Quaternion"/>, representing the rotation.
 		/// </summary>
 		/// <param name="value">Source <see cref="Vector3"/>.</param>
 		/// <param name="rotation">The <see cref="Quaternion"/> which contains rotation transformation.</param>
@@ -1139,7 +1141,7 @@ namespace Microsoft.Xna.Framework
 		}
 
 		/// <summary>
-		/// Creates a new <see cref="Vector3"/> that contains a transformation of vector(position.X,position.Y,position.Z,0) by the specified <see cref="Quaternion"/>, representing the rotation.
+		/// Creates a new <see cref="Vector3"/> that contains a transformation of 3d-vector by the specified <see cref="Quaternion"/>, representing the rotation.
 		/// </summary>
 		/// <param name="value">Source <see cref="Vector3"/>.</param>
 		/// <param name="rotation">The <see cref="Quaternion"/> which contains rotation transformation.</param>
