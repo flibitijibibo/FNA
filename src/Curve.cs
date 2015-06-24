@@ -108,6 +108,15 @@ namespace Microsoft.Xna.Framework
 		/// <returns>Value at the position on this <see cref="Curve"/>.</returns>
 		public float Evaluate(float position)
 		{
+			if (Keys.Count == 0)
+			{
+				return 0.0f;
+			}
+			if (Keys.Count == 1)
+			{
+				return Keys[0].Value;
+			}
+
 			CurveKey first = Keys[0];
 			CurveKey last = Keys[Keys.Count - 1];
 
