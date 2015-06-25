@@ -262,18 +262,16 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			get
 			{
-				// return multisampleMask;
-				throw new NotImplementedException("MultiSampleMask!");
+				return multisampleMask;
 			}
 			set
 			{
-				/* TODO: MultiSampleMask! -flibit
 				if (value != multisampleMask)
 				{
 					multisampleMask = value;
+					// FIXME: index...? -flibit
+					glSampleMaski(0, (uint) multisampleMask);
 				}
-				*/
-				throw new NotImplementedException("MultiSampleMask!");
 			}
 		}
 
@@ -289,7 +287,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		private ColorWriteChannels colorWriteEnable1 = ColorWriteChannels.All;
 		private ColorWriteChannels colorWriteEnable2 = ColorWriteChannels.All;
 		private ColorWriteChannels colorWriteEnable3 = ColorWriteChannels.All;
-		// TODO: MultiSampleMask! private int multisampleMask = -1; // AKA 0xFFFFFFFF
+		private int multisampleMask = -1; // AKA 0xFFFFFFFF
 
 		#endregion
 
@@ -1122,12 +1120,12 @@ namespace Microsoft.Xna.Framework.Graphics
 				);
 			}
 
-			/* TODO: MultiSampleMask! -flibit
 			if (blendState.MultiSampleMask != multisampleMask)
 			{
 				multisampleMask = blendState.MultiSampleMask;
+				// FIXME: index...? -flibit
+				glSampleMaski(0, (uint) multisampleMask);
 			}
-			*/
 		}
 
 		public void SetDepthStencilState(DepthStencilState depthStencilState)

@@ -312,6 +312,9 @@ namespace Microsoft.Xna.Framework.Graphics
 		);
 		private ColorMaskIndexedEXT glColorMaskIndexedEXT;
 
+		private delegate void SampleMaski(uint maskNumber, uint mask);
+		private SampleMaski glSampleMaski;
+
 		/* END BLEND STATE FUNCTIONS */
 
 		/* BEGIN DEPTH/STENCIL STATE FUNCTIONS */
@@ -1121,6 +1124,10 @@ namespace Microsoft.Xna.Framework.Graphics
 				glRenderbufferStorageMultisample = (RenderbufferStorageMultisample) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glRenderbufferStorageMultisample"),
 					typeof(RenderbufferStorageMultisample)
+				);
+				glSampleMaski = (SampleMaski) Marshal.GetDelegateForFunctionPointer(
+					SDL.SDL_GL_GetProcAddress("glSampleMaski"),
+					typeof(SampleMaski)
 				);
 			}
 			catch
