@@ -51,7 +51,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			width,
 			height,
 			false,
-			SurfaceFormat.Color
+			SurfaceFormat.Color,
+			1
 		) {
 		}
 
@@ -61,6 +62,27 @@ namespace Microsoft.Xna.Framework.Graphics
 			int height,
 			bool mipMap,
 			SurfaceFormat format
+		) : this(
+			graphicsDevice,
+			width,
+			height,
+			mipMap,
+			format,
+			1
+		) {
+		}
+
+		#endregion
+
+		#region Internal Constructor
+
+		internal Texture2D(
+			GraphicsDevice graphicsDevice,
+			int width,
+			int height,
+			bool mipMap,
+			SurfaceFormat format,
+			int multiSampleCount
 		) {
 			if (graphicsDevice == null)
 			{
@@ -77,7 +99,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				Format,
 				Width,
 				Height,
-				LevelCount
+				LevelCount,
+				multiSampleCount
 			);
 		}
 

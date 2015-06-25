@@ -554,6 +554,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				PresentationParameters.BackBufferWidth,
 				PresentationParameters.BackBufferHeight,
 				PresentationParameters.DepthStencilFormat,
+				PresentationParameters.MultiSampleCount == 0 ?
+					4 : PresentationParameters.MultiSampleCount,
 				RenderTargetCount > 0
 			);
 

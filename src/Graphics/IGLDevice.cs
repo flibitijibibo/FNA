@@ -150,7 +150,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			SurfaceFormat format,
 			int width,
 			int height,
-			int levelCount
+			int levelCount,
+			int multiSampleCount
 		);
 		IGLTexture CreateTexture3D(
 			SurfaceFormat format,
@@ -162,7 +163,8 @@ namespace Microsoft.Xna.Framework.Graphics
 		IGLTexture CreateTextureCube(
 			SurfaceFormat format,
 			int size,
-			int levelCount
+			int levelCount,
+			int multiSampleCount
 		);
 		void AddDisposeTexture(IGLTexture texture);
 		void SetTextureData2D<T>(
@@ -232,7 +234,8 @@ namespace Microsoft.Xna.Framework.Graphics
 		IGLRenderbuffer GenRenderbuffer(
 			int width,
 			int height,
-			DepthFormat format
+			DepthFormat format,
+			int multiSampleCount
 		);
 		void AddDisposeRenderbuffer(IGLRenderbuffer renderbuffer);
 
@@ -361,6 +364,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			int width,
 			int height,
 			DepthFormat depthFormat,
+			int multiSampleCount,
 			bool renderTargetBound
 		);
 	}

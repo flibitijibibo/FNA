@@ -157,6 +157,8 @@ namespace Microsoft.Xna.Framework
 
 			SynchronizeWithVerticalRetrace = true;
 
+			PreferMultiSampling = false;
+
 			if (game.Services.GetService(typeof(IGraphicsDeviceManager)) != null)
 			{
 				throw new ArgumentException("Graphics Device Manager Already Present");
@@ -232,6 +234,10 @@ namespace Microsoft.Xna.Framework
 				PreferredDepthStencilFormat;
 			GraphicsDevice.PresentationParameters.IsFullScreen =
 				IsFullScreen;
+			if (!PreferMultiSampling)
+			{
+				GraphicsDevice.PresentationParameters.MultiSampleCount = 1;
+			}
 
 			// Make the Platform device changes.
 			game.Platform.BeginScreenDeviceChange(
@@ -389,6 +395,10 @@ namespace Microsoft.Xna.Framework
 			GraphicsProfile = gdi.GraphicsProfile;
 			PreferredBackBufferFormat = gdi.PresentationParameters.BackBufferFormat;
 			PreferredDepthStencilFormat = gdi.PresentationParameters.DepthStencilFormat;
+			if (!PreferMultiSampling)
+			{
+				gdi.PresentationParameters.MultiSampleCount = 1;
+			}
 
 			// Create the GraphicsDevice, apply the initial settings.
 			graphicsDevice = new GraphicsDevice(
