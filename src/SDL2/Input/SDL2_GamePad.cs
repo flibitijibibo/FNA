@@ -124,16 +124,15 @@ namespace Microsoft.Xna.Framework.Input
 			IntPtr thisJoystick = SDL.SDL_GameControllerGetJoystick(INTERNAL_devices[which]);
 
 			// Pair up the instance ID to the player index.
-			// FIXME: Remove try/catch after 2.0.4! -flibit
-			try
+			// FIXME: Remove check after 2.0.4? -flibit
+			int thisInstance = SDL.SDL_JoystickInstanceID(thisJoystick);
+			if (INTERNAL_instanceList.ContainsKey(thisInstance))
 			{
-				INTERNAL_instanceList.Add(SDL.SDL_JoystickInstanceID(thisJoystick), which);
-			} catch
-			{
-				// OSX duplicate, WOOPS
+				// Duplicate? Usually this is OSX being dumb, but...?
 				INTERNAL_devices[which] = IntPtr.Zero;
 				return;
 			}
+			INTERNAL_instanceList.Add(thisInstance, which);
 
 			// Start with a fresh state.
 			INTERNAL_states[which] = InitializedState;
