@@ -316,10 +316,10 @@ namespace Microsoft.Xna.Framework.Audio
 
 			// WaveBank Flags
 			ushort wavebankFlags = reader.ReadUInt16();
-			// bool containsEntryNames =	(wavebankFlags & 0x00010000) != 0;
-			bool compact =			(wavebankFlags & 0x00020000) != 0;
-			// bool syncDisabled =		(wavebankFlags & 0x00040000) != 0;
-			// bool containsSeekTables =	(wavebankFlags & 0x00080000) != 0;
+			// bool containsEntryNames =	(wavebankFlags & 0x0001) != 0;
+			bool compact =			(wavebankFlags & 0x0002) != 0;
+			// bool syncDisabled =		(wavebankFlags & 0x0004) != 0;
+			// bool containsSeekTables =	(wavebankFlags & 0x0008) != 0;
 
 			// WaveBank Entry Count
 			uint numEntries = reader.ReadUInt32();
