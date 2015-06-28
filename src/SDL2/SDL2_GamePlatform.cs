@@ -668,6 +668,14 @@ namespace Microsoft.Xna.Framework
 
 			// Load the SDL_Surface* from RWops, get the image data
 			IntPtr surface = SDL_image.IMG_Load_RW(rwops, 1);
+			if (surface == IntPtr.Zero)
+			{
+				// File not found, supported, etc.
+				width = 0;
+				height = 0;
+				pixels = null;
+				return;
+			}
 			surface = INTERNAL_convertSurfaceFormat(surface);
 			unsafe
 			{
