@@ -663,6 +663,7 @@ namespace Microsoft.Xna.Framework
 		) {
 			// Load the Stream into an SDL_RWops*
 			byte[] mem = new byte[stream.Length];
+			GCHandle handle = GCHandle.Alloc(mem, GCHandleType.Pinned);
 			stream.Read(mem, 0, mem.Length);
 			IntPtr rwops = SDL.SDL_RWFromMem(mem, mem.Length);
 
@@ -686,6 +687,7 @@ namespace Microsoft.Xna.Framework
 				Marshal.Copy(surPtr->pixels, pixels, 0, pixels.Length);
 			}
 			SDL.SDL_FreeSurface(surface);
+			handle.Free();
 
 			/* Ensure that the alpha pixels are... well, actual alpha.
 			 * You think this looks stupid, but be assured: Your paint program is
