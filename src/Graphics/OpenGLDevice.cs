@@ -3842,6 +3842,10 @@ namespace Microsoft.Xna.Framework.Graphics
 						}
 						depthStencilFormat = DepthFormat.None;
 					}
+
+					// Keep this state sane.
+					glDevice.glBindRenderbuffer(GLenum.GL_RENDERBUFFER, 0);
+
 					return;
 				}
 				else if (depthStencilAttachment == 0)
