@@ -266,7 +266,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			set
 			{
-				if (value != multisampleMask)
+				if (value != multisampleMask && supportsMultisampling)
 				{
 					multisampleMask = value;
 					// FIXME: index...? -flibit
@@ -1120,7 +1120,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				);
 			}
 
-			if (blendState.MultiSampleMask != multisampleMask)
+			if (blendState.MultiSampleMask != multisampleMask && supportsMultisampling)
 			{
 				multisampleMask = blendState.MultiSampleMask;
 				// FIXME: index...? -flibit
