@@ -3735,7 +3735,6 @@ namespace Microsoft.Xna.Framework.Graphics
 						height
 					);
 				}
-				glDevice.glBindRenderbuffer(GLenum.GL_RENDERBUFFER, 0);
 				glDevice.glFramebufferRenderbuffer(
 					GLenum.GL_FRAMEBUFFER,
 					GLenum.GL_DEPTH_ATTACHMENT,
@@ -3751,6 +3750,9 @@ namespace Microsoft.Xna.Framework.Graphics
 						depthStencilAttachment
 					);
 				}
+
+				// Keep this state sane.
+				glDevice.glBindRenderbuffer(GLenum.GL_RENDERBUFFER, 0);
 #endif
 			}
 
@@ -3924,6 +3926,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
 					depthStencilFormat = depthFormat;
 				}
+
+				// Keep this state sane.
+				glDevice.glBindRenderbuffer(GLenum.GL_RENDERBUFFER, 0);
 #endif
 			}
 		}
