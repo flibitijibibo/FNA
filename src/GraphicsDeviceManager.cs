@@ -238,6 +238,10 @@ namespace Microsoft.Xna.Framework
 			{
 				GraphicsDevice.PresentationParameters.MultiSampleCount = 1;
 			}
+			else if (GraphicsDevice.PresentationParameters.MultiSampleCount == 1)
+			{
+				GraphicsDevice.PresentationParameters.MultiSampleCount = 0;
+			}
 
 			// Make the Platform device changes.
 			game.Platform.BeginScreenDeviceChange(
