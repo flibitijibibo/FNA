@@ -2973,8 +2973,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		public IGLRenderbuffer GenRenderbuffer(
 			int width,
 			int height,
-			DepthFormat format,
-			int multiSampleCount
+			DepthFormat format
 		) {
 			uint handle = 0;
 
@@ -2987,25 +2986,12 @@ namespace Microsoft.Xna.Framework.Graphics
 				GLenum.GL_RENDERBUFFER,
 				handle
 			);
-			if (multiSampleCount > 0)
-			{
-				glRenderbufferStorageMultisample(
-					GLenum.GL_RENDERBUFFER,
-					multiSampleCount,
-					XNAToGL.DepthStorage[format],
-					width,
-					height
-				);
-			}
-			else
-			{
-				glRenderbufferStorage(
-					GLenum.GL_RENDERBUFFER,
-					XNAToGL.DepthStorage[format],
-					width,
-					height
-				);
-			}
+			glRenderbufferStorage(
+				GLenum.GL_RENDERBUFFER,
+				XNAToGL.DepthStorage[format],
+				width,
+				height
+			);
 			glBindRenderbuffer(
 				GLenum.GL_RENDERBUFFER,
 				0

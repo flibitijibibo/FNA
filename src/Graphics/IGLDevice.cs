@@ -237,8 +237,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		IGLRenderbuffer GenRenderbuffer(
 			int width,
 			int height,
-			DepthFormat format,
-			int multiSampleCount
+			DepthFormat format
 		);
 		void AddDisposeRenderbuffer(IGLRenderbuffer renderbuffer);
 

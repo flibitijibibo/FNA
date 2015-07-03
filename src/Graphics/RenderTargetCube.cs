@@ -177,8 +177,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			glDepthStencilBuffer = graphicsDevice.GLDevice.GenRenderbuffer(
 				size,
 				size,
-				preferredDepthFormat,
-				MultiSampleCount
+				preferredDepthFormat
 			);
 		}
 
