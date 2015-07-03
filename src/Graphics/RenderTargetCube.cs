@@ -163,7 +163,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		) {
 			DepthStencilFormat = preferredDepthFormat;
 			MultiSampleCount = Math.Min(
-				MathHelper.ClosestPowOf2(preferredMultiSampleCount),
+				MathHelper.ClosestMSAAPower(preferredMultiSampleCount),
 				graphicsDevice.GLDevice.MaxMultiSampleCount
 			);
 			RenderTargetUsage = usage;

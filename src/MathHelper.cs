@@ -358,21 +358,30 @@ namespace Microsoft.Xna.Framework
 			return Math.Abs(floatA - floatB) < MachineEpsilonFloat;
 		}
 
-		internal static int ClosestPowOf2(int value)
+		internal static int ClosestMSAAPower(int value)
 		{
 			/* Checking for the highest power of two _after_ than the given int:
 			 * http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
 			 * Take result, divide by 2, get the highest power of two _before_!
 			 * -flibit
 			 */
-			value -= 1;
-			value |= value >> 1;
-			value |= value >> 2;
-			value |= value >> 4;
-			value |= value >> 8;
-			value |= value >> 16;
-			value += 1;
-			return value >> 1;
+			if (value == 1)
+			{
+				// ... Except for 1, which is invalid for MSAA -flibit
+				return 0;
+			}
+			int result = value - 1;
+			result |= result >> 1;
+			result |= result >> 2;
+			result |= result >> 4;
+			result |= result >> 8;
+			result |= result >> 16;
+			result += 1;
+			if (result == value)
+			{
+				return result;
+			}
+			return result >> 1;
 		}
 
 		#endregion

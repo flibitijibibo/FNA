@@ -370,7 +370,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			Adapter = adapter;
 			PresentationParameters = presentationParameters;
 			GraphicsProfile = graphicsProfile;
-			PresentationParameters.MultiSampleCount = MathHelper.ClosestPowOf2(
+			PresentationParameters.MultiSampleCount = MathHelper.ClosestMSAAPower(
 				PresentationParameters.MultiSampleCount
 			);
 
@@ -549,7 +549,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			// Set the new PresentationParameters first.
 			PresentationParameters = presentationParameters;
 			PresentationParameters.MultiSampleCount = Math.Min(
-				MathHelper.ClosestPowOf2(
+				MathHelper.ClosestMSAAPower(
 					PresentationParameters.MultiSampleCount
 				),
 				GLDevice.MaxMultiSampleCount
