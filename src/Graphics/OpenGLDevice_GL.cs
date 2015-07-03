@@ -1109,7 +1109,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			try
 			{
 				glRenderbufferStorageMultisample = (RenderbufferStorageMultisample) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glRenderbufferStorageMultisample"),
+					TryGetFramebufferEP("glRenderbufferStorageMultisample"),
 					typeof(RenderbufferStorageMultisample)
 				);
 				glSampleMaski = (SampleMaski) Marshal.GetDelegateForFunctionPointer(
