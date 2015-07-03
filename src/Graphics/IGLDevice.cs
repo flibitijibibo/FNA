@@ -53,6 +53,11 @@ namespace Microsoft.Xna.Framework.Graphics
 			get;
 		}
 
+		int MaxMultiSampleCount
+		{
+			get;
+		}
+
 		IGLBackbuffer Backbuffer
 		{
 			get;
@@ -358,9 +363,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
 
 		void ResetFramebuffer(
-			int width,
-			int height,
-			DepthFormat depthFormat,
+			PresentationParameters presentationParameters,
 			bool renderTargetBound
 		);
 	}

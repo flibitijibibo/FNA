@@ -370,6 +370,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			Adapter = adapter;
 			PresentationParameters = presentationParameters;
 			GraphicsProfile = graphicsProfile;
+			PresentationParameters.MultiSampleCount = MathHelper.ClosestMSAAPower(
+				PresentationParameters.MultiSampleCount
+			);
 
 			// Set up the OpenGL Device. Loads entry points.
 			GLDevice = new OpenGLDevice(PresentationParameters);
@@ -545,15 +548,19 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			// Set the new PresentationParameters first.
 			PresentationParameters = presentationParameters;
+			PresentationParameters.MultiSampleCount = Math.Min(
+				MathHelper.ClosestMSAAPower(
+					PresentationParameters.MultiSampleCount
+				),
+				GLDevice.MaxMultiSampleCount
+			);
 
 			/* Reset the backbuffer first, before doing anything else.
 			 * The GLDevice needs to know what we're up to right away.
 			 * -flibit
 			 */
 			GLDevice.Backbuffer.ResetFramebuffer(
-				PresentationParameters.BackBufferWidth,
-				PresentationParameters.BackBufferHeight,
-				PresentationParameters.DepthStencilFormat,
+				PresentationParameters,
 				RenderTargetCount > 0
 			);
 
