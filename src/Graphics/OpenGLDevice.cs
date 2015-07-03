@@ -3151,11 +3151,10 @@ namespace Microsoft.Xna.Framework.Graphics
 			GLenum[] textureTargets = new GLenum[renderTargets.Length];
 			for (i = 0; i < renderTargets.Length; i += 1)
 			{
-				OpenGLTexture tex = renderTargets[i].RenderTarget.texture as OpenGLTexture;
-				attachments[i] = tex.Handle;
+				attachments[i] = (renderTargets[i].RenderTarget.texture as OpenGLTexture).Handle;
 				if (renderTargets[i].RenderTarget is RenderTarget2D)
 				{
-					textureTargets[i] = tex.Target;
+					textureTargets[i] = GLenum.GL_TEXTURE_2D;
 				}
 				else
 				{

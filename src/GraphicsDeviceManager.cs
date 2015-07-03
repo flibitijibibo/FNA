@@ -407,10 +407,6 @@ namespace Microsoft.Xna.Framework
 			GraphicsProfile = gdi.GraphicsProfile;
 			PreferredBackBufferFormat = gdi.PresentationParameters.BackBufferFormat;
 			PreferredDepthStencilFormat = gdi.PresentationParameters.DepthStencilFormat;
-			if (!PreferMultiSampling)
-			{
-				gdi.PresentationParameters.MultiSampleCount = 1;
-			}
 
 			// Create the GraphicsDevice, apply the initial settings.
 			graphicsDevice = new GraphicsDevice(
