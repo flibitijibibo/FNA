@@ -81,7 +81,6 @@ namespace Microsoft.Xna.Framework.Graphics
 			GL_TEXTURE_3D =				0x806F,
 			GL_TEXTURE_CUBE_MAP =			0x8513,
 			GL_TEXTURE_CUBE_MAP_POSITIVE_X =	0x8515,
-			GL_TEXTURE_2D_MULTISAMPLE =		0x9100,
 			// Blend Mode
 			GL_BLEND =				0x0BE2,
 			GL_SRC_COLOR =				0x0300,
@@ -195,6 +194,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			GL_QUERY_RESULT =			0x8866,
 			GL_QUERY_RESULT_AVAILABLE =		0x8867,
 			GL_SAMPLES_PASSED =			0x8914,
+			// Multisampling
+			GL_MAX_SAMPLES =			0x8D57,
 			// Source Enum Values
 			GL_DEBUG_SOURCE_API_ARB =		0x8246,
 			GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB =	0x8247,
@@ -440,16 +441,6 @@ namespace Microsoft.Xna.Framework.Graphics
 			IntPtr pixels
 		);
 		private CompressedTexSubImage2D glCompressedTexSubImage2D;
-
-		private delegate void TexImage2DMultisample(
-			GLenum target,
-			int samples,
-			int internalFormat,
-			int width,
-			int height,
-			bool fixedsamplelocation
-		);
-		private TexImage2DMultisample glTexImage2DMultisample;
 
 		private delegate void TexImage3D(
 			GLenum target,
@@ -1113,14 +1104,10 @@ namespace Microsoft.Xna.Framework.Graphics
 				// FIXME: SupportsIndependentWriteMasks? -flibit
 			}
 
-			/* ARB_texture_multisample is glitter -flibit */
+			/* EXT_framebuffer_multisample/ARB_texture_multisample is glitter -flibit */
 			supportsMultisampling = true;
 			try
 			{
-				glTexImage2DMultisample = (TexImage2DMultisample) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glTexImage2DMultisample"),
-					typeof(TexImage2DMultisample)
-				);
 				glRenderbufferStorageMultisample = (RenderbufferStorageMultisample) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glRenderbufferStorageMultisample"),
 					typeof(RenderbufferStorageMultisample)

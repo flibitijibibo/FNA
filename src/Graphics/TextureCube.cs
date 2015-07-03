@@ -36,25 +36,6 @@ namespace Microsoft.Xna.Framework.Graphics
 			int size,
 			bool mipMap,
 			SurfaceFormat format
-		) : this(
-			graphicsDevice,
-			size,
-			mipMap,
-			format,
-			1
-		) {
-		}
-
-		#endregion
-
-		#region Internal Constructor
-
-		internal TextureCube(
-			GraphicsDevice graphicsDevice,
-			int size,
-			bool mipMap,
-			SurfaceFormat format,
-			int multiSampleCount
 		) {
 			if (graphicsDevice == null)
 			{
@@ -69,8 +50,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			texture = GraphicsDevice.GLDevice.CreateTextureCube(
 				format,
 				size,
-				LevelCount,
-				multiSampleCount
+				LevelCount
 			);
 		}
 

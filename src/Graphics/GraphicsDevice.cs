@@ -370,6 +370,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			Adapter = adapter;
 			PresentationParameters = presentationParameters;
 			GraphicsProfile = graphicsProfile;
+			PresentationParameters.MultiSampleCount = MathHelper.ClosestPowOf2(
+				PresentationParameters.MultiSampleCount
+			);
 
 			// Set up the OpenGL Device. Loads entry points.
 			GLDevice = new OpenGLDevice(PresentationParameters);
@@ -545,17 +548,19 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			// Set the new PresentationParameters first.
 			PresentationParameters = presentationParameters;
+			PresentationParameters.MultiSampleCount = Math.Min(
+				MathHelper.ClosestPowOf2(
+					PresentationParameters.MultiSampleCount
+				),
+				GLDevice.MaxMultiSampleCount
+			);
 
 			/* Reset the backbuffer first, before doing anything else.
 			 * The GLDevice needs to know what we're up to right away.
 			 * -flibit
 			 */
 			GLDevice.Backbuffer.ResetFramebuffer(
-				PresentationParameters.BackBufferWidth,
-				PresentationParameters.BackBufferHeight,
-				PresentationParameters.DepthStencilFormat,
-				PresentationParameters.MultiSampleCount == 0 ?
-					4 : PresentationParameters.MultiSampleCount,
+				PresentationParameters,
 				RenderTargetCount > 0
 			);
 
@@ -1311,6 +1316,22 @@ namespace Microsoft.Xna.Framework.Graphics
 			while (modifiedSamplers.Count > 0)
 			{
 				int sampler = modifiedSamplers.Dequeue();
+				if (Textures[sampler] is IRenderTarget)
+				{
+					/* FIXME: I don't know wheretf to actually resolve this.
+					 * For now, just assume that whenever we bind a multisample
+					 * target, we need to resolve on each new bind. This can be
+					 * both too _much_ resolving and _not enough_ resolving.
+					 *
+					 * I just wanted multisample textures to work, GL pls ;_;
+					 * -flibit
+					 */
+					IRenderTarget target = Textures[sampler] as IRenderTarget;
+					if (target.ColorBuffer != null)
+					{
+						GLDevice.ResolveTarget(target);
+					}
+				}
 				GLDevice.VerifySampler(
 					sampler,
 					Textures[sampler],

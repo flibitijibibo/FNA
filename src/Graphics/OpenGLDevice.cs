@@ -92,24 +92,14 @@ namespace Microsoft.Xna.Framework.Graphics
 			public float Anistropy;
 			public int MaxMipmapLevel;
 			public float LODBias;
-			public int MultiSampleCount;
 
 			public OpenGLTexture(
 				uint handle,
 				Type target,
-				int levelCount,
-				int multiSampleCount
+				int levelCount
 			) {
 				Handle = handle;
-				if (multiSampleCount > 1)
-				{
-					// FIXME: Assumption! -flibit
-					Target = GLenum.GL_TEXTURE_2D_MULTISAMPLE;
-				}
-				else
-				{
-					Target = XNAToGL.TextureType[target];
-				}
+				Target = XNAToGL.TextureType[target];
 				HasMipmaps = levelCount > 1;
 
 				WrapS = TextureAddressMode.Wrap;
@@ -119,7 +109,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				Anistropy = 4.0f;
 				MaxMipmapLevel = 0;
 				LODBias = 0.0f;
-				MultiSampleCount = multiSampleCount;
 			}
 
 			// We can't set a SamplerState Texture to null, so use this.
@@ -422,6 +411,9 @@ namespace Microsoft.Xna.Framework.Graphics
 		private uint currentRenderbuffer;
 		private DepthFormat currentDepthStencilFormat;
 
+		private uint resolveReadBuffer = 0;
+		private uint resolveDrawBuffer = 0;
+
 		#endregion
 
 		#region Clear Cache Variables
@@ -472,6 +464,12 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
 
 		public int MaxTextureSlots
+		{
+			get;
+			private set;
+		}
+
+		public int MaxMultiSampleCount
 		{
 			get;
 			private set;
@@ -587,14 +585,27 @@ namespace Microsoft.Xna.Framework.Graphics
 				extensions.Contains("GL_EXT_texture_compression_dxt1")
 			);
 
+			/* Check the max multisample count, override parameters if necessary */
+			int maxSamples = 0;
+			if (supportsMultisampling)
+			{
+				glGetIntegerv(GLenum.GL_MAX_SAMPLES, out maxSamples);
+				glGenFramebuffers(1, out resolveReadBuffer);
+				glGenFramebuffers(1, out resolveDrawBuffer);
+			}
+			MaxMultiSampleCount = maxSamples;
+			presentationParameters.MultiSampleCount = Math.Min(
+				presentationParameters.MultiSampleCount,
+				MaxMultiSampleCount
+			);
+
 			// Initialize the faux-backbuffer
 			backbuffer = new OpenGLBackbuffer(
 				this,
 				GraphicsDeviceManager.DefaultBackBufferWidth,
 				GraphicsDeviceManager.DefaultBackBufferHeight,
 				presentationParameters.DepthStencilFormat,
-				presentationParameters.MultiSampleCount == 0 ?
-					4 : presentationParameters.MultiSampleCount
+				presentationParameters.MultiSampleCount
 			);
 
 			// Initialize texture collection array
@@ -632,6 +643,8 @@ namespace Microsoft.Xna.Framework.Graphics
 		public void Dispose()
 		{
 			glDeleteFramebuffers(1, ref targetFramebuffer);
+			glDeleteFramebuffers(1, ref resolveReadBuffer);
+			glDeleteFramebuffers(1, ref resolveDrawBuffer);
 			targetFramebuffer = 0;
 			backbuffer.Dispose();
 			backbuffer = null;
@@ -2041,16 +2054,14 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		private OpenGLTexture CreateTexture(
 			Type target,
-			int levelCount,
-			int multiSampleCount = 1
+			int levelCount
 		) {
 			uint handle;
 			glGenTextures(1, out handle);
 			OpenGLTexture result = new OpenGLTexture(
 				handle,
 				target,
-				levelCount,
-				multiSampleCount
+				levelCount
 			);
 			BindTexture(result);
 			glTexParameteri(
@@ -2103,8 +2114,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			SurfaceFormat format,
 			int width,
 			int height,
-			int levelCount,
-			int multiSampleCount
+			int levelCount
 		) {
 			OpenGLTexture result = null;
 
@@ -2114,8 +2124,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			result = CreateTexture(
 				typeof(Texture2D),
-				levelCount,
-				multiSampleCount
+				levelCount
 			);
 
 			GLenum glFormat = XNAToGL.TextureFormat[format];
@@ -2140,34 +2149,20 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			else
 			{
-				if (multiSampleCount > 1 && supportsMultisampling)
+				GLenum glType = XNAToGL.TextureDataType[format];
+				for (int i = 0; i < levelCount; i += 1)
 				{
-					glTexImage2DMultisample(
-						GLenum.GL_TEXTURE_2D_MULTISAMPLE,
-						multiSampleCount,
+					glTexImage2D(
+						GLenum.GL_TEXTURE_2D,
+						i,
 						(int) glInternalFormat,
-						width,
-						height,
-						false
+						Math.Max(width >> i, 1),
+						Math.Max(height >> i, 1),
+						0,
+						glFormat,
+						glType,
+						IntPtr.Zero
 					);
-				}
-				else
-				{
-					GLenum glType = XNAToGL.TextureDataType[format];
-					for (int i = 0; i < levelCount; i += 1)
-					{
-						glTexImage2D(
-							GLenum.GL_TEXTURE_2D,
-							i,
-							(int) glInternalFormat,
-							Math.Max(width >> i, 1),
-							Math.Max(height >> i, 1),
-							0,
-							glFormat,
-							glType,
-							IntPtr.Zero
-						);
-					}
 				}
 			}
 
@@ -2225,8 +2220,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		public IGLTexture CreateTextureCube(
 			SurfaceFormat format,
 			int size,
-			int levelCount,
-			int multiSampleCount
+			int levelCount
 		) {
 			OpenGLTexture result = null;
 
@@ -2986,6 +2980,54 @@ namespace Microsoft.Xna.Framework.Graphics
 		public IGLRenderbuffer GenRenderbuffer(
 			int width,
 			int height,
+			SurfaceFormat format,
+			int multiSampleCount
+		) {
+			uint handle = 0;
+
+#if !DISABLE_THREADING
+			ForceToMainThread(() => {
+#endif
+
+			glGenRenderbuffers(1, out handle);
+			glBindRenderbuffer(
+				GLenum.GL_RENDERBUFFER,
+				handle
+			);
+			if (multiSampleCount > 0)
+			{
+				glRenderbufferStorageMultisample(
+					GLenum.GL_RENDERBUFFER,
+					multiSampleCount,
+					XNAToGL.TextureFormat[format],
+					width,
+					height
+				);
+			}
+			else
+			{
+				glRenderbufferStorage(
+					GLenum.GL_RENDERBUFFER,
+					XNAToGL.TextureFormat[format],
+					width,
+					height
+				);
+			}
+			glBindRenderbuffer(
+				GLenum.GL_RENDERBUFFER,
+				0
+			);
+
+#if !DISABLE_THREADING
+			});
+#endif
+
+			return new OpenGLRenderbuffer(handle);
+		}
+
+		public IGLRenderbuffer GenRenderbuffer(
+			int width,
+			int height,
 			DepthFormat format,
 			int multiSampleCount
 		) {
@@ -3000,7 +3042,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				GLenum.GL_RENDERBUFFER,
 				handle
 			);
-			if (multiSampleCount > 1 && supportsMultisampling)
+			if (multiSampleCount > 0)
 			{
 				glRenderbufferStorageMultisample(
 					GLenum.GL_RENDERBUFFER,
@@ -3164,6 +3206,13 @@ namespace Microsoft.Xna.Framework.Graphics
 			GLenum[] textureTargets = new GLenum[renderTargets.Length];
 			for (i = 0; i < renderTargets.Length; i += 1)
 			{
+				IGLRenderbuffer buf = (renderTargets[i].RenderTarget as IRenderTarget).ColorBuffer;
+				if (buf != null)
+				{
+					attachments[i] = (buf as OpenGLRenderbuffer).Handle;
+					textureTargets[i] = GLenum.GL_RENDERBUFFER;
+					continue;
+				}
 				OpenGLTexture tex = renderTargets[i].RenderTarget.texture as OpenGLTexture;
 				attachments[i] = tex.Handle;
 				if (renderTargets[i].RenderTarget is RenderTarget2D)
@@ -3182,13 +3231,49 @@ namespace Microsoft.Xna.Framework.Graphics
 				if (	attachments[i] != currentAttachments[i] ||
 					textureTargets[i] != currentAttachmentFaces[i]	)
 				{
-					glFramebufferTexture2D(
-						GLenum.GL_FRAMEBUFFER,
-						GLenum.GL_COLOR_ATTACHMENT0 + i,
-						textureTargets[i],
-						attachments[i],
-						0
-					);
+					if (currentAttachments[i] != 0)
+					{
+						if (	textureTargets[i] != GLenum.GL_RENDERBUFFER &&
+							currentAttachmentFaces[i] == GLenum.GL_RENDERBUFFER	)
+						{
+							glFramebufferRenderbuffer(
+								GLenum.GL_FRAMEBUFFER,
+								GLenum.GL_COLOR_ATTACHMENT0 + i,
+								GLenum.GL_RENDERBUFFER,
+								0
+							);
+						}
+						else if (	textureTargets[i] != GLenum.GL_RENDERBUFFER &&
+								currentAttachmentFaces[i] == GLenum.GL_RENDERBUFFER	)
+						{
+							glFramebufferTexture2D(
+								GLenum.GL_FRAMEBUFFER,
+								GLenum.GL_COLOR_ATTACHMENT0 + i,
+								currentAttachmentFaces[i],
+								0,
+								0
+							);
+						}
+					}
+					if (textureTargets[i] == GLenum.GL_RENDERBUFFER)
+					{
+						glFramebufferRenderbuffer(
+							GLenum.GL_FRAMEBUFFER,
+							GLenum.GL_COLOR_ATTACHMENT0 + i,
+							GLenum.GL_RENDERBUFFER,
+							attachments[i]
+						);
+					}
+					else
+					{
+						glFramebufferTexture2D(
+							GLenum.GL_FRAMEBUFFER,
+							GLenum.GL_COLOR_ATTACHMENT0 + i,
+							textureTargets[i],
+							attachments[i],
+							0
+						);
+					}
 					currentAttachments[i] = attachments[i];
 					currentAttachmentFaces[i] = textureTargets[i];
 				}
@@ -3197,13 +3282,25 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				if (currentAttachments[i] != 0)
 				{
-					glFramebufferTexture2D(
-						GLenum.GL_FRAMEBUFFER,
-						GLenum.GL_COLOR_ATTACHMENT0 + i,
-						currentAttachmentFaces[i],
-						0,
-						0
-					);
+					if (currentAttachmentFaces[i] == GLenum.GL_RENDERBUFFER)
+					{
+						glFramebufferRenderbuffer(
+							GLenum.GL_FRAMEBUFFER,
+							GLenum.GL_COLOR_ATTACHMENT0 + i,
+							GLenum.GL_RENDERBUFFER,
+							0
+						);
+					}
+					else
+					{
+						glFramebufferTexture2D(
+							GLenum.GL_FRAMEBUFFER,
+							GLenum.GL_COLOR_ATTACHMENT0 + i,
+							currentAttachmentFaces[i],
+							0,
+							0
+						);
+					}
 					currentAttachments[i] = 0;
 					currentAttachmentFaces[i] = GLenum.GL_TEXTURE_2D;
 				}
@@ -3260,6 +3357,44 @@ namespace Microsoft.Xna.Framework.Graphics
 				}
 				currentRenderbuffer = handle;
 			}
+		}
+
+		#endregion
+
+		#region Renderbuffer->Texture Resolve Method
+
+		public void ResolveTarget(IRenderTarget target)
+		{
+			// FIXME: Assumption! -flibit
+			RenderTarget2D assumption = (target as RenderTarget2D);
+			OpenGLTexture tex = assumption.texture as OpenGLTexture;
+			int width = assumption.Width;
+			int height = assumption.Height;
+			uint prevRead = currentReadFramebuffer;
+			uint prevDraw = currentDrawFramebuffer;
+			BindReadFramebuffer(resolveReadBuffer);
+			BindDrawFramebuffer(resolveDrawBuffer);
+			glFramebufferRenderbuffer(
+				GLenum.GL_READ_FRAMEBUFFER,
+				GLenum.GL_COLOR_ATTACHMENT0,
+				GLenum.GL_RENDERBUFFER,
+				(target.ColorBuffer as OpenGLRenderbuffer).Handle
+			);
+			glFramebufferTexture2D(
+				GLenum.GL_DRAW_FRAMEBUFFER,
+				GLenum.GL_COLOR_ATTACHMENT0,
+				GLenum.GL_TEXTURE_2D, // FIXME: Assumption! -flibit
+				tex.Handle,
+				0
+			);
+			glBlitFramebuffer(
+				0, 0, width, height,
+				0, 0, width, height,
+				GLenum.GL_COLOR_BUFFER_BIT,
+				GLenum.GL_LINEAR
+			);
+			BindReadFramebuffer(prevRead);
+			BindDrawFramebuffer(prevDraw);
 		}
 
 		#endregion
@@ -3662,10 +3797,6 @@ namespace Microsoft.Xna.Framework.Graphics
 #else
 				glDevice = device;
 				depthStencilFormat = depthFormat;
-				if (!glDevice.supportsMultisampling)
-				{
-					multiSampleCount = 1;
-				}
 
 				// Generate and bind the FBO.
 				uint handle;
@@ -3676,7 +3807,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				// Create and attach the color buffer
 				glDevice.glGenRenderbuffers(1, out colorAttachment);
 				glDevice.glBindRenderbuffer(GLenum.GL_RENDERBUFFER, colorAttachment);
-				if (multiSampleCount > 1)
+				if (multiSampleCount > 0)
 				{
 					glDevice.glRenderbufferStorageMultisample(
 						GLenum.GL_RENDERBUFFER,
@@ -3716,7 +3847,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				// Create and attach the depth/stencil buffer
 				glDevice.glGenRenderbuffers(1, out depthStencilAttachment);
 				glDevice.glBindRenderbuffer(GLenum.GL_RENDERBUFFER, depthStencilAttachment);
-				if (multiSampleCount > 1)
+				if (multiSampleCount > 0)
 				{
 					glDevice.glRenderbufferStorageMultisample(
 						GLenum.GL_RENDERBUFFER,
@@ -3772,30 +3903,25 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 
 			public void ResetFramebuffer(
-				int width,
-				int height,
-				DepthFormat depthFormat,
-				int multiSampleCount,
+				PresentationParameters presentationParameters,
 				bool renderTargetBound
 			) {
-				Width = width;
-				Height = height;
+				Width = presentationParameters.BackBufferWidth;
+				Height = presentationParameters.BackBufferHeight;
 #if !DISABLE_FAUXBACKBUFFER
-				if (!glDevice.supportsMultisampling)
-				{
-					multiSampleCount = 1;
-				}
+				DepthFormat depthFormat = presentationParameters.DepthStencilFormat;
+				int multiSampleCount = presentationParameters.MultiSampleCount;
 
 				// Update our color attachment to the new resolution.
 				glDevice.glBindRenderbuffer(GLenum.GL_RENDERBUFFER, colorAttachment);
-				if (multiSampleCount > 1)
+				if (multiSampleCount > 0)
 				{
 					glDevice.glRenderbufferStorageMultisample(
 						GLenum.GL_RENDERBUFFER,
 						multiSampleCount,
 						GLenum.GL_RGBA,
-						width,
-						height
+						Width,
+						Height
 					);
 				}
 				else
@@ -3803,8 +3929,8 @@ namespace Microsoft.Xna.Framework.Graphics
 					glDevice.glRenderbufferStorage(
 						GLenum.GL_RENDERBUFFER,
 						GLenum.GL_RGBA,
-						width,
-						height
+						Width,
+						Height
 					);
 				}
 
@@ -3859,14 +3985,14 @@ namespace Microsoft.Xna.Framework.Graphics
 
 				// Update the depth/stencil buffer
 				glDevice.glBindRenderbuffer(GLenum.GL_RENDERBUFFER, depthStencilAttachment);
-				if (multiSampleCount > 1)
+				if (multiSampleCount > 0)
 				{
 					glDevice.glRenderbufferStorageMultisample(
 						GLenum.GL_RENDERBUFFER,
 						multiSampleCount,
 						XNAToGL.DepthStorage[depthFormat],
-						width,
-						height
+						Width,
+						Height
 					);
 				}
 				else
@@ -3874,8 +4000,8 @@ namespace Microsoft.Xna.Framework.Graphics
 					glDevice.glRenderbufferStorage(
 						GLenum.GL_RENDERBUFFER,
 						XNAToGL.DepthStorage[depthFormat],
-						width,
-						height
+						Width,
+						Height
 					);
 				}
 

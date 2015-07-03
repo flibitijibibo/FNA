@@ -53,6 +53,11 @@ namespace Microsoft.Xna.Framework.Graphics
 			get;
 		}
 
+		int MaxMultiSampleCount
+		{
+			get;
+		}
+
 		IGLBackbuffer Backbuffer
 		{
 			get;
@@ -138,6 +143,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			DepthFormat depthFormat
 		);
 		void GenerateTargetMipmaps(IGLTexture target);
+		void ResolveTarget(IRenderTarget target);
 
 		void ReadBackbuffer<T>(
 			T[] data,
@@ -150,8 +156,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			SurfaceFormat format,
 			int width,
 			int height,
-			int levelCount,
-			int multiSampleCount
+			int levelCount
 		);
 		IGLTexture CreateTexture3D(
 			SurfaceFormat format,
@@ -163,8 +168,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		IGLTexture CreateTextureCube(
 			SurfaceFormat format,
 			int size,
-			int levelCount,
-			int multiSampleCount
+			int levelCount
 		);
 		void AddDisposeTexture(IGLTexture texture);
 		void SetTextureData2D<T>(
@@ -231,6 +235,12 @@ namespace Microsoft.Xna.Framework.Graphics
 			int elementCount
 		) where T : struct;
 
+		IGLRenderbuffer GenRenderbuffer(
+			int width,
+			int height,
+			SurfaceFormat format,
+			int multiSampleCount
+		);
 		IGLRenderbuffer GenRenderbuffer(
 			int width,
 			int height,
@@ -361,10 +371,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
 
 		void ResetFramebuffer(
-			int width,
-			int height,
-			DepthFormat depthFormat,
-			int multiSampleCount,
+			PresentationParameters presentationParameters,
 			bool renderTargetBound
 		);
 	}

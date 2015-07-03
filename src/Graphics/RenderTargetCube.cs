@@ -81,6 +81,15 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
 
 		/// <inheritdoc/>
+		IGLRenderbuffer IRenderTarget.ColorBuffer
+		{
+			get
+			{
+				return null; // TODO: Multisample render buffer cubes...? -flibit
+			}
+		}
+
+		/// <inheritdoc/>
 		IGLRenderbuffer IRenderTarget.DepthStencilBuffer
 		{
 			get
@@ -162,7 +171,10 @@ namespace Microsoft.Xna.Framework.Graphics
 			preferredFormat
 		) {
 			DepthStencilFormat = preferredDepthFormat;
-			MultiSampleCount = preferredMultiSampleCount;
+			MultiSampleCount = Math.Min(
+				MathHelper.ClosestPowOf2(preferredMultiSampleCount),
+				graphicsDevice.GLDevice.MaxMultiSampleCount
+			);
 			RenderTargetUsage = usage;
 
 			// If we don't need a depth buffer then we're done.
@@ -175,7 +187,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				size,
 				size,
 				preferredDepthFormat,
-				preferredMultiSampleCount
+				MultiSampleCount
 			);
 		}
 

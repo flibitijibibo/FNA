@@ -236,11 +236,19 @@ namespace Microsoft.Xna.Framework
 				IsFullScreen;
 			if (!PreferMultiSampling)
 			{
-				GraphicsDevice.PresentationParameters.MultiSampleCount = 1;
-			}
-			else if (GraphicsDevice.PresentationParameters.MultiSampleCount == 1)
-			{
 				GraphicsDevice.PresentationParameters.MultiSampleCount = 0;
+			}
+			else if (GraphicsDevice.PresentationParameters.MultiSampleCount == 0)
+			{
+				/* XNA4 seems to have an upper limit of 8, but I'm willing to
+				 * limit this only in GraphicsDeviceManager's default setting.
+				 * If you want even higher values, Reset() with a custom value.
+				 * -flibit
+				 */
+				GraphicsDevice.PresentationParameters.MultiSampleCount = Math.Min(
+					GraphicsDevice.GLDevice.MaxMultiSampleCount,
+					8
+				);
 			}
 
 			// Make the Platform device changes.
