@@ -81,15 +81,6 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
 
 		/// <inheritdoc/>
-		IGLRenderbuffer IRenderTarget.ColorBuffer
-		{
-			get
-			{
-				return null; // TODO: Multisample render buffer cubes...? -flibit
-			}
-		}
-
-		/// <inheritdoc/>
 		IGLRenderbuffer IRenderTarget.DepthStencilBuffer
 		{
 			get

@@ -411,9 +411,6 @@ namespace Microsoft.Xna.Framework.Graphics
 		private uint currentRenderbuffer;
 		private DepthFormat currentDepthStencilFormat;
 
-		private uint resolveReadBuffer = 0;
-		private uint resolveDrawBuffer = 0;
-
 		#endregion
 
 		#region Clear Cache Variables
@@ -590,8 +587,6 @@ namespace Microsoft.Xna.Framework.Graphics
 			if (supportsMultisampling)
 			{
 				glGetIntegerv(GLenum.GL_MAX_SAMPLES, out maxSamples);
-				glGenFramebuffers(1, out resolveReadBuffer);
-				glGenFramebuffers(1, out resolveDrawBuffer);
 			}
 			MaxMultiSampleCount = maxSamples;
 			presentationParameters.MultiSampleCount = Math.Min(
@@ -643,8 +638,6 @@ namespace Microsoft.Xna.Framework.Graphics
 		public void Dispose()
 		{
 			glDeleteFramebuffers(1, ref targetFramebuffer);
-			glDeleteFramebuffers(1, ref resolveReadBuffer);
-			glDeleteFramebuffers(1, ref resolveDrawBuffer);
 			targetFramebuffer = 0;
 			backbuffer.Dispose();
 			backbuffer = null;
@@ -2980,54 +2973,6 @@ namespace Microsoft.Xna.Framework.Graphics
 		public IGLRenderbuffer GenRenderbuffer(
 			int width,
 			int height,
-			SurfaceFormat format,
-			int multiSampleCount
-		) {
-			uint handle = 0;
-
-#if !DISABLE_THREADING
-			ForceToMainThread(() => {
-#endif
-
-			glGenRenderbuffers(1, out handle);
-			glBindRenderbuffer(
-				GLenum.GL_RENDERBUFFER,
-				handle
-			);
-			if (multiSampleCount > 0)
-			{
-				glRenderbufferStorageMultisample(
-					GLenum.GL_RENDERBUFFER,
-					multiSampleCount,
-					XNAToGL.TextureFormat[format],
-					width,
-					height
-				);
-			}
-			else
-			{
-				glRenderbufferStorage(
-					GLenum.GL_RENDERBUFFER,
-					XNAToGL.TextureFormat[format],
-					width,
-					height
-				);
-			}
-			glBindRenderbuffer(
-				GLenum.GL_RENDERBUFFER,
-				0
-			);
-
-#if !DISABLE_THREADING
-			});
-#endif
-
-			return new OpenGLRenderbuffer(handle);
-		}
-
-		public IGLRenderbuffer GenRenderbuffer(
-			int width,
-			int height,
 			DepthFormat format,
 			int multiSampleCount
 		) {
@@ -3206,13 +3151,6 @@ namespace Microsoft.Xna.Framework.Graphics
 			GLenum[] textureTargets = new GLenum[renderTargets.Length];
 			for (i = 0; i < renderTargets.Length; i += 1)
 			{
-				IGLRenderbuffer buf = (renderTargets[i].RenderTarget as IRenderTarget).ColorBuffer;
-				if (buf != null)
-				{
-					attachments[i] = (buf as OpenGLRenderbuffer).Handle;
-					textureTargets[i] = GLenum.GL_RENDERBUFFER;
-					continue;
-				}
 				OpenGLTexture tex = renderTargets[i].RenderTarget.texture as OpenGLTexture;
 				attachments[i] = tex.Handle;
 				if (renderTargets[i].RenderTarget is RenderTarget2D)
@@ -3231,49 +3169,13 @@ namespace Microsoft.Xna.Framework.Graphics
 				if (	attachments[i] != currentAttachments[i] ||
 					textureTargets[i] != currentAttachmentFaces[i]	)
 				{
-					if (currentAttachments[i] != 0)
-					{
-						if (	textureTargets[i] != GLenum.GL_RENDERBUFFER &&
-							currentAttachmentFaces[i] == GLenum.GL_RENDERBUFFER	)
-						{
-							glFramebufferRenderbuffer(
-								GLenum.GL_FRAMEBUFFER,
-								GLenum.GL_COLOR_ATTACHMENT0 + i,
-								GLenum.GL_RENDERBUFFER,
-								0
-							);
-						}
-						else if (	textureTargets[i] != GLenum.GL_RENDERBUFFER &&
-								currentAttachmentFaces[i] == GLenum.GL_RENDERBUFFER	)
-						{
-							glFramebufferTexture2D(
-								GLenum.GL_FRAMEBUFFER,
-								GLenum.GL_COLOR_ATTACHMENT0 + i,
-								currentAttachmentFaces[i],
-								0,
-								0
-							);
-						}
-					}
-					if (textureTargets[i] == GLenum.GL_RENDERBUFFER)
-					{
-						glFramebufferRenderbuffer(
-							GLenum.GL_FRAMEBUFFER,
-							GLenum.GL_COLOR_ATTACHMENT0 + i,
-							GLenum.GL_RENDERBUFFER,
-							attachments[i]
-						);
-					}
-					else
-					{
-						glFramebufferTexture2D(
-							GLenum.GL_FRAMEBUFFER,
-							GLenum.GL_COLOR_ATTACHMENT0 + i,
-							textureTargets[i],
-							attachments[i],
-							0
-						);
-					}
+					glFramebufferTexture2D(
+						GLenum.GL_FRAMEBUFFER,
+						GLenum.GL_COLOR_ATTACHMENT0 + i,
+						textureTargets[i],
+						attachments[i],
+						0
+					);
 					currentAttachments[i] = attachments[i];
 					currentAttachmentFaces[i] = textureTargets[i];
 				}
@@ -3282,25 +3184,13 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				if (currentAttachments[i] != 0)
 				{
-					if (currentAttachmentFaces[i] == GLenum.GL_RENDERBUFFER)
-					{
-						glFramebufferRenderbuffer(
-							GLenum.GL_FRAMEBUFFER,
-							GLenum.GL_COLOR_ATTACHMENT0 + i,
-							GLenum.GL_RENDERBUFFER,
-							0
-						);
-					}
-					else
-					{
-						glFramebufferTexture2D(
-							GLenum.GL_FRAMEBUFFER,
-							GLenum.GL_COLOR_ATTACHMENT0 + i,
-							currentAttachmentFaces[i],
-							0,
-							0
-						);
-					}
+					glFramebufferTexture2D(
+						GLenum.GL_FRAMEBUFFER,
+						GLenum.GL_COLOR_ATTACHMENT0 + i,
+						currentAttachmentFaces[i],
+						0,
+						0
+					);
 					currentAttachments[i] = 0;
 					currentAttachmentFaces[i] = GLenum.GL_TEXTURE_2D;
 				}
@@ -3357,44 +3247,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				}
 				currentRenderbuffer = handle;
 			}
-		}
-
-		#endregion
-
-		#region Renderbuffer->Texture Resolve Method
-
-		public void ResolveTarget(IRenderTarget target)
-		{
-			// FIXME: Assumption! -flibit
-			RenderTarget2D assumption = (target as RenderTarget2D);
-			OpenGLTexture tex = assumption.texture as OpenGLTexture;
-			int width = assumption.Width;
-			int height = assumption.Height;
-			uint prevRead = currentReadFramebuffer;
-			uint prevDraw = currentDrawFramebuffer;
-			BindReadFramebuffer(resolveReadBuffer);
-			BindDrawFramebuffer(resolveDrawBuffer);
-			glFramebufferRenderbuffer(
-				GLenum.GL_READ_FRAMEBUFFER,
-				GLenum.GL_COLOR_ATTACHMENT0,
-				GLenum.GL_RENDERBUFFER,
-				(target.ColorBuffer as OpenGLRenderbuffer).Handle
-			);
-			glFramebufferTexture2D(
-				GLenum.GL_DRAW_FRAMEBUFFER,
-				GLenum.GL_COLOR_ATTACHMENT0,
-				GLenum.GL_TEXTURE_2D, // FIXME: Assumption! -flibit
-				tex.Handle,
-				0
-			);
-			glBlitFramebuffer(
-				0, 0, width, height,
-				0, 0, width, height,
-				GLenum.GL_COLOR_BUFFER_BIT,
-				GLenum.GL_LINEAR
-			);
-			BindReadFramebuffer(prevRead);
-			BindDrawFramebuffer(prevDraw);
 		}
 
 		#endregion

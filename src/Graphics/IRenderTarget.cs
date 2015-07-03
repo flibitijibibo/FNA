@@ -42,15 +42,6 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
 
 		/// <summary>
-		/// Gets the handle of the color buffer.
-		/// </summary>
-		/// <value>The color buffer handle.</value>
-		IGLRenderbuffer ColorBuffer
-		{
-			get;
-		}
-
-		/// <summary>
 		/// Gets the DepthFormat of the depth-stencil buffer.
 		/// </summary>
 		/// <value>The DepthFormat of the DepthStencilBuffer.</value>

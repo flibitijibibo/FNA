@@ -1316,22 +1316,6 @@ namespace Microsoft.Xna.Framework.Graphics
 			while (modifiedSamplers.Count > 0)
 			{
 				int sampler = modifiedSamplers.Dequeue();
-				if (Textures[sampler] is IRenderTarget)
-				{
-					/* FIXME: I don't know wheretf to actually resolve this.
-					 * For now, just assume that whenever we bind a multisample
-					 * target, we need to resolve on each new bind. This can be
-					 * both too _much_ resolving and _not enough_ resolving.
-					 *
-					 * I just wanted multisample textures to work, GL pls ;_;
-					 * -flibit
-					 */
-					IRenderTarget target = Textures[sampler] as IRenderTarget;
-					if (target.ColorBuffer != null)
-					{
-						GLDevice.ResolveTarget(target);
-					}
-				}
 				GLDevice.VerifySampler(
 					sampler,
 					Textures[sampler],
