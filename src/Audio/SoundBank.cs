@@ -26,6 +26,14 @@ namespace Microsoft.Xna.Framework.Audio
 			private set;
 		}
 
+		public bool IsInUse
+		{
+			get
+			{
+				throw new NotImplementedException("Bank Cue instance count tracking!");
+			}
+		}
+
 		#endregion
 
 		#region Private Variables

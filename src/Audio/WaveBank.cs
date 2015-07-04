@@ -129,6 +129,14 @@ namespace Microsoft.Xna.Framework.Audio
 			private set;
 		}
 
+		public bool IsInUse
+		{
+			get
+			{
+				throw new NotImplementedException("Cue wave entry dependency tracking!");
+			}
+		}
+
 		#endregion
 
 		#region Private Variables
