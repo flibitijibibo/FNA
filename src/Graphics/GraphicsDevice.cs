@@ -384,7 +384,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			// Initialize the Texture/Sampler state containers
 			int maxTextures = Math.Min(GLDevice.MaxTextureSlots, 16); // Per XNA4 spec
-			int maxVertexTextures = Math.Min(GLDevice.MaxTextureSlots - 16, 4); // Per XNA4 HiDef spec
+			int maxVertexTextures = MathHelper.Clamp(GLDevice.MaxTextureSlots - 16, 0, 4); // Per XNA4 HiDef spec
 			vertexSamplerStart = GLDevice.MaxTextureSlots - maxVertexTextures;
 			Textures = new TextureCollection(
 				maxTextures,
