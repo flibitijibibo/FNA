@@ -91,7 +91,7 @@ namespace Microsoft.Xna.Framework.Input
 			INTERNAL_keyMap.Add((int) SDL.SDL_Keycode.SDLK_KP_DECIMAL,	Keys.Decimal);
 			INTERNAL_keyMap.Add((int) SDL.SDL_Keycode.SDLK_KP_DIVIDE,	Keys.Divide);
 			INTERNAL_keyMap.Add((int) SDL.SDL_Keycode.SDLK_KP_ENTER,	Keys.Enter);
-			INTERNAL_keyMap.Add((int) SDL.SDL_Keycode.SDLK_KP_MINUS,	Keys.OemMinus);
+			INTERNAL_keyMap.Add((int) SDL.SDL_Keycode.SDLK_KP_MINUS,	Keys.Subtract);
 			INTERNAL_keyMap.Add((int) SDL.SDL_Keycode.SDLK_KP_MULTIPLY,	Keys.Multiply);
 			INTERNAL_keyMap.Add((int) SDL.SDL_Keycode.SDLK_KP_PERIOD,	Keys.OemPeriod);
 			INTERNAL_keyMap.Add((int) SDL.SDL_Keycode.SDLK_KP_PLUS,		Keys.Add);
@@ -212,7 +212,7 @@ namespace Microsoft.Xna.Framework.Input
 			INTERNAL_scanMap.Add((int) SDL.SDL_Scancode.SDL_SCANCODE_KP_DECIMAL,	Keys.Decimal);
 			INTERNAL_scanMap.Add((int) SDL.SDL_Scancode.SDL_SCANCODE_KP_DIVIDE,	Keys.Divide);
 			INTERNAL_scanMap.Add((int) SDL.SDL_Scancode.SDL_SCANCODE_KP_ENTER,	Keys.Enter);
-			INTERNAL_scanMap.Add((int) SDL.SDL_Scancode.SDL_SCANCODE_KP_MINUS,	Keys.OemMinus);
+			INTERNAL_scanMap.Add((int) SDL.SDL_Scancode.SDL_SCANCODE_KP_MINUS,	Keys.Subtract);
 			INTERNAL_scanMap.Add((int) SDL.SDL_Scancode.SDL_SCANCODE_KP_MULTIPLY,	Keys.Multiply);
 			INTERNAL_scanMap.Add((int) SDL.SDL_Scancode.SDL_SCANCODE_KP_PERIOD,	Keys.OemPeriod);
 			INTERNAL_scanMap.Add((int) SDL.SDL_Scancode.SDL_SCANCODE_KP_PLUS,	Keys.Add);
@@ -335,6 +335,7 @@ namespace Microsoft.Xna.Framework.Input
 			INTERNAL_xnaMap.Add((int) Keys.Decimal,			SDL.SDL_Scancode.SDL_SCANCODE_KP_DECIMAL);
 			INTERNAL_xnaMap.Add((int) Keys.Divide,			SDL.SDL_Scancode.SDL_SCANCODE_KP_DIVIDE);
 			INTERNAL_xnaMap.Add((int) Keys.Multiply,		SDL.SDL_Scancode.SDL_SCANCODE_KP_MULTIPLY);
+			INTERNAL_xnaMap.Add((int) Keys.Subtract,		SDL.SDL_Scancode.SDL_SCANCODE_KP_MINUS);
 			INTERNAL_xnaMap.Add((int) Keys.Add,			SDL.SDL_Scancode.SDL_SCANCODE_KP_PLUS);
 			INTERNAL_xnaMap.Add((int) Keys.F1,			SDL.SDL_Scancode.SDL_SCANCODE_F1);
 			INTERNAL_xnaMap.Add((int) Keys.F2,			SDL.SDL_Scancode.SDL_SCANCODE_F2);
@@ -453,3 +454,4 @@ namespace Microsoft.Xna.Framework.Input
 		#endregion
 	}
 }
+
