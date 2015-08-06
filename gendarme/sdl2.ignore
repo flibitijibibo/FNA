@@ -886,6 +886,8 @@ T: SDL2.SDL_mixer/ChannelFinishedDelegate
 T: SDL2.SDL_mixer/SoundFontDelegate
 
 R: Gendarme.Rules.Interoperability.CentralizePInvokesIntoNativeMethodsTypeRule
+M: System.IntPtr SDL2.SDL::SDL_malloc(System.IntPtr)
+M: System.Void SDL2.SDL::SDL_free(System.IntPtr)
 M: System.IntPtr SDL2.SDL::INTERNAL_SDL_RWFromFile(System.String,System.String)
 M: System.IntPtr SDL2.SDL::SDL_RWFromMem(System.Byte[],System.Int32)
 M: System.Void SDL2.SDL::SDL_SetMainReady()

@@ -169,28 +169,6 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region Internal Constructors
 
-		internal SoundEffect(string fileName)
-		{
-			if (fileName == string.Empty)
-			{
-				throw new ArgumentNullException("fileName");
-			}
-
-			Name = Path.GetFileNameWithoutExtension(fileName);
-
-			try
-			{
-				using (Stream s = File.OpenRead(fileName))
-				{
-					INTERNAL_loadAudioStream(s);
-				}
-			}
-			catch (IOException e)
-			{
-				throw new Content.ContentLoadException("Could not load audio data", e);
-			}
-		}
-
 		internal SoundEffect(Stream s)
 		{
 			INTERNAL_loadAudioStream(s);

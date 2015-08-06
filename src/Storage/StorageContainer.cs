@@ -77,6 +77,7 @@ namespace Microsoft.Xna.Framework.Storage
 		/// </summary>
 		/// <param name='device'>The attached storage-device.</param>
 		/// <param name='name'>The title's filename.</param>
+		/// <param name='rootPath'>The path of the storage root folder</param>
 		/// <param name='playerIndex'>
 		/// The index of the player whose data is being saved, or null if data is for all
 		/// players.
@@ -84,6 +85,7 @@ namespace Microsoft.Xna.Framework.Storage
 		internal StorageContainer(
 			StorageDevice device,
 			string name,
+			string rootPath,
 			PlayerIndex? playerIndex
 		) {
 			if (string.IsNullOrEmpty(name))
@@ -94,24 +96,9 @@ namespace Microsoft.Xna.Framework.Storage
 			StorageDevice = device;
 			DisplayName = name;
 
-			string saved;
-			if (Game.Instance.Platform.OSVersion.Equals("Windows"))
-			{
-				// The root on Windows is the "My Documents" folder
-				saved = Path.Combine(StorageDevice.storageRoot, "SavedGames");
-			}
-			else if (	Game.Instance.Platform.OSVersion.Equals("Mac OS X") ||
-					Game.Instance.Platform.OSVersion.Equals("Linux")	)
-			{
-				// Unix-like systems are expected to have a dedicated userdata folder.
-				saved = StorageDevice.storageRoot;
-			}
-			else
-			{
-				throw new Exception("StorageContainer: Platform.OSVersion not handled!");
-			}
+			// Generate the path of the game's savefolder
 			storagePath = Path.Combine(
-				saved,
+				rootPath,
 				Path.GetFileNameWithoutExtension(
 					AppDomain.CurrentDomain.FriendlyName
 				)

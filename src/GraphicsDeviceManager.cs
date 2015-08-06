@@ -157,6 +157,8 @@ namespace Microsoft.Xna.Framework
 
 			SynchronizeWithVerticalRetrace = true;
 
+			PreferMultiSampling = false;
+
 			if (game.Services.GetService(typeof(IGraphicsDeviceManager)) != null)
 			{
 				throw new ArgumentException("Graphics Device Manager Already Present");
@@ -232,6 +234,22 @@ namespace Microsoft.Xna.Framework
 				PreferredDepthStencilFormat;
 			GraphicsDevice.PresentationParameters.IsFullScreen =
 				IsFullScreen;
+			if (!PreferMultiSampling)
+			{
+				GraphicsDevice.PresentationParameters.MultiSampleCount = 0;
+			}
+			else if (GraphicsDevice.PresentationParameters.MultiSampleCount == 0)
+			{
+				/* XNA4 seems to have an upper limit of 8, but I'm willing to
+				 * limit this only in GraphicsDeviceManager's default setting.
+				 * If you want even higher values, Reset() with a custom value.
+				 * -flibit
+				 */
+				GraphicsDevice.PresentationParameters.MultiSampleCount = Math.Min(
+					GraphicsDevice.GLDevice.MaxMultiSampleCount,
+					8
+				);
+			}
 
 			// Make the Platform device changes.
 			game.Platform.BeginScreenDeviceChange(

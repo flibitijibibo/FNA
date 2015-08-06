@@ -194,6 +194,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			GL_QUERY_RESULT =			0x8866,
 			GL_QUERY_RESULT_AVAILABLE =		0x8867,
 			GL_SAMPLES_PASSED =			0x8914,
+			// Multisampling
+			GL_MAX_SAMPLES =			0x8D57,
 			// Source Enum Values
 			GL_DEBUG_SOURCE_API_ARB =		0x8246,
 			GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB =	0x8247,
@@ -310,6 +312,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			bool alpha
 		);
 		private ColorMaskIndexedEXT glColorMaskIndexedEXT;
+
+		private delegate void SampleMaski(uint maskNumber, uint mask);
+		private SampleMaski glSampleMaski;
 
 		/* END BLEND STATE FUNCTIONS */
 
@@ -651,6 +656,15 @@ namespace Microsoft.Xna.Framework.Graphics
 			int height
 		);
 		private RenderbufferStorage glRenderbufferStorage;
+
+		private delegate void RenderbufferStorageMultisample(
+			GLenum target,
+			int samples,
+			GLenum internalformat,
+			int width,
+			int height
+		);
+		private RenderbufferStorageMultisample glRenderbufferStorageMultisample;
 
 		/* END FRAMEBUFFER FUNCTIONS */
 
@@ -1088,6 +1102,24 @@ namespace Microsoft.Xna.Framework.Graphics
 			catch
 			{
 				// FIXME: SupportsIndependentWriteMasks? -flibit
+			}
+
+			/* EXT_framebuffer_multisample/ARB_texture_multisample is glitter -flibit */
+			supportsMultisampling = true;
+			try
+			{
+				glRenderbufferStorageMultisample = (RenderbufferStorageMultisample) Marshal.GetDelegateForFunctionPointer(
+					TryGetFramebufferEP("glRenderbufferStorageMultisample"),
+					typeof(RenderbufferStorageMultisample)
+				);
+				glSampleMaski = (SampleMaski) Marshal.GetDelegateForFunctionPointer(
+					SDL.SDL_GL_GetProcAddress("glSampleMaski"),
+					typeof(SampleMaski)
+				);
+			}
+			catch
+			{
+				supportsMultisampling = false;
 			}
 
 #if DEBUG

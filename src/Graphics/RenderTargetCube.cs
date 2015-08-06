@@ -162,7 +162,10 @@ namespace Microsoft.Xna.Framework.Graphics
 			preferredFormat
 		) {
 			DepthStencilFormat = preferredDepthFormat;
-			MultiSampleCount = preferredMultiSampleCount;
+			MultiSampleCount = Math.Min(
+				MathHelper.ClosestMSAAPower(preferredMultiSampleCount),
+				graphicsDevice.GLDevice.MaxMultiSampleCount
+			);
 			RenderTargetUsage = usage;
 
 			// If we don't need a depth buffer then we're done.

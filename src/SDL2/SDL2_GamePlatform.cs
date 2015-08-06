@@ -453,13 +453,13 @@ namespace Microsoft.Xna.Framework
 					}
 
 					// Controller device management
-					else if (evt.type == SDL.SDL_EventType.SDL_JOYDEVICEADDED)
+					else if (evt.type == SDL.SDL_EventType.SDL_CONTROLLERDEVICEADDED)
 					{
-						GamePad.INTERNAL_AddInstance(evt.jdevice.which);
+						GamePad.INTERNAL_AddInstance(evt.cdevice.which);
 					}
-					else if (evt.type == SDL.SDL_EventType.SDL_JOYDEVICEREMOVED)
+					else if (evt.type == SDL.SDL_EventType.SDL_CONTROLLERDEVICEREMOVED)
 					{
-						GamePad.INTERNAL_RemoveInstance(evt.jdevice.which);
+						GamePad.INTERNAL_RemoveInstance(evt.cdevice.which);
 					}
 
 					// Text Input
@@ -521,14 +521,11 @@ namespace Microsoft.Xna.Framework
 				evt,
 				1,
 				SDL.SDL_eventaction.SDL_GETEVENT,
-				SDL.SDL_EventType.SDL_JOYDEVICEADDED,
-				SDL.SDL_EventType.SDL_JOYDEVICEADDED
+				SDL.SDL_EventType.SDL_CONTROLLERDEVICEADDED,
+				SDL.SDL_EventType.SDL_CONTROLLERDEVICEADDED
 			) == 1) {
-				GamePad.INTERNAL_AddInstance(evt[0].jdevice.which);
+				GamePad.INTERNAL_AddInstance(evt[0].cdevice.which);
 			}
-
-			// Also, initialize the MonoGameJoystick.cfg file.
-			GamePad.INTERNAL_InitMonoGameJoystick();
 		}
 
 		public override bool BeforeUpdate(GameTime gameTime)
@@ -666,11 +663,20 @@ namespace Microsoft.Xna.Framework
 		) {
 			// Load the Stream into an SDL_RWops*
 			byte[] mem = new byte[stream.Length];
+			GCHandle handle = GCHandle.Alloc(mem, GCHandleType.Pinned);
 			stream.Read(mem, 0, mem.Length);
 			IntPtr rwops = SDL.SDL_RWFromMem(mem, mem.Length);
 
 			// Load the SDL_Surface* from RWops, get the image data
 			IntPtr surface = SDL_image.IMG_Load_RW(rwops, 1);
+			if (surface == IntPtr.Zero)
+			{
+				// File not found, supported, etc.
+				width = 0;
+				height = 0;
+				pixels = null;
+				return;
+			}
 			surface = INTERNAL_convertSurfaceFormat(surface);
 			unsafe
 			{
@@ -681,6 +687,7 @@ namespace Microsoft.Xna.Framework
 				Marshal.Copy(surPtr->pixels, pixels, 0, pixels.Length);
 			}
 			SDL.SDL_FreeSurface(surface);
+			handle.Free();
 
 			/* Ensure that the alpha pixels are... well, actual alpha.
 			 * You think this looks stupid, but be assured: Your paint program is

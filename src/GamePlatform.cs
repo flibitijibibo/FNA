@@ -355,6 +355,9 @@ namespace Microsoft.Xna.Framework
 		{
 			if (!disposed)
 			{
+				Mouse.WindowHandle = IntPtr.Zero;
+				TouchPanel.PrimaryWindow = null;
+
 				disposed = true;
 			}
 		}
