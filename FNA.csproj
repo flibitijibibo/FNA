@@ -15,7 +15,7 @@
     <DebugType>full</DebugType>
     <Optimize>False</Optimize>
     <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>DEBUG;SDL2;OPENGL</DefineConstants>
+    <DefineConstants>DEBUG;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
@@ -31,11 +31,9 @@
     <PlatformTarget>x86</PlatformTarget>
     <ConsolePause>False</ConsolePause>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-    <DefineConstants>SDL2;OPENGL</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -76,7 +74,6 @@
     <Compile Include="src\Quaternion.cs" />
     <Compile Include="src\Ray.cs" />
     <Compile Include="src\Rectangle.cs" />
-    <Compile Include="src\ReusableItemList.cs" />
     <Compile Include="src\Vector2.cs" />
     <Compile Include="src\Vector3.cs" />
     <Compile Include="src\Vector4.cs" />
@@ -392,13 +389,4 @@
       <Name>Logger</Name>
     </ProjectReference>
   </ItemGroup>
-  <ProjectExtensions>
-    <MonoDevelop>
-      <Properties>
-        <Policies>
-          <StandardHeader Text="" IncludeInNewFiles="False" />
-        </Policies>
-      </Properties>
-    </MonoDevelop>
-  </ProjectExtensions>
 </Project>
