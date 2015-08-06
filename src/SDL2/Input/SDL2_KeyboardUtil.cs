@@ -335,7 +335,7 @@ namespace Microsoft.Xna.Framework.Input
 			INTERNAL_xnaMap.Add((int) Keys.Decimal,			SDL.SDL_Scancode.SDL_SCANCODE_KP_DECIMAL);
 			INTERNAL_xnaMap.Add((int) Keys.Divide,			SDL.SDL_Scancode.SDL_SCANCODE_KP_DIVIDE);
 			INTERNAL_xnaMap.Add((int) Keys.Multiply,		SDL.SDL_Scancode.SDL_SCANCODE_KP_MULTIPLY);
-			INTERNAL_xnaMap.Add((int) Keys.Subtract,	SDL.SDL_Scancode.SDL_SCANCODE_KP_MINUS);
+			INTERNAL_xnaMap.Add((int) Keys.Subtract,		SDL.SDL_Scancode.SDL_SCANCODE_KP_MINUS);
 			INTERNAL_xnaMap.Add((int) Keys.Add,			SDL.SDL_Scancode.SDL_SCANCODE_KP_PLUS);
 			INTERNAL_xnaMap.Add((int) Keys.F1,			SDL.SDL_Scancode.SDL_SCANCODE_F1);
 			INTERNAL_xnaMap.Add((int) Keys.F2,			SDL.SDL_Scancode.SDL_SCANCODE_F2);
