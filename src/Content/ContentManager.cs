@@ -675,7 +675,13 @@ namespace Microsoft.Xna.Framework.Content
 				 */
 				int compressedSize = xnbLength - 14;
 				int decompressedSize = xnbReader.ReadInt32();
-				MemoryStream decompressedStream = new MemoryStream(decompressedSize);
+				MemoryStream decompressedStream = new MemoryStream(
+					new byte[decompressedSize],
+					0,
+					decompressedSize,
+					true,
+					true // This MUST be true! We may need GetBuffer()!
+				);
 				// Default window size for XNB encoded files is 64Kb (need 16 bits to represent it)
 				LzxDecoder dec = new LzxDecoder(16);
 				int decodedBytes = 0;
