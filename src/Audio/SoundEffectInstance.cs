@@ -119,13 +119,9 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#endregion
 
-		#region Internal Properties
+		#region Internal Variables: XACT Filters
 
-		internal int FilterType
-		{
-			get;
-			set;
-		}
+		internal byte FilterType;
 
 		#endregion
 
@@ -336,33 +332,27 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 		}
 
-		internal void INTERNAL_applyFilter(
-			IALFilter filter,
-			float hfGain,
-			float lfGain
-		) {
-			if (FilterType == -1)
-			{
-				return;
-			}
-			else if (FilterType == 0)
-			{
-				AudioDevice.ALDevice.ApplyLowPassFilter(filter, hfGain);
-			}
-			else if (FilterType == 1)
-			{
-				AudioDevice.ALDevice.ApplyHighPassFilter(filter, lfGain);
-			}
-			else if (FilterType == 2)
-			{
-				AudioDevice.ALDevice.ApplyBandPassFilter(filter, hfGain, lfGain);
-			}
+		internal void INTERNAL_applyLowPassFilter(float hfGain)
+		{
 			if (INTERNAL_alSource != null)
 			{
-				AudioDevice.ALDevice.SetSourceFilter(
-					INTERNAL_alSource,
-					filter
-				);
+				AudioDevice.ALDevice.SetSourceLowPassFilter(INTERNAL_alSource, hfGain);
+			}
+		}
+
+		internal void INTERNAL_applyHighPassFilter(float lfGain)
+		{
+			if (INTERNAL_alSource != null)
+			{
+				AudioDevice.ALDevice.SetSourceHighPassFilter(INTERNAL_alSource, lfGain);
+			}
+		}
+
+		internal void INTERNAL_applyBandPassFilter(float hfGain, float lfGain)
+		{
+			if (INTERNAL_alSource != null)
+			{
+				AudioDevice.ALDevice.SetSourceBandPassFilter(INTERNAL_alSource, hfGain, lfGain);
 			}
 		}
 

@@ -88,29 +88,18 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#endregion
 
-		#region OpenAL Filter Container Class
-
-		private class OpenALFilter : IALFilter
-		{
-			public uint Handle
-			{
-				get;
-				private set;
-			}
-
-			public OpenALFilter(uint handle)
-			{
-				Handle = handle;
-			}
-		}
-
-		#endregion
-
 		#region Private ALC Variables
 
 		// OpenAL Device/Context Handles
 		private IntPtr alDevice;
 		private IntPtr alContext;
+
+		#endregion
+
+		#region Private EFX Variables
+
+		// OpenAL Filter Handle
+		private uint INTERNAL_alFilter;
 
 		#endregion
 
@@ -160,6 +149,8 @@ namespace Microsoft.Xna.Framework.Audio
 
 			// We do NOT use automatic attenuation! XNA does not do this!
 			AL10.alDistanceModel(AL10.AL_NONE);
+
+			EFX.alGenFilters((IntPtr) 1, out INTERNAL_alFilter);
 		}
 
 		#endregion
@@ -168,6 +159,8 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public void Dispose()
 		{
+			EFX.alDeleteFilters((IntPtr) 1, ref INTERNAL_alFilter);
+
 			ALC10.alcMakeContextCurrent(IntPtr.Zero);
 			if (alContext != IntPtr.Zero)
 			{
@@ -475,12 +468,37 @@ namespace Microsoft.Xna.Framework.Audio
 			);
 		}
 
-		public void SetSourceFilter(IALSource source, IALFilter filter)
+		public void SetSourceLowPassFilter(IALSource source, float hfGain)
 		{
+			EFX.alFilteri(INTERNAL_alFilter, EFX.AL_FILTER_TYPE, EFX.AL_FILTER_LOWPASS);
+			EFX.alFilterf(INTERNAL_alFilter, EFX.AL_LOWPASS_GAINHF, hfGain);
 			AL10.alSourcei(
 				(source as OpenALSource).Handle,
 				EFX.AL_DIRECT_FILTER,
-				(int) (filter as OpenALFilter).Handle
+				(int) INTERNAL_alFilter
+			);
+		}
+
+		public void SetSourceHighPassFilter(IALSource source, float lfGain)
+		{
+			EFX.alFilteri(INTERNAL_alFilter, EFX.AL_FILTER_TYPE, EFX.AL_FILTER_HIGHPASS);
+			EFX.alFilterf(INTERNAL_alFilter, EFX.AL_HIGHPASS_GAINLF, lfGain);
+			AL10.alSourcei(
+				(source as OpenALSource).Handle,
+				EFX.AL_DIRECT_FILTER,
+				(int) INTERNAL_alFilter
+			);
+		}
+
+		public void SetSourceBandPassFilter(IALSource source, float hfGain, float lfGain)
+		{
+			EFX.alFilteri(INTERNAL_alFilter, EFX.AL_FILTER_TYPE, EFX.AL_FILTER_BANDPASS);
+			EFX.alFilterf(INTERNAL_alFilter, EFX.AL_BANDPASS_GAINHF, hfGain);
+			EFX.alFilterf(INTERNAL_alFilter, EFX.AL_BANDPASS_GAINLF, lfGain);
+			AL10.alSourcei(
+				(source as OpenALSource).Handle,
+				EFX.AL_DIRECT_FILTER,
+				(int) INTERNAL_alFilter
 			);
 		}
 
@@ -779,45 +797,6 @@ namespace Microsoft.Xna.Framework.Audio
 		public void SetReverbWetDryMix(IALReverb reverb, float value)
 		{
 			// No known mapping :(
-		}
-
-		#endregion
-
-		#region OpenAL Filter Methods
-
-		public IALFilter GenFilter()
-		{
-			uint handle;
-			EFX.alGenFilters((IntPtr) 1, out handle);
-			return new OpenALFilter(handle);
-		}
-
-		public void DeleteFilter(IALFilter filter)
-		{
-			uint handle = (filter as OpenALFilter).Handle;
-			EFX.alDeleteFilters((IntPtr) 1, ref handle);
-		}
-
-		public void ApplyLowPassFilter(IALFilter filter, float hfGain)
-		{
-			uint handle = (filter as OpenALFilter).Handle;
-			EFX.alFilteri(handle, EFX.AL_FILTER_TYPE, EFX.AL_FILTER_LOWPASS);
-			EFX.alFilterf(handle, EFX.AL_LOWPASS_GAINHF, hfGain);
-		}
-
-		public void ApplyHighPassFilter(IALFilter filter, float lfGain)
-		{
-			uint handle = (filter as OpenALFilter).Handle;
-			EFX.alFilteri(handle, EFX.AL_FILTER_TYPE, EFX.AL_FILTER_HIGHPASS);
-			EFX.alFilterf(handle, EFX.AL_HIGHPASS_GAINLF, lfGain);
-		}
-
-		public void ApplyBandPassFilter(IALFilter filter, float hfGain, float lfGain)
-		{
-			uint handle = (filter as OpenALFilter).Handle;
-			EFX.alFilteri(handle, EFX.AL_FILTER_TYPE, EFX.AL_FILTER_BANDPASS);
-			EFX.alFilterf(handle, EFX.AL_BANDPASS_GAINHF, hfGain);
-			EFX.alFilterf(handle, EFX.AL_BANDPASS_GAINLF, lfGain);
 		}
 
 		#endregion

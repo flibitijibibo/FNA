@@ -42,10 +42,6 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 		}
 
-		private class NullFilter : IALFilter
-		{
-		}
-
 		public void Update()
 		{
 			// No-op, duh.
@@ -177,7 +173,17 @@ namespace Microsoft.Xna.Framework.Audio
 			// No-op, duh.
 		}
 
-		public void SetSourceFilter(IALSource source, IALFilter filter)
+		public void SetSourceLowPassFilter(IALSource source, float hfGain)
+		{
+			// No-op, duh.
+		}
+
+		public void SetSourceHighPassFilter(IALSource source, float lfGain)
+		{
+			// No-op, duh.
+		}
+
+		public void SetSourceBandPassFilter(IALSource source, float hfGain, float lfGain)
 		{
 			// No-op, duh.
 		}
@@ -321,31 +327,6 @@ namespace Microsoft.Xna.Framework.Audio
 		}
 
 		public void SetReverbWetDryMix(IALReverb reverb, float value)
-		{
-			// No-op, duh.
-		}
-
-		public IALFilter GenFilter()
-		{
-			return new NullFilter();
-		}
-
-		public void DeleteFilter(IALFilter filter)
-		{
-			// No-op, duh.
-		}
-
-		public void ApplyLowPassFilter(IALFilter filter, float hfGain)
-		{
-			// No-op, duh.
-		}
-
-		public void ApplyHighPassFilter(IALFilter filter, float lfGain)
-		{
-			// No-op, duh.
-		}
-
-		public void ApplyBandPassFilter(IALFilter filter, float hfGain, float lfGain)
 		{
 			// No-op, duh.
 		}

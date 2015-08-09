@@ -293,7 +293,7 @@ namespace Microsoft.Xna.Framework.Audio
 				0,
 				1.0,
 				1.0,
-				-1,
+				0xFF,
 				0,
 				0,
 				new byte[] { 0xFF }
@@ -359,7 +359,7 @@ namespace Microsoft.Xna.Framework.Audio
 						0,
 						clipVolume,
 						clipVolume,
-						-1,
+						0xFF,
 						loopCount,
 						0,
 						new byte[] { 0xFF }
@@ -421,7 +421,7 @@ namespace Microsoft.Xna.Framework.Audio
 						0,
 						clipVolume,
 						clipVolume,
-						-1,
+						0xFF,
 						loopCount,
 						variationType,
 						weights
@@ -481,7 +481,7 @@ namespace Microsoft.Xna.Framework.Audio
 						maxPitch,
 						minVolume,
 						maxVolume,
-						(int) filterType,
+						filterType,
 						loopCount,
 						0,
 						new byte[] { 0xFF }
@@ -578,7 +578,7 @@ namespace Microsoft.Xna.Framework.Audio
 						maxPitch,
 						minVolume,
 						maxVolume,
-						(int) filterType,
+						filterType,
 						loopCount,
 						variationType,
 						weights
@@ -696,7 +696,7 @@ namespace Microsoft.Xna.Framework.Audio
 		private double INTERNAL_minVolume;
 		private double INTERNAL_maxVolume;
 
-		private int INTERNAL_filterType;
+		private byte INTERNAL_filterType;
 
 		private byte INTERNAL_loopCount;
 
@@ -716,7 +716,7 @@ namespace Microsoft.Xna.Framework.Audio
 			short maxPitch,
 			double minVolume,
 			double maxVolume,
-			int filterType,
+			byte filterType,
 			byte loopCount,
 			ushort variationType,
 			byte[] weights

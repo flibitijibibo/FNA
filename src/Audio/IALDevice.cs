@@ -59,7 +59,9 @@ namespace Microsoft.Xna.Framework.Audio
 		void SetSourcePosition(IALSource source, Vector3 pos);
 		void SetSourcePitch(IALSource source, float pitch, bool clamp);
 		void SetSourceReverb(IALSource source, IALReverb reverb);
-		void SetSourceFilter(IALSource source, IALFilter filter);
+		void SetSourceLowPassFilter(IALSource source, float hfGain);
+		void SetSourceHighPassFilter(IALSource source, float lfGain);
+		void SetSourceBandPassFilter(IALSource source, float hfGain, float lfGain);
 		void QueueSourceBuffer(IALSource source, IALBuffer buffer);
 		void DequeueSourceBuffers(
 			IALSource source,
@@ -93,12 +95,6 @@ namespace Microsoft.Xna.Framework.Audio
 		void SetReverbDensity(IALReverb reverb, float value);
 		void SetReverbRoomSize(IALReverb reverb, float value);
 		void SetReverbWetDryMix(IALReverb reverb, float value);
-
-		IALFilter GenFilter();
-		void DeleteFilter(IALFilter filter);
-		void ApplyLowPassFilter(IALFilter filter, float hfGain);
-		void ApplyHighPassFilter(IALFilter filter, float lfGain);
-		void ApplyBandPassFilter(IALFilter filter, float hfGain, float lfGain);
 	}
 
 	internal interface IALBuffer
@@ -114,10 +110,6 @@ namespace Microsoft.Xna.Framework.Audio
 	}
 
 	internal interface IALReverb
-	{
-	}
-
-	internal interface IALFilter
 	{
 	}
 }
