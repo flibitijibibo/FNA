@@ -3069,6 +3069,12 @@ namespace Microsoft.Xna.Framework.Graphics
 					);
 					currentClearColor = color;
 				}
+				// glClear depends on the color write mask!
+				if (colorWriteEnable != ColorWriteChannels.All)
+				{
+					// FIXME: ColorWriteChannels1/2/3? -flibit
+					glColorMask(true, true, true, true);
+				}
 			}
 			if (clearDepth)
 			{
@@ -3107,6 +3113,16 @@ namespace Microsoft.Xna.Framework.Graphics
 			if (scissorTestEnable)
 			{
 				glEnable(GLenum.GL_SCISSOR_TEST);
+			}
+			if (colorWriteEnable != ColorWriteChannels.All)
+			{
+				// FIXME: ColorWriteChannels1/2/3? -flibit
+				glColorMask(
+					(colorWriteEnable & ColorWriteChannels.Red) != 0,
+					(colorWriteEnable & ColorWriteChannels.Blue) != 0,
+					(colorWriteEnable & ColorWriteChannels.Green) != 0,
+					(colorWriteEnable & ColorWriteChannels.Alpha) != 0
+				);
 			}
 			if (clearDepth && !zWriteEnable)
 			{
