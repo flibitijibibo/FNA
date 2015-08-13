@@ -28,10 +28,8 @@ namespace Microsoft.Xna.Framework.Content
 
 		public IServiceProvider ServiceProvider
 		{
-			get
-			{
-				return this.serviceProvider;
-			}
+			get;
+			private set;
 		}
 
 		#endregion
@@ -64,11 +62,14 @@ namespace Microsoft.Xna.Framework.Content
 
 		#region Private Variables
 
-		private IServiceProvider serviceProvider;
 		private IGraphicsDeviceService graphicsDeviceService;
 		private Dictionary<string, object> loadedAssets = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 		private List<IDisposable> disposableAssets = new List<IDisposable>();
 		private bool disposed;
+
+		#endregion
+
+		#region Private Static Variables
 
 		private static object ContentManagerLock = new object();
 		private static List<WeakReference> ContentManagers = new List<WeakReference>();
@@ -95,81 +96,32 @@ namespace Microsoft.Xna.Framework.Content
 
 		#endregion
 
-		#region Private Static Methods
+		#region Public Constructors
 
-		private static void AddContentManager(ContentManager contentManager)
+		public ContentManager(IServiceProvider serviceProvider)
 		{
-			lock (ContentManagerLock)
+			if (serviceProvider == null)
 			{
-				/* Check if the list contains this content manager already. Also take
-				 * the opportunity to prune the list of any finalized content managers.
-				 */
-				bool contains = false;
-				for (int i = ContentManagers.Count - 1; i >= 0; i -= 1)
-				{
-					WeakReference contentRef = ContentManagers[i];
-					if (ReferenceEquals(contentRef.Target, contentManager))
-					{
-						contains = true;
-					}
-					if (!contentRef.IsAlive)
-					{
-						ContentManagers.RemoveAt(i);
-					}
-				}
-				if (!contains)
-				{
-					ContentManagers.Add(new WeakReference(contentManager));
-				}
+				throw new ArgumentNullException("serviceProvider");
 			}
+			ServiceProvider = serviceProvider;
+			RootDirectory = string.Empty;
+			AddContentManager(this);
 		}
 
-		private static void RemoveContentManager(ContentManager contentManager)
+		public ContentManager(IServiceProvider serviceProvider, string rootDirectory)
 		{
-			lock (ContentManagerLock)
+			if (serviceProvider == null)
 			{
-				/* Check if the list contains this content manager and remove it. Also
-				 * take the opportunity to prune the list of any finalized content managers.
-				 */
-				for (int i = ContentManagers.Count - 1; i >= 0; i -= 1)
-				{
-					WeakReference contentRef = ContentManagers[i];
-					if (!contentRef.IsAlive || ReferenceEquals(contentRef.Target, contentManager))
-					{
-						ContentManagers.RemoveAt(i);
-					}
-				}
+				throw new ArgumentNullException("serviceProvider");
 			}
-		}
-
-		#endregion
-
-		#region Internal Static Methods
-
-		internal static void ReloadGraphicsContent()
-		{
-			lock (ContentManagerLock)
+			if (rootDirectory == null)
 			{
-				/* Reload the graphic assets of each content manager. Also take the
-				 * opportunity to prune the list of any finalized content managers.
-				 */
-				for (int i = ContentManagers.Count - 1; i >= 0; i -= 1)
-				{
-					WeakReference contentRef = ContentManagers[i];
-					if (contentRef.IsAlive)
-					{
-						ContentManager contentManager = (ContentManager) contentRef.Target;
-						if (contentManager != null)
-						{
-							contentManager.ReloadGraphicsAssets();
-						}
-					}
-					else
-					{
-						ContentManagers.RemoveAt(i);
-					}
-				}
+				throw new ArgumentNullException("rootDirectory");
 			}
+			ServiceProvider = serviceProvider;
+			RootDirectory = rootDirectory;
+			AddContentManager(this);
 		}
 
 		#endregion
@@ -193,37 +145,38 @@ namespace Microsoft.Xna.Framework.Content
 
 		#endregion
 
-		#region Public Constructors
+		#region Dispose Methods
 
-		public ContentManager(IServiceProvider serviceProvider)
+		public void Dispose()
 		{
-			if (serviceProvider == null)
-			{
-				throw new ArgumentNullException("serviceProvider");
-			}
-			this.RootDirectory = string.Empty;
-			this.serviceProvider = serviceProvider;
-			AddContentManager(this);
+			Dispose(true);
+			/* Tell the garbage collector not to call the finalizer
+			 * since all the cleanup will already be done.
+			 */
+			GC.SuppressFinalize(this);
+			// Once disposed, content manager wont be used again
+			RemoveContentManager(this);
 		}
 
-		public ContentManager(IServiceProvider serviceProvider, string rootDirectory)
+		/* If disposing is true, it was called explicitly and we should dispose managed
+		 * objects. If disposing is false, it was called by the finalizer and managed
+		 * objects should not be disposed.
+		 */
+		protected virtual void Dispose(bool disposing)
 		{
-			if (serviceProvider == null)
+			if (!disposed)
 			{
-				throw new ArgumentNullException("serviceProvider");
+				if (disposing)
+				{
+					Unload();
+				}
+				disposed = true;
 			}
-			if (rootDirectory == null)
-			{
-				throw new ArgumentNullException("rootDirectory");
-			}
-			this.RootDirectory = rootDirectory;
-			this.serviceProvider = serviceProvider;
-			AddContentManager(this);
 		}
 
 		#endregion
 
-		#region Public Load Method
+		#region Public Methods
 
 		public virtual T Load<T>(string assetName)
 		{
@@ -262,25 +215,6 @@ namespace Microsoft.Xna.Framework.Content
 			return result;
 		}
 
-		#endregion
-
-		#region Public Dispose Method
-
-		public void Dispose()
-		{
-			Dispose(true);
-			/* Tell the garbage collector not to call the finalizer
-			 * since all the cleanup will already be done.
-			 */
-			GC.SuppressFinalize(this);
-			// Once disposed, content manager wont be used again
-			RemoveContentManager(this);
-		}
-
-		#endregion
-
-		#region Public Unload Method
-
 		public virtual void Unload()
 		{
 			// Look for disposable assets.
@@ -297,7 +231,189 @@ namespace Microsoft.Xna.Framework.Content
 
 		#endregion
 
-		#region Internal RecordDisposable Method
+		#region Protected Methods
+
+		protected virtual Stream OpenStream(string assetName)
+		{
+			Stream stream;
+			try
+			{
+				string assetPath = FileHelpers.NormalizeFilePathSeparators(
+					Path.Combine(RootDirectoryFullPath, assetName) + ".xnb"
+				);
+				stream = File.OpenRead(assetPath);
+			}
+			catch (FileNotFoundException fileNotFound)
+			{
+				throw new ContentLoadException("The content file was not found.", fileNotFound);
+			}
+			catch (DirectoryNotFoundException directoryNotFound)
+			{
+				throw new ContentLoadException("The directory was not found.", directoryNotFound);
+			}
+			catch (Exception exception)
+			{
+				throw new ContentLoadException("Opening stream error.", exception);
+			}
+			return stream;
+		}
+
+		protected T ReadAsset<T>(string assetName, Action<IDisposable> recordDisposableObject)
+		{
+			if (string.IsNullOrEmpty(assetName))
+			{
+				throw new ArgumentNullException("assetName");
+			}
+			if (disposed)
+			{
+				throw new ObjectDisposedException("ContentManager");
+			}
+
+			object result = null;
+
+			// FIXME: Should this block be here? -flibit
+			if (graphicsDeviceService == null)
+			{
+				graphicsDeviceService = ServiceProvider.GetService(typeof(IGraphicsDeviceService)) as IGraphicsDeviceService;
+				if (graphicsDeviceService == null)
+				{
+					throw new InvalidOperationException("No Graphics Device Service");
+				}
+			}
+
+			Stream stream = null;
+			string modifiedAssetName = String.Empty; // Will be used if we have to guess a filename
+			try
+			{
+				stream = OpenStream(assetName);
+			}
+			catch (Exception e)
+			{
+				// Okay, so we couldn’t open it. Maybe it needs a different extension?
+				// FIXME: Normalizing checks for a file on the disk, what about custom streams? -flibit
+				modifiedAssetName = FileHelpers.NormalizeFilePathSeparators(
+					Path.Combine(RootDirectoryFullPath, assetName)
+				);
+				if (typeof(T) == typeof(Texture2D) || typeof(T) == typeof(Texture))
+				{
+					modifiedAssetName = Texture2DReader.Normalize(assetName);
+				}
+				else if ((typeof(T) == typeof(SoundEffect)))
+				{
+					modifiedAssetName = SoundEffectReader.Normalize(assetName);
+				}
+				else if ((typeof(T) == typeof(Effect)))
+				{
+					modifiedAssetName = EffectReader.Normalize(assetName);
+				}
+				else if ((typeof(T) == typeof(Song)))
+				{
+					modifiedAssetName = SongReader.Normalize(assetName);
+				}
+				else if ((typeof(T) == typeof(Video)))
+				{
+					modifiedAssetName = VideoReader.Normalize(assetName);
+				}
+
+				// Did we get anything…?
+				if (String.IsNullOrEmpty(modifiedAssetName))
+				{
+					// Nope, nothing we’re aware of!
+					throw new ContentLoadException(
+						"Could not load asset " + assetName + "! Error: " + e.Message,
+						e
+					);
+				}
+
+				stream = File.OpenRead(modifiedAssetName);
+			}
+
+			using (BinaryReader xnbReader = new BinaryReader(stream))
+			{
+				try
+				{
+					// Try to load as XNB file
+					using (ContentReader reader = GetContentReaderFromXnb(assetName, ref stream, xnbReader, recordDisposableObject))
+					{
+						result = reader.ReadAsset<T>();
+						GraphicsResource resource = result as GraphicsResource;
+						if (resource != null)
+						{
+							resource.Name = assetName;
+						}
+					}
+				}
+				catch (Exception e)
+				{
+					// FIXME: Assuming seekable streams! -flibit
+					stream.Seek(0, SeekOrigin.Begin);
+
+					// Try to load as a raw asset
+					if (typeof(T) == typeof(Texture2D) || typeof(T) == typeof(Texture))
+					{
+						Texture2D texture = Texture2D.FromStream(
+							graphicsDeviceService.GraphicsDevice,
+							stream
+						);
+						texture.Name = assetName;
+						result = texture;
+					}
+					else if ((typeof(T) == typeof(SoundEffect)))
+					{
+						result = SoundEffect.FromStream(stream);
+					}
+					else if ((typeof(T) == typeof(Effect)))
+					{
+						byte[] data = new byte[stream.Length];
+						stream.Read(data, 0, (int) stream.Length);
+						result = new Effect(graphicsDeviceService.GraphicsDevice, data);
+					}
+					else if ((typeof(T) == typeof(Song)))
+					{
+						// FIXME: Not using the stream! -flibit
+						result = new Song(modifiedAssetName);
+					}
+					else if ((typeof(T) == typeof(Video)))
+					{
+						// FIXME: Not using the stream! -flibit
+						result = new Video(modifiedAssetName);
+					}
+					else
+					{
+						// We dunno WTF this is, give them the XNB Exception.
+						throw e;
+					}
+
+					/* Because Raw Assets skip the ContentReader step, they need to have their
+					 * disposables recorded here. Doing it outside of this catch will
+					 * result in disposables being logged twice.
+					 */
+					IDisposable disposableResult = result as IDisposable;
+					if (disposableResult != null)
+					{
+						if (recordDisposableObject != null)
+						{
+							recordDisposableObject(disposableResult);
+						}
+						else
+						{
+							disposableAssets.Add(disposableResult);
+						}
+					}
+				}
+			}
+
+			if (result == null)
+			{
+				throw new ContentLoadException("Could not load " + assetName + " asset!");
+			}
+
+			return (T) result;
+		}
+
+		#endregion
+
+		#region Internal Methods
 
 		internal void RecordDisposable(IDisposable disposable)
 		{
@@ -315,336 +431,7 @@ namespace Microsoft.Xna.Framework.Content
 
 		#endregion
 
-		#region Protected Dispose Method
-
-		/* If disposing is true, it was called explicitly and we should dispose managed
-		 * objects. If disposing is false, it was called by the finalizer and managed
-		 * objects should not be disposed.
-		 */
-		protected virtual void Dispose(bool disposing)
-		{
-			if (!disposed)
-			{
-				if (disposing)
-				{
-					Unload();
-				}
-				disposed = true;
-			}
-		}
-
-		#endregion
-
-		#region Protected OpenStream Method
-
-		protected virtual Stream OpenStream(string assetName)
-		{
-			Stream stream;
-			try
-			{
-				string assetPath = FileHelpers.NormalizeFilePathSeparators(
-					Path.Combine(RootDirectoryFullPath, assetName) + ".xnb"
-				);
-				stream = File.OpenRead(assetPath);
-
-			}
-			catch (FileNotFoundException fileNotFound)
-			{
-				throw new ContentLoadException("The content file was not found.", fileNotFound);
-			}
-			catch (DirectoryNotFoundException directoryNotFound)
-			{
-				throw new ContentLoadException("The directory was not found.", directoryNotFound);
-			}
-			catch (Exception exception)
-			{
-				throw new ContentLoadException("Opening stream error.", exception);
-			}
-			return stream;
-		}
-
-		#endregion
-
-		#region Protected ReadAsset Method
-
-		protected T ReadAsset<T>(string assetName, Action<IDisposable> recordDisposableObject)
-		{
-			if (string.IsNullOrEmpty(assetName))
-			{
-				throw new ArgumentNullException("assetName");
-			}
-			if (disposed)
-			{
-				throw new ObjectDisposedException("ContentManager");
-			}
-			string originalAssetName = assetName;
-			object result = null;
-			if (this.graphicsDeviceService == null)
-			{
-				this.graphicsDeviceService = serviceProvider.GetService(typeof(IGraphicsDeviceService)) as IGraphicsDeviceService;
-				if (this.graphicsDeviceService == null)
-				{
-					throw new InvalidOperationException("No Graphics Device Service");
-				}
-			}
-			Stream stream = null;
-			try
-			{
-				// Try to load it traditionally
-				stream = OpenStream(assetName);
-				// Try to load as XNB file
-				try
-				{
-					using (BinaryReader xnbReader = new BinaryReader(stream))
-					{
-						using (ContentReader reader = GetContentReaderFromXnb(assetName, ref stream, xnbReader, recordDisposableObject))
-						{
-							result = reader.ReadAsset<T>();
-							GraphicsResource resource = result as GraphicsResource;
-							if (resource != null)
-							{
-								resource.Name = originalAssetName;
-							}
-						}
-					}
-				}
-				finally
-				{
-					if (stream != null)
-					{
-						stream.Dispose();
-					}
-				}
-			}
-			catch (ContentLoadException ex)
-			{
-				// Try to load as a non-content file
-				assetName = FileHelpers.NormalizeFilePathSeparators(
-					Path.Combine(RootDirectoryFullPath, assetName)
-				);
-				assetName = Normalize<T>(assetName);
-				if (string.IsNullOrEmpty(assetName))
-				{
-					throw new ContentLoadException(
-						"Could not load " +
-						originalAssetName +
-						" asset as a non-content file!",
-						ex
-					);
-				}
-				result = ReadRawAsset<T>(assetName, originalAssetName);
-				/* Because Raw Assets skip the ContentReader step, they need to have their
-				 * disposables recorded here. Doing it outside of this catch will
-				 * result in disposables being logged twice.
-				 */
-				IDisposable disposableResult = result as IDisposable;
-
-				if (disposableResult != null)
-				{
-					if (recordDisposableObject != null)
-					{
-						recordDisposableObject(disposableResult);
-					}
-					else
-					{
-						disposableAssets.Add(disposableResult);
-					}
-				}
-			}
-
-			if (result == null)
-			{
-				throw new ContentLoadException("Could not load " + originalAssetName + " asset!");
-			}
-
-			return (T) result;
-		}
-
-		#endregion
-
-		#region Protected Filename Normalizer Method
-
-		protected virtual string Normalize<T>(string assetName)
-		{
-			if (typeof(T) == typeof(Texture2D) || typeof(T) == typeof(Texture))
-			{
-				return Texture2DReader.Normalize(assetName);
-			}
-			else if ((typeof(T) == typeof(SpriteFont)))
-			{
-				return SpriteFontReader.Normalize(assetName);
-			}
-			else if ((typeof(T) == typeof(Song)))
-			{
-				return SongReader.Normalize(assetName);
-			}
-			else if ((typeof(T) == typeof(SoundEffect)))
-			{
-				return SoundEffectReader.Normalize(assetName);
-			}
-			else if ((typeof(T) == typeof(Video)))
-			{
-				return VideoReader.Normalize(assetName);
-			}
-			else if ((typeof(T) == typeof(Effect)))
-			{
-				return EffectReader.Normalize(assetName);
-			}
-			return null;
-		}
-
-		#endregion
-
-		#region Protected ReadRawAsset Method
-
-		protected virtual object ReadRawAsset<T>(string assetName, string originalAssetName)
-		{
-			if (typeof(T) == typeof(Texture2D) || typeof(T) == typeof(Texture))
-			{
-				using (Stream assetStream = File.OpenRead(assetName))
-				{
-					Texture2D texture = Texture2D.FromStream(
-						graphicsDeviceService.GraphicsDevice,
-						assetStream
-					);
-					texture.Name = originalAssetName;
-					return texture;
-				}
-			}
-			else if ((typeof(T) == typeof(SpriteFont)))
-			{
-				throw new NotImplementedException();
-			}
-			else if ((typeof(T) == typeof(Song)))
-			{
-				return new Song(assetName);
-			}
-			else if ((typeof(T) == typeof(SoundEffect)))
-			{
-				using (Stream s = File.OpenRead(assetName))
-				{
-					return SoundEffect.FromStream(s);
-				}
-			}
-			else if ((typeof(T) == typeof(Video)))
-			{
-				return new Video(assetName);
-			}
-			else if ((typeof(T) == typeof(Effect)))
-			{
-				using (Stream assetStream = File.OpenRead(assetName))
-				{
-					byte[] data = new byte[assetStream.Length];
-					assetStream.Read(data, 0, (int) assetStream.Length);
-					return new Effect(this.graphicsDeviceService.GraphicsDevice, data);
-				}
-			}
-			return null;
-		}
-
-		#endregion
-
-		#region Protected LoadedAssets Property
-
-		/// <summary>
-		/// Virtual property to allow a derived ContentManager to have it's assets reloaded
-		/// </summary>
-		protected virtual Dictionary<string, object> LoadedAssets
-		{
-			get
-			{
-				return loadedAssets;
-			}
-		}
-
-		#endregion
-
-		#region Protected Asset Reloading Methods
-
-		protected virtual void ReloadGraphicsAssets()
-		{
-			foreach (KeyValuePair<string, object> asset in LoadedAssets)
-			{
-				/* This never executes as asset.Key is never null. This just forces the
-				 * linker to include the ReloadAsset function when AOT compiled.
-				 */
-				if (asset.Key == null)
-				{
-					ReloadAsset(asset.Key, Convert.ChangeType(asset.Value, asset.Value.GetType()));
-				}
-
-				MethodInfo methodInfo = typeof(ContentManager).GetMethod("ReloadAsset", BindingFlags.NonPublic | BindingFlags.Instance);
-				MethodInfo genericMethod = methodInfo.MakeGenericMethod(asset.Value.GetType());
-				genericMethod.Invoke(this, new object[] { asset.Key, Convert.ChangeType(asset.Value, asset.Value.GetType()) });
-			}
-		}
-
-		protected virtual void ReloadAsset<T>(string originalAssetName, T currentAsset)
-		{
-			string assetName = originalAssetName;
-			if (string.IsNullOrEmpty(assetName))
-			{
-				throw new ArgumentNullException("assetName");
-			}
-			if (disposed)
-			{
-				throw new ObjectDisposedException("ContentManager");
-			}
-
-			if (this.graphicsDeviceService == null)
-			{
-				this.graphicsDeviceService = serviceProvider.GetService(typeof(IGraphicsDeviceService)) as IGraphicsDeviceService;
-				if (this.graphicsDeviceService == null)
-				{
-					throw new InvalidOperationException("No Graphics Device Service");
-				}
-			}
-
-			Stream stream = null;
-			try
-			{
-				// Try to load it traditionally
-				stream = OpenStream(assetName);
-				// Try to load as XNB file
-				try
-				{
-					using (BinaryReader xnbReader = new BinaryReader(stream))
-					{
-						using (ContentReader reader = GetContentReaderFromXnb(assetName, ref stream, xnbReader, null))
-						{
-							reader.InitializeTypeReaders();
-							reader.ReadObject<T>(currentAsset);
-							reader.ReadSharedResources();
-						}
-					}
-				}
-				finally
-				{
-					if (stream != null)
-					{
-						stream.Dispose();
-					}
-				}
-			}
-			catch (ContentLoadException)
-			{
-				// Try to reload as a non-xnb file.
-				assetName = FileHelpers.NormalizeFilePathSeparators(
-					Path.Combine(RootDirectoryFullPath, assetName)
-				);
-				assetName = Normalize<T>(assetName);
-				ReloadRawAsset(currentAsset, assetName, originalAssetName);
-			}
-		}
-
-		protected virtual void ReloadRawAsset<T>(T asset, string assetName, string originalAssetName)
-		{
-			// FIXME: Is this needed? -flibit
-		}
-
-		#endregion
-
-		#region Private GetContentReaderFromXnb Method
+		#region Private Methods
 
 		private ContentReader GetContentReaderFromXnb(string originalAssetName, ref Stream stream, BinaryReader xnbReader, Action<IDisposable> recordDisposableObject)
 		{
@@ -741,7 +528,7 @@ namespace Microsoft.Xna.Framework.Content
 				reader = new ContentReader(
 					this,
 					decompressedStream,
-					this.graphicsDeviceService.GraphicsDevice,
+					graphicsDeviceService.GraphicsDevice,
 					originalAssetName,
 					version,
 					recordDisposableObject
@@ -752,13 +539,62 @@ namespace Microsoft.Xna.Framework.Content
 				reader = new ContentReader(
 					this,
 					stream,
-					this.graphicsDeviceService.GraphicsDevice,
+					graphicsDeviceService.GraphicsDevice,
 					originalAssetName,
 					version,
 					recordDisposableObject
 				);
 			}
 			return reader;
+		}
+
+		#endregion
+
+		#region Private Static Methods
+
+		private static void AddContentManager(ContentManager contentManager)
+		{
+			lock (ContentManagerLock)
+			{
+				/* Check if the list contains this content manager already. Also take
+				 * the opportunity to prune the list of any finalized content managers.
+				 */
+				bool contains = false;
+				for (int i = ContentManagers.Count - 1; i >= 0; i -= 1)
+				{
+					WeakReference contentRef = ContentManagers[i];
+					if (ReferenceEquals(contentRef.Target, contentManager))
+					{
+						contains = true;
+					}
+					if (!contentRef.IsAlive)
+					{
+						ContentManagers.RemoveAt(i);
+					}
+				}
+				if (!contains)
+				{
+					ContentManagers.Add(new WeakReference(contentManager));
+				}
+			}
+		}
+
+		private static void RemoveContentManager(ContentManager contentManager)
+		{
+			lock (ContentManagerLock)
+			{
+				/* Check if the list contains this content manager and remove it. Also
+				 * take the opportunity to prune the list of any finalized content managers.
+				 */
+				for (int i = ContentManagers.Count - 1; i >= 0; i -= 1)
+				{
+					WeakReference contentRef = ContentManagers[i];
+					if (!contentRef.IsAlive || ReferenceEquals(contentRef.Target, contentManager))
+					{
+						ContentManagers.RemoveAt(i);
+					}
+				}
+			}
 		}
 
 		#endregion
