@@ -1311,7 +1311,15 @@ namespace Microsoft.Xna.Framework.Graphics
 					else
 					{
 						glEnable(GLenum.GL_POLYGON_OFFSET_FILL);
-						glPolygonOffset(slopeScaleDepthBias, depthBias);
+						// FIXME: Call again on SetRenderTarget changes? -flibit
+						glPolygonOffset(
+							slopeScaleDepthBias,
+							depthBias * XNAToGL.DepthBiasScale[
+								currentDrawFramebuffer == targetFramebuffer ?
+									currentDepthStencilFormat :
+									Backbuffer.DepthFormat
+							]
+						);
 					}
 				}
 			}
@@ -3501,6 +3509,14 @@ namespace Microsoft.Xna.Framework.Graphics
 				{ DepthFormat.Depth24Stencil8,	GLenum.GL_DEPTH24_STENCIL8 }
 			};
 
+			public static readonly Dictionary<DepthFormat, float> DepthBiasScale = new Dictionary<DepthFormat, float>()
+			{
+				{ DepthFormat.None,		0.0f },
+				{ DepthFormat.Depth16,		(float) (1 << 16) },
+				{ DepthFormat.Depth24,		(float) (1 << 24) },
+				{ DepthFormat.Depth24Stencil8,	(float) (1 << 24) }
+			};
+
 			public static readonly Dictionary<VertexElementUsage, MojoShader.MOJOSHADER_usage> VertexAttribUsage = new Dictionary<VertexElementUsage, MojoShader.MOJOSHADER_usage>()
 			{
 				{ VertexElementUsage.Position,		MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_POSITION },
@@ -3613,10 +3629,15 @@ namespace Microsoft.Xna.Framework.Graphics
 				private set;
 			}
 
+			public DepthFormat DepthFormat
+			{
+				get;
+				private set;
+			}
+
 #if !DISABLE_FAUXBACKBUFFER
 			private uint colorAttachment;
 			private uint depthStencilAttachment;
-			private DepthFormat depthStencilFormat;
 			private OpenGLDevice glDevice;
 #endif
 
@@ -3633,7 +3654,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				Handle = 0;
 #else
 				glDevice = device;
-				depthStencilFormat = depthFormat;
+				DepthFormat = depthFormat;
 
 				// Generate and bind the FBO.
 				uint handle;
@@ -3783,7 +3804,7 @@ namespace Microsoft.Xna.Framework.Graphics
 							GLenum.GL_RENDERBUFFER,
 							0
 						);
-						if (depthStencilFormat == DepthFormat.Depth24Stencil8)
+						if (DepthFormat == DepthFormat.Depth24Stencil8)
 						{
 							glDevice.glFramebufferRenderbuffer(
 								GLenum.GL_FRAMEBUFFER,
@@ -3803,7 +3824,7 @@ namespace Microsoft.Xna.Framework.Graphics
 								glDevice.targetFramebuffer
 							);
 						}
-						depthStencilFormat = DepthFormat.None;
+						DepthFormat = DepthFormat.None;
 					}
 
 					// Keep this state sane.
@@ -3843,12 +3864,12 @@ namespace Microsoft.Xna.Framework.Graphics
 				}
 
 				// If the depth format changes, detach before reattaching!
-				if (depthFormat != depthStencilFormat)
+				if (depthFormat != DepthFormat)
 				{
 					glDevice.BindFramebuffer(Handle);
 
 					// Detach...
-					if (depthStencilFormat != DepthFormat.None)
+					if (DepthFormat != DepthFormat.None)
 					{
 						glDevice.glFramebufferRenderbuffer(
 							GLenum.GL_FRAMEBUFFER,
@@ -3856,7 +3877,7 @@ namespace Microsoft.Xna.Framework.Graphics
 							GLenum.GL_RENDERBUFFER,
 							0
 						);
-						if (depthStencilFormat == DepthFormat.Depth24Stencil8)
+						if (DepthFormat == DepthFormat.Depth24Stencil8)
 						{
 							glDevice.glFramebufferRenderbuffer(
 								GLenum.GL_FRAMEBUFFER,
@@ -3891,7 +3912,7 @@ namespace Microsoft.Xna.Framework.Graphics
 						);
 					}
 
-					depthStencilFormat = depthFormat;
+					DepthFormat = depthFormat;
 				}
 
 				// Keep this state sane.
