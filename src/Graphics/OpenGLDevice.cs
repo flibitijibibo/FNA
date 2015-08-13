@@ -3512,9 +3512,9 @@ namespace Microsoft.Xna.Framework.Graphics
 			public static readonly Dictionary<DepthFormat, float> DepthBiasScale = new Dictionary<DepthFormat, float>()
 			{
 				{ DepthFormat.None,		0.0f },
-				{ DepthFormat.Depth16,		(float) (1 << 16) },
-				{ DepthFormat.Depth24,		(float) (1 << 24) },
-				{ DepthFormat.Depth24Stencil8,	(float) (1 << 24) }
+				{ DepthFormat.Depth16,		(float) ((1 << 16) - 1) },
+				{ DepthFormat.Depth24,		(float) ((1 << 24) - 1) },
+				{ DepthFormat.Depth24Stencil8,	(float) ((1 << 24) - 1) }
 			};
 
 			public static readonly Dictionary<VertexElementUsage, MojoShader.MOJOSHADER_usage> VertexAttribUsage = new Dictionary<VertexElementUsage, MojoShader.MOJOSHADER_usage>()
