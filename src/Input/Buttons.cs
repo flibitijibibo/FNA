@@ -14,110 +14,110 @@ using System;
 namespace Microsoft.Xna.Framework.Input
 {
 	/// <summary>
-	/// Enumerates input device buttons.
+	/// Defines the buttons on gamepad.
 	/// </summary>
 	[Flags]
 	public enum Buttons
 	{
 		/// <summary>
-		/// Directional pad down
+		/// Directional pad down.
 		/// </summary>
 		DPadUp = 1,
 		/// <summary>
-		/// Directional pad up
+		/// Directional pad up.
 		/// </summary>
 		DPadDown = 2,
 		/// <summary>
-		/// Directional pad left
+		/// Directional pad left.
 		/// </summary>
 		DPadLeft = 4,
 		/// <summary>
-		/// Directional pad right
+		/// Directional pad right.
 		/// </summary>
 		DPadRight = 8,
 		/// <summary>
-		/// START button
+		/// START button.
 		/// </summary>
 		Start = 16,
 		/// <summary>
-		/// BACK button
+		/// BACK button.
 		/// </summary>
 		Back = 32,
 		/// <summary>
-		/// Left stick button (pressing the left stick)
+		/// Left stick button (pressing the left stick).
 		/// </summary>
 		LeftStick = 64,
 		/// <summary>
-		/// Right stick button (pressing the right stick)
+		/// Right stick button (pressing the right stick).
 		/// </summary>
 		RightStick = 128,
 		/// <summary>
-		/// Left bumper (shoulder) button
+		/// Left bumper (shoulder) button.
 		/// </summary>
 		LeftShoulder = 256,
 		/// <summary>
-		/// Right bumper (shoulder) button
+		/// Right bumper (shoulder) button.
 		/// </summary>
 		RightShoulder = 512,
 		/// <summary>
-		/// Big button
+		/// Big button.
 		/// </summary>
 		BigButton = 2048,
 		/// <summary>
-		/// A button
+		/// A button.
 		/// </summary>
 		A = 4096,
 		/// <summary>
-		/// B button
+		/// B button.
 		/// </summary>
 		B = 8192,
 		/// <summary>
-		/// X button
+		/// X button.
 		/// </summary>
 		X = 16384,
 		/// <summary>
-		/// Y button
+		/// Y button.
 		/// </summary>
 		Y = 32768,
 		/// <summary>
-		/// Left stick is towards the left
+		/// Left stick is towards the left.
 		/// </summary>
 		LeftThumbstickLeft = 2097152,
 		/// <summary>
-		/// Right trigger
+		/// Right trigger.
 		/// </summary>
 		RightTrigger = 4194304,
 		/// <summary>
-		/// Left trigger
+		/// Left trigger.
 		/// </summary>
 		LeftTrigger = 8388608,
 		/// <summary>
-		/// Right stick is towards up
+		/// Right stick is towards up.
 		/// </summary>
 		RightThumbstickUp = 16777216,
 		/// <summary>
-		/// Right stick is towards down
+		/// Right stick is towards down.
 		/// </summary>
 		RightThumbstickDown = 33554432,
 		/// <summary>
-		/// Right stick is towards the right
+		/// Right stick is towards the right.
 		/// </summary>
 		RightThumbstickRight = 67108864,
 		/// <summary>
-		/// Right stick is towards the left
+		/// Right stick is towards the left.
 		/// </summary>
 		RightThumbstickLeft = 134217728,
 		/// <summary>
-		/// Left stick is towards up
+		/// Left stick is towards up.
 		/// </summary>
 		LeftThumbstickUp = 268435456,
 		/// <summary>
-		/// Left stick is towards down
+		/// Left stick is towards down.
 		/// </summary>
 		LeftThumbstickDown = 536870912,
 		/// <summary>
-		/// Left stick is towards the right
+		/// Left stick is towards the right.
 		/// </summary>
-		LeftThumbstickRight = 1073741824,
+		LeftThumbstickRight = 1073741824
 	}
 }
