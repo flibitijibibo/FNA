@@ -736,26 +736,26 @@ namespace Microsoft.Xna.Framework.Graphics
 				DeleteTexture(gcTexture);
 			}
 			IGLRenderbuffer gcDepthBuffer;
-			while (GCDepthBuffers.Count > 0 && GCDepthBuffers.TryDequeue(out gcDepthBuffer))
+			while (GCDepthBuffers.TryDequeue(out gcDepthBuffer))
 			{
 				DeleteRenderbuffer(gcDepthBuffer);
 			}
 			IGLBuffer gcBuffer;
-			while (GCVertexBuffers.Count > 0 && GCVertexBuffers.TryDequeue(out gcBuffer))
+			while (GCVertexBuffers.TryDequeue(out gcBuffer))
 			{
 				DeleteVertexBuffer(gcBuffer);
 			}
-			while (GCIndexBuffers.Count > 0 && GCIndexBuffers.TryDequeue(out gcBuffer))
+			while (GCIndexBuffers.TryDequeue(out gcBuffer))
 			{
 				DeleteIndexBuffer(gcBuffer);
 			}
 			IGLEffect gcEffect;
-			while (GCEffects.Count > 0 && GCEffects.TryDequeue(out gcEffect))
+			while (GCEffects.TryDequeue(out gcEffect))
 			{
 				DeleteEffect(gcEffect);
 			}
 			IGLQuery gcQuery;
-			while (GCQueries.Count > 0 && GCQueries.TryDequeue(out gcQuery))
+			while (GCQueries.TryDequeue(out gcQuery))
 			{
 				DeleteQuery(gcQuery);
 			}
