@@ -296,23 +296,23 @@ namespace Microsoft.Xna.Framework.Content
 				);
 				if (typeof(T) == typeof(Texture2D) || typeof(T) == typeof(Texture))
 				{
-					modifiedAssetName = Texture2DReader.Normalize(assetName);
+					modifiedAssetName = Texture2DReader.Normalize(modifiedAssetName);
 				}
 				else if ((typeof(T) == typeof(SoundEffect)))
 				{
-					modifiedAssetName = SoundEffectReader.Normalize(assetName);
+					modifiedAssetName = SoundEffectReader.Normalize(modifiedAssetName);
 				}
 				else if ((typeof(T) == typeof(Effect)))
 				{
-					modifiedAssetName = EffectReader.Normalize(assetName);
+					modifiedAssetName = EffectReader.Normalize(modifiedAssetName);
 				}
 				else if ((typeof(T) == typeof(Song)))
 				{
-					modifiedAssetName = SongReader.Normalize(assetName);
+					modifiedAssetName = SongReader.Normalize(modifiedAssetName);
 				}
 				else if ((typeof(T) == typeof(Video)))
 				{
-					modifiedAssetName = VideoReader.Normalize(assetName);
+					modifiedAssetName = VideoReader.Normalize(modifiedAssetName);
 				}
 
 				// Did we get anything…?
