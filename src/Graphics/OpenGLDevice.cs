@@ -53,6 +53,7 @@
 #region Using Statements
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -499,12 +500,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Private Graphics Object Disposal Queues
 
-		private Queue<IGLTexture> GCTextures = new Queue<IGLTexture>();
-		private Queue<IGLRenderbuffer> GCDepthBuffers = new Queue<IGLRenderbuffer>();
-		private Queue<IGLBuffer> GCVertexBuffers = new Queue<IGLBuffer>();
-		private Queue<IGLBuffer> GCIndexBuffers = new Queue<IGLBuffer>();
-		private Queue<IGLEffect> GCEffects = new Queue<IGLEffect>();
-		private Queue<IGLQuery> GCQueries = new Queue<IGLQuery>();
+		private ConcurrentQueue<IGLTexture> GCTextures = new ConcurrentQueue<IGLTexture>();
+		private ConcurrentQueue<IGLRenderbuffer> GCDepthBuffers = new ConcurrentQueue<IGLRenderbuffer>();
+		private ConcurrentQueue<IGLBuffer> GCVertexBuffers = new ConcurrentQueue<IGLBuffer>();
+		private ConcurrentQueue<IGLBuffer> GCIndexBuffers = new ConcurrentQueue<IGLBuffer>();
+		private ConcurrentQueue<IGLEffect> GCEffects = new ConcurrentQueue<IGLEffect>();
+		private ConcurrentQueue<IGLQuery> GCQueries = new ConcurrentQueue<IGLQuery>();
 
 		#endregion
 
@@ -729,29 +730,34 @@ namespace Microsoft.Xna.Framework.Graphics
 #if !DISABLE_THREADING && !THREADED_GL
 			RunActions();
 #endif
-			while (GCTextures.Count > 0)
+			IGLTexture gcTexture;
+			while (GCTextures.TryDequeue(out gcTexture))
 			{
-				DeleteTexture(GCTextures.Dequeue());
+				DeleteTexture(gcTexture);
 			}
-			while (GCDepthBuffers.Count > 0)
+			IGLRenderbuffer gcDepthBuffer;
+			while (GCDepthBuffers.Count > 0 && GCDepthBuffers.TryDequeue(out gcDepthBuffer))
 			{
-				DeleteRenderbuffer(GCDepthBuffers.Dequeue());
+				DeleteRenderbuffer(gcDepthBuffer);
 			}
-			while (GCVertexBuffers.Count > 0)
+			IGLBuffer gcBuffer;
+			while (GCVertexBuffers.Count > 0 && GCVertexBuffers.TryDequeue(out gcBuffer))
 			{
-				DeleteVertexBuffer(GCVertexBuffers.Dequeue());
+				DeleteVertexBuffer(gcBuffer);
 			}
-			while (GCIndexBuffers.Count > 0)
+			while (GCIndexBuffers.Count > 0 && GCIndexBuffers.TryDequeue(out gcBuffer))
 			{
-				DeleteIndexBuffer(GCIndexBuffers.Dequeue());
+				DeleteIndexBuffer(gcBuffer);
 			}
-			while (GCEffects.Count > 0)
+			IGLEffect gcEffect;
+			while (GCEffects.Count > 0 && GCEffects.TryDequeue(out gcEffect))
 			{
-				DeleteEffect(GCEffects.Dequeue());
+				DeleteEffect(gcEffect);
 			}
-			while (GCQueries.Count > 0)
+			IGLQuery gcQuery;
+			while (GCQueries.Count > 0 && GCQueries.TryDequeue(out gcQuery))
 			{
-				DeleteQuery(GCQueries.Dequeue());
+				DeleteQuery(gcQuery);
 			}
 		}
 
