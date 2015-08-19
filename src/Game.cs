@@ -210,7 +210,6 @@ namespace Microsoft.Xna.Framework
 				(u, handler) => u.UpdateOrderChanged -= handler
 			);
 
-		private IGraphicsDeviceManager _graphicsDeviceManager;
 		private IGraphicsDeviceService _graphicsDeviceService;
 
 		private bool _initialized = false;
@@ -292,11 +291,11 @@ namespace Microsoft.Xna.Framework
 					}
 
 
-					if (_graphicsDeviceManager != null)
+					if (_graphicsDeviceService != null)
 					{
 						// FIXME: Does XNA4 require the GDM to be disposable? -flibit
-						(_graphicsDeviceManager as IDisposable).Dispose();
-						_graphicsDeviceManager = null;
+						(_graphicsDeviceService as IDisposable).Dispose();
+						_graphicsDeviceService = null;
 					}
 
 					AudioDevice.Dispose();
