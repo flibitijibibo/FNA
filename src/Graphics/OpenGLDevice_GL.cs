@@ -179,6 +179,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			GL_STREAM_DRAW =			0x88E0,
 			GL_STATIC_DRAW =			0x88E4,
 			GL_READ_ONLY =				0x88B8,
+			GL_MAX_VERTEX_ATTRIBS =			0x8869,
 			// Render targets
 			GL_FRAMEBUFFER =			0x8D40,
 			GL_READ_FRAMEBUFFER =			0x8CA8,
@@ -668,6 +669,32 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		/* END FRAMEBUFFER FUNCTIONS */
 
+		/* BEGIN VERTEX ATTRIBUTE FUNCTIONS */
+
+		private delegate void VertexAttribPointer(
+			int index,
+			int size,
+			GLenum type,
+			bool normalized,
+			int stride,
+			IntPtr pointer
+		);
+		private VertexAttribPointer glVertexAttribPointer;
+
+		private delegate void VertexAttribDivisor(
+			int index,
+			int divisor
+		);
+		private VertexAttribDivisor glVertexAttribDivisor;
+
+		private delegate void EnableVertexAttribArray(int index);
+		private EnableVertexAttribArray glEnableVertexAttribArray;
+
+		private delegate void DisableVertexAttribArray(int index);
+		private DisableVertexAttribArray glDisableVertexAttribArray;
+
+		/* END VERTEX ATTRIBUTE FUNCTIONS */
+
 		/* BEGIN DRAWING FUNCTIONS */
 
 		private delegate void DrawElementsInstanced(
@@ -984,6 +1011,18 @@ namespace Microsoft.Xna.Framework.Graphics
 					SDL.SDL_GL_GetProcAddress("glReadPixels"),
 					typeof(ReadPixels)
 				);
+				glVertexAttribPointer = (VertexAttribPointer) Marshal.GetDelegateForFunctionPointer(
+					SDL.SDL_GL_GetProcAddress("glVertexAttribPointer"),
+					typeof(VertexAttribPointer)
+				);
+				glEnableVertexAttribArray = (EnableVertexAttribArray) Marshal.GetDelegateForFunctionPointer(
+					SDL.SDL_GL_GetProcAddress("glEnableVertexAttribArray"),
+					typeof(EnableVertexAttribArray)
+				);
+				glDisableVertexAttribArray = (DisableVertexAttribArray) Marshal.GetDelegateForFunctionPointer(
+					SDL.SDL_GL_GetProcAddress("glDisableVertexAttribArray"),
+					typeof(DisableVertexAttribArray)
+				);
 				glDrawRangeElements = (DrawRangeElements) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glDrawRangeElements"),
 					typeof(DrawRangeElements)
@@ -1073,14 +1112,14 @@ namespace Microsoft.Xna.Framework.Graphics
 				throw new NoSuitableGraphicsDeviceException("OpenGL framebuffer support is required!");
 			}
 
-			/* ARB_instanced_arrays/ARB_draw_instanced are almost optional.
-			 * While we do not directly call glVertexAttribDivisor ourselves,
-			 * we still need to check for ARB_instanced_arrays support.
-			 * -flibit
-			 */
-			SupportsHardwareInstancing = SDL.SDL_GL_GetProcAddress("glVertexAttribDivisor") != IntPtr.Zero;
+			/* ARB_instanced_arrays/ARB_draw_instanced are almost optional. */
+			SupportsHardwareInstancing = true;
 			try
 			{
+				glVertexAttribDivisor = (VertexAttribDivisor) Marshal.GetDelegateForFunctionPointer(
+					SDL.SDL_GL_GetProcAddress("glVertexAttribDivisor"),
+					typeof(VertexAttribDivisor)
+				);
 				glDrawElementsInstanced = (DrawElementsInstanced) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glDrawElementsInstanced"),
 					typeof(DrawElementsInstanced)
