@@ -1730,6 +1730,7 @@ namespace Microsoft.Xna.Framework.Graphics
 						}
 					}
 				}
+				FlushGLVertexAttributes();
 
 				ldBaseVertex = baseVertex;
 				ldEffect = currentEffect;
@@ -1740,7 +1741,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				ldPointer = IntPtr.Zero;
 			}
 
-			FlushGLVertexAttributes();
 			MojoShader.MOJOSHADER_glProgramReady();
 			if (flipViewport != 0)
 			{
@@ -1804,6 +1804,7 @@ namespace Microsoft.Xna.Framework.Graphics
 						attributeDivisor[attribLoc] = 0;
 					}
 				}
+				FlushGLVertexAttributes();
 
 				ldVertexDeclaration = vertexDeclaration;
 				ldPointer = ptr;
@@ -1814,7 +1815,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				ldBaseVertex = -1;
 			}
 
-			FlushGLVertexAttributes();
 			MojoShader.MOJOSHADER_glProgramReady();
 			if (flipViewport != 0)
 			{
