@@ -1360,11 +1360,10 @@ namespace Microsoft.Xna.Framework.Graphics
 					else
 					{
 						glEnable(GLenum.GL_POLYGON_OFFSET_FILL);
-						// FIXME: Call again on SetRenderTarget changes? -flibit
 						glPolygonOffset(
 							slopeScaleDepthBias,
 							depthBias * XNAToGL.DepthBiasScale[
-								currentDrawFramebuffer == targetFramebuffer ?
+								renderTargetBound ?
 									currentDepthStencilFormat :
 									Backbuffer.DepthFormat
 							]
