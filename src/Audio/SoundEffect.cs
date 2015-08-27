@@ -10,6 +10,7 @@
 #region Using Statements
 using System;
 using System.IO;
+using System.Collections.Generic;
 #endregion
 
 namespace Microsoft.Xna.Framework.Audio
@@ -109,8 +110,9 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#endregion
 
-		#region Internal Audio Data
+		#region Internal Variables
 
+		internal List<SoundEffectInstance> Instances = new List<SoundEffectInstance>();
 		internal IALBuffer INTERNAL_buffer;
 
 		#endregion
@@ -213,6 +215,11 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			if (!IsDisposed)
 			{
+				while (Instances.Count > 0)
+				{
+					Instances[0].Dispose();
+				}
+				Instances = null;
 				AudioDevice.ALDevice.DeleteBuffer(INTERNAL_buffer);
 				IsDisposed = true;
 			}

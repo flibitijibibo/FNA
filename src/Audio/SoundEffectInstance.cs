@@ -159,6 +159,10 @@ namespace Microsoft.Xna.Framework.Audio
 		internal SoundEffectInstance(SoundEffect parent)
 		{
 			INTERNAL_parentEffect = parent;
+			if (INTERNAL_parentEffect != null)
+			{
+				INTERNAL_parentEffect.Instances.Add(this);
+			}
 		}
 
 		#endregion
@@ -179,6 +183,10 @@ namespace Microsoft.Xna.Framework.Audio
 			if (!IsDisposed)
 			{
 				Stop(true);
+				if (INTERNAL_parentEffect != null)
+				{
+					INTERNAL_parentEffect.Instances.Remove(this);
+				}
 				IsDisposed = true;
 			}
 		}
