@@ -7,6 +7,18 @@
  */
 #endregion
 
+#region VERBOSE_AL_DEBUGGING Option
+// #define VERBOSE_AL_DEBUGGING
+/* OpenAL does not have a function similar to ARB_debug_output. Because of this,
+ * we only have alGetError to debug. In DEBUG, we call this once per frame.
+ *
+ * If you enable this define, we call this after every single AL operation, and
+ * throw an Exception when any errors show up. This makes finding problems a lot
+ * easier, but calling alGetError so often can slow things down.
+ * -flibit
+ */
+#endregion
+
 #region Using Statements
 using System;
 using System.Collections.Generic;
@@ -193,6 +205,9 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			uint result;
 			AL10.alGenBuffers((IntPtr) 1, out result);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 			return new OpenALBuffer(result, TimeSpan.Zero);
 		}
 
@@ -209,6 +224,9 @@ namespace Microsoft.Xna.Framework.Audio
 
 			// Generate the buffer now, in case we need to perform alBuffer ops.
 			AL10.alGenBuffers((IntPtr) 1, out result);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 
 			int format;
 			if (isADPCM)
@@ -246,6 +264,9 @@ namespace Microsoft.Xna.Framework.Audio
 				(IntPtr) data.Length,
 				(IntPtr) sampleRate
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 
 			// Calculate the duration now, after we've unpacked the buffer
 			int bufLen, bits;
@@ -279,6 +300,9 @@ namespace Microsoft.Xna.Framework.Audio
 					}
 				);
 			}
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 
 			// Finally.
 			return new OpenALBuffer(result, resultDur);
@@ -288,6 +312,9 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			uint handle = (buffer as OpenALBuffer).Handle;
 			AL10.alDeleteBuffers((IntPtr) 1, ref handle);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void SetBufferData(
@@ -304,6 +331,9 @@ namespace Microsoft.Xna.Framework.Audio
 				(IntPtr) count,
 				(IntPtr) sampleRate
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void SetBufferData(
@@ -319,6 +349,9 @@ namespace Microsoft.Xna.Framework.Audio
 				(IntPtr) (data.Length * 4),
 				(IntPtr) sampleRate
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		#endregion
@@ -329,6 +362,9 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			uint result;
 			AL10.alGenSources((IntPtr) 1, out result);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 			if (result == 0)
 			{
 				return null;
@@ -340,6 +376,9 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			uint result;
 			AL10.alGenSources((IntPtr) 1, out result);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 			if (result == 0)
 			{
 				return null;
@@ -349,6 +388,9 @@ namespace Microsoft.Xna.Framework.Audio
 				AL10.AL_BUFFER,
 				(int) (buffer as OpenALBuffer).Handle
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 			return new OpenALSource(result);
 		}
 
@@ -356,22 +398,37 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			uint handle = (source as OpenALSource).Handle;
 			AL10.alSourceStop(handle);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 			AL10.alDeleteSources((IntPtr) 1, ref handle);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void PlaySource(IALSource source)
 		{
 			AL10.alSourcePlay((source as OpenALSource).Handle);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void PauseSource(IALSource source)
 		{
 			AL10.alSourcePause((source as OpenALSource).Handle);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void ResumeSource(IALSource source)
 		{
 			AL10.alSourcePlay((source as OpenALSource).Handle);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public SoundState GetSourceState(IALSource source)
@@ -382,6 +439,9 @@ namespace Microsoft.Xna.Framework.Audio
 				AL10.AL_SOURCE_STATE,
 				out state
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 			if (state == AL10.AL_PLAYING)
 			{
 				return SoundState.Playing;
@@ -400,6 +460,9 @@ namespace Microsoft.Xna.Framework.Audio
 				AL10.AL_GAIN,
 				volume * SoundEffect.MasterVolume
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void SetSourceLooped(IALSource source, bool looped)
@@ -409,6 +472,9 @@ namespace Microsoft.Xna.Framework.Audio
 				AL10.AL_LOOPING,
 				looped ? 1 : 0
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void SetSourcePan(IALSource source, float pan)
@@ -420,6 +486,9 @@ namespace Microsoft.Xna.Framework.Audio
 				0.0f,
 				(float) Math.Sqrt(1 - Math.Pow(pan, 2))
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void SetSourcePosition(IALSource source, Vector3 pos)
@@ -431,6 +500,9 @@ namespace Microsoft.Xna.Framework.Audio
 				pos.Y,
 				pos.Z
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void SetSourcePitch(IALSource source, float pitch, bool clamp)
@@ -455,6 +527,9 @@ namespace Microsoft.Xna.Framework.Audio
 				AL10.AL_PITCH,
 				(float) Math.Pow(2, pitch)
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void SetSourceReverb(IALSource source, IALReverb reverb)
@@ -466,6 +541,9 @@ namespace Microsoft.Xna.Framework.Audio
 				0,
 				0
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void SetSourceLowPassFilter(IALSource source, float hfGain)
@@ -477,6 +555,9 @@ namespace Microsoft.Xna.Framework.Audio
 				EFX.AL_DIRECT_FILTER,
 				(int) INTERNAL_alFilter
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void SetSourceHighPassFilter(IALSource source, float lfGain)
@@ -488,6 +569,9 @@ namespace Microsoft.Xna.Framework.Audio
 				EFX.AL_DIRECT_FILTER,
 				(int) INTERNAL_alFilter
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void SetSourceBandPassFilter(IALSource source, float hfGain, float lfGain)
@@ -500,6 +584,9 @@ namespace Microsoft.Xna.Framework.Audio
 				EFX.AL_DIRECT_FILTER,
 				(int) INTERNAL_alFilter
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void QueueSourceBuffer(IALSource source, IALBuffer buffer)
@@ -510,6 +597,9 @@ namespace Microsoft.Xna.Framework.Audio
 				(IntPtr) 1,
 				ref buf
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void DequeueSourceBuffers(
@@ -523,6 +613,9 @@ namespace Microsoft.Xna.Framework.Audio
 				(IntPtr) buffersToDequeue,
 				bufs
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 #if DEBUG
 			// Error check our queuedBuffers list.
 			IALBuffer[] sync = errorCheck.ToArray();
@@ -544,6 +637,9 @@ namespace Microsoft.Xna.Framework.Audio
 				AL10.AL_BUFFERS_PROCESSED,
 				out result
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 			return result;
 		}
 
@@ -596,6 +692,9 @@ namespace Microsoft.Xna.Framework.Audio
 				(int) effect
 			);
 
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 			return result;
 		}
 
@@ -606,6 +705,9 @@ namespace Microsoft.Xna.Framework.Audio
 			uint effect = rv.EffectHandle;
 			EFX.alDeleteAuxiliaryEffectSlots((IntPtr) 1, ref slot);
 			EFX.alDeleteEffects((IntPtr) 1, ref effect);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void CommitReverbChanges(IALReverb reverb)
@@ -616,6 +718,9 @@ namespace Microsoft.Xna.Framework.Audio
 				EFX.AL_EFFECTSLOT_EFFECT,
 				(int) rv.EffectHandle
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void SetReverbReflectionsDelay(IALReverb reverb, float value)
@@ -625,6 +730,9 @@ namespace Microsoft.Xna.Framework.Audio
 				EFX.AL_EAXREVERB_REFLECTIONS_DELAY,
 				value / 1000.0f
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void SetReverbDelay(IALReverb reverb, float value)
@@ -634,6 +742,9 @@ namespace Microsoft.Xna.Framework.Audio
 				EFX.AL_EAXREVERB_LATE_REVERB_DELAY,
 				value / 1000.0f
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void SetReverbPositionLeft(IALReverb reverb, float value)
@@ -664,6 +775,9 @@ namespace Microsoft.Xna.Framework.Audio
 				EFX.AL_EAXREVERB_DIFFUSION,
 				value / 15.0f
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void SetReverbLateDiffusion(IALReverb reverb, float value)
@@ -674,6 +788,9 @@ namespace Microsoft.Xna.Framework.Audio
 				EFX.AL_EAXREVERB_DIFFUSION,
 				value / 15.0f
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void SetReverbLowEQGain(IALReverb reverb, float value)
@@ -689,6 +806,9 @@ namespace Microsoft.Xna.Framework.Audio
 					1.0f
 				)
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void SetReverbLowEQCutoff(IALReverb reverb, float value)
@@ -698,6 +818,9 @@ namespace Microsoft.Xna.Framework.Audio
 				EFX.AL_EAXREVERB_LFREFERENCE,
 				(value * 50.0f) + 50.0f
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void SetReverbHighEQGain(IALReverb reverb, float value)
@@ -709,6 +832,9 @@ namespace Microsoft.Xna.Framework.Audio
 					value - 8.0f
 				)
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void SetReverbHighEQCutoff(IALReverb reverb, float value)
@@ -718,6 +844,9 @@ namespace Microsoft.Xna.Framework.Audio
 				EFX.AL_EAXREVERB_HFREFERENCE,
 				(value * 500.0f) + 1000.0f
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void SetReverbRearDelay(IALReverb reverb, float value)
@@ -751,6 +880,9 @@ namespace Microsoft.Xna.Framework.Audio
 					3.16f
 				)
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void SetReverbGain(IALReverb reverb, float value)
@@ -764,6 +896,9 @@ namespace Microsoft.Xna.Framework.Audio
 					1.0f
 				)
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void SetReverbDecayTime(IALReverb reverb, float value)
@@ -787,6 +922,9 @@ namespace Microsoft.Xna.Framework.Audio
 				EFX.AL_EAXREVERB_DENSITY,
 				value / 100.0f
 			);
+#if VERBOSE_AL_DEBUGGING
+			CheckALError();
+#endif
 		}
 
 		public void SetReverbRoomSize(IALReverb reverb, float value)
@@ -813,6 +951,9 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 
 			System.Console.WriteLine("OpenAL Error: {0:X}", err);
+#if VERBOSE_AL_DEBUGGING
+			throw new InvalidOperationException("OpenAL Error!");
+#endif
 		}
 
 		private bool CheckALCError()
