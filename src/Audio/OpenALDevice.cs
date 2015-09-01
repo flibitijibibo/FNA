@@ -326,7 +326,7 @@ namespace Microsoft.Xna.Framework.Audio
 		) {
 			AL10.alBufferData(
 				(buffer as OpenALBuffer).Handle,
-				XNAToShort[channels],
+				XNAToShort[(int) channels],
 				data, // TODO: offset -flibit
 				(IntPtr) count,
 				(IntPtr) sampleRate
@@ -344,7 +344,7 @@ namespace Microsoft.Xna.Framework.Audio
 		) {
 			AL10.alBufferData(
 				(buffer as OpenALBuffer).Handle,
-				XNAToFloat[channels],
+				XNAToFloat[(int) channels],
 				data,
 				(IntPtr) (data.Length * 4),
 				(IntPtr) sampleRate
@@ -973,16 +973,18 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region Private Static XNA->AL Dictionaries
 
-		private static readonly Dictionary<AudioChannels, int> XNAToShort = new Dictionary<AudioChannels, int>
+		private static readonly int[] XNAToShort = new int[]
 		{
-			{ AudioChannels.Mono, AL10.AL_FORMAT_MONO16 },
-			{ AudioChannels.Stereo, AL10.AL_FORMAT_STEREO16 }
+			AL10.AL_NONE,			// NOPE
+			AL10.AL_FORMAT_MONO16,		// AudioChannels.Mono
+			AL10.AL_FORMAT_STEREO16,	// AudioChannels.Stereo
 		};
 
-		private static readonly Dictionary<AudioChannels, int> XNAToFloat = new Dictionary<AudioChannels, int>
+		private static readonly int[] XNAToFloat = new int[]
 		{
-			{ AudioChannels.Mono, ALEXT.AL_FORMAT_MONO_FLOAT32 },
-			{ AudioChannels.Stereo, ALEXT.AL_FORMAT_STEREO_FLOAT32 }
+			AL10.AL_NONE,			// NOPE
+			ALEXT.AL_FORMAT_MONO_FLOAT32,	// AudioChannels.Mono
+			ALEXT.AL_FORMAT_STEREO_FLOAT32	// AudioChannels.Stereo
 		};
 
 		#endregion

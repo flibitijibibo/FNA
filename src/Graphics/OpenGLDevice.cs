@@ -52,7 +52,6 @@
 
 #region Using Statements
 using System;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -96,11 +95,11 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			public OpenGLTexture(
 				uint handle,
-				Type target,
+				GLenum target,
 				int levelCount
 			) {
 				Handle = handle;
-				Target = XNAToGL.TextureType[target];
+				Target = target;
 				HasMipmaps = levelCount > 1;
 
 				WrapS = TextureAddressMode.Wrap;
@@ -306,13 +305,13 @@ namespace Microsoft.Xna.Framework.Graphics
 					{
 						glStencilFuncSeparate(
 							GLenum.GL_FRONT,
-							XNAToGL.CompareFunc[stencilFunc],
+							XNAToGL.CompareFunc[(int) stencilFunc],
 							stencilRef,
 							stencilMask
 						);
 						glStencilFuncSeparate(
 							GLenum.GL_BACK,
-							XNAToGL.CompareFunc[ccwStencilFunc],
+							XNAToGL.CompareFunc[(int) ccwStencilFunc],
 							stencilRef,
 							stencilMask
 						);
@@ -320,7 +319,7 @@ namespace Microsoft.Xna.Framework.Graphics
 					else
 					{
 						glStencilFunc(
-							XNAToGL.CompareFunc[stencilFunc],
+							XNAToGL.CompareFunc[(int) stencilFunc],
 							stencilRef,
 							stencilMask
 						);
@@ -913,7 +912,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			// Draw!
 			glDrawRangeElements(
-				XNAToGL.Primitive[primitiveType],
+				XNAToGL.Primitive[(int) primitiveType],
 				minVertexIndex,
 				minVertexIndex + numVertices - 1,
 				XNAToGL.PrimitiveVerts(primitiveType, primitiveCount),
@@ -944,7 +943,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			// Draw!
 			glDrawElementsInstanced(
-				XNAToGL.Primitive[primitiveType],
+				XNAToGL.Primitive[(int) primitiveType],
 				XNAToGL.PrimitiveVerts(primitiveType, primitiveCount),
 				shortIndices ?
 					GLenum.GL_UNSIGNED_SHORT :
@@ -961,7 +960,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		) {
 			// Draw!
 			glDrawArrays(
-				XNAToGL.Primitive[primitiveType],
+				XNAToGL.Primitive[(int) primitiveType],
 				vertexStart,
 				XNAToGL.PrimitiveVerts(primitiveType, primitiveCount)
 			);
@@ -985,7 +984,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			// Draw!
 			glDrawRangeElements(
-				XNAToGL.Primitive[primitiveType],
+				XNAToGL.Primitive[(int) primitiveType],
 				0,
 				numVertices - 1,
 				XNAToGL.PrimitiveVerts(primitiveType, primitiveCount),
@@ -1007,7 +1006,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		) {
 			// Draw!
 			glDrawArrays(
-				XNAToGL.Primitive[primitiveType],
+				XNAToGL.Primitive[(int) primitiveType],
 				vertexOffset,
 				XNAToGL.PrimitiveVerts(primitiveType, primitiveCount)
 			);
@@ -1103,10 +1102,10 @@ namespace Microsoft.Xna.Framework.Graphics
 					srcBlendAlpha = blendState.AlphaSourceBlend;
 					dstBlendAlpha = blendState.AlphaDestinationBlend;
 					glBlendFuncSeparate(
-						XNAToGL.BlendMode[srcBlend],
-						XNAToGL.BlendMode[dstBlend],
-						XNAToGL.BlendMode[srcBlendAlpha],
-						XNAToGL.BlendMode[dstBlendAlpha]
+						XNAToGL.BlendMode[(int) srcBlend],
+						XNAToGL.BlendMode[(int) dstBlend],
+						XNAToGL.BlendMode[(int) srcBlendAlpha],
+						XNAToGL.BlendMode[(int) dstBlendAlpha]
 					);
 				}
 
@@ -1116,8 +1115,8 @@ namespace Microsoft.Xna.Framework.Graphics
 					blendOp = blendState.ColorBlendFunction;
 					blendOpAlpha = blendState.AlphaBlendFunction;
 					glBlendEquationSeparate(
-						XNAToGL.BlendEquation[blendOp],
-						XNAToGL.BlendEquation[blendOpAlpha]
+						XNAToGL.BlendEquation[(int) blendOp],
+						XNAToGL.BlendEquation[(int) blendOpAlpha]
 					);
 				}
 			}
@@ -1202,7 +1201,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				if (depthStencilState.DepthBufferFunction != depthFunc)
 				{
 					depthFunc = depthStencilState.DepthBufferFunction;
-					glDepthFunc(XNAToGL.CompareFunc[depthFunc]);
+					glDepthFunc(XNAToGL.CompareFunc[(int) depthFunc]);
 				}
 			}
 
@@ -1248,40 +1247,40 @@ namespace Microsoft.Xna.Framework.Graphics
 						ccwStencilPass = depthStencilState.CounterClockwiseStencilPass;
 						glStencilFuncSeparate(
 							GLenum.GL_FRONT,
-							XNAToGL.CompareFunc[stencilFunc],
+							XNAToGL.CompareFunc[(int) stencilFunc],
 							stencilRef,
 							stencilMask
 						);
 						glStencilFuncSeparate(
 							GLenum.GL_BACK,
-							XNAToGL.CompareFunc[ccwStencilFunc],
+							XNAToGL.CompareFunc[(int) ccwStencilFunc],
 							stencilRef,
 							stencilMask
 						);
 						glStencilOpSeparate(
 							GLenum.GL_FRONT,
-							XNAToGL.GLStencilOp[stencilFail],
-							XNAToGL.GLStencilOp[stencilZFail],
-							XNAToGL.GLStencilOp[stencilPass]
+							XNAToGL.GLStencilOp[(int) stencilFail],
+							XNAToGL.GLStencilOp[(int) stencilZFail],
+							XNAToGL.GLStencilOp[(int) stencilPass]
 						);
 						glStencilOpSeparate(
 							GLenum.GL_BACK,
-							XNAToGL.GLStencilOp[ccwStencilFail],
-							XNAToGL.GLStencilOp[ccwStencilZFail],
-							XNAToGL.GLStencilOp[ccwStencilPass]
+							XNAToGL.GLStencilOp[(int) ccwStencilFail],
+							XNAToGL.GLStencilOp[(int) ccwStencilZFail],
+							XNAToGL.GLStencilOp[(int) ccwStencilPass]
 						);
 					}
 					else
 					{
 						glStencilFunc(
-							XNAToGL.CompareFunc[stencilFunc],
+							XNAToGL.CompareFunc[(int) stencilFunc],
 							stencilRef,
 							stencilMask
 						);
 						glStencilOp(
-							XNAToGL.GLStencilOp[stencilFail],
-							XNAToGL.GLStencilOp[stencilZFail],
-							XNAToGL.GLStencilOp[stencilPass]
+							XNAToGL.GLStencilOp[(int) stencilFail],
+							XNAToGL.GLStencilOp[(int) stencilZFail],
+							XNAToGL.GLStencilOp[(int) stencilPass]
 						);
 					}
 				}
@@ -1333,7 +1332,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				cullFrontFace = actualMode;
 				if (cullFrontFace != CullMode.None)
 				{
-					glFrontFace(XNAToGL.FrontFace[cullFrontFace]);
+					glFrontFace(XNAToGL.FrontFace[(int) cullFrontFace]);
 				}
 			}
 
@@ -1342,7 +1341,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				fillMode = rasterizerState.FillMode;
 				glPolygonMode(
 					GLenum.GL_FRONT_AND_BACK,
-					XNAToGL.GLFillMode[fillMode]
+					XNAToGL.GLFillMode[(int) fillMode]
 				);
 			}
 
@@ -1350,8 +1349,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				float realDepthBias = rasterizerState.DepthBias * XNAToGL.DepthBiasScale[
 					renderTargetBound ?
-						currentDepthStencilFormat :
-						Backbuffer.DepthFormat
+						(int) currentDepthStencilFormat :
+						(int) Backbuffer.DepthFormat
 				];
 				if (	realDepthBias != depthBias ||
 					rasterizerState.SlopeScaleDepthBias != slopeScaleDepthBias	)
@@ -1441,7 +1440,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				glTexParameteri(
 					tex.Target,
 					GLenum.GL_TEXTURE_WRAP_S,
-					(int) XNAToGL.Wrap[tex.WrapS]
+					XNAToGL.Wrap[(int) tex.WrapS]
 				);
 			}
 			if (sampler.AddressV != tex.WrapT)
@@ -1450,7 +1449,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				glTexParameteri(
 					tex.Target,
 					GLenum.GL_TEXTURE_WRAP_T,
-					(int) XNAToGL.Wrap[tex.WrapT]
+					XNAToGL.Wrap[(int) tex.WrapT]
 				);
 			}
 			if (sampler.AddressW != tex.WrapR)
@@ -1459,7 +1458,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				glTexParameteri(
 					tex.Target,
 					GLenum.GL_TEXTURE_WRAP_R,
-					(int) XNAToGL.Wrap[tex.WrapR]
+					XNAToGL.Wrap[(int) tex.WrapR]
 				);
 			}
 			if (	sampler.Filter != tex.Filter ||
@@ -1470,16 +1469,14 @@ namespace Microsoft.Xna.Framework.Graphics
 				glTexParameteri(
 					tex.Target,
 					GLenum.GL_TEXTURE_MAG_FILTER,
-					(int) XNAToGL.MagFilter[tex.Filter]
+					XNAToGL.MagFilter[(int) tex.Filter]
 				);
 				glTexParameteri(
 					tex.Target,
 					GLenum.GL_TEXTURE_MIN_FILTER,
-					(int) (
-						tex.HasMipmaps ?
-							XNAToGL.MinMipFilter[tex.Filter] :
-							XNAToGL.MinFilter[tex.Filter]
-					)
+					tex.HasMipmaps ?
+						XNAToGL.MinMipFilter[(int) tex.Filter] :
+						XNAToGL.MinFilter[(int) tex.Filter]
 				);
 				glTexParameterf(
 					tex.Target,
@@ -1696,7 +1693,7 @@ namespace Microsoft.Xna.Framework.Graphics
 					foreach (VertexElement element in vertexDeclaration.elements)
 					{
 						int attribLoc = MojoShader.MOJOSHADER_glGetVertexAttribLocation(
-							XNAToGL.VertexAttribUsage[element.VertexElementUsage],
+							XNAToGL.VertexAttribUsage[(int) element.VertexElementUsage],
 							element.UsageIndex
 						);
 						if (attribLoc == -1)
@@ -1718,15 +1715,15 @@ namespace Microsoft.Xna.Framework.Graphics
 						{
 							glVertexAttribPointer(
 								attribLoc,
-								XNAToGL.VertexAttribSize[element.VertexElementFormat],
-								XNAToGL.VertexAttribType[element.VertexElementFormat],
+								XNAToGL.VertexAttribSize[(int) format],
+								XNAToGL.VertexAttribType[(int) format],
 								normalized,
 								vertexDeclaration.VertexStride,
 								ptr
 							);
 							attr.CurrentBuffer = buffer;
 							attr.CurrentPointer = ptr;
-							attr.CurrentFormat = element.VertexElementFormat;
+							attr.CurrentFormat = format;
 							attr.CurrentNormalized = normalized;
 							attr.CurrentStride = vertexDeclaration.VertexStride;
 						}
@@ -1773,7 +1770,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				foreach (VertexElement element in vertexDeclaration.elements)
 				{
 					int attribLoc = MojoShader.MOJOSHADER_glGetVertexAttribLocation(
-						XNAToGL.VertexAttribUsage[element.VertexElementUsage],
+						XNAToGL.VertexAttribUsage[(int) element.VertexElementUsage],
 						element.UsageIndex
 					);
 					if (attribLoc == -1)
@@ -1793,8 +1790,8 @@ namespace Microsoft.Xna.Framework.Graphics
 					{
 						glVertexAttribPointer(
 							attribLoc,
-							XNAToGL.VertexAttribSize[element.VertexElementFormat],
-							XNAToGL.VertexAttribType[element.VertexElementFormat],
+							XNAToGL.VertexAttribSize[(int) element.VertexElementFormat],
+							XNAToGL.VertexAttribType[(int) element.VertexElementFormat],
 							normalized,
 							vertexDeclaration.VertexStride,
 							finalPtr
@@ -2189,7 +2186,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		#region glCreateTexture Methods
 
 		private OpenGLTexture CreateTexture(
-			Type target,
+			GLenum target,
 			int levelCount
 		) {
 			uint handle;
@@ -2203,27 +2200,29 @@ namespace Microsoft.Xna.Framework.Graphics
 			glTexParameteri(
 				result.Target,
 				GLenum.GL_TEXTURE_WRAP_S,
-				(int) XNAToGL.Wrap[result.WrapS]
+				XNAToGL.Wrap[(int) result.WrapS]
 			);
 			glTexParameteri(
 				result.Target,
 				GLenum.GL_TEXTURE_WRAP_T,
-				(int) XNAToGL.Wrap[result.WrapT]
+				XNAToGL.Wrap[(int) result.WrapT]
 			);
 			glTexParameteri(
 				result.Target,
 				GLenum.GL_TEXTURE_WRAP_R,
-				(int) XNAToGL.Wrap[result.WrapR]
+				XNAToGL.Wrap[(int) result.WrapR]
 			);
 			glTexParameteri(
 				result.Target,
 				GLenum.GL_TEXTURE_MAG_FILTER,
-				(int) XNAToGL.MagFilter[result.Filter]
+				XNAToGL.MagFilter[(int) result.Filter]
 			);
 			glTexParameteri(
 				result.Target,
 				GLenum.GL_TEXTURE_MIN_FILTER,
-				(int) (result.HasMipmaps ? XNAToGL.MinMipFilter[result.Filter] : XNAToGL.MinFilter[result.Filter])
+				result.HasMipmaps ?
+					XNAToGL.MinMipFilter[(int) result.Filter] :
+					XNAToGL.MinFilter[(int) result.Filter]
 			);
 			glTexParameterf(
 				result.Target,
@@ -2259,12 +2258,12 @@ namespace Microsoft.Xna.Framework.Graphics
 #endif
 
 			result = CreateTexture(
-				typeof(Texture2D),
+				GLenum.GL_TEXTURE_2D,
 				levelCount
 			);
 
-			GLenum glFormat = XNAToGL.TextureFormat[format];
-			GLenum glInternalFormat = XNAToGL.TextureInternalFormat[format];
+			GLenum glFormat = XNAToGL.TextureFormat[(int) format];
+			GLenum glInternalFormat = XNAToGL.TextureInternalFormat[(int) format];
 			if (glFormat == GLenum.GL_COMPRESSED_TEXTURE_FORMATS)
 			{
 				for (int i = 0; i < levelCount; i += 1)
@@ -2285,7 +2284,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			else
 			{
-				GLenum glType = XNAToGL.TextureDataType[format];
+				GLenum glType = XNAToGL.TextureDataType[(int) format];
 				for (int i = 0; i < levelCount; i += 1)
 				{
 					glTexImage2D(
@@ -2323,13 +2322,13 @@ namespace Microsoft.Xna.Framework.Graphics
 #endif
 
 			result = CreateTexture(
-				typeof(Texture3D),
+				GLenum.GL_TEXTURE_3D,
 				levelCount
 			);
 
-			GLenum glFormat = XNAToGL.TextureFormat[format];
-			GLenum glInternalFormat = XNAToGL.TextureInternalFormat[format];
-			GLenum glType = XNAToGL.TextureDataType[format];
+			GLenum glFormat = XNAToGL.TextureFormat[(int) format];
+			GLenum glInternalFormat = XNAToGL.TextureInternalFormat[(int) format];
+			GLenum glType = XNAToGL.TextureDataType[(int) format];
 			for (int i = 0; i < levelCount; i += 1)
 			{
 				glTexImage3D(
@@ -2365,12 +2364,12 @@ namespace Microsoft.Xna.Framework.Graphics
 #endif
 
 			result = CreateTexture(
-				typeof(TextureCube),
+				GLenum.GL_TEXTURE_CUBE_MAP,
 				levelCount
 			);
 
-			GLenum glFormat = XNAToGL.TextureFormat[format];
-			GLenum glInternalFormat = XNAToGL.TextureInternalFormat[format];
+			GLenum glFormat = XNAToGL.TextureFormat[(int) format];
+			GLenum glInternalFormat = XNAToGL.TextureInternalFormat[(int) format];
 			if (glFormat == GLenum.GL_COMPRESSED_TEXTURE_FORMATS)
 			{
 				for (int i = 0; i < 6; i += 1)
@@ -2393,7 +2392,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			else
 			{
-				GLenum glType = XNAToGL.TextureDataType[format];
+				GLenum glType = XNAToGL.TextureDataType[(int) format];
 				for (int i = 0; i < 6; i += 1)
 				{
 					for (int l = 0; l < levelCount; l += 1)
@@ -2447,7 +2446,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			int startByte = startIndex * elementSizeInBytes;
 			IntPtr dataPtr = (IntPtr) (dataHandle.AddrOfPinnedObject().ToInt64() + startByte);
 
-			GLenum glFormat = XNAToGL.TextureFormat[format];
+			GLenum glFormat = XNAToGL.TextureFormat[(int) format];
 			try
 			{
 				if (glFormat == GLenum.GL_COMPRESSED_TEXTURE_FORMATS)
@@ -2475,7 +2474,7 @@ namespace Microsoft.Xna.Framework.Graphics
 						y,
 						w,
 						h,
-						XNAToGL.TextureInternalFormat[format],
+						XNAToGL.TextureInternalFormat[(int) format],
 						dataLength,
 						dataPtr
 					);
@@ -2500,7 +2499,7 @@ namespace Microsoft.Xna.Framework.Graphics
 						w,
 						h,
 						glFormat,
-						XNAToGL.TextureDataType[format],
+						XNAToGL.TextureDataType[(int) format],
 						dataPtr
 					);
 
@@ -2555,8 +2554,8 @@ namespace Microsoft.Xna.Framework.Graphics
 					right - left,
 					bottom - top,
 					back - front,
-					XNAToGL.TextureFormat[format],
-					XNAToGL.TextureDataType[format],
+					XNAToGL.TextureFormat[(int) format],
+					XNAToGL.TextureDataType[(int) format],
 					(IntPtr) (dataHandle.AddrOfPinnedObject().ToInt64() + startIndex * Marshal.SizeOf(typeof(T)))
 				);
 			}
@@ -2593,7 +2592,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			int startByte = startIndex * elementSizeInBytes;
 			IntPtr dataPtr = (IntPtr) (dataHandle.AddrOfPinnedObject().ToInt64() + startByte);
 
-			GLenum glFormat = XNAToGL.TextureFormat[format];
+			GLenum glFormat = XNAToGL.TextureFormat[(int) format];
 			try
 			{
 				if (glFormat == GLenum.GL_COMPRESSED_TEXTURE_FORMATS)
@@ -2621,7 +2620,7 @@ namespace Microsoft.Xna.Framework.Graphics
 						yOffset,
 						width,
 						height,
-						XNAToGL.TextureInternalFormat[format],
+						XNAToGL.TextureInternalFormat[(int) format],
 						dataLength,
 						dataPtr
 					);
@@ -2636,7 +2635,7 @@ namespace Microsoft.Xna.Framework.Graphics
 						width,
 						height,
 						glFormat,
-						XNAToGL.TextureDataType[format],
+						XNAToGL.TextureDataType[(int) format],
 						dataPtr
 					);
 				}
@@ -2663,8 +2662,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				0,
 				texture.Width,
 				texture.Height,
-				XNAToGL.TextureFormat[texture.Format],
-				XNAToGL.TextureDataType[texture.Format],
+				XNAToGL.TextureFormat[(int) texture.Format],
+				XNAToGL.TextureDataType[(int) texture.Format],
 				ptr
 			);
 		}
@@ -2700,7 +2699,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 
 			BindTexture(texture);
-			GLenum glFormat = XNAToGL.TextureFormat[format];
+			GLenum glFormat = XNAToGL.TextureFormat[(int) format];
 			if (glFormat == GLenum.GL_COMPRESSED_TEXTURE_FORMATS)
 			{
 				throw new NotImplementedException("GetData, CompressedTexture");
@@ -2715,7 +2714,7 @@ namespace Microsoft.Xna.Framework.Graphics
 						GLenum.GL_TEXTURE_2D,
 						0,
 						glFormat,
-						XNAToGL.TextureDataType[format],
+						XNAToGL.TextureDataType[(int) format],
 						ptr.AddrOfPinnedObject()
 					);
 				}
@@ -2735,7 +2734,7 @@ namespace Microsoft.Xna.Framework.Graphics
 						GLenum.GL_TEXTURE_2D,
 						0,
 						glFormat,
-						XNAToGL.TextureDataType[format],
+						XNAToGL.TextureDataType[(int) format],
 						ptr.AddrOfPinnedObject()
 					);
 				}
@@ -2788,7 +2787,7 @@ namespace Microsoft.Xna.Framework.Graphics
 #endif
 
 			BindTexture(texture);
-			GLenum glFormat = XNAToGL.TextureFormat[format];
+			GLenum glFormat = XNAToGL.TextureFormat[(int) format];
 			if (glFormat == GLenum.GL_COMPRESSED_TEXTURE_FORMATS)
 			{
 				throw new NotImplementedException("GetData, CompressedTexture");
@@ -2803,7 +2802,7 @@ namespace Microsoft.Xna.Framework.Graphics
 						GLenum.GL_TEXTURE_CUBE_MAP_POSITIVE_X + (int) cubeMapFace,
 						0,
 						glFormat,
-						XNAToGL.TextureDataType[format],
+						XNAToGL.TextureDataType[(int) format],
 						ptr.AddrOfPinnedObject()
 					);
 				}
@@ -2823,7 +2822,7 @@ namespace Microsoft.Xna.Framework.Graphics
 						GLenum.GL_TEXTURE_CUBE_MAP_POSITIVE_X + (int) cubeMapFace,
 						0,
 						glFormat,
-						XNAToGL.TextureDataType[format],
+						XNAToGL.TextureDataType[(int) format],
 						ptr.AddrOfPinnedObject()
 					);
 				}
@@ -3131,7 +3130,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			);
 			glRenderbufferStorage(
 				GLenum.GL_RENDERBUFFER,
-				XNAToGL.DepthStorage[format],
+				XNAToGL.DepthStorage[(int) format],
 				width,
 				height
 			);
@@ -3457,264 +3456,258 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		private static class XNAToGL
 		{
-			/* Ideally we would be using arrays, rather than Dictionaries.
-			 * The problem is that we don't support every enum, and dealing
-			 * with gaps would be a headache. So whatever, Dictionaries!
-			 * -flibit
-			 */
-
-			public static readonly Dictionary<Type, GLenum> TextureType = new Dictionary<Type, GLenum>()
+			public static readonly GLenum[] TextureFormat = new GLenum[]
 			{
-				{ typeof(Texture2D), GLenum.GL_TEXTURE_2D },
-				{ typeof(Texture3D), GLenum.GL_TEXTURE_3D },
-				{ typeof(TextureCube), GLenum.GL_TEXTURE_CUBE_MAP }
+				GLenum.GL_RGBA,				// SurfaceFormat.Color
+				GLenum.GL_RGB,				// SurfaceFormat.Bgr565
+				GLenum.GL_BGRA,				// SurfaceFormat.Bgra5551
+				GLenum.GL_BGRA,				// SurfaceFormat.Bgra4444
+				GLenum.GL_COMPRESSED_TEXTURE_FORMATS,	// SurfaceFormat.Dxt1
+				GLenum.GL_COMPRESSED_TEXTURE_FORMATS,	// SurfaceFormat.Dxt3
+				GLenum.GL_COMPRESSED_TEXTURE_FORMATS,	// SurfaceFormat.Dxt5
+				GLenum.GL_RG,				// SurfaceFormat.NormalizedByte2
+				GLenum.GL_RGBA,				// SurfaceFormat.NormalizedByte4
+				GLenum.GL_RGBA,				// SurfaceFormat.Rgba1010102
+				GLenum.GL_RG,				// SurfaceFormat.Rg32
+				GLenum.GL_RGBA,				// SurfaceFormat.Rgba64
+				GLenum.GL_LUMINANCE,			// SurfaceFormat.Alpha8
+				GLenum.GL_RED,				// SurfaceFormat.Single
+				GLenum.GL_RG,				// SurfaceFormat.Vector2
+				GLenum.GL_RGBA,				// SurfaceFormat.Vector4
+				GLenum.GL_RED,				// SurfaceFormat.HalfSingle
+				GLenum.GL_RG,				// SurfaceFormat.HalfVector2
+				GLenum.GL_RGBA,				// SurfaceFormat.HalfVector4
+				GLenum.GL_RGBA				// SurfaceFormat.HdrBlendable
 			};
 
-			public static readonly Dictionary<SurfaceFormat, GLenum> TextureFormat = new Dictionary<SurfaceFormat, GLenum>()
+			public static readonly GLenum[] TextureInternalFormat = new GLenum[]
 			{
-				{ SurfaceFormat.Color,			GLenum.GL_RGBA },
-				{ SurfaceFormat.Bgr565,			GLenum.GL_RGB },
-				{ SurfaceFormat.Bgra5551,		GLenum.GL_BGRA },
-				{ SurfaceFormat.Bgra4444,		GLenum.GL_BGRA },
-				{ SurfaceFormat.Dxt1,			GLenum.GL_COMPRESSED_TEXTURE_FORMATS },
-				{ SurfaceFormat.Dxt3,			GLenum.GL_COMPRESSED_TEXTURE_FORMATS },
-				{ SurfaceFormat.Dxt5,			GLenum.GL_COMPRESSED_TEXTURE_FORMATS },
-				{ SurfaceFormat.NormalizedByte2,	GLenum.GL_RG },
-				{ SurfaceFormat.NormalizedByte4,	GLenum.GL_RGBA },
-				{ SurfaceFormat.Rgba1010102,		GLenum.GL_RGBA },
-				{ SurfaceFormat.Rg32,			GLenum.GL_RG },
-				{ SurfaceFormat.Rgba64,			GLenum.GL_RGBA },
-				{ SurfaceFormat.Alpha8,			GLenum.GL_LUMINANCE },
-				{ SurfaceFormat.Single,			GLenum.GL_RED },
-				{ SurfaceFormat.Vector2,		GLenum.GL_RG },
-				{ SurfaceFormat.Vector4,		GLenum.GL_RGBA },
-				{ SurfaceFormat.HalfSingle,		GLenum.GL_RED },
-				{ SurfaceFormat.HalfVector2,		GLenum.GL_RG },
-				{ SurfaceFormat.HalfVector4,		GLenum.GL_RGBA },
-				{ SurfaceFormat.HdrBlendable,		GLenum.GL_RGBA }
+				GLenum.GL_RGBA,					// SurfaceFormat.Color
+				GLenum.GL_RGB,					// SurfaceFormat.Bgr565
+				GLenum.GL_RGBA,					// SurfaceFormat.Bgra5551
+				GLenum.GL_RGBA4,				// SurfaceFormat.Bgra4444
+				GLenum.GL_COMPRESSED_RGBA_S3TC_DXT1_EXT,	// SurfaceFormat.Dxt1
+				GLenum.GL_COMPRESSED_RGBA_S3TC_DXT3_EXT,	// SurfaceFormat.Dxt3
+				GLenum.GL_COMPRESSED_RGBA_S3TC_DXT5_EXT,	// SurfaceFormat.Dxt5
+				GLenum.GL_RG,					// SurfaceFormat.NormalizedByte2
+				GLenum.GL_RGBA,					// SurfaceFormat.NormalizedByte4
+				GLenum.GL_RGB10_A2_EXT,				// SurfaceFormat.Rgba1010102
+				GLenum.GL_RG16,					// SurfaceFormat.Rg32
+				GLenum.GL_RGBA16,				// SurfaceFormat.Rgba64
+				GLenum.GL_LUMINANCE,				// SurfaceFormat.Alpha8
+				GLenum.GL_R32F,					// SurfaceFormat.Single
+				GLenum.GL_RG32F,				// SurfaceFormat.Vector2
+				GLenum.GL_RGBA32F,				// SurfaceFormat.Vector4
+				GLenum.GL_R16F,					// SurfaceFormat.HalfSingle
+				GLenum.GL_RG16F,				// SurfaceFormat.HalfVector2
+				GLenum.GL_RGBA16F,				// SurfaceFormat.HalfVector4
+				GLenum.GL_RGBA16F				// SurfaceFormat.HdrBlendable
 			};
 
-			public static readonly Dictionary<SurfaceFormat, GLenum> TextureInternalFormat = new Dictionary<SurfaceFormat, GLenum>()
+			public static readonly GLenum[] TextureDataType = new GLenum[]
 			{
-				{ SurfaceFormat.Color,			GLenum.GL_RGBA },
-				{ SurfaceFormat.Bgr565,			GLenum.GL_RGB },
-				{ SurfaceFormat.Bgra5551,		GLenum.GL_RGBA },
-				{ SurfaceFormat.Bgra4444,		GLenum.GL_RGBA4 },
-				{ SurfaceFormat.Dxt1,			GLenum.GL_COMPRESSED_RGBA_S3TC_DXT1_EXT },
-				{ SurfaceFormat.Dxt3,			GLenum.GL_COMPRESSED_RGBA_S3TC_DXT3_EXT },
-				{ SurfaceFormat.Dxt5,			GLenum.GL_COMPRESSED_RGBA_S3TC_DXT5_EXT },
-				{ SurfaceFormat.NormalizedByte2,	GLenum.GL_RG },
-				{ SurfaceFormat.NormalizedByte4,	GLenum.GL_RGBA },
-				{ SurfaceFormat.Rgba1010102,		GLenum.GL_RGB10_A2_EXT },
-				{ SurfaceFormat.Rg32,			GLenum.GL_RG16 },
-				{ SurfaceFormat.Rgba64,			GLenum.GL_RGBA16 },
-				{ SurfaceFormat.Alpha8,			GLenum.GL_LUMINANCE },
-				{ SurfaceFormat.Single,			GLenum.GL_R32F },
-				{ SurfaceFormat.Vector2,		GLenum.GL_RG32F },
-				{ SurfaceFormat.Vector4,		GLenum.GL_RGBA32F },
-				{ SurfaceFormat.HalfSingle,		GLenum.GL_R16F },
-				{ SurfaceFormat.HalfVector2,		GLenum.GL_RG16F },
-				{ SurfaceFormat.HalfVector4,		GLenum.GL_RGBA16F },
-				{ SurfaceFormat.HdrBlendable,		GLenum.GL_RGBA16F }
+				GLenum.GL_UNSIGNED_BYTE,			// SurfaceFormat.Color
+				GLenum.GL_UNSIGNED_SHORT_5_6_5,			// SurfaceFormat.Bgr565
+				GLenum.GL_UNSIGNED_SHORT_5_5_5_1,		// SurfaceFormat.Bgra5551
+				GLenum.GL_UNSIGNED_SHORT_4_4_4_4,		// SurfaceFormat.Bgra4444
+				GLenum.GL_ZERO,					// NOPE
+				GLenum.GL_ZERO,					// NOPE
+				GLenum.GL_ZERO,					// NOPE
+				GLenum.GL_BYTE,					// SurfaceFormat.NormalizedByte2
+				GLenum.GL_BYTE,					// SurfaceFormat.NormalizedByte4
+				GLenum.GL_UNSIGNED_INT_10_10_10_2,		// SurfaceFormat.Rgba1010102
+				GLenum.GL_UNSIGNED_SHORT,			// SurfaceFormat.Rg32
+				GLenum.GL_UNSIGNED_SHORT,			// SurfaceFormat.Rgba64
+				GLenum.GL_UNSIGNED_BYTE,			// SurfaceFormat.Alpha8
+				GLenum.GL_FLOAT,				// SurfaceFormat.Single
+				GLenum.GL_FLOAT,				// SurfaceFormat.Vector2
+				GLenum.GL_FLOAT,				// SurfaceFormat.Vector4
+				GLenum.GL_HALF_FLOAT,				// SurfaceFormat.HalfSingle
+				GLenum.GL_HALF_FLOAT,				// SurfaceFormat.HalfVector2
+				GLenum.GL_HALF_FLOAT,				// SurfaceFormat.HalfVector4
+				GLenum.GL_HALF_FLOAT				// SurfaceFormat.HdrBlendable
 			};
 
-			public static readonly Dictionary<SurfaceFormat, GLenum> TextureDataType = new Dictionary<SurfaceFormat, GLenum>()
+			public static readonly GLenum[] BlendMode = new GLenum[]
 			{
-				{ SurfaceFormat.Color,			GLenum.GL_UNSIGNED_BYTE },
-				{ SurfaceFormat.Bgr565,			GLenum.GL_UNSIGNED_SHORT_5_6_5 },
-				{ SurfaceFormat.Bgra5551,		GLenum.GL_UNSIGNED_SHORT_5_5_5_1 },
-				{ SurfaceFormat.Bgra4444,		GLenum.GL_UNSIGNED_SHORT_4_4_4_4 },
-				// Ignoring Dxt1, Dxt3, Dxt5
-				{ SurfaceFormat.NormalizedByte2,	GLenum.GL_BYTE },
-				{ SurfaceFormat.NormalizedByte4,	GLenum.GL_BYTE },
-				{ SurfaceFormat.Rgba1010102,		GLenum.GL_UNSIGNED_INT_10_10_10_2 },
-				{ SurfaceFormat.Rg32,			GLenum.GL_UNSIGNED_SHORT },
-				{ SurfaceFormat.Rgba64,			GLenum.GL_UNSIGNED_SHORT },
-				{ SurfaceFormat.Alpha8,			GLenum.GL_UNSIGNED_BYTE },
-				{ SurfaceFormat.Single,			GLenum.GL_FLOAT },
-				{ SurfaceFormat.Vector2,		GLenum.GL_FLOAT },
-				{ SurfaceFormat.Vector4,		GLenum.GL_FLOAT },
-				{ SurfaceFormat.HalfSingle,		GLenum.GL_HALF_FLOAT },
-				{ SurfaceFormat.HalfVector2,		GLenum.GL_HALF_FLOAT },
-				{ SurfaceFormat.HalfVector4,		GLenum.GL_HALF_FLOAT },
-				{ SurfaceFormat.HdrBlendable,		GLenum.GL_HALF_FLOAT }
+				GLenum.GL_ONE,			// Blend.One
+				GLenum.GL_ZERO,			// Blend.Zero
+				GLenum.GL_SRC_COLOR,		// Blend.SourceColor
+				GLenum.GL_ONE_MINUS_SRC_COLOR,	// Blend.InverseSourceColor
+				GLenum.GL_SRC_ALPHA,		// Blend.SourceAlpha
+				GLenum.GL_ONE_MINUS_SRC_ALPHA,	// Blend.InverseSourceAlpha
+				GLenum.GL_DST_COLOR,		// Blend.DestinationColor
+				GLenum.GL_ONE_MINUS_DST_COLOR,	// Blend.InverseDestinationColor
+				GLenum.GL_DST_ALPHA,		// Blend.DestinationAlpha
+				GLenum.GL_ONE_MINUS_DST_ALPHA,	// Blend.InverseDestinationAlpha
+				GLenum.GL_ZERO,			// FIXME: Blend.BlendFactor
+				GLenum.GL_ZERO,			// FIXME: Blend.InverseBlendFactor
+				GLenum.GL_SRC_ALPHA_SATURATE	// Blend.SourceAlphaSaturation
 			};
 
-			public static readonly Dictionary<Blend, GLenum> BlendMode = new Dictionary<Blend, GLenum>()
+			public static readonly GLenum[] BlendEquation = new GLenum[]
 			{
-				{ Blend.DestinationAlpha,		GLenum.GL_DST_ALPHA },
-				{ Blend.DestinationColor,		GLenum.GL_DST_COLOR },
-				{ Blend.InverseDestinationAlpha,	GLenum.GL_ONE_MINUS_DST_ALPHA },
-				{ Blend.InverseDestinationColor,	GLenum.GL_ONE_MINUS_DST_COLOR },
-				{ Blend.InverseSourceAlpha,		GLenum.GL_ONE_MINUS_SRC_ALPHA },
-				{ Blend.InverseSourceColor,		GLenum.GL_ONE_MINUS_SRC_COLOR },
-				{ Blend.One,				GLenum.GL_ONE },
-				{ Blend.SourceAlpha,			GLenum.GL_SRC_ALPHA },
-				{ Blend.SourceAlphaSaturation,		GLenum.GL_SRC_ALPHA_SATURATE },
-				{ Blend.SourceColor,			GLenum.GL_SRC_COLOR },
-				{ Blend.Zero,				GLenum.GL_ZERO }
+				GLenum.GL_FUNC_ADD,			// BlendFunction.Add
+				GLenum.GL_FUNC_SUBTRACT,			// BlendFunction.Subtract
+				GLenum.GL_FUNC_REVERSE_SUBTRACT,	// BlendFunction.ReverseSubtract
+				GLenum.GL_MAX,				// BlendFunction.Max
+				GLenum.GL_MIN				// BlendFunction.Min
 			};
 
-			public static readonly Dictionary<BlendFunction, GLenum> BlendEquation = new Dictionary<BlendFunction, GLenum>()
+			public static readonly GLenum[] CompareFunc = new GLenum[]
 			{
-				{ BlendFunction.Add,			GLenum.GL_FUNC_ADD },
-				{ BlendFunction.Max,			GLenum.GL_MAX },
-				{ BlendFunction.Min,			GLenum.GL_MIN },
-				{ BlendFunction.ReverseSubtract,	GLenum.GL_FUNC_REVERSE_SUBTRACT },
-				{ BlendFunction.Subtract,		GLenum.GL_FUNC_SUBTRACT }
+				GLenum.GL_ALWAYS,	// CompareFunction.Always
+				GLenum.GL_NEVER,	// CompareFunction.Never
+				GLenum.GL_LESS,		// CompareFunction.Less
+				GLenum.GL_LEQUAL,	// CompareFunction.LessEqual
+				GLenum.GL_EQUAL,	// CompareFunction.Equal
+				GLenum.GL_GEQUAL,	// CompareFunction.GreaterEqual
+				GLenum.GL_GREATER,	// CompareFunction.Greater
+				GLenum.GL_NOTEQUAL	// CompareFunction.NotEqual
 			};
 
-			public static readonly Dictionary<CompareFunction, GLenum> CompareFunc = new Dictionary<CompareFunction, GLenum>()
+			public static readonly GLenum[] GLStencilOp = new GLenum[]
 			{
-				{ CompareFunction.Always,	GLenum.GL_ALWAYS },
-				{ CompareFunction.Equal,	GLenum.GL_EQUAL },
-				{ CompareFunction.Greater,	GLenum.GL_GREATER },
-				{ CompareFunction.GreaterEqual,	GLenum.GL_GEQUAL },
-				{ CompareFunction.Less,		GLenum.GL_LESS },
-				{ CompareFunction.LessEqual,	GLenum.GL_LEQUAL },
-				{ CompareFunction.Never,	GLenum.GL_NEVER },
-				{ CompareFunction.NotEqual,	GLenum.GL_NOTEQUAL }
+				GLenum.GL_KEEP,		// StencilOperation.Keep
+				GLenum.GL_ZERO,		// StencilOperation.Zero
+				GLenum.GL_REPLACE,	// StencilOperation.Replace
+				GLenum.GL_INCR_WRAP,	// StencilOperation.Increment
+				GLenum.GL_DECR_WRAP,	// StencilOperation.Decrement
+				GLenum.GL_INCR,		// StencilOperation.IncrementSaturation
+				GLenum.GL_DECR,		// StencilOperation.DecrementSaturation
+				GLenum.GL_INVERT	// StencilOperation.Invert
 			};
 
-			public static readonly Dictionary<StencilOperation, GLenum> GLStencilOp = new Dictionary<StencilOperation, GLenum>()
+			public static readonly GLenum[] FrontFace = new GLenum[]
 			{
-				{ StencilOperation.Decrement,		GLenum.GL_DECR_WRAP },
-				{ StencilOperation.DecrementSaturation,	GLenum.GL_DECR },
-				{ StencilOperation.Increment,		GLenum.GL_INCR_WRAP },
-				{ StencilOperation.IncrementSaturation,	GLenum.GL_INCR },
-				{ StencilOperation.Invert,		GLenum.GL_INVERT },
-				{ StencilOperation.Keep,		GLenum.GL_KEEP },
-				{ StencilOperation.Replace,		GLenum.GL_REPLACE },
-				{ StencilOperation.Zero,		GLenum.GL_ZERO }
+				GLenum.GL_ZERO,	// NOPE
+				GLenum.GL_CW,	// CullMode.CullClockwiseFace
+				GLenum.GL_CCW	// CullMode.CullCounterClockwiseFace
 			};
 
-			public static readonly Dictionary<CullMode, GLenum> FrontFace = new Dictionary<CullMode, GLenum>()
+			public static readonly GLenum[] GLFillMode = new GLenum[]
 			{
-				{ CullMode.CullClockwiseFace,		GLenum.GL_CW },
-				{ CullMode.CullCounterClockwiseFace,	GLenum.GL_CCW }
+				GLenum.GL_FILL,	// FillMode.Solid
+				GLenum.GL_LINE	// FillMode.WireFrame
 			};
 
-			public static readonly Dictionary<FillMode, GLenum> GLFillMode = new Dictionary<FillMode, GLenum>()
+			public static readonly int[] Wrap = new int[]
 			{
-				{ FillMode.Solid,	GLenum.GL_FILL },
-				{ FillMode.WireFrame,	GLenum.GL_LINE }
+				(int) GLenum.GL_REPEAT,			// TextureAddressMode.Wrap
+				(int) GLenum.GL_CLAMP_TO_EDGE,		// TextureAddressMode.Clamp
+				(int) GLenum.GL_MIRRORED_REPEAT		// TextureAddressMode.Mirror
 			};
 
-			public static readonly Dictionary<TextureAddressMode, GLenum> Wrap = new Dictionary<TextureAddressMode, GLenum>()
+			public static readonly int[] MagFilter = new int[]
 			{
-				{ TextureAddressMode.Clamp,	GLenum.GL_CLAMP_TO_EDGE },
-				{ TextureAddressMode.Mirror,	GLenum.GL_MIRRORED_REPEAT },
-				{ TextureAddressMode.Wrap,	GLenum.GL_REPEAT }
+				(int) GLenum.GL_LINEAR,		// TextureFilter.Linear
+				(int) GLenum.GL_NEAREST,	// TextureFilter.Point
+				(int) GLenum.GL_LINEAR,		// TextureFilter.Anisotropic
+				(int) GLenum.GL_LINEAR,		// TextureFilter.LinearMipPoint
+				(int) GLenum.GL_NEAREST,	// TextureFilter.PointMipLinear
+				(int) GLenum.GL_NEAREST,	// TextureFilter.MinLinearMagPointMipLinear
+				(int) GLenum.GL_NEAREST,	// TextureFilter.MinLinearMagPointMipPoint
+				(int) GLenum.GL_LINEAR,		// TextureFilter.MinPointMagLinearMipLinear
+				(int) GLenum.GL_LINEAR		// TextureFilter.MinPointMagLinearMipPoint
 			};
 
-			public static readonly Dictionary<TextureFilter, GLenum> MagFilter = new Dictionary<TextureFilter, GLenum>()
+			public static readonly int[] MinMipFilter = new int[]
 			{
-				{ TextureFilter.Linear,				GLenum.GL_LINEAR },
-				{ TextureFilter.Point,				GLenum.GL_NEAREST },
-				{ TextureFilter.Anisotropic,			GLenum.GL_LINEAR },
-				{ TextureFilter.LinearMipPoint,			GLenum.GL_LINEAR },
-				{ TextureFilter.PointMipLinear,			GLenum.GL_NEAREST },
-				{ TextureFilter.MinLinearMagPointMipLinear,	GLenum.GL_NEAREST },
-				{ TextureFilter.MinLinearMagPointMipPoint,	GLenum.GL_NEAREST },
-				{ TextureFilter.MinPointMagLinearMipLinear,	GLenum.GL_LINEAR },
-				{ TextureFilter.MinPointMagLinearMipPoint,	GLenum.GL_LINEAR }
+				(int) GLenum.GL_LINEAR_MIPMAP_LINEAR,	// TextureFilter.Linear
+				(int) GLenum.GL_NEAREST_MIPMAP_NEAREST,	// TextureFilter.Point
+				(int) GLenum.GL_LINEAR_MIPMAP_LINEAR,	// TextureFilter.Anisotropic
+				(int) GLenum.GL_LINEAR_MIPMAP_NEAREST,	// TextureFilter.LinearMipPoint
+				(int) GLenum.GL_NEAREST_MIPMAP_LINEAR,	// TextureFilter.PointMipLinear
+				(int) GLenum.GL_LINEAR_MIPMAP_LINEAR,	// TextureFilter.MinLinearMagPointMipLinear
+				(int) GLenum.GL_LINEAR_MIPMAP_NEAREST,	// TextureFilter.MinLinearMagPointMipPoint
+				(int) GLenum.GL_NEAREST_MIPMAP_LINEAR,	// TextureFilter.MinPointMagLinearMipLinear
+				(int) GLenum.GL_NEAREST_MIPMAP_NEAREST	// TextureFilter.MinPointMagLinearMipPoint
 			};
 
-			public static readonly Dictionary<TextureFilter, GLenum> MinMipFilter = new Dictionary<TextureFilter, GLenum>()
+			public static readonly int[] MinFilter = new int[]
 			{
-				{ TextureFilter.Linear,				GLenum.GL_LINEAR_MIPMAP_LINEAR },
-				{ TextureFilter.Point,				GLenum.GL_NEAREST_MIPMAP_NEAREST },
-				{ TextureFilter.Anisotropic,			GLenum.GL_LINEAR_MIPMAP_LINEAR },
-				{ TextureFilter.LinearMipPoint,			GLenum.GL_LINEAR_MIPMAP_NEAREST },
-				{ TextureFilter.PointMipLinear,			GLenum.GL_NEAREST_MIPMAP_LINEAR },
-				{ TextureFilter.MinLinearMagPointMipLinear,	GLenum.GL_LINEAR_MIPMAP_LINEAR },
-				{ TextureFilter.MinLinearMagPointMipPoint,	GLenum.GL_LINEAR_MIPMAP_NEAREST },
-				{ TextureFilter.MinPointMagLinearMipLinear,	GLenum.GL_NEAREST_MIPMAP_LINEAR },
-				{ TextureFilter.MinPointMagLinearMipPoint,	GLenum.GL_NEAREST_MIPMAP_NEAREST }
+				(int) GLenum.GL_LINEAR,		// TextureFilter.Linear
+				(int) GLenum.GL_NEAREST,	// TextureFilter.Point
+				(int) GLenum.GL_LINEAR,		// TextureFilter.Anisotropic
+				(int) GLenum.GL_LINEAR,		// TextureFilter.LinearMipPoint
+				(int) GLenum.GL_NEAREST,	// TextureFilter.PointMipLinear
+				(int) GLenum.GL_LINEAR,		// TextureFilter.MinLinearMagPointMipLinear
+				(int) GLenum.GL_LINEAR,		// TextureFilter.MinLinearMagPointMipPoint
+				(int) GLenum.GL_NEAREST,	// TextureFilter.MinPointMagLinearMipLinear
+				(int) GLenum.GL_NEAREST		// TextureFilter.MinPointMagLinearMipPoint
 			};
 
-			public static readonly Dictionary<TextureFilter, GLenum> MinFilter = new Dictionary<TextureFilter, GLenum>()
+			public static readonly GLenum[] DepthStencilAttachment = new GLenum[]
 			{
-				{ TextureFilter.Linear,				GLenum.GL_LINEAR },
-				{ TextureFilter.Point,				GLenum.GL_NEAREST },
-				{ TextureFilter.Anisotropic,			GLenum.GL_LINEAR },
-				{ TextureFilter.LinearMipPoint,			GLenum.GL_LINEAR },
-				{ TextureFilter.PointMipLinear,			GLenum.GL_NEAREST },
-				{ TextureFilter.MinLinearMagPointMipLinear,	GLenum.GL_LINEAR },
-				{ TextureFilter.MinLinearMagPointMipPoint,	GLenum.GL_LINEAR },
-				{ TextureFilter.MinPointMagLinearMipLinear,	GLenum.GL_NEAREST },
-				{ TextureFilter.MinPointMagLinearMipPoint,	GLenum.GL_NEAREST }
+				GLenum.GL_ZERO,				// NOPE
+				GLenum.GL_DEPTH_ATTACHMENT,		// DepthFormat.Depth16
+				GLenum.GL_DEPTH_ATTACHMENT,		// DepthFormat.Depth24
+				GLenum.GL_DEPTH_STENCIL_ATTACHMENT	// DepthFormat.Depth24Stencil8
 			};
 
-			public static readonly Dictionary<DepthFormat, GLenum> DepthStencilAttachment = new Dictionary<DepthFormat, GLenum>()
+			public static readonly GLenum[] DepthStorage = new GLenum[]
 			{
-				{ DepthFormat.Depth16,		GLenum.GL_DEPTH_ATTACHMENT },
-				{ DepthFormat.Depth24,		GLenum.GL_DEPTH_ATTACHMENT },
-				{ DepthFormat.Depth24Stencil8,	GLenum.GL_DEPTH_STENCIL_ATTACHMENT }
+				GLenum.GL_ZERO,			// NOPE
+				GLenum.GL_DEPTH_COMPONENT16,	// DepthFormat.Depth16
+				GLenum.GL_DEPTH_COMPONENT24,	// DepthFormat.Depth24
+				GLenum.GL_DEPTH24_STENCIL8	// DepthFormat.Depth24Stencil8
 			};
 
-			public static readonly Dictionary<DepthFormat, GLenum> DepthStorage = new Dictionary<DepthFormat, GLenum>()
+			public static readonly float[] DepthBiasScale = new float[]
 			{
-				{ DepthFormat.Depth16,		GLenum.GL_DEPTH_COMPONENT16 },
-				{ DepthFormat.Depth24,		GLenum.GL_DEPTH_COMPONENT24 },
-				{ DepthFormat.Depth24Stencil8,	GLenum.GL_DEPTH24_STENCIL8 }
+				0.0f,				// DepthFormat.None
+				(float) ((1 << 16) - 1),	// DepthFormat.Depth16
+				(float) ((1 << 24) - 1),	// DepthFormat.Depth24
+				(float) ((1 << 24) - 1)		// DepthFormat.Depth24Stencil8
 			};
 
-			public static readonly Dictionary<DepthFormat, float> DepthBiasScale = new Dictionary<DepthFormat, float>()
+			public static readonly MojoShader.MOJOSHADER_usage[] VertexAttribUsage = new MojoShader.MOJOSHADER_usage[]
 			{
-				{ DepthFormat.None,		0.0f },
-				{ DepthFormat.Depth16,		(float) ((1 << 16) - 1) },
-				{ DepthFormat.Depth24,		(float) ((1 << 24) - 1) },
-				{ DepthFormat.Depth24Stencil8,	(float) ((1 << 24) - 1) }
+				MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_POSITION,		// VertexElementUsage.Position
+				MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_COLOR,		// VertexElementUsage.Color
+				MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_TEXCOORD,		// VertexElementUsage.TextureCoordinate
+				MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_NORMAL,		// VertexElementUsage.Normal
+				MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_BINORMAL,		// VertexElementUsage.Binormal
+				MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_TANGENT,		// VertexElementUsage.Tangent
+				MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_BLENDINDICES,	// VertexElementUsage.BlendIndices
+				MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_BLENDWEIGHT,	// VertexElementUsage.BlendWeight
+				MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_DEPTH,		// VertexElementUsage.Depth
+				MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_FOG,		// VertexElementUsage.Fog
+				MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_POINTSIZE,		// VertexElementUsage.PointSize
+				MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_SAMPLE,		// VertexElementUsage.Sample
+				MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_TESSFACTOR		// VertexElementUsage.TessellateFactor
 			};
 
-			public static readonly Dictionary<VertexElementUsage, MojoShader.MOJOSHADER_usage> VertexAttribUsage = new Dictionary<VertexElementUsage, MojoShader.MOJOSHADER_usage>()
+			public static readonly int[] VertexAttribSize = new int[]
 			{
-				{ VertexElementUsage.Position,		MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_POSITION },
-				{ VertexElementUsage.Color,		MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_COLOR },
-				{ VertexElementUsage.TextureCoordinate,	MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_TEXCOORD },
-				{ VertexElementUsage.Normal,		MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_NORMAL },
-				{ VertexElementUsage.Binormal,		MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_BINORMAL },
-				{ VertexElementUsage.Tangent,		MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_TANGENT },
-				{ VertexElementUsage.BlendIndices,	MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_BLENDINDICES },
-				{ VertexElementUsage.BlendWeight,	MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_BLENDWEIGHT },
-				{ VertexElementUsage.Depth,		MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_DEPTH },
-				{ VertexElementUsage.Fog,		MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_FOG },
-				{ VertexElementUsage.PointSize,		MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_POINTSIZE },
-				{ VertexElementUsage.Sample,		MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_SAMPLE },
-				{ VertexElementUsage.TessellateFactor,	MojoShader.MOJOSHADER_usage.MOJOSHADER_USAGE_TESSFACTOR }
+					1,	// VertexElementFormat.Single
+					2,	// VertexElementFormat.Vector2
+					3,	// VertexElementFormat.Vector3
+					4,	// VertexElementFormat.Vector4
+					4,	// VertexElementFormat.Color
+					4,	// VertexElementFormat.Byte4
+					2,	// VertexElementFormat.Short2
+					2,	// VertexElementFormat.Short4
+					2,	// VertexElementFormat.NormalizedShort2
+					4,	// VertexElementFormat.NormalizedShort4
+					2,	// VertexElementFormat.HalfVector2
+					4	// VertexElementFormat.HalfVector4
 			};
 
-			public static readonly Dictionary<VertexElementFormat, int> VertexAttribSize = new Dictionary<VertexElementFormat, int>()
+			public static readonly GLenum[] VertexAttribType = new GLenum[]
 			{
-				{ VertexElementFormat.Single,		1 },
-				{ VertexElementFormat.Vector2,		2 },
-				{ VertexElementFormat.Vector3,		3 },
-				{ VertexElementFormat.Vector4,		4 },
-				{ VertexElementFormat.Color,		4 },
-				{ VertexElementFormat.Byte4,		4 },
-				{ VertexElementFormat.Short2,		2 },
-				{ VertexElementFormat.Short4,		2 },
-				{ VertexElementFormat.NormalizedShort2,	2 },
-				{ VertexElementFormat.NormalizedShort4,	4 },
-				{ VertexElementFormat.HalfVector2,	2 },
-				{ VertexElementFormat.HalfVector4,	4 }
-			};
-
-			public static readonly Dictionary<VertexElementFormat, GLenum> VertexAttribType = new Dictionary<VertexElementFormat, GLenum>()
-			{
-				{ VertexElementFormat.Single,		GLenum.GL_FLOAT },
-				{ VertexElementFormat.Vector2,		GLenum.GL_FLOAT },
-				{ VertexElementFormat.Vector3,		GLenum.GL_FLOAT },
-				{ VertexElementFormat.Vector4,		GLenum.GL_FLOAT },
-				{ VertexElementFormat.Color,		GLenum.GL_UNSIGNED_BYTE },
-				{ VertexElementFormat.Byte4,		GLenum.GL_UNSIGNED_BYTE },
-				{ VertexElementFormat.Short2,		GLenum.GL_SHORT },
-				{ VertexElementFormat.Short4,		GLenum.GL_SHORT },
-				{ VertexElementFormat.NormalizedShort2,	GLenum.GL_SHORT },
-				{ VertexElementFormat.NormalizedShort4,	GLenum.GL_SHORT },
-				{ VertexElementFormat.HalfVector2,	GLenum.GL_HALF_FLOAT },
-				{ VertexElementFormat.HalfVector4,	GLenum.GL_HALF_FLOAT }
+				GLenum.GL_FLOAT,		// VertexElementFormat.Single
+				GLenum.GL_FLOAT,		// VertexElementFormat.Vector2
+				GLenum.GL_FLOAT,		// VertexElementFormat.Vector3
+				GLenum.GL_FLOAT,		// VertexElementFormat.Vector4
+				GLenum.GL_UNSIGNED_BYTE,	// VertexElementFormat.Color
+				GLenum.GL_UNSIGNED_BYTE,	// VertexElementFormat.Byte4
+				GLenum.GL_SHORT,		// VertexElementFormat.Short2
+				GLenum.GL_SHORT,		// VertexElementFormat.Short4
+				GLenum.GL_SHORT,		// VertexElementFormat.NormalizedShort2
+				GLenum.GL_SHORT,		// VertexElementFormat.NormalizedShort4
+				GLenum.GL_HALF_FLOAT,		// VertexElementFormat.HalfVector2
+				GLenum.GL_HALF_FLOAT		// VertexElementFormat.HalfVector4
 			};
 
 			public static bool VertexAttribNormalized(VertexElement element)
@@ -3724,26 +3717,26 @@ namespace Microsoft.Xna.Framework.Graphics
 						element.VertexElementFormat == VertexElementFormat.NormalizedShort4	);
 			}
 
-			public static Dictionary<PrimitiveType, GLenum> Primitive = new Dictionary<PrimitiveType, GLenum>()
+			public static readonly GLenum[] Primitive = new GLenum[]
 			{
-				{ PrimitiveType.LineList,	GLenum.GL_LINES },
-				{ PrimitiveType.LineStrip,	GLenum.GL_LINE_STRIP },
-				{ PrimitiveType.TriangleList,	GLenum.GL_TRIANGLES },
-				{ PrimitiveType.TriangleStrip,	GLenum.GL_TRIANGLE_STRIP }
+				GLenum.GL_TRIANGLES,		// PrimitiveType.TriangleList
+				GLenum.GL_TRIANGLE_STRIP,	// PrimitiveType.TriangleStrip
+				GLenum.GL_LINES,		// PrimitiveType.LineList
+				GLenum.GL_LINE_STRIP,		// PrimitiveType.LineStrip
 			};
 
 			public static int PrimitiveVerts(PrimitiveType primitiveType, int primitiveCount)
 			{
 				switch (primitiveType)
 				{
-					case PrimitiveType.LineList:
-						return primitiveCount * 2;
-					case PrimitiveType.LineStrip:
-						return primitiveCount + 1;
 					case PrimitiveType.TriangleList:
 						return primitiveCount * 3;
 					case PrimitiveType.TriangleStrip:
 						return primitiveCount + 2;
+					case PrimitiveType.LineList:
+						return primitiveCount * 2;
+					case PrimitiveType.LineStrip:
+						return primitiveCount + 1;
 				}
 				throw new NotSupportedException();
 			}
@@ -3854,7 +3847,7 @@ namespace Microsoft.Xna.Framework.Graphics
 					glDevice.glRenderbufferStorageMultisample(
 						GLenum.GL_RENDERBUFFER,
 						multiSampleCount,
-						XNAToGL.DepthStorage[depthFormat],
+						XNAToGL.DepthStorage[(int) depthFormat],
 						width,
 						height
 					);
@@ -3992,7 +3985,7 @@ namespace Microsoft.Xna.Framework.Graphics
 					glDevice.glRenderbufferStorageMultisample(
 						GLenum.GL_RENDERBUFFER,
 						multiSampleCount,
-						XNAToGL.DepthStorage[depthFormat],
+						XNAToGL.DepthStorage[(int) depthFormat],
 						Width,
 						Height
 					);
@@ -4001,7 +3994,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				{
 					glDevice.glRenderbufferStorage(
 						GLenum.GL_RENDERBUFFER,
-						XNAToGL.DepthStorage[depthFormat],
+						XNAToGL.DepthStorage[(int) depthFormat],
 						Width,
 						Height
 					);
@@ -4112,7 +4105,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		private Flush glFlush;
 
 #else
-		private List<Action> actions = new List<Action>();
+		private System.Collections.Generic.List<Action> actions = new System.Collections.Generic.List<Action>();
 		private void RunActions()
 		{
 			lock (actions)
