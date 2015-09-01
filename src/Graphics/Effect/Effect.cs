@@ -143,6 +143,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			Blend.DestinationColor,		// MOJOSHADER_BLEND_DESTCOLOR
 			Blend.InverseDestinationColor,	// MOJOSHADER_BLEND_INVDESTCOLOR
 			Blend.SourceAlphaSaturation,	// MOJOSHADER_BLEND_SRCALPHASAT
+			(Blend) (-1),			// NOPE
+			(Blend) (-1),			// NOPE
 			Blend.BlendFactor,		// MOJOSHADER_BLEND_BLENDFACTOR
 			Blend.InverseBlendFactor	// MOJOSHADER_BLEND_INVBLENDFACTOR
 		};
