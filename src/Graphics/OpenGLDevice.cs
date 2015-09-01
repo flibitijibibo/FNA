@@ -3548,7 +3548,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			public static readonly GLenum[] BlendEquation = new GLenum[]
 			{
 				GLenum.GL_FUNC_ADD,			// BlendFunction.Add
-				GLenum.GL_FUNC_SUBTRACT,			// BlendFunction.Subtract
+				GLenum.GL_FUNC_SUBTRACT,		// BlendFunction.Subtract
 				GLenum.GL_FUNC_REVERSE_SUBTRACT,	// BlendFunction.ReverseSubtract
 				GLenum.GL_MAX,				// BlendFunction.Max
 				GLenum.GL_MIN				// BlendFunction.Min
