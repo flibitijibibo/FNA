@@ -388,7 +388,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				{
 					MojoShader.MOJOSHADER_renderStateType type = states[i].type;
 					if (	type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_VERTEXSHADER ||
-							type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_PIXELSHADER	)
+						type == MojoShader.MOJOSHADER_renderStateType.MOJOSHADER_RS_PIXELSHADER	)
 					{
 						// Skip shader states
 						continue;
