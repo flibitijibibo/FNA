@@ -92,6 +92,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			GL_DST_COLOR =				0x0306,
 			GL_ONE_MINUS_DST_COLOR =		0x0307,
 			GL_SRC_ALPHA_SATURATE =			0x0308,
+			GL_CONSTANT_COLOR =			0x8001,
+			GL_ONE_MINUS_CONSTANT_COLOR =		0x8002,
 			// Equations
 			GL_MIN =				0x8007,
 			GL_MAX =				0x8008,

@@ -3530,19 +3530,19 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			public static readonly GLenum[] BlendMode = new GLenum[]
 			{
-				GLenum.GL_ONE,			// Blend.One
-				GLenum.GL_ZERO,			// Blend.Zero
-				GLenum.GL_SRC_COLOR,		// Blend.SourceColor
-				GLenum.GL_ONE_MINUS_SRC_COLOR,	// Blend.InverseSourceColor
-				GLenum.GL_SRC_ALPHA,		// Blend.SourceAlpha
-				GLenum.GL_ONE_MINUS_SRC_ALPHA,	// Blend.InverseSourceAlpha
-				GLenum.GL_DST_COLOR,		// Blend.DestinationColor
-				GLenum.GL_ONE_MINUS_DST_COLOR,	// Blend.InverseDestinationColor
-				GLenum.GL_DST_ALPHA,		// Blend.DestinationAlpha
-				GLenum.GL_ONE_MINUS_DST_ALPHA,	// Blend.InverseDestinationAlpha
-				GLenum.GL_ZERO,			// FIXME: Blend.BlendFactor
-				GLenum.GL_ZERO,			// FIXME: Blend.InverseBlendFactor
-				GLenum.GL_SRC_ALPHA_SATURATE	// Blend.SourceAlphaSaturation
+				GLenum.GL_ONE,				// Blend.One
+				GLenum.GL_ZERO,				// Blend.Zero
+				GLenum.GL_SRC_COLOR,			// Blend.SourceColor
+				GLenum.GL_ONE_MINUS_SRC_COLOR,		// Blend.InverseSourceColor
+				GLenum.GL_SRC_ALPHA,			// Blend.SourceAlpha
+				GLenum.GL_ONE_MINUS_SRC_ALPHA,		// Blend.InverseSourceAlpha
+				GLenum.GL_DST_COLOR,			// Blend.DestinationColor
+				GLenum.GL_ONE_MINUS_DST_COLOR,		// Blend.InverseDestinationColor
+				GLenum.GL_DST_ALPHA,			// Blend.DestinationAlpha
+				GLenum.GL_ONE_MINUS_DST_ALPHA,		// Blend.InverseDestinationAlpha
+				GLenum.GL_CONSTANT_COLOR,		// Blend.BlendFactor
+				GLenum.GL_ONE_MINUS_CONSTANT_COLOR,	// Blend.InverseBlendFactor
+				GLenum.GL_SRC_ALPHA_SATURATE		// Blend.SourceAlphaSaturation
 			};
 
 			public static readonly GLenum[] BlendEquation = new GLenum[]
