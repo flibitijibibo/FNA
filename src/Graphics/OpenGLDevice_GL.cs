@@ -199,6 +199,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			GL_SAMPLES_PASSED =			0x8914,
 			// Multisampling
 			GL_MAX_SAMPLES =			0x8D57,
+			// 3.2 Core Profile
+			GL_NUM_EXTENSIONS =			0x821D,
 			// Source Enum Values
 			GL_DEBUG_SOURCE_API_ARB =		0x8246,
 			GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB =	0x8247,
@@ -750,6 +752,29 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		/* END QUERY FUNCTIONS */
 
+		/* BEGIN 3.2 CORE PROFILE FUNCTIONS */
+
+		private delegate IntPtr GetStringi(GLenum pname, uint index);
+		private GetStringi INTERNAL_glGetStringi;
+		private string glGetStringi(GLenum pname, uint index)
+		{
+			unsafe
+			{
+				return new string((sbyte*) INTERNAL_glGetStringi(pname, index));
+			}
+		}
+
+		private delegate void GenVertexArrays(int n, out uint arrays);
+		private GenVertexArrays glGenVertexArrays;
+
+		private delegate void DeleteVertexArrays(int n, ref uint arrays);
+		private DeleteVertexArrays glDeleteVertexArrays;
+
+		private delegate void BindVertexArray(uint array);
+		private BindVertexArray glBindVertexArray;
+
+		/* END 3.2 CORE PROFILE FUNCTIONS */
+
 #if DEBUG
 		/* BEGIN DEBUG OUTPUT FUNCTIONS */
 
@@ -1161,6 +1186,33 @@ namespace Microsoft.Xna.Framework.Graphics
 			catch
 			{
 				supportsMultisampling = false;
+			}
+
+			if (useCoreProfile)
+			{
+				try
+				{
+					INTERNAL_glGetStringi = (GetStringi) Marshal.GetDelegateForFunctionPointer(
+						SDL.SDL_GL_GetProcAddress("glGetStringi"),
+						typeof(GetStringi)
+					);
+					glGenVertexArrays = (GenVertexArrays) Marshal.GetDelegateForFunctionPointer(
+						SDL.SDL_GL_GetProcAddress("glGenVertexArrays"),
+						typeof(GenVertexArrays)
+					);
+					glDeleteVertexArrays = (DeleteVertexArrays) Marshal.GetDelegateForFunctionPointer(
+						SDL.SDL_GL_GetProcAddress("glDeleteVertexArrays"),
+						typeof(DeleteVertexArrays)
+					);
+					glBindVertexArray = (BindVertexArray) Marshal.GetDelegateForFunctionPointer(
+						SDL.SDL_GL_GetProcAddress("glBindVertexArray"),
+						typeof(BindVertexArray)
+					);
+				}
+				catch
+				{
+					throw new NoSuitableGraphicsDeviceException("OpenGL 3.2 support is required!");
+				}
 			}
 
 #if DEBUG

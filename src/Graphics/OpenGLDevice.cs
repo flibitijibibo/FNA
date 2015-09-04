@@ -534,9 +534,11 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
-		#region Private GLES-specific Variables
+		#region Private Profile-specific Variables
 
 		private bool useES2;
+		private bool useCoreProfile;
+		private uint vao;
 
 		#endregion
 
@@ -555,6 +557,10 @@ namespace Microsoft.Xna.Framework.Graphics
 			int es2Flag = (int) SDL.SDL_GLprofile.SDL_GL_CONTEXT_PROFILE_ES;
 			SDL.SDL_GL_GetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_PROFILE_MASK, out flags);
 			useES2 = (flags & es2Flag) == es2Flag;
+
+			// Check for a possible Core context
+			int coreFlag = (int) SDL.SDL_GLprofile.SDL_GL_CONTEXT_PROFILE_CORE;
+			useCoreProfile = (flags & coreFlag) == coreFlag;
 
 			// Init threaded GL crap where applicable
 			InitThreadedGL(
@@ -596,7 +602,21 @@ namespace Microsoft.Xna.Framework.Graphics
 			System.Console.WriteLine("MojoShader Profile: " + shaderProfile);
 
 			// Load the extension list, initialize extension-dependent components
-			string extensions = glGetString(GLenum.GL_EXTENSIONS);
+			string extensions;
+			if (useCoreProfile)
+			{
+				extensions = string.Empty;
+				int numExtensions;
+				glGetIntegerv(GLenum.GL_NUM_EXTENSIONS, out numExtensions);
+				for (uint i = 0; i < numExtensions; i += 1)
+				{
+					extensions += glGetStringi(GLenum.GL_EXTENSIONS, i) + " ";
+				}
+			}
+			else
+			{
+				extensions = glGetString(GLenum.GL_EXTENSIONS);
+			}
 			SupportsS3tc = (
 				extensions.Contains("GL_EXT_texture_compression_s3tc") ||
 				extensions.Contains("GL_OES_texture_compression_S3TC") ||
@@ -672,6 +692,13 @@ namespace Microsoft.Xna.Framework.Graphics
 			currentRenderbuffer = 0;
 			currentDepthStencilFormat = DepthFormat.None;
 			glGenFramebuffers(1, out targetFramebuffer);
+
+			// Generate and bind a VAO, to shut Core up
+			if (useCoreProfile)
+			{
+				glGenVertexArrays(1, out vao);
+				glBindVertexArray(vao);
+			}
 		}
 
 		#endregion
@@ -680,6 +707,11 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public void Dispose()
 		{
+			if (useCoreProfile)
+			{
+				glBindVertexArray(0);
+				glDeleteVertexArrays(1, ref vao);
+			}
 			glDeleteFramebuffers(1, ref targetFramebuffer);
 			targetFramebuffer = 0;
 			backbuffer.Dispose();
