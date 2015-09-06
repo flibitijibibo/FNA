@@ -277,11 +277,9 @@ namespace Microsoft.Xna.Framework
 			}
 			else if (!INTERNAL_wantsFullscreen)
 			{
-				// Store the last window position
-				INTERNAL_lastWindowPosition = new Point(
-					prevBounds.Left - (prevBounds.Width / 2),
-					prevBounds.Top - (prevBounds.Height / 2)
-					);
+				// Store the window position before switching to fullscreen
+				INTERNAL_lastWindowPosition.X = prevBounds.Left - (prevBounds.Width / 2);
+				INTERNAL_lastWindowPosition.Y = prevBounds.Top - (prevBounds.Height / 2);
 
 				SDL.SDL_SetWindowPosition(
 					INTERNAL_sdlWindow,
