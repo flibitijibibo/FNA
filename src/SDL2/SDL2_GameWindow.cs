@@ -223,7 +223,7 @@ namespace Microsoft.Xna.Framework
 
 			INTERNAL_isFullscreen = false;
 			INTERNAL_wantsFullscreen = false;
-            INTERNAL_lastWindowPosition = new Point(SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED);
+			INTERNAL_lastWindowPosition = new Point(SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED);
 		}
 
 		#endregion
