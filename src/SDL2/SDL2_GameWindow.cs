@@ -137,6 +137,8 @@ namespace Microsoft.Xna.Framework
 
 		private string INTERNAL_deviceName;
 
+		private Point INTERNAL_lastWindowPosition;
+
 		#endregion
 
 		#region Internal Constructor
@@ -221,6 +223,7 @@ namespace Microsoft.Xna.Framework
 
 			INTERNAL_isFullscreen = false;
 			INTERNAL_wantsFullscreen = false;
+			INTERNAL_lastWindowPosition = new Point(SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED);
 		}
 
 		#endregion
@@ -268,12 +271,16 @@ namespace Microsoft.Xna.Framework
 				// If exiting fullscreen, just center the window on the desktop.
 				SDL.SDL_SetWindowPosition(
 					INTERNAL_sdlWindow,
-					SDL.SDL_WINDOWPOS_CENTERED,
-					SDL.SDL_WINDOWPOS_CENTERED
+					INTERNAL_lastWindowPosition.X,
+					INTERNAL_lastWindowPosition.Y
 				);
 			}
 			else if (!INTERNAL_wantsFullscreen)
 			{
+				// Store the window position before switching to fullscreen
+				INTERNAL_lastWindowPosition.X = prevBounds.Left - (prevBounds.Width / 2);
+				INTERNAL_lastWindowPosition.Y = prevBounds.Top - (prevBounds.Height / 2);
+
 				SDL.SDL_SetWindowPosition(
 					INTERNAL_sdlWindow,
 					Math.Max(
