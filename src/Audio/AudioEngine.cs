@@ -43,16 +43,6 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#endregion
 
-		#region Internal Properties
-
-		internal IALFilter Filter
-		{
-			get;
-			private set;
-		}
-
-		#endregion
-
 		#region Private Variables
 
 		private Dictionary<string, WaveBank> INTERNAL_waveBanks;
@@ -437,9 +427,6 @@ namespace Microsoft.Xna.Framework.Audio
 			// Create the WaveBank Dictionary
 			INTERNAL_waveBanks = new Dictionary<string, WaveBank>();
 
-			// Create the device filter
-			Filter = AudioDevice.ALDevice.GenFilter();
-
 			// Finally.
 			IsDisposed = false;
 		}
@@ -490,7 +477,6 @@ namespace Microsoft.Xna.Framework.Audio
 				INTERNAL_dspParameters.Clear();
 				INTERNAL_variables.Clear();
 				INTERNAL_RPCs.Clear();
-				AudioDevice.ALDevice.DeleteFilter(Filter);
 				IsDisposed = true;
 			}
 		}

@@ -191,11 +191,15 @@ namespace Microsoft.Xna.Framework
 			bool forceES2 = Environment.GetEnvironmentVariable(
 				"FNA_OPENGL_FORCE_ES2"
 			) == "1";
+			bool forceCoreProfile = Environment.GetEnvironmentVariable(
+				"FNA_OPENGL_FORCE_CORE_PROFILE"
+			) == "1";
 			Window = new SDL2_GameWindow(
 				forceES2 ||
 				OSVersion.Equals("Emscripten") ||
 				OSVersion.Equals("Android") ||
-				OSVersion.Equals("iOS")
+				OSVersion.Equals("iOS"),
+				forceCoreProfile
 			);
 
 			// Create the DisplayMode list

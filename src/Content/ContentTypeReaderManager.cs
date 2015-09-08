@@ -54,7 +54,7 @@ namespace Microsoft.Xna.Framework.Content
 		{
 			locker = new object();
 			contentReadersCache = new Dictionary<Type, ContentTypeReader>(255);
-			assemblyName = Assembly.GetExecutingAssembly().FullName;
+			assemblyName = typeof(ContentTypeReaderManager).Assembly.FullName;
 		}
 
 		#endregion

@@ -362,6 +362,11 @@ namespace Microsoft.Xna.Framework.Graphics
 			get;
 		}
 
+		DepthFormat DepthFormat
+		{
+			get;
+		}
+
 		void ResetFramebuffer(
 			PresentationParameters presentationParameters,
 			bool renderTargetBound

@@ -25,6 +25,18 @@ namespace Microsoft.Xna.Framework.Audio
 			private set;
 		}
 
+		public override bool IsLooped
+		{
+			get
+			{
+				return false;
+			}
+			set
+			{
+				// No-op, DynamicSoundEffectInstance cannot be looped!
+			}
+		}
+
 		#endregion
 
 		#region Private XNA Variables
@@ -235,7 +247,6 @@ namespace Microsoft.Xna.Framework.Audio
 
 			// Reassign Properties, in case the AL properties need to be applied.
 			Volume = Volume;
-			IsLooped = IsLooped;
 			Pitch = Pitch;
 
 			// ... but wait! What if we need moar buffers?

@@ -92,6 +92,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			GL_DST_COLOR =				0x0306,
 			GL_ONE_MINUS_DST_COLOR =		0x0307,
 			GL_SRC_ALPHA_SATURATE =			0x0308,
+			GL_CONSTANT_COLOR =			0x8001,
+			GL_ONE_MINUS_CONSTANT_COLOR =		0x8002,
 			// Equations
 			GL_MIN =				0x8007,
 			GL_MAX =				0x8008,
@@ -179,6 +181,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			GL_STREAM_DRAW =			0x88E0,
 			GL_STATIC_DRAW =			0x88E4,
 			GL_READ_ONLY =				0x88B8,
+			GL_MAX_VERTEX_ATTRIBS =			0x8869,
 			// Render targets
 			GL_FRAMEBUFFER =			0x8D40,
 			GL_READ_FRAMEBUFFER =			0x8CA8,
@@ -196,6 +199,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			GL_SAMPLES_PASSED =			0x8914,
 			// Multisampling
 			GL_MAX_SAMPLES =			0x8D57,
+			// 3.2 Core Profile
+			GL_NUM_EXTENSIONS =			0x821D,
 			// Source Enum Values
 			GL_DEBUG_SOURCE_API_ARB =		0x8246,
 			GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB =	0x8247,
@@ -668,6 +673,32 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		/* END FRAMEBUFFER FUNCTIONS */
 
+		/* BEGIN VERTEX ATTRIBUTE FUNCTIONS */
+
+		private delegate void VertexAttribPointer(
+			int index,
+			int size,
+			GLenum type,
+			bool normalized,
+			int stride,
+			IntPtr pointer
+		);
+		private VertexAttribPointer glVertexAttribPointer;
+
+		private delegate void VertexAttribDivisor(
+			int index,
+			int divisor
+		);
+		private VertexAttribDivisor glVertexAttribDivisor;
+
+		private delegate void EnableVertexAttribArray(int index);
+		private EnableVertexAttribArray glEnableVertexAttribArray;
+
+		private delegate void DisableVertexAttribArray(int index);
+		private DisableVertexAttribArray glDisableVertexAttribArray;
+
+		/* END VERTEX ATTRIBUTE FUNCTIONS */
+
 		/* BEGIN DRAWING FUNCTIONS */
 
 		private delegate void DrawElementsInstanced(
@@ -720,6 +751,29 @@ namespace Microsoft.Xna.Framework.Graphics
 		private GetQueryObjectiv glGetQueryObjectiv;
 
 		/* END QUERY FUNCTIONS */
+
+		/* BEGIN 3.2 CORE PROFILE FUNCTIONS */
+
+		private delegate IntPtr GetStringi(GLenum pname, uint index);
+		private GetStringi INTERNAL_glGetStringi;
+		private string glGetStringi(GLenum pname, uint index)
+		{
+			unsafe
+			{
+				return new string((sbyte*) INTERNAL_glGetStringi(pname, index));
+			}
+		}
+
+		private delegate void GenVertexArrays(int n, out uint arrays);
+		private GenVertexArrays glGenVertexArrays;
+
+		private delegate void DeleteVertexArrays(int n, ref uint arrays);
+		private DeleteVertexArrays glDeleteVertexArrays;
+
+		private delegate void BindVertexArray(uint array);
+		private BindVertexArray glBindVertexArray;
+
+		/* END 3.2 CORE PROFILE FUNCTIONS */
 
 #if DEBUG
 		/* BEGIN DEBUG OUTPUT FUNCTIONS */
@@ -984,6 +1038,18 @@ namespace Microsoft.Xna.Framework.Graphics
 					SDL.SDL_GL_GetProcAddress("glReadPixels"),
 					typeof(ReadPixels)
 				);
+				glVertexAttribPointer = (VertexAttribPointer) Marshal.GetDelegateForFunctionPointer(
+					SDL.SDL_GL_GetProcAddress("glVertexAttribPointer"),
+					typeof(VertexAttribPointer)
+				);
+				glEnableVertexAttribArray = (EnableVertexAttribArray) Marshal.GetDelegateForFunctionPointer(
+					SDL.SDL_GL_GetProcAddress("glEnableVertexAttribArray"),
+					typeof(EnableVertexAttribArray)
+				);
+				glDisableVertexAttribArray = (DisableVertexAttribArray) Marshal.GetDelegateForFunctionPointer(
+					SDL.SDL_GL_GetProcAddress("glDisableVertexAttribArray"),
+					typeof(DisableVertexAttribArray)
+				);
 				glDrawRangeElements = (DrawRangeElements) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glDrawRangeElements"),
 					typeof(DrawRangeElements)
@@ -1073,14 +1139,14 @@ namespace Microsoft.Xna.Framework.Graphics
 				throw new NoSuitableGraphicsDeviceException("OpenGL framebuffer support is required!");
 			}
 
-			/* ARB_instanced_arrays/ARB_draw_instanced are almost optional.
-			 * While we do not directly call glVertexAttribDivisor ourselves,
-			 * we still need to check for ARB_instanced_arrays support.
-			 * -flibit
-			 */
-			SupportsHardwareInstancing = SDL.SDL_GL_GetProcAddress("glVertexAttribDivisor") != IntPtr.Zero;
+			/* ARB_instanced_arrays/ARB_draw_instanced are almost optional. */
+			SupportsHardwareInstancing = true;
 			try
 			{
+				glVertexAttribDivisor = (VertexAttribDivisor) Marshal.GetDelegateForFunctionPointer(
+					SDL.SDL_GL_GetProcAddress("glVertexAttribDivisor"),
+					typeof(VertexAttribDivisor)
+				);
 				glDrawElementsInstanced = (DrawElementsInstanced) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glDrawElementsInstanced"),
 					typeof(DrawElementsInstanced)
@@ -1120,6 +1186,33 @@ namespace Microsoft.Xna.Framework.Graphics
 			catch
 			{
 				supportsMultisampling = false;
+			}
+
+			if (useCoreProfile)
+			{
+				try
+				{
+					INTERNAL_glGetStringi = (GetStringi) Marshal.GetDelegateForFunctionPointer(
+						SDL.SDL_GL_GetProcAddress("glGetStringi"),
+						typeof(GetStringi)
+					);
+					glGenVertexArrays = (GenVertexArrays) Marshal.GetDelegateForFunctionPointer(
+						SDL.SDL_GL_GetProcAddress("glGenVertexArrays"),
+						typeof(GenVertexArrays)
+					);
+					glDeleteVertexArrays = (DeleteVertexArrays) Marshal.GetDelegateForFunctionPointer(
+						SDL.SDL_GL_GetProcAddress("glDeleteVertexArrays"),
+						typeof(DeleteVertexArrays)
+					);
+					glBindVertexArray = (BindVertexArray) Marshal.GetDelegateForFunctionPointer(
+						SDL.SDL_GL_GetProcAddress("glBindVertexArray"),
+						typeof(BindVertexArray)
+					);
+				}
+				catch
+				{
+					throw new NoSuitableGraphicsDeviceException("OpenGL 3.2 support is required!");
+				}
 			}
 
 #if DEBUG

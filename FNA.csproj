@@ -155,7 +155,7 @@
     <Compile Include="src\Graphics\States\StencilOperation.cs" />
     <Compile Include="src\Graphics\Vertices\BufferUsage.cs" />
     <Compile Include="src\Graphics\Vertices\IVertexType.cs" />
-    <Compile Include="src\Graphics\Vertices\PrimitiveType.cs" />
+    <Compile Include="src\Graphics\PrimitiveType.cs" />
     <Compile Include="src\Graphics\Vertices\VertexElement.cs" />
     <Compile Include="src\Graphics\Vertices\VertexElementFormat.cs" />
     <Compile Include="src\Graphics\Vertices\VertexElementUsage.cs" />

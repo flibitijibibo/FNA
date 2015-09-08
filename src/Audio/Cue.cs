@@ -642,11 +642,27 @@ namespace Microsoft.Xna.Framework.Audio
 				/* The final filter is determined by the instance's filter type,
 				 * in addition to our calculation of the HF/LF gain values.
 				 */
-				INTERNAL_instancePool[i].INTERNAL_applyFilter(
-					INTERNAL_baseEngine.Filter,
-					hfGain,
-					lfGain
-				);
+				byte fType = INTERNAL_instancePool[i].FilterType;
+				if (fType == 0xFF)
+				{
+					// No-op, no filter!
+				}
+				else if (fType == 0)
+				{
+					INTERNAL_instancePool[i].INTERNAL_applyLowPassFilter(hfGain);
+				}
+				else if (fType == 1)
+				{
+					INTERNAL_instancePool[i].INTERNAL_applyHighPassFilter(lfGain);
+				}
+				else if (fType == 2)
+				{
+					INTERNAL_instancePool[i].INTERNAL_applyBandPassFilter(hfGain, lfGain);
+				}
+				else
+				{
+					throw new InvalidOperationException("Unhandled filter type!");
+				}
 
 				// Update 3D position, if applicable
 				if (INTERNAL_isPositional)
