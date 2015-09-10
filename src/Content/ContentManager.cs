@@ -324,7 +324,6 @@ namespace Microsoft.Xna.Framework.Content
 						e
 					);
 				}
-
 				stream = File.OpenRead(modifiedAssetName);
 			}
 
@@ -345,8 +344,10 @@ namespace Microsoft.Xna.Framework.Content
 				}
 				catch (Exception e)
 				{
-					// FIXME: Assuming seekable streams! -flibit
-					stream.Seek(0, SeekOrigin.Begin);
+					if (stream.CanSeek) {
+						// FIXME: Assuming seekable streams! -flibit
+						stream.Seek (0, SeekOrigin.Begin);
+					}
 
 					// Try to load as a raw asset
 					if (typeof(T) == typeof(Texture2D) || typeof(T) == typeof(Texture))
@@ -360,7 +361,11 @@ namespace Microsoft.Xna.Framework.Content
 					}
 					else if ((typeof(T) == typeof(SoundEffect)))
 					{
-						result = SoundEffect.FromStream(stream);
+						if (stream.CanRead) {
+							result = SoundEffect.FromStream (stream);
+						} else {
+							throw e; // can't read it on our own... throw the XNB exception
+						}
 					}
 					else if ((typeof(T) == typeof(Effect)))
 					{

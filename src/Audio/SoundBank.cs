@@ -425,7 +425,7 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 			if (!INTERNAL_cueData.ContainsKey(name))
 			{
-				throw new ArgumentException("name not found!");
+				throw new ArgumentException("name not found! name: " + name);
 			}
 			return new Cue(
 				INTERNAL_baseEngine,
