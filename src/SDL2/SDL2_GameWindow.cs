@@ -284,11 +284,11 @@ namespace Microsoft.Xna.Framework
 				SDL.SDL_SetWindowPosition(
 					INTERNAL_sdlWindow,
 					Math.Max(
-						prevBounds.X + ((prevBounds.Width - clientWidth) / 2),
+						INTERNAL_lastWindowPosition.X,
 						0
 					),
 					Math.Max(
-						prevBounds.Y + ((prevBounds.Height - clientHeight) / 2),
+						INTERNAL_lastWindowPosition.Y,
 						0
 					)
 				);
