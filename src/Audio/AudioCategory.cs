@@ -369,6 +369,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 		internal void INTERNAL_removeActiveCue(Cue cue)
 		{
+			// FIXME: Avoid calling this when a Cue is GC'd! -flibit
 			if (activeCues != null)
 			{
 				lock (activeCues)
