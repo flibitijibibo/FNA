@@ -598,7 +598,7 @@ namespace Microsoft.Xna.Framework.Audio
 					{
 						// FIXME: Just listening to the last RPC!
 						float hf = result / 20000.0f;
-						float lf = 1.0f - hfGain;
+						float lf = 1.0f - hf;
 						if (i == 0)
 						{
 							hfGain = hf;
