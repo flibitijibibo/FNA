@@ -125,9 +125,9 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public void SetVolume(float volume)
 		{
-			INTERNAL_volume.Value = volume;
 			lock (activeCues)
 			{
+				INTERNAL_volume.Value = volume;
 				foreach (Cue curCue in activeCues)
 				{
 					curCue.SetVariable("Volume", volume);
@@ -251,12 +251,15 @@ namespace Microsoft.Xna.Framework.Audio
 
 		internal void INTERNAL_initCue(Cue newCue)
 		{
-			if (!cueInstanceCounts.ContainsKey(newCue.Name))
+			lock (activeCues)
 			{
-				cueInstanceCounts.Add(newCue.Name, 0);
+				if (!cueInstanceCounts.ContainsKey(newCue.Name))
+				{
+					cueInstanceCounts.Add(newCue.Name, 0);
+				}
+				newCue.SetVariable("NumCueInstances", cueInstanceCounts[newCue.Name]);
+				newCue.SetVariable("Volume", INTERNAL_volume.Value);
 			}
-			newCue.SetVariable("NumCueInstances", cueInstanceCounts[newCue.Name]);
-			newCue.SetVariable("Volume", INTERNAL_volume.Value);
 		}
 
 		internal bool INTERNAL_addCue(Cue newCue)
