@@ -52,7 +52,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		// Buffer objects used for actual drawing
 		private DynamicVertexBuffer vertexBuffer;
-		private DynamicIndexBuffer indexBuffer;
+		private IndexBuffer indexBuffer;
 
 		// Local data stored before buffering to GPU
 		private VertexPositionColorTexture[] vertexInfo;
@@ -114,7 +114,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				MAX_VERTICES,
 				BufferUsage.WriteOnly
 			);
-			indexBuffer = new DynamicIndexBuffer(
+			indexBuffer = new IndexBuffer(
 				graphicsDevice,
 				IndexElementSize.SixteenBits,
 				MAX_INDICES,
