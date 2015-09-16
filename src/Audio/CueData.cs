@@ -236,8 +236,19 @@ namespace Microsoft.Xna.Framework.Audio
 					// XACT Clip Offset in Bank
 					uint offset = reader.ReadUInt32();
 
-					// Unknown value
-					reader.ReadUInt32();
+					// XACT Clip filter
+					byte filterFlags = reader.ReadByte();
+					byte filterType;
+					if ((filterFlags & 0x01) == 0x01)
+					{
+						filterType = (byte) ((filterFlags >> 1) & 0x02);
+					}
+					else
+					{
+						filterType = 0xFF;
+					}
+					reader.ReadByte(); // QFactor?
+					reader.ReadUInt16(); // Frequency
 
 					// Store this for when we're done reading the clip.
 					long curPos = reader.BaseStream.Position;
@@ -246,7 +257,7 @@ namespace Microsoft.Xna.Framework.Audio
 					reader.BaseStream.Seek(offset, SeekOrigin.Begin);
 
 					// Parse the Clip.
-					INTERNAL_clips[i] = new XACTClip(reader, clipVolume);
+					INTERNAL_clips[i] = new XACTClip(reader, clipVolume, filterType);
 
 					// Back to where we were...
 					reader.BaseStream.Seek(curPos, SeekOrigin.Begin);
@@ -300,7 +311,7 @@ namespace Microsoft.Xna.Framework.Audio
 			);
 		}
 
-		public XACTClip(BinaryReader reader, double clipVolume)
+		public XACTClip(BinaryReader reader, double clipVolume, byte filterType)
 		{
 			// Number of XACT Events
 			Events = new XACTEvent[reader.ReadByte()];
@@ -359,7 +370,7 @@ namespace Microsoft.Xna.Framework.Audio
 						0,
 						clipVolume,
 						clipVolume,
-						0xFF,
+						filterType,
 						loopCount,
 						0,
 						new byte[] { 0xFF }
@@ -421,7 +432,7 @@ namespace Microsoft.Xna.Framework.Audio
 						0,
 						clipVolume,
 						clipVolume,
-						0xFF,
+						filterType,
 						loopCount,
 						variationType,
 						weights
@@ -469,8 +480,8 @@ namespace Microsoft.Xna.Framework.Audio
 					reader.ReadSingle();
 					reader.ReadSingle();
 
-					// Filter Type
-					byte filterType = reader.ReadByte();
+					// Filter Type again...?
+					reader.ReadByte();
 					
 					// Finally.
 					Events[i] = new PlayWaveEvent(
@@ -523,8 +534,8 @@ namespace Microsoft.Xna.Framework.Audio
 					reader.ReadSingle();
 					reader.ReadSingle();
 
-					// Filter Type
-					byte filterType = reader.ReadByte();
+					// Filter Type again...?
+					reader.ReadByte();
 
 					// Variation flags
 					// FIXME: There's probably more to these flags...
