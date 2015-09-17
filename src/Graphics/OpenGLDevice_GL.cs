@@ -7,18 +7,6 @@
  */
 #endregion
 
-#region DISABLE_FAUXBACKBUFFER Option
-// #define DISABLE_FAUXBACKBUFFER
-/* If you want to debug GL without the extra FBO in your way, you can use this.
- * Additionally, if you always use the desktop resolution in fullscreen mode,
- * you can use this to optimize your game and even lower the GL requirements.
- *
- * Note that this also affects OpenGLDevice.cs!
- * Check DISABLE_FAUXBACKBUFFER there too.
- * -flibit
- */
-#endregion
-
 #region Using Statements
 using System;
 using System.Collections.Generic;
@@ -620,7 +608,6 @@ namespace Microsoft.Xna.Framework.Graphics
 		);
 		private FramebufferRenderbuffer glFramebufferRenderbuffer;
 
-#if !DISABLE_FAUXBACKBUFFER
 		private delegate void BlitFramebuffer(
 			int srcX0,
 			int srcY0,
@@ -634,7 +621,6 @@ namespace Microsoft.Xna.Framework.Graphics
 			GLenum filter
 		);
 		private BlitFramebuffer glBlitFramebuffer;
-#endif
 
 		private delegate void GenRenderbuffers(
 			int n,
@@ -1111,12 +1097,6 @@ namespace Microsoft.Xna.Framework.Graphics
 					TryGetFramebufferEP("glGenerateMipmap"),
 					typeof(GenerateMipmap)
 				);
-#if !DISABLE_FAUXBACKBUFFER
-				glBlitFramebuffer = (BlitFramebuffer) Marshal.GetDelegateForFunctionPointer(
-					TryGetFramebufferEP("glBlitFramebuffer"),
-					typeof(BlitFramebuffer)
-				);
-#endif
 				glGenRenderbuffers = (GenRenderbuffers) Marshal.GetDelegateForFunctionPointer(
 					TryGetFramebufferEP("glGenRenderbuffers"),
 					typeof(GenRenderbuffers)
@@ -1137,6 +1117,20 @@ namespace Microsoft.Xna.Framework.Graphics
 			catch
 			{
 				throw new NoSuitableGraphicsDeviceException("OpenGL framebuffer support is required!");
+			}
+
+			/* EXT_framebuffer_blit (or ARB_framebuffer_object) is needed by the faux-backbuffer. */
+			supportsFauxBackbuffer = true;
+			try
+			{
+				glBlitFramebuffer = (BlitFramebuffer) Marshal.GetDelegateForFunctionPointer(
+					TryGetFramebufferEP("glBlitFramebuffer"),
+					typeof(BlitFramebuffer)
+				);
+			}
+			catch
+			{
+				supportsFauxBackbuffer = false;
 			}
 
 			/* ARB_instanced_arrays/ARB_draw_instanced are almost optional. */

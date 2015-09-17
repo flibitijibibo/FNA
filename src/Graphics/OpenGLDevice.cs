@@ -10,11 +10,8 @@
 #region DISABLE_FAUXBACKBUFFER Option
 // #define DISABLE_FAUXBACKBUFFER
 /* If you want to debug GL without the extra FBO in your way, you can use this.
- * Additionally, if you always use the desktop resolution in fullscreen mode,
- * you can use this to optimize your game and even lower the GL requirements.
- *
- * Note that this also affects OpenGLDevice_GL.cs!
- * Check DISABLE_FAUXBACKBUFFER there too.
+ * Note that we only enable a faux-backbuffer when the window size is not equal
+ * to the backbuffer size!
  * -flibit
  */
 #endregion
@@ -429,13 +426,10 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Faux-Backbuffer Variable
 
-		private OpenGLBackbuffer backbuffer;
 		public IGLBackbuffer Backbuffer
 		{
-			get
-			{
-				return backbuffer;
-			}
+			get;
+			private set;
 		}
 
 		#endregion
@@ -473,6 +467,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		}
 
 		private bool supportsMultisampling;
+		private bool supportsFauxBackbuffer;
 
 		#endregion
 
@@ -641,13 +636,40 @@ namespace Microsoft.Xna.Framework.Graphics
 			);
 
 			// Initialize the faux-backbuffer
-			backbuffer = new OpenGLBackbuffer(
-				this,
-				GraphicsDeviceManager.DefaultBackBufferWidth,
-				GraphicsDeviceManager.DefaultBackBufferHeight,
-				presentationParameters.DepthStencilFormat,
-				presentationParameters.MultiSampleCount
+#if !DISABLE_FAUXBACKBUFFER
+			int winWidth, winHeight;
+			SDL.SDL_GetWindowSize(
+				presentationParameters.DeviceWindowHandle,
+				out winWidth,
+				out winHeight
 			);
+			if (	winWidth != GraphicsDeviceManager.DefaultBackBufferWidth ||
+				winHeight != GraphicsDeviceManager.DefaultBackBufferHeight ||
+				presentationParameters.MultiSampleCount > 0	)
+			{
+				if (!supportsFauxBackbuffer)
+				{
+					throw new NoSuitableGraphicsDeviceException(
+						"Your hardware does not support the faux-backbuffer!" +
+						"\n\nKeep the window/backbuffer resolution the same."
+					);
+				}
+				Backbuffer = new OpenGLBackbuffer(
+					this,
+					GraphicsDeviceManager.DefaultBackBufferWidth,
+					GraphicsDeviceManager.DefaultBackBufferHeight,
+					presentationParameters.DepthStencilFormat,
+					presentationParameters.MultiSampleCount
+				);
+			}
+			else
+#endif
+			{
+				Backbuffer = new NullBackbuffer(
+					GraphicsDeviceManager.DefaultBackBufferWidth,
+					GraphicsDeviceManager.DefaultBackBufferHeight
+				);
+			}
 
 			// Initialize texture collection array
 			int numSamplers;
@@ -714,8 +736,11 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			glDeleteFramebuffers(1, ref targetFramebuffer);
 			targetFramebuffer = 0;
-			backbuffer.Dispose();
-			backbuffer = null;
+			if (Backbuffer is OpenGLBackbuffer)
+			{
+				(Backbuffer as OpenGLBackbuffer).Dispose();
+			}
+			Backbuffer = null;
 			MojoShader.MOJOSHADER_glMakeContextCurrent(IntPtr.Zero);
 			MojoShader.MOJOSHADER_glDestroyContext(shaderContext);
 
@@ -727,6 +752,72 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
+		#region Window Backbuffer Reset Method
+
+		public void ResetBackbuffer(
+			PresentationParameters presentationParameters,
+			bool renderTargetBound
+		) {
+#if !DISABLE_FAUXBACKBUFFER
+			int winWidth, winHeight;
+			SDL.SDL_GetWindowSize(
+				presentationParameters.DeviceWindowHandle,
+				out winWidth,
+				out winHeight
+			);
+			bool useFauxBackbuffer = (	winWidth != presentationParameters.BackBufferWidth ||
+							winHeight != presentationParameters.BackBufferHeight ||
+							presentationParameters.MultiSampleCount > 0	);
+			if (useFauxBackbuffer)
+			{
+				if (Backbuffer is NullBackbuffer)
+				{
+					if (!supportsFauxBackbuffer)
+					{
+						throw new NoSuitableGraphicsDeviceException(
+							"Your hardware does not support the faux-backbuffer!" +
+							"\n\nKeep the window/backbuffer resolution the same."
+						);
+					}
+					Backbuffer = new OpenGLBackbuffer(
+						this,
+						presentationParameters.BackBufferWidth,
+						presentationParameters.BackBufferHeight,
+						presentationParameters.DepthStencilFormat,
+						presentationParameters.MultiSampleCount
+					);
+				}
+				else
+				{
+					Backbuffer.ResetFramebuffer(
+						presentationParameters,
+						renderTargetBound
+					);
+				}
+			}
+			else
+#endif
+			{
+				if (Backbuffer is OpenGLBackbuffer)
+				{
+					(Backbuffer as OpenGLBackbuffer).Dispose();
+					Backbuffer = new NullBackbuffer(
+						presentationParameters.BackBufferWidth,
+						presentationParameters.BackBufferHeight
+					);
+				}
+				else
+				{
+					Backbuffer.ResetFramebuffer(
+						presentationParameters,
+						renderTargetBound
+					);
+				}
+			}
+		}
+
+		#endregion
+
 		#region Window SwapBuffers Method
 
 		public void SwapBuffers(
@@ -734,72 +825,81 @@ namespace Microsoft.Xna.Framework.Graphics
 			Rectangle? destinationRectangle,
 			IntPtr overrideWindowHandle
 		) {
-#if !DISABLE_FAUXBACKBUFFER
 			/* Only the faux-backbuffer supports presenting
 			 * specific regions given to Present().
 			 * -flibit
 			 */
-			int srcX, srcY, srcW, srcH;
-			int dstX, dstY, dstW, dstH;
-			if (sourceRectangle.HasValue)
+			if (Backbuffer is OpenGLBackbuffer)
 			{
-				srcX = sourceRectangle.Value.X;
-				srcY = sourceRectangle.Value.Y;
-				srcW = sourceRectangle.Value.Width;
-				srcH = sourceRectangle.Value.Height;
+				int srcX, srcY, srcW, srcH;
+				int dstX, dstY, dstW, dstH;
+				if (sourceRectangle.HasValue)
+				{
+					srcX = sourceRectangle.Value.X;
+					srcY = sourceRectangle.Value.Y;
+					srcW = sourceRectangle.Value.Width;
+					srcH = sourceRectangle.Value.Height;
+				}
+				else
+				{
+					srcX = 0;
+					srcY = 0;
+					srcW = Backbuffer.Width;
+					srcH = Backbuffer.Height;
+				}
+				if (destinationRectangle.HasValue)
+				{
+					dstX = destinationRectangle.Value.X;
+					dstY = destinationRectangle.Value.Y;
+					dstW = destinationRectangle.Value.Width;
+					dstH = destinationRectangle.Value.Height;
+				}
+				else
+				{
+					dstX = 0;
+					dstY = 0;
+					SDL.SDL_GetWindowSize(
+						overrideWindowHandle,
+						out dstW,
+						out dstH
+					);
+				}
+
+				if (scissorTestEnable)
+				{
+					glDisable(GLenum.GL_SCISSOR_TEST);
+				}
+
+				BindReadFramebuffer((Backbuffer as OpenGLBackbuffer).Handle);
+				BindDrawFramebuffer(0);
+
+				glBlitFramebuffer(
+					srcX, srcY, srcW, srcH,
+					dstX, dstY, dstW, dstH,
+					GLenum.GL_COLOR_BUFFER_BIT,
+					GLenum.GL_LINEAR
+				);
+
+				BindFramebuffer(0);
+
+				if (scissorTestEnable)
+				{
+					glEnable(GLenum.GL_SCISSOR_TEST);
+				}
+
+				SDL.SDL_GL_SwapWindow(
+					overrideWindowHandle
+				);
+
+				BindFramebuffer((Backbuffer as OpenGLBackbuffer).Handle);
 			}
 			else
 			{
-				srcX = 0;
-				srcY = 0;
-				srcW = backbuffer.Width;
-				srcH = backbuffer.Height;
-			}
-			if (destinationRectangle.HasValue)
-			{
-				dstX = destinationRectangle.Value.X;
-				dstY = destinationRectangle.Value.Y;
-				dstW = destinationRectangle.Value.Width;
-				dstH = destinationRectangle.Value.Height;
-			}
-			else
-			{
-				dstX = 0;
-				dstY = 0;
-				SDL.SDL_GetWindowSize(
-					overrideWindowHandle,
-					out dstW,
-					out dstH
+				// Nothing left to do, just swap!
+				SDL.SDL_GL_SwapWindow(
+					overrideWindowHandle
 				);
 			}
-
-			if (scissorTestEnable)
-			{
-				glDisable(GLenum.GL_SCISSOR_TEST);
-			}
-
-			BindReadFramebuffer(backbuffer.Handle);
-			BindDrawFramebuffer(0);
-
-			glBlitFramebuffer(
-				srcX, srcY, srcW, srcH,
-				dstX, dstY, dstW, dstH,
-				GLenum.GL_COLOR_BUFFER_BIT,
-				GLenum.GL_LINEAR
-			);
-
-			BindFramebuffer(0);
-
-			if (scissorTestEnable)
-			{
-				glEnable(GLenum.GL_SCISSOR_TEST);
-			}
-#endif
-
-			SDL.SDL_GL_SwapWindow(
-				overrideWindowHandle
-			);
-			BindFramebuffer(backbuffer.Handle);
 
 #if !DISABLE_THREADING && !THREADED_GL
 			RunActions();
@@ -1053,7 +1153,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			// Flip viewport when target is not bound
 			if (!renderTargetBound)
 			{
-				vp.Y = backbuffer.Height - vp.Y - vp.Height;
+				vp.Y = Backbuffer.Height - vp.Y - vp.Height;
 			}
 
 			if (vp.Bounds != viewport)
@@ -2948,7 +3048,11 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 
 			uint prevReadBuffer = currentReadFramebuffer;
-			BindReadFramebuffer(backbuffer.Handle);
+			BindReadFramebuffer(
+				(Backbuffer is OpenGLBackbuffer) ?
+					(Backbuffer as OpenGLBackbuffer).Handle :
+					0
+			);
 
 			int x;
 			int y;
@@ -2965,8 +3069,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				x = 0;
 				y = 0;
-				w = backbuffer.Width;
-				h = backbuffer.Height;
+				w = Backbuffer.Width;
+				h = Backbuffer.Height;
 			}
 
 			GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
@@ -3312,7 +3416,11 @@ namespace Microsoft.Xna.Framework.Graphics
 			// Bind the right framebuffer, if needed
 			if (renderTargets == null)
 			{
-				BindFramebuffer(backbuffer.Handle);
+				BindFramebuffer(
+					(Backbuffer is OpenGLBackbuffer) ?
+						(Backbuffer as OpenGLBackbuffer).Handle :
+						0
+				);
 				flipViewport = 1;
 				return;
 			}
@@ -3804,11 +3912,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				private set;
 			}
 
-#if !DISABLE_FAUXBACKBUFFER
 			private uint colorAttachment;
 			private uint depthStencilAttachment;
 			private OpenGLDevice glDevice;
-#endif
 
 			public OpenGLBackbuffer(
 				OpenGLDevice device,
@@ -3819,9 +3925,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			) {
 				Width = width;
 				Height = height;
-#if DISABLE_FAUXBACKBUFFER
-				Handle = 0;
-#else
+
 				glDevice = device;
 				DepthFormat = depthFormat;
 
@@ -3911,12 +4015,10 @@ namespace Microsoft.Xna.Framework.Graphics
 
 				// Keep this state sane.
 				glDevice.glBindRenderbuffer(GLenum.GL_RENDERBUFFER, 0);
-#endif
 			}
 
 			public void Dispose()
 			{
-#if !DISABLE_FAUXBACKBUFFER
 				uint handle = Handle;
 				glDevice.glDeleteFramebuffers(1, ref handle);
 				glDevice.glDeleteRenderbuffers(1, ref colorAttachment);
@@ -3926,7 +4028,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				}
 				glDevice = null;
 				Handle = 0;
-#endif
 			}
 
 			public void ResetFramebuffer(
@@ -3935,7 +4036,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			) {
 				Width = presentationParameters.BackBufferWidth;
 				Height = presentationParameters.BackBufferHeight;
-#if !DISABLE_FAUXBACKBUFFER
+
 				DepthFormat depthFormat = presentationParameters.DepthStencilFormat;
 				int multiSampleCount = presentationParameters.MultiSampleCount;
 
@@ -4086,7 +4187,48 @@ namespace Microsoft.Xna.Framework.Graphics
 
 				// Keep this state sane.
 				glDevice.glBindRenderbuffer(GLenum.GL_RENDERBUFFER, 0);
-#endif
+			}
+		}
+
+		#endregion
+
+		#region The Faux-Faux-Backbuffer
+
+		private class NullBackbuffer : IGLBackbuffer
+		{
+			public int Width
+			{
+				get;
+				private set;
+			}
+
+			public int Height
+			{
+				get;
+				private set;
+			}
+
+			public DepthFormat DepthFormat
+			{
+				get
+				{
+					// Constant, per SDL2_GameWindow
+					return DepthFormat.Depth24Stencil8;
+				}
+			}
+
+			public NullBackbuffer(int width, int height)
+			{
+				Width = width;
+				Height = height;
+			}
+
+			public void ResetFramebuffer(
+				PresentationParameters presentationParameters,
+				bool renderTargetBound
+			) {
+				Width = presentationParameters.BackBufferWidth;
+				Height = presentationParameters.BackBufferHeight;
 			}
 		}
 
