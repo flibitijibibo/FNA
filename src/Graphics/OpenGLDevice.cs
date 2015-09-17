@@ -3825,107 +3825,15 @@ namespace Microsoft.Xna.Framework.Graphics
 				glDevice = device;
 				DepthFormat = depthFormat;
 
-				// Generate and bind the FBO.
-				uint handle;
-				glDevice.glGenFramebuffers(1, out handle);
-				Handle = handle;
-				glDevice.BindFramebuffer(Handle);
-
-				// Create and attach the color buffer
-				glDevice.glGenRenderbuffers(1, out colorAttachment);
-				glDevice.glBindRenderbuffer(GLenum.GL_RENDERBUFFER, colorAttachment);
-				if (multiSampleCount > 0)
-				{
-					glDevice.glRenderbufferStorageMultisample(
-						GLenum.GL_RENDERBUFFER,
-						multiSampleCount,
-						GLenum.GL_RGBA,
-						width,
-						height
-					);
-				}
-				else
-				{
-					glDevice.glRenderbufferStorage(
-						GLenum.GL_RENDERBUFFER,
-						GLenum.GL_RGBA,
-						width,
-						height
-					);
-				}
-				glDevice.glFramebufferRenderbuffer(
-					GLenum.GL_FRAMEBUFFER,
-					GLenum.GL_COLOR_ATTACHMENT0,
-					GLenum.GL_RENDERBUFFER,
-					colorAttachment
-				);
-
-				if (depthFormat == DepthFormat.None)
-				{
-					// Don't bother creating a depth/stencil buffer.
-					depthStencilAttachment = 0;
-
-					// Keep this state sane.
-					glDevice.glBindRenderbuffer(GLenum.GL_RENDERBUFFER, 0);
-
-					return;
-				}
-
-				// Create and attach the depth/stencil buffer
-				glDevice.glGenRenderbuffers(1, out depthStencilAttachment);
-				glDevice.glBindRenderbuffer(GLenum.GL_RENDERBUFFER, depthStencilAttachment);
-				if (multiSampleCount > 0)
-				{
-					glDevice.glRenderbufferStorageMultisample(
-						GLenum.GL_RENDERBUFFER,
-						multiSampleCount,
-						XNAToGL.DepthStorage[(int) depthFormat],
-						width,
-						height
-					);
-				}
-				else
-				{
-					glDevice.glRenderbufferStorage(
-						GLenum.GL_RENDERBUFFER,
-						GLenum.GL_DEPTH24_STENCIL8,
-						width,
-						height
-					);
-				}
-				glDevice.glFramebufferRenderbuffer(
-					GLenum.GL_FRAMEBUFFER,
-					GLenum.GL_DEPTH_ATTACHMENT,
-					GLenum.GL_RENDERBUFFER,
-					depthStencilAttachment
-				);
-				if (depthFormat == DepthFormat.Depth24Stencil8)
-				{
-					glDevice.glFramebufferRenderbuffer(
-						GLenum.GL_FRAMEBUFFER,
-						GLenum.GL_STENCIL_ATTACHMENT,
-						GLenum.GL_RENDERBUFFER,
-						depthStencilAttachment
-					);
-				}
-
-				// Keep this state sane.
-				glDevice.glBindRenderbuffer(GLenum.GL_RENDERBUFFER, 0);
+                InitFramebuffer(width, height, depthFormat, multiSampleCount);
 #endif
 			}
 
 			public void Dispose()
 			{
 #if !DISABLE_FAUXBACKBUFFER
-				uint handle = Handle;
-				glDevice.glDeleteFramebuffers(1, ref handle);
-				glDevice.glDeleteRenderbuffers(1, ref colorAttachment);
-				if (depthStencilAttachment != 0)
-				{
-					glDevice.glDeleteRenderbuffers(1, ref depthStencilAttachment);
-				}
+                DisposeFramebuffer();
 				glDevice = null;
-				Handle = 0;
 #endif
 			}
 
@@ -3936,6 +3844,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				Width = presentationParameters.BackBufferWidth;
 				Height = presentationParameters.BackBufferHeight;
 #if !DISABLE_FAUXBACKBUFFER
+                DisposeFramebuffer();
+                InitFramebuffer(presentationParameters.BackBufferWidth, presentationParameters.BackBufferHeight, presentationParameters.DepthStencilFormat, presentationParameters.MultiSampleCount);
+
 				DepthFormat depthFormat = presentationParameters.DepthStencilFormat;
 				int multiSampleCount = presentationParameters.MultiSampleCount;
 
@@ -4088,6 +3999,115 @@ namespace Microsoft.Xna.Framework.Graphics
 				glDevice.glBindRenderbuffer(GLenum.GL_RENDERBUFFER, 0);
 #endif
 			}
+
+#if !DISABLE_FAUXBACKBUFFER
+            private void DisposeFramebuffer()
+            {
+                uint handle = Handle;
+                glDevice.glDeleteFramebuffers(1, ref handle);
+                glDevice.glDeleteRenderbuffers(1, ref colorAttachment);
+                if (depthStencilAttachment != 0)
+                {
+                    glDevice.glDeleteRenderbuffers(1, ref depthStencilAttachment);
+                }
+                Handle = 0;
+                colorAttachment = 0;
+                depthStencilAttachment = 0;
+
+                // Make sure we reset this so when we rebind a new FBB it registers
+                glDevice.BindFramebuffer(0);
+            }
+
+            private void InitFramebuffer(int width, int height, DepthFormat depthFormat, int multiSampleCount)
+            {
+                // Generate and bind the FBO.
+                uint handle;
+                glDevice.glGenFramebuffers(1, out handle);
+                Handle = handle;
+                glDevice.BindFramebuffer(Handle);
+
+                // Create and attach the color buffer
+                glDevice.glGenRenderbuffers(1, out colorAttachment);
+                glDevice.glBindRenderbuffer(GLenum.GL_RENDERBUFFER, colorAttachment);
+                if (multiSampleCount > 0)
+                {
+                    glDevice.glRenderbufferStorageMultisample(
+                        GLenum.GL_RENDERBUFFER,
+                        multiSampleCount,
+                        GLenum.GL_RGBA,
+                        width,
+                        height
+                    );
+                }
+                else
+                {
+                    glDevice.glRenderbufferStorage(
+                        GLenum.GL_RENDERBUFFER,
+                        GLenum.GL_RGBA,
+                        width,
+                        height
+                    );
+                }
+                glDevice.glFramebufferRenderbuffer(
+                    GLenum.GL_FRAMEBUFFER,
+                    GLenum.GL_COLOR_ATTACHMENT0,
+                    GLenum.GL_RENDERBUFFER,
+                    colorAttachment
+                );
+
+                if (depthFormat == DepthFormat.None)
+                {
+                    // Don't bother creating a depth/stencil buffer.
+                    depthStencilAttachment = 0;
+
+                    // Keep this state sane.
+                    glDevice.glBindRenderbuffer(GLenum.GL_RENDERBUFFER, 0);
+
+                    return;
+                }
+
+                // Create and attach the depth/stencil buffer
+                glDevice.glGenRenderbuffers(1, out depthStencilAttachment);
+                glDevice.glBindRenderbuffer(GLenum.GL_RENDERBUFFER, depthStencilAttachment);
+                if (multiSampleCount > 0)
+                {
+                    glDevice.glRenderbufferStorageMultisample(
+                        GLenum.GL_RENDERBUFFER,
+                        multiSampleCount,
+                        XNAToGL.DepthStorage[(int)depthFormat],
+                        width,
+                        height
+                    );
+                }
+                else
+                {
+                    glDevice.glRenderbufferStorage(
+                        GLenum.GL_RENDERBUFFER,
+                        GLenum.GL_DEPTH24_STENCIL8,
+                        width,
+                        height
+                    );
+                }
+                glDevice.glFramebufferRenderbuffer(
+                    GLenum.GL_FRAMEBUFFER,
+                    GLenum.GL_DEPTH_ATTACHMENT,
+                    GLenum.GL_RENDERBUFFER,
+                    depthStencilAttachment
+                );
+                if (depthFormat == DepthFormat.Depth24Stencil8)
+                {
+                    glDevice.glFramebufferRenderbuffer(
+                        GLenum.GL_FRAMEBUFFER,
+                        GLenum.GL_STENCIL_ATTACHMENT,
+                        GLenum.GL_RENDERBUFFER,
+                        depthStencilAttachment
+                    );
+                }
+
+                // Keep this state sane.
+                glDevice.glBindRenderbuffer(GLenum.GL_RENDERBUFFER, 0);
+            }
+#endif
 		}
 
 		#endregion
