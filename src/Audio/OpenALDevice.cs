@@ -934,7 +934,19 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public void SetReverbWetDryMix(IALReverb reverb, float value)
 		{
-			// No known mapping :(
+			/* FIXME: Note that were dividing by 200, not 100.
+			 * For some ridiculous reason the mix is WAY too wet
+			 * when we actually do the correct math, but cutting
+			 * the ratio in half mysteriously makes it sound right.
+			 *
+			 * Or, well, "more" right. I'm sure we're still off.
+			 * -flibit
+			 */
+			EFX.alAuxiliaryEffectSlotf(
+				(reverb as OpenALReverb).SlotHandle,
+				EFX.AL_EFFECTSLOT_GAIN,
+				value / 200.0f
+			);
 		}
 
 		#endregion
