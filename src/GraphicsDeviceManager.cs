@@ -291,6 +291,12 @@ namespace Microsoft.Xna.Framework
 				GraphicsDevice.GLDevice.Backbuffer.Width,
 				GraphicsDevice.GLDevice.Backbuffer.Height
 			);
+
+			// Toggling fullscreen may have effects on the backbuffer!
+			GraphicsDevice.GLDevice.ResetBackbuffer(
+				GraphicsDevice.PresentationParameters,
+				GraphicsDevice.RenderTargetCount > 0
+			);
 		}
 
 		#endregion
