@@ -4076,6 +4076,10 @@ namespace Microsoft.Xna.Framework.Graphics
 				}
 
 				// Update our color attachment to the new resolution.
+				glDevice.glBindRenderbuffer(
+					GLenum.GL_RENDERBUFFER,
+					colorAttachment
+				);
 				if (multiSampleCount > 0)
 				{
 					glDevice.glRenderbufferStorageMultisample(
