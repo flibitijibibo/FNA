@@ -3850,6 +3850,34 @@ namespace Microsoft.Xna.Framework.Graphics
 				DepthFormat depthFormat = presentationParameters.DepthStencilFormat;
 				int multiSampleCount = presentationParameters.MultiSampleCount;
 
+				// Detach color attachment
+				glDevice.glBindFramebuffer(GLenum.GL_FRAMEBUFFER, Handle);
+				glDevice.glFramebufferRenderbuffer(
+					GLenum.GL_FRAMEBUFFER,
+					GLenum.GL_COLOR_ATTACHMENT0,
+					GLenum.GL_RENDERBUFFER,
+					0
+				);
+
+				// Detach depth/stencil attachment, if applicable
+				if (depthStencilAttachment != 0) {
+					glDevice.glFramebufferRenderbuffer(
+							GLenum.GL_FRAMEBUFFER,
+							GLenum.GL_DEPTH_ATTACHMENT,
+							GLenum.GL_RENDERBUFFER,
+							0
+						);
+					if (DepthFormat == DepthFormat.Depth24Stencil8)
+					{
+						glDevice.glFramebufferRenderbuffer(
+							GLenum.GL_FRAMEBUFFER,
+							GLenum.GL_STENCIL_ATTACHMENT,
+							GLenum.GL_RENDERBUFFER,
+							0
+						);
+					}
+				}
+
 				// Update our color attachment to the new resolution.
 				glDevice.glBindRenderbuffer(GLenum.GL_RENDERBUFFER, colorAttachment);
 				if (multiSampleCount > 0)
@@ -3877,40 +3905,13 @@ namespace Microsoft.Xna.Framework.Graphics
 				{
 					if (depthStencilAttachment != 0)
 					{
-						glDevice.BindFramebuffer(Handle);
-						glDevice.glFramebufferRenderbuffer(
-							GLenum.GL_FRAMEBUFFER,
-							GLenum.GL_DEPTH_ATTACHMENT,
-							GLenum.GL_RENDERBUFFER,
-							0
-						);
-						if (DepthFormat == DepthFormat.Depth24Stencil8)
-						{
-							glDevice.glFramebufferRenderbuffer(
-								GLenum.GL_FRAMEBUFFER,
-								GLenum.GL_STENCIL_ATTACHMENT,
-								GLenum.GL_RENDERBUFFER,
-								0
-							);
-						}
 						glDevice.glDeleteRenderbuffers(
 							1,
 							ref depthStencilAttachment
 						);
 						depthStencilAttachment = 0;
-						if (renderTargetBound)
-						{
-							glDevice.BindFramebuffer(
-								glDevice.targetFramebuffer
-							);
-						}
 						DepthFormat = DepthFormat.None;
 					}
-
-					// Keep this state sane.
-					glDevice.glBindRenderbuffer(GLenum.GL_RENDERBUFFER, 0);
-
-					return;
 				}
 				else if (depthStencilAttachment == 0)
 				{
@@ -3921,54 +3922,31 @@ namespace Microsoft.Xna.Framework.Graphics
 					);
 				}
 
-				// Update the depth/stencil buffer
-				glDevice.glBindRenderbuffer(GLenum.GL_RENDERBUFFER, depthStencilAttachment);
-				if (multiSampleCount > 0)
+				// Update the depth/stencil buffer, if applicable
+				if (depthStencilAttachment != 0)
 				{
-					glDevice.glRenderbufferStorageMultisample(
-						GLenum.GL_RENDERBUFFER,
-						multiSampleCount,
-						XNAToGL.DepthStorage[(int) depthFormat],
-						Width,
-						Height
-					);
-				}
-				else
-				{
-					glDevice.glRenderbufferStorage(
-						GLenum.GL_RENDERBUFFER,
-						XNAToGL.DepthStorage[(int) depthFormat],
-						Width,
-						Height
-					);
-				}
-
-				// If the depth format changes, detach before reattaching!
-				if (depthFormat != DepthFormat)
-				{
-					glDevice.BindFramebuffer(Handle);
-
-					// Detach...
-					if (DepthFormat != DepthFormat.None)
+					glDevice.glBindRenderbuffer(GLenum.GL_RENDERBUFFER, depthStencilAttachment);
+					if (multiSampleCount > 0)
 					{
-						glDevice.glFramebufferRenderbuffer(
-							GLenum.GL_FRAMEBUFFER,
-							GLenum.GL_DEPTH_ATTACHMENT,
+						glDevice.glRenderbufferStorageMultisample(
 							GLenum.GL_RENDERBUFFER,
-							0
+							multiSampleCount,
+							XNAToGL.DepthStorage[(int)depthFormat],
+							Width,
+							Height
 						);
-						if (DepthFormat == DepthFormat.Depth24Stencil8)
-						{
-							glDevice.glFramebufferRenderbuffer(
-								GLenum.GL_FRAMEBUFFER,
-								GLenum.GL_STENCIL_ATTACHMENT,
-								GLenum.GL_RENDERBUFFER,
-								0
-							);
-						}
+					}
+					else
+					{
+						glDevice.glRenderbufferStorage(
+							GLenum.GL_RENDERBUFFER,
+							XNAToGL.DepthStorage[(int)depthFormat],
+							Width,
+							Height
+						);
 					}
 
-					// ... then attach.
+					// Attach.
 					glDevice.glFramebufferRenderbuffer(
 						GLenum.GL_FRAMEBUFFER,
 						GLenum.GL_DEPTH_ATTACHMENT,
@@ -3984,16 +3962,23 @@ namespace Microsoft.Xna.Framework.Graphics
 							depthStencilAttachment
 						);
 					}
-
-					if (renderTargetBound)
-					{
-						glDevice.BindFramebuffer(
-							glDevice.targetFramebuffer
-						);
-					}
-
-					DepthFormat = depthFormat;
 				}
+
+				glDevice.glFramebufferRenderbuffer(
+					GLenum.GL_FRAMEBUFFER,
+					GLenum.GL_COLOR_ATTACHMENT0,
+					GLenum.GL_RENDERBUFFER,
+					colorAttachment
+				);
+
+				if (renderTargetBound)
+				{
+					glDevice.BindFramebuffer(
+						glDevice.targetFramebuffer
+					);
+				}
+
+				DepthFormat = depthFormat;
 
 				// Keep this state sane.
 				glDevice.glBindRenderbuffer(GLenum.GL_RENDERBUFFER, 0);
