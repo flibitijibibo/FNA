@@ -537,6 +537,44 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
+		#region Private Static SDL2 Bug Workaround
+
+		private static void GetWindowDimensions(
+			PresentationParameters presentationParameters,
+			out int width,
+			out int height
+		) {
+			if (presentationParameters.IsFullScreen)
+			{
+				/* FIXME: SDL2 bug!
+				 * SDL's a little weird about SDL_GetWindowSize.
+				 * If you call it early enough (for example,
+				 * Game.Initialize()), it reports outdated ints.
+				 * So you know what, let's just use this.
+				 * -flibit
+				 */
+				SDL.SDL_DisplayMode mode;
+				SDL.SDL_GetCurrentDisplayMode(
+					SDL.SDL_GetWindowDisplayIndex(
+						presentationParameters.DeviceWindowHandle
+					),
+					out mode
+				);
+				width = mode.w;
+				height = mode.h;
+			}
+			else
+			{
+				SDL.SDL_GetWindowSize(
+					presentationParameters.DeviceWindowHandle,
+					out width,
+					out height
+				);
+			}
+		}
+
+		#endregion
+
 		#region Public Constructor
 
 		public OpenGLDevice(
@@ -638,13 +676,13 @@ namespace Microsoft.Xna.Framework.Graphics
 			// Initialize the faux-backbuffer
 #if !DISABLE_FAUXBACKBUFFER
 			int winWidth, winHeight;
-			SDL.SDL_GetWindowSize(
-				presentationParameters.DeviceWindowHandle,
+			GetWindowDimensions(
+				presentationParameters,
 				out winWidth,
 				out winHeight
 			);
-			if (	winWidth != GraphicsDeviceManager.DefaultBackBufferWidth ||
-				winHeight != GraphicsDeviceManager.DefaultBackBufferHeight ||
+			if (	winWidth != presentationParameters.BackBufferWidth ||
+				winHeight != presentationParameters.BackBufferHeight ||
 				presentationParameters.MultiSampleCount > 0	)
 			{
 				if (!supportsFauxBackbuffer)
@@ -656,8 +694,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				}
 				Backbuffer = new OpenGLBackbuffer(
 					this,
-					GraphicsDeviceManager.DefaultBackBufferWidth,
-					GraphicsDeviceManager.DefaultBackBufferHeight,
+					presentationParameters.BackBufferWidth,
+					presentationParameters.BackBufferHeight,
 					presentationParameters.DepthStencilFormat,
 					presentationParameters.MultiSampleCount
 				);
@@ -666,8 +704,8 @@ namespace Microsoft.Xna.Framework.Graphics
 #endif
 			{
 				Backbuffer = new NullBackbuffer(
-					GraphicsDeviceManager.DefaultBackBufferWidth,
-					GraphicsDeviceManager.DefaultBackBufferHeight
+					presentationParameters.BackBufferWidth,
+					presentationParameters.BackBufferHeight
 				);
 			}
 
@@ -760,8 +798,8 @@ namespace Microsoft.Xna.Framework.Graphics
 		) {
 #if !DISABLE_FAUXBACKBUFFER
 			int winWidth, winHeight;
-			SDL.SDL_GetWindowSize(
-				presentationParameters.DeviceWindowHandle,
+			GetWindowDimensions(
+				presentationParameters,
 				out winWidth,
 				out winHeight
 			);
