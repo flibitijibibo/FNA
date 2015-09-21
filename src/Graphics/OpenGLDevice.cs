@@ -4173,7 +4173,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				if (renderTargetBound)
 				{
 					glDevice.glBindFramebuffer(
-						GL_FRAMEBUFFER,
+						GLenum.GL_FRAMEBUFFER,
 						glDevice.targetFramebuffer
 					);
 				}
