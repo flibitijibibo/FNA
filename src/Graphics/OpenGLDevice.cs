@@ -4101,7 +4101,6 @@ namespace Microsoft.Xna.Framework.Graphics
 							ref depthStencilAttachment
 						);
 						depthStencilAttachment = 0;
-						DepthFormat = DepthFormat.None;
 					}
 				}
 				else if (depthStencilAttachment == 0)
