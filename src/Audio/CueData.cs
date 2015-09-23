@@ -296,6 +296,7 @@ namespace Microsoft.Xna.Framework.Audio
 				-1,
 				0,
 				0,
+				false,
 				new byte[] { 0xFF }
 			);
 		}
@@ -362,6 +363,7 @@ namespace Microsoft.Xna.Framework.Audio
 						-1,
 						loopCount,
 						0,
+						false,
 						new byte[] { 0xFF }
 					);
 				}
@@ -394,7 +396,9 @@ namespace Microsoft.Xna.Framework.Audio
 					 * The rest is currently unknown.
 					 * -flibit
 					 */
-					ushort variationType = (ushort) (reader.ReadUInt16() & 0x000F);
+					ushort variationValues = reader.ReadUInt16();
+					ushort variationType = (ushort)(variationValues & 0x000F);
+					bool variationOnLoop = (variationValues & 0x00F0) > 0;
 
 					// Unknown values
 					reader.ReadBytes(4);
@@ -424,6 +428,7 @@ namespace Microsoft.Xna.Framework.Audio
 						-1,
 						loopCount,
 						variationType,
+						variationOnLoop,
 						weights
 					);
 				}
@@ -484,6 +489,7 @@ namespace Microsoft.Xna.Framework.Audio
 						(int) filterType,
 						loopCount,
 						0,
+						false,
 						new byte[] { 0xFF }
 					);
 				}
@@ -551,7 +557,9 @@ namespace Microsoft.Xna.Framework.Audio
 					 * The rest is currently unknown.
 					 * -flibit
 					 */
-					ushort variationType = (ushort) (reader.ReadUInt16() & 0x000F);
+					ushort variationValues = reader.ReadUInt16();
+					ushort variationType = (ushort)(variationValues & 0x000F);
+					bool variationOnLoop = (variationValues & 0x00F0) > 0;
 
 					// Unknown values
 					reader.ReadBytes(4);
@@ -581,6 +589,7 @@ namespace Microsoft.Xna.Framework.Audio
 						(int) filterType,
 						loopCount,
 						variationType,
+						variationOnLoop,
 						weights
 					);
 				}
@@ -701,6 +710,7 @@ namespace Microsoft.Xna.Framework.Audio
 		private byte INTERNAL_loopCount;
 
 		private VariationPlaylistType INTERNAL_variationType;
+		private bool INTERNAL_variationOnLoop;
 		private byte[] INTERNAL_weights;
 		private int INTERNAL_curWave;
 
@@ -719,6 +729,7 @@ namespace Microsoft.Xna.Framework.Audio
 			int filterType,
 			byte loopCount,
 			ushort variationType,
+			bool variationOnLoop,
 			byte[] weights
 		) : base(1, timestamp) {
 			INTERNAL_tracks = tracks;
@@ -730,6 +741,7 @@ namespace Microsoft.Xna.Framework.Audio
 			INTERNAL_filterType = filterType;
 			INTERNAL_loopCount = loopCount;
 			INTERNAL_variationType = (VariationPlaylistType) variationType;
+			INTERNAL_variationOnLoop = variationOnLoop;
 			INTERNAL_weights = weights;
 			INTERNAL_waves = new SoundEffect[tracks.Length];
 			INTERNAL_curWave = -1;
@@ -772,7 +784,7 @@ namespace Microsoft.Xna.Framework.Audio
 				) / 1000.0f
 			) + soundPitch;
 			result.FilterType = INTERNAL_filterType;
-			result.IsLooped = (INTERNAL_loopCount == 255);
+			result.IsLooped = !INTERNAL_variationOnLoop && (INTERNAL_loopCount == 255);
 			return result;
 		}
 
