@@ -774,7 +774,7 @@ namespace Microsoft.Xna.Framework.Audio
 			float soundPitch,
 			int currentLoop
 		) {
-			if (currentLoop > INTERNAL_loopCount)
+			if (currentLoop > INTERNAL_loopCount && INTERNAL_loopCount != 255)
 			{
 				// We've finished all the loops!
 				return null;
