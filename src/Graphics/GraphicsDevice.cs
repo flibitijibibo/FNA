@@ -619,7 +619,11 @@ namespace Microsoft.Xna.Framework.Graphics
 			DepthFormat dsFormat;
 			if (RenderTargetCount == 0)
 			{
-				dsFormat = PresentationParameters.DepthStencilFormat;
+				/* FIXME: PresentationParameters.DepthStencilFormat is probably
+				 * a more accurate value here, but the Backbuffer may disagree.
+				 * -flibit
+				 */
+				dsFormat = GLDevice.Backbuffer.DepthFormat;
 			}
 			else
 			{
