@@ -572,17 +572,7 @@ namespace Microsoft.Xna.Framework.Audio
 					}
 					if (curRPC.Parameter == RPCParameter.Volume)
 					{
-						/* FIXME: Quite annoyingly, this does not appear to use
-						 * the proper amplitude ratio calculation! It should be
-						 * XACTCalculator.CalculateAmplitudeRatio(result / 100.0).
-						 *
-						 * An example case is the Murder Miners volume control.
-						 * 80% volume (-1440) is almost entirely inaudible!
-						 *
-						 * It looks like it's just a linear scale. How dumb.
-						 * -flibit
-						 */
-						float vol = (result + 9600.0f) / 10200.0f;
+						float vol = XACTCalculator.CalculateAmplitudeRatio(result / 100.0);
 						if (i == 0)
 						{
 							rpcVolume *= vol;
