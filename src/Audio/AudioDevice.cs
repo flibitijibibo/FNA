@@ -176,6 +176,15 @@ namespace Microsoft.Xna.Framework.Audio
 			);
 		}
 
+		public static void DeleteBuffer(IALBuffer buffer)
+		{
+			if (ALDevice == null)
+			{
+				throw new NoAudioHardwareException();
+			}
+			ALDevice.DeleteBuffer(buffer);
+		}
+
 		#endregion
 
 		#region Public Static Reverb Methods
