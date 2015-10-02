@@ -59,6 +59,18 @@ namespace Microsoft.Xna.Framework.Audio
 			private set;
 		}
 
+		public ushort FadeInMS
+		{
+			get;
+			private set;
+		}
+
+		public ushort FadeOutMS
+		{
+			get;
+			private set;
+		}
+
 		public CueData(XACTSound sound)
 		{
 			Sounds = new XACTSound[1];
@@ -73,6 +85,8 @@ namespace Microsoft.Xna.Framework.Audio
 			// Assume we can have max instances, for now.
 			InstanceLimit = 255;
 			MaxCueBehavior = MaxInstanceBehavior.ReplaceOldest;
+			FadeInMS = 0;
+			FadeOutMS = 0;
 		}
 
 		public CueData(
@@ -89,12 +103,20 @@ namespace Microsoft.Xna.Framework.Audio
 			// Assume we can have max instances, for now.
 			InstanceLimit = 255;
 			MaxCueBehavior = MaxInstanceBehavior.ReplaceOldest;
+			FadeInMS = 0;
+			FadeOutMS = 0;
 		}
 
-		public void SetLimit(byte instanceLimit, byte behavior)
-		{
+		public void SetLimit(
+			byte instanceLimit,
+			byte behavior,
+			ushort fadeIn,
+			ushort fadeOut
+		) {
 			InstanceLimit = instanceLimit;
 			MaxCueBehavior = (MaxInstanceBehavior) (behavior >> 3);
+			FadeInMS = fadeIn;
+			FadeOutMS = fadeOut;
 		}
 	}
 

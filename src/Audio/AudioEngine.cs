@@ -297,31 +297,6 @@ namespace Microsoft.Xna.Framework.Audio
 					);
 				}
 
-				// Append built-in properties to Variable list
-				bool hasVolume = false;
-				foreach (Variable curVar in INTERNAL_variables)
-				{
-					if (curVar.Name.Equals("Volume"))
-					{
-						hasVolume = true;
-					}
-				}
-				if (!hasVolume)
-				{
-					INTERNAL_variables.Add(
-						new Variable(
-							"Volume",
-							true,
-							false,
-							false,
-							false,
-							1.0f,
-							0.0f,
-							1.0f
-						)
-					);
-				}
-
 				// Obtain the RPC Curves
 				reader.BaseStream.Seek(rpcOffset, SeekOrigin.Begin);
 				INTERNAL_RPCs = new Dictionary<long, RPC>();

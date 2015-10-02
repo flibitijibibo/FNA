@@ -74,8 +74,7 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			get
 			{
-				// FIXME: Authored Stop Options?
-				return false;
+				return INTERNAL_fadeMode == FadeMode.FadeOut;
 			}
 		}
 
@@ -128,6 +127,17 @@ namespace Microsoft.Xna.Framework.Audio
 		// Category managing this Cue, and whether or not it's user-managed
 		private AudioCategory INTERNAL_category;
 		private bool INTERNAL_isManaged;
+
+		// Fading
+		private enum FadeMode
+		{
+			None,
+			FadeOut,
+			FadeIn
+		}
+		private long INTERNAL_fadeStart;
+		private long INTERNAL_fadeEnd;
+		private FadeMode INTERNAL_fadeMode = FadeMode.None;
 
 		#endregion
 
@@ -331,6 +341,10 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 
 			INTERNAL_timer.Start();
+			if (INTERNAL_data.FadeInMS > 0)
+			{
+				INTERNAL_startFadeIn(INTERNAL_data.FadeInMS);
+			}
 
 			if (!INTERNAL_calculateNextSound())
 			{
@@ -378,6 +392,12 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			if (IsPlaying)
 			{
+				if (	options == AudioStopOptions.AsAuthored &&
+					INTERNAL_data.FadeOutMS > 0	)
+				{
+					INTERNAL_startFadeOut(INTERNAL_data.FadeOutMS);
+					return;
+				}
 				INTERNAL_timer.Stop();
 				INTERNAL_timer.Reset();
 				foreach (SoundEffectInstance sfi in INTERNAL_instancePool)
@@ -463,6 +483,45 @@ namespace Microsoft.Xna.Framework.Audio
 
 					// Removed a wave, have to step back...
 					i -= 1;
+				}
+			}
+
+			// Fade in/out
+			float fadePerc = 1.0f;
+			if (INTERNAL_fadeMode != FadeMode.None)
+			{
+				if (INTERNAL_fadeMode == FadeMode.FadeOut)
+				{
+					if (INTERNAL_category.crossfadeType == CrossfadeType.Linear)
+					{
+						fadePerc = (INTERNAL_fadeEnd - (INTERNAL_timer.ElapsedMilliseconds - INTERNAL_fadeStart)) / (float) INTERNAL_fadeEnd;
+					}
+					else
+					{
+						throw new NotImplementedException("Unhandled CrossfadeType!");
+					}
+					if (fadePerc <= 0.0f)
+					{
+						Stop(AudioStopOptions.Immediate);
+						INTERNAL_fadeMode = FadeMode.None;
+						return false;
+					}
+				}
+				else
+				{
+					if (INTERNAL_category.crossfadeType == CrossfadeType.Linear)
+					{
+						fadePerc = INTERNAL_timer.ElapsedMilliseconds / (float) INTERNAL_fadeEnd;
+					}
+					else
+					{
+						throw new NotImplementedException("Unhandled CrossfadeType!");
+					}
+					if (fadePerc > 1.0f)
+					{
+						fadePerc = 1.0f;
+						INTERNAL_fadeMode = FadeMode.None;
+					}
 				}
 			}
 
@@ -617,17 +676,17 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 
 			// Sound effect instance updates
-			float cueVolume = GetVariable("Volume");
 			for (int i = 0; i < INTERNAL_instancePool.Count; i += 1)
 			{
 				/* The final volume should be the combination of the
-				 * authored volume, Volume variable and RPC volume results.
+				 * authored volume, category volume, RPC volumes, and fade.
 				 */
 				INTERNAL_instancePool[i].Volume = (
 					INTERNAL_instanceVolumes[i] *
-					cueVolume *
+					INTERNAL_category.INTERNAL_volume.Value *
 					rpcVolume *
-					INTERNAL_rpcTrackVolumes[i]
+					INTERNAL_rpcTrackVolumes[i] *
+					fadePerc
 				);
 
 				/* The final pitch should be the combination of the
@@ -680,6 +739,50 @@ namespace Microsoft.Xna.Framework.Audio
 		internal void INTERNAL_genVariables(List<Variable> cueVariables)
 		{
 			INTERNAL_variables = cueVariables;
+		}
+
+		internal float INTERNAL_calculateVolume()
+		{
+			float retval = 1.0f;
+			for (int i = 0; i < INTERNAL_activeSound.RPCCodes.Count; i += 1)
+			foreach (uint curCode in INTERNAL_activeSound.RPCCodes[i])
+			{
+				RPC curRPC = INTERNAL_baseEngine.INTERNAL_getRPC(curCode);
+				if (curRPC.Parameter != RPCParameter.Volume)
+				{
+					continue;
+				}
+				float result;
+				if (!INTERNAL_baseEngine.INTERNAL_isGlobalVariable(curRPC.Variable))
+				{
+					result = curRPC.CalculateRPC(GetVariable(curRPC.Variable));
+				}
+				else
+				{
+					// It's a global variable we're looking for!
+					result = curRPC.CalculateRPC(
+						INTERNAL_baseEngine.GetGlobalVariable(
+							curRPC.Variable
+						)
+					);
+				}
+				retval *= XACTCalculator.CalculateAmplitudeRatio(result / 100.0);
+			}
+			return retval;
+		}
+
+		internal void INTERNAL_startFadeIn(ushort ms)
+		{
+			// start is not used, since it's always 0 anyway -flibit
+			INTERNAL_fadeEnd = ms;
+			INTERNAL_fadeMode = FadeMode.FadeIn;
+		}
+
+		internal void INTERNAL_startFadeOut(ushort ms)
+		{
+			INTERNAL_fadeStart = INTERNAL_timer.ElapsedMilliseconds;
+			INTERNAL_fadeEnd = ms;
+			INTERNAL_fadeMode = FadeMode.FadeOut;
 		}
 
 		#endregion
