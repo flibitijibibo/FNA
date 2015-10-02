@@ -220,7 +220,10 @@ namespace Microsoft.Xna.Framework.Audio
 					Instances[0].Dispose();
 				}
 				Instances = null;
-				AudioDevice.DeleteBuffer(INTERNAL_buffer);
+				if (INTERNAL_buffer != null)
+				{
+					AudioDevice.ALDevice.DeleteBuffer(INTERNAL_buffer);
+				}
 				IsDisposed = true;
 			}
 		}
