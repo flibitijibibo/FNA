@@ -23,6 +23,7 @@
 using System;
 using System.IO;
 using System.Threading;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 using Microsoft.Xna.Framework.Audio;
@@ -109,8 +110,10 @@ namespace Microsoft.Xna.Framework.Media
 		// TODO: Track the ov_reads and stream position
 		internal TimeSpan Position
 		{
-			get;
-			private set;
+			get
+			{
+				return timer.Elapsed;
+			}
 		}
 
 		internal float Volume
@@ -129,6 +132,15 @@ namespace Microsoft.Xna.Framework.Media
 		#endregion
 
 		#region Private Variables
+
+		/* FIXME: Ideally we'd be using the Vorbis offsets to track position,
+		 * but usually you end up with a bit of stairstepping...
+		 *
+		 * For now, just use a timer. It's not 100% accurate, but it'll at
+		 * least be consistent.
+		 * -flibit
+		 */
+		private Stopwatch timer = new Stopwatch();
 
 		private DynamicSoundEffectInstance soundStream;
 		private IntPtr vorbisFile;
@@ -163,7 +175,6 @@ namespace Microsoft.Xna.Framework.Media
 			Duration = TimeSpan.FromSeconds(
 				Vorbisfile.ov_time_total(vorbisFile, 0)
 			);
-			Position = TimeSpan.Zero;
 
 			soundStream = new DynamicSoundEffectInstance(
 				(int) fileInfo.rate,
@@ -231,17 +242,21 @@ namespace Microsoft.Xna.Framework.Media
 			songThread.Start();
 #endif
 
+			timer.Start();
+
 			PlayCount += 1;
 		}
 
 		internal void Resume()
 		{
 			soundStream.Resume();
+			timer.Start();
 		}
 
 		internal void Pause()
 		{
 			soundStream.Pause();
+			timer.Stop();
 		}
 
 		internal void Stop()
@@ -255,6 +270,9 @@ namespace Microsoft.Xna.Framework.Media
 				songThread.Join();
 			}
 #endif
+
+			timer.Stop();
+			timer.Reset();
 
 			soundStream.Stop();
 			soundStream.BufferNeeded -= QueueBuffer;
