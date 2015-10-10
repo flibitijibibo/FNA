@@ -108,8 +108,8 @@ namespace Microsoft.Xna.Framework.Input
 				case GamePadDeadZone.IndependentAxes:
 					left.X = ExcludeAxisDeadZone(left.X, leftThumbDeadZone);
 					left.Y = ExcludeAxisDeadZone(left.Y, leftThumbDeadZone);
-					right.X = ExcludeAxisDeadZone(right.X, leftThumbDeadZone);
-					right.Y = ExcludeAxisDeadZone(right.Y, leftThumbDeadZone);
+					right.X = ExcludeAxisDeadZone(right.X, rightThumbDeadZone);
+					right.Y = ExcludeAxisDeadZone(right.Y, rightThumbDeadZone);
 					break;
 				case GamePadDeadZone.Circular:
 					left = ExcludeCircularDeadZone(left, leftThumbDeadZone);
