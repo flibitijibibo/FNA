@@ -100,99 +100,54 @@ namespace Microsoft.Xna.Framework.Input
 			// Based on the XInput constants
 			const float leftThumbDeadZone = 0.24f;
 			const float rightThumbDeadZone = 0.265f;
+
 			switch (dz)
 			{
 				case GamePadDeadZone.None:
 					break;
 				case GamePadDeadZone.IndependentAxes:
-					if (Math.Abs(left.X) < leftThumbDeadZone)
-					{
-						left.X = 0f;
-					}
-					if (Math.Abs(left.Y) < leftThumbDeadZone)
-					{
-						left.Y = 0f;
-					}
-					if (Math.Abs(right.X) < rightThumbDeadZone)
-					{
-						right.X = 0f;
-					}
-					if (Math.Abs(right.Y) < rightThumbDeadZone)
-					{
-						right.Y = 0f;
-					}
+					left.X = ExcludeAxisDeadZone(left.X, leftThumbDeadZone);
+					left.Y = ExcludeAxisDeadZone(left.Y, leftThumbDeadZone);
+					right.X = ExcludeAxisDeadZone(right.X, leftThumbDeadZone);
+					right.Y = ExcludeAxisDeadZone(right.Y, leftThumbDeadZone);
 					break;
 				case GamePadDeadZone.Circular:
-					if (left.LengthSquared() < leftThumbDeadZone * leftThumbDeadZone)
-					{
-						left = Vector2.Zero;
-					}
-					if (right.LengthSquared() < rightThumbDeadZone * rightThumbDeadZone)
-					{
-						right = Vector2.Zero;
-					}
+					left = ExcludeCircularDeadZone(left, leftThumbDeadZone);
+					right = ExcludeCircularDeadZone(right, rightThumbDeadZone);
 					break;
 			}
+		}
 
-			// Excluding dead zone from the final output range
-			if (dz == GamePadDeadZone.IndependentAxes)
+		#endregion
+
+		#region Private Static Methods
+
+		private static float ExcludeAxisDeadZone(float value, float deadZone)
+		{
+			if (value < -deadZone)
 			{
-				if (left.X < -leftThumbDeadZone)
-				{
-					left.X += leftThumbDeadZone;
-				}
-				else if (left.X > leftThumbDeadZone)
-				{
-					left.X -= leftThumbDeadZone;
-				}
-				if (left.Y < -leftThumbDeadZone)
-				{
-					left.Y += leftThumbDeadZone;
-				}
-				else if (left.Y > leftThumbDeadZone)
-				{
-					left.Y -= leftThumbDeadZone;
-				}
-
-				if (right.X < -rightThumbDeadZone)
-				{
-					right.X += rightThumbDeadZone;
-				}
-				else if (right.X > rightThumbDeadZone)
-				{
-					right.X -= rightThumbDeadZone;
-				}
-				if (right.Y < -rightThumbDeadZone)
-				{
-					right.Y += rightThumbDeadZone;
-				}
-				else if (right.Y > rightThumbDeadZone)
-				{
-					right.Y -= rightThumbDeadZone;
-				}
-
-				left.X /= 1.0f - leftThumbDeadZone;
-				left.Y /= 1.0f - leftThumbDeadZone;
-				right.X /= 1.0f - rightThumbDeadZone;
-				right.Y /= 1.0f - rightThumbDeadZone;
+				value += deadZone;
 			}
-			else if (dz == GamePadDeadZone.Circular)
+			else if (value > deadZone)
 			{
-				if (left.LengthSquared() >= leftThumbDeadZone * leftThumbDeadZone)
-				{
-					Vector2 norm = left;
-					norm.Normalize();
-					left = left - norm * leftThumbDeadZone; // Excluding deadzone
-					left = left / leftThumbDeadZone; // Re-range output
-				}
-				if (right.LengthSquared() >= rightThumbDeadZone * rightThumbDeadZone)
-				{
-					Vector2 norm = right;
-					norm.Normalize();
-					right = right - norm * rightThumbDeadZone;
-					right = right / rightThumbDeadZone;
-				}
+				value -= deadZone;
 			}
+			else
+			{
+				return 0.0f;
+			}
+			return value / (1.0f - deadZone);
+		}
+
+		private static Vector2 ExcludeCircularDeadZone(Vector2 value, float deadZone)
+		{
+			float originalLength = value.Length();
+			if (originalLength <= deadZone)
+			{
+				return Vector2.Zero;
+			}
+			float newLength = (originalLength - deadZone) / (1.0f - deadZone);
+			return value * (newLength / originalLength);
 		}
 
 		#endregion
