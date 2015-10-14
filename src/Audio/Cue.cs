@@ -112,6 +112,10 @@ namespace Microsoft.Xna.Framework.Audio
 		private List<float> INTERNAL_rpcTrackVolumes;
 		private List<float> INTERNAL_rpcTrackPitches;
 
+		// Events can control volume/pitch as well!
+		private float eventVolume;
+		private float eventPitch;
+
 		// User-controlled sounds require a bit more trickery.
 		private bool INTERNAL_userControlledPlaying;
 		private float INTERNAL_controlledValue;
@@ -184,6 +188,9 @@ namespace Microsoft.Xna.Framework.Audio
 				this,
 				data.Category
 			);
+
+			eventVolume = 1.0f;
+			eventPitch = 0.0f;
 
 			INTERNAL_userControlledPlaying = false;
 			INTERNAL_isPositional = false;
@@ -446,11 +453,11 @@ namespace Microsoft.Xna.Framework.Audio
 					}
 					else if (type == 2)
 					{
-						// FIXME: SetVariable, or apply instanceVolumes? -flibit
-						SetVariable(
-							"Volume",
-							((SetVolumeEvent) INTERNAL_eventList[i]).GetVolume()
-						);
+						eventVolume = ((SetVolumeEvent) INTERNAL_eventList[i]).GetVolume();
+					}
+					else if (type == 3)
+					{
+						eventPitch = ((SetPitchEvent) INTERNAL_eventList[i]).GetPitch();
 					}
 					else
 					{
@@ -679,22 +686,24 @@ namespace Microsoft.Xna.Framework.Audio
 			for (int i = 0; i < INTERNAL_instancePool.Count; i += 1)
 			{
 				/* The final volume should be the combination of the
-				 * authored volume, category volume, RPC volumes, and fade.
+				 * authored volume, category volume, RPC/Event volumes, and fade.
 				 */
 				INTERNAL_instancePool[i].Volume = (
 					INTERNAL_instanceVolumes[i] *
 					INTERNAL_category.INTERNAL_volume.Value *
 					rpcVolume *
 					INTERNAL_rpcTrackVolumes[i] *
+					eventVolume *
 					fadePerc
 				);
 
 				/* The final pitch should be the combination of the
-				 * authored pitch and RPC pitch results.
+				 * authored pitch and RPC/Event pitch results.
 				 */
 				INTERNAL_instancePool[i].Pitch = (
 					INTERNAL_instancePitches[i] +
 					rpcPitch +
+					eventPitch +
 					INTERNAL_rpcTrackPitches[i]
 				);
 

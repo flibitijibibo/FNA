@@ -628,8 +628,34 @@ namespace Microsoft.Xna.Framework.Audio
 				}
 				else if (eventType == 7)
 				{
-					// TODO: Codename OhGodNo -flibit
-					// Pitch Event
+					// Unknown values
+					reader.ReadBytes(2);
+
+					/* Event Flags
+					 * 0x08 = Min/Max Values
+					 * Rest is unknown
+					 */
+					bool minMax = (reader.ReadByte() & 0x08) == 0x08;
+
+					// Min/Max Random
+					float min = reader.ReadSingle() / 1000.0f;
+					float max;
+					if (minMax)
+					{
+						max = reader.ReadSingle() / 1000.0f;
+					}
+					else
+					{
+						max = min;
+					}
+
+					// FIXME: Any more...? -flibit
+
+					Events[i] = new SetPitchEvent(
+						eventTimestamp,
+						min,
+						max
+					);
 				}
 				else if (eventType == 8)
 				{
@@ -637,24 +663,41 @@ namespace Microsoft.Xna.Framework.Audio
 					reader.ReadBytes(2);
 
 					/* Event Flags
+					 * 0x08 = Min/Max Values
 					 * 0x01 = Add, rather than replace
 					 * Rest is unknown
 					 */
-					bool addVolume = (reader.ReadByte() & 0x01) == 0x01;
+					byte flags = reader.ReadByte();
+					bool addVolume = (flags & 0x01) == 0x01;
+					bool minMax = (flags & 0x08) == 0x08;
 
 					// Operand Constant
-					float constant = reader.ReadSingle() / 100.0f;
+					float min = reader.ReadSingle() / 100.0f;
+					float max;
+					if (minMax)
+					{
+						max = reader.ReadSingle() / 100.0f;
+
+						// Unknown bytes
+						reader.ReadBytes(5);
+					}
+					else
+					{
+						max = min;
+
+						// Unknown values
+						reader.ReadBytes(8);
+					}
 					if (addVolume)
 					{
-						constant += (float) clipVolume;
+						min += (float) clipVolume;
+						max += (float) clipVolume;
 					}
-
-					// Unknown values
-					reader.ReadBytes(8);
 
 					Events[i] = new SetVolumeEvent(
 						eventTimestamp,
-						XACTCalculator.CalculateAmplitudeRatio(constant)
+						XACTCalculator.CalculateAmplitudeRatio(min),
+						XACTCalculator.CalculateAmplitudeRatio(max)
 					);
 				}
 				else if (eventType == 15)
@@ -711,6 +754,8 @@ namespace Microsoft.Xna.Framework.Audio
 			private set;
 		}
 
+		protected static Random random = new Random();
+
 		public XACTEvent(uint type, uint timestamp)
 		{
 			Type = type;
@@ -748,8 +793,6 @@ namespace Microsoft.Xna.Framework.Audio
 		private int INTERNAL_curWave;
 
 		private SoundEffect[] INTERNAL_waves;
-
-		private static Random random = new Random();
 
 		public PlayWaveEvent(
 			uint timestamp,
@@ -898,19 +941,45 @@ namespace Microsoft.Xna.Framework.Audio
 
 	internal class SetVolumeEvent : XACTEvent
 	{
-		private float INTERNAL_constant;
+		private float INTERNAL_min;
+		private float INTERNAL_max;
 
 		public SetVolumeEvent(
 			uint timestamp,
-			float constant
+			float min,
+			float max
 		) : base(2, timestamp) {
-			INTERNAL_constant = constant;
+			INTERNAL_min = min;
+			INTERNAL_max = max;
 		}
 
 		public float GetVolume()
 		{
-			// FIXME: There's probably more that this event does...
-			return INTERNAL_constant;
+			return INTERNAL_min + (float) (
+				random.NextDouble() * (INTERNAL_max - INTERNAL_min)
+			);
+		}
+	}
+
+	internal class SetPitchEvent : XACTEvent
+	{
+		private float INTERNAL_min;
+		private float INTERNAL_max;
+
+		public SetPitchEvent(
+			uint timestamp,
+			float min,
+			float max
+		) : base(3, timestamp) {
+			INTERNAL_min = min;
+			INTERNAL_max = max;
+		}
+
+		public float GetPitch()
+		{
+			return INTERNAL_min + (float) (
+				random.NextDouble() * (INTERNAL_max - INTERNAL_min)
+			);
 		}
 	}
 }
