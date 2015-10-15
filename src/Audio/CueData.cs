@@ -507,8 +507,8 @@ namespace Microsoft.Xna.Framework.Audio
 					reader.ReadSingle();
 					reader.ReadSingle();
 
-					// Filter Type again...?
-					reader.ReadByte();
+					// Unknown value
+					reader.ReadUInt16();
 					
 					// Finally.
 					Events[i] = new PlayWaveEvent(
@@ -562,7 +562,7 @@ namespace Microsoft.Xna.Framework.Audio
 					reader.ReadSingle();
 					reader.ReadSingle();
 
-					// Filter Type again...?
+					// Unknown value
 					reader.ReadByte();
 
 					// Variation flags
