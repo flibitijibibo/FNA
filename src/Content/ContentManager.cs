@@ -74,6 +74,7 @@ namespace Microsoft.Xna.Framework.Content
 		private static object ContentManagerLock = new object();
 		private static List<WeakReference> ContentManagers = new List<WeakReference>();
 
+		private static readonly byte[] xnbHeader = new byte[4];
 		private static List<char> targetPlatformIdentifiers = new List<char>()
 		{
 			'w', // Windows (DirectX)
@@ -328,84 +329,89 @@ namespace Microsoft.Xna.Framework.Content
 				stream = File.OpenRead(modifiedAssetName);
 			}
 
-			using (BinaryReader xnbReader = new BinaryReader(stream))
+			// Check for XNB header
+			stream.Read(xnbHeader, 0, xnbHeader.Length);
+			if (	xnbHeader[0] == 'X' &&
+				xnbHeader[1] == 'N' &&
+				xnbHeader[2] == 'B' &&
+				targetPlatformIdentifiers.Contains((char) xnbHeader[3]) )
 			{
-				try
+				using (BinaryReader xnbReader = new BinaryReader(stream))
+				using (ContentReader reader = GetContentReaderFromXnb(assetName, ref stream, xnbReader, recordDisposableObject))
 				{
-					// Try to load as XNB file
-					using (ContentReader reader = GetContentReaderFromXnb(assetName, ref stream, xnbReader, recordDisposableObject))
+					result = reader.ReadAsset<T>();
+					GraphicsResource resource = result as GraphicsResource;
+					if (resource != null)
 					{
-						result = reader.ReadAsset<T>();
-						GraphicsResource resource = result as GraphicsResource;
-						if (resource != null)
-						{
-							resource.Name = assetName;
-						}
-					}
-				}
-				catch (Exception e)
-				{
-					// FIXME: Assuming seekable streams! -flibit
-					stream.Seek(0, SeekOrigin.Begin);
-
-					// Try to load as a raw asset
-					if (typeof(T) == typeof(Texture2D) || typeof(T) == typeof(Texture))
-					{
-						Texture2D texture = Texture2D.FromStream(
-							graphicsDeviceService.GraphicsDevice,
-							stream
-						);
-						texture.Name = assetName;
-						result = texture;
-					}
-					else if ((typeof(T) == typeof(SoundEffect)))
-					{
-						result = SoundEffect.FromStream(stream);
-					}
-					else if ((typeof(T) == typeof(Effect)))
-					{
-						byte[] data = new byte[stream.Length];
-						stream.Read(data, 0, (int) stream.Length);
-						result = new Effect(graphicsDeviceService.GraphicsDevice, data);
-					}
-					else if ((typeof(T) == typeof(Song)))
-					{
-						// FIXME: Not using the stream! -flibit
-						result = new Song(modifiedAssetName);
-					}
-					else if ((typeof(T) == typeof(Video)))
-					{
-						// FIXME: Not using the stream! -flibit
-						result = new Video(modifiedAssetName);
-					}
-					else
-					{
-						// We dunno WTF this is, give them the XNB Exception.
-						throw e;
-					}
-
-					/* Because Raw Assets skip the ContentReader step, they need to have their
-					 * disposables recorded here. Doing it outside of this catch will
-					 * result in disposables being logged twice.
-					 */
-					IDisposable disposableResult = result as IDisposable;
-					if (disposableResult != null)
-					{
-						if (recordDisposableObject != null)
-						{
-							recordDisposableObject(disposableResult);
-						}
-						else
-						{
-							disposableAssets.Add(disposableResult);
-						}
+						resource.Name = assetName;
 					}
 				}
 			}
-
-			if (result == null)
+			else
 			{
-				throw new ContentLoadException("Could not load " + assetName + " asset!");
+				// It's not an XNB file. Try to load as a raw asset instead.
+
+				// FIXME: Assuming seekable streams! -flibit
+				stream.Seek(0, SeekOrigin.Begin);
+
+				// Try to load as a raw asset
+				if (typeof(T) == typeof(Texture2D) || typeof(T) == typeof(Texture))
+				{
+					Texture2D texture = Texture2D.FromStream(
+						graphicsDeviceService.GraphicsDevice,
+						stream
+					);
+					texture.Name = assetName;
+					result = texture;
+				}
+				else if ((typeof(T) == typeof(SoundEffect)))
+				{
+					result = SoundEffect.FromStream(stream);
+				}
+				else if ((typeof(T) == typeof(Effect)))
+				{
+					byte[] data = new byte[stream.Length];
+					stream.Read(data, 0, (int) stream.Length);
+					result = new Effect(graphicsDeviceService.GraphicsDevice, data);
+				}
+				else if ((typeof(T) == typeof(Song)))
+				{
+					// FIXME: Not using the stream! -flibit
+					result = new Song(modifiedAssetName);
+				}
+				else if ((typeof(T) == typeof(Video)))
+				{
+					// FIXME: Not using the stream! -flibit
+					result = new Video(modifiedAssetName);
+				}
+				else
+				{
+					stream.Close();
+					throw new ContentLoadException("Could not load " + assetName + " asset!");
+				}
+
+				/* Because Raw Assets skip the ContentReader step, they need to have their
+				 * disposables recorded here. Doing it outside of this catch will
+				 * result in disposables being logged twice.
+				 */
+				IDisposable disposableResult = result as IDisposable;
+				if (disposableResult != null)
+				{
+					if (recordDisposableObject != null)
+					{
+						recordDisposableObject(disposableResult);
+					}
+					else
+					{
+						disposableAssets.Add(disposableResult);
+					}
+				}
+
+				/* Because we're not using a BinaryReader for raw assets, we
+				 * need to close the stream ourselves.
+				 * -flibit
+				 */
+				stream.Close();
 			}
 
 			return (T) result;
@@ -435,16 +441,6 @@ namespace Microsoft.Xna.Framework.Content
 
 		private ContentReader GetContentReaderFromXnb(string originalAssetName, ref Stream stream, BinaryReader xnbReader, Action<IDisposable> recordDisposableObject)
 		{
-			// The first 4 bytes should be the "XNB" header.
-			byte x = xnbReader.ReadByte();
-			byte n = xnbReader.ReadByte();
-			byte b = xnbReader.ReadByte();
-			byte platform = xnbReader.ReadByte();
-			if (	x != 'X' || n != 'N' || b != 'B' ||
-				!(targetPlatformIdentifiers.Contains((char) platform)) )
-			{
-				throw new ContentLoadException("Asset does not appear to be a valid XNB file. Did you process your content for Windows?");
-			}
 			byte version = xnbReader.ReadByte();
 			byte flags = xnbReader.ReadByte();
 			bool compressed = (flags & 0x80) != 0;
