@@ -2825,6 +2825,15 @@ namespace Microsoft.Xna.Framework.Graphics
 			IntPtr ptr
 		) {
 			BindTexture(texture.texture);
+			// Set pixel alignment to match texel size in bytes
+			int packSize = Texture.GetFormatSize(texture.Format);
+			if (packSize != 4)
+			{
+				glPixelStorei(
+					GLenum.GL_UNPACK_ALIGNMENT,
+					packSize
+				);
+			}
 			glTexSubImage2D(
 				GLenum.GL_TEXTURE_2D,
 				0,
@@ -2836,6 +2845,11 @@ namespace Microsoft.Xna.Framework.Graphics
 				XNAToGL.TextureDataType[(int) texture.Format],
 				ptr
 			);
+			// Keep this state sane -flibit
+			if (packSize != 4)
+			{
+				glPixelStorei(GLenum.GL_UNPACK_ALIGNMENT, 4);
+			}
 		}
 
 		#endregion
