@@ -292,7 +292,12 @@ namespace Microsoft.Xna.Framework.Storage
 		/// <returns>Array of directory names.</returns>
 		public string[] GetDirectoryNames()
 		{
-			return Directory.GetDirectories(storagePath);
+			string[] names = Directory.GetDirectories(storagePath);
+			for (int i = 0; i < names.Length; i += 1)
+			{
+				names[i] = names[i].Substring(storagePath.Length + 1);
+			}
+			return names;
 		}
 
 		/// <summary>
@@ -310,7 +315,12 @@ namespace Microsoft.Xna.Framework.Storage
 				throw new ArgumentNullException("Parameter searchPattern must contain a value.");
 			}
 
-			return Directory.GetDirectories(storagePath, searchPattern);
+			string[] names = Directory.GetDirectories(storagePath, searchPattern);
+			for (int i = 0; i < names.Length; i += 1)
+			{
+				names[i] = names[i].Substring(storagePath.Length + 1);
+			}
+			return names;
 		}
 
 		/// <summary>
@@ -319,7 +329,12 @@ namespace Microsoft.Xna.Framework.Storage
 		/// <returns>Array of file names.</returns>
 		public string[] GetFileNames()
 		{
-			return Directory.GetFiles(storagePath);
+			string[] names = Directory.GetFiles(storagePath);
+			for (int i = 0; i < names.Length; i += 1)
+			{
+				names[i] = names[i].Substring(storagePath.Length + 1);
+			}
+			return names;
 		}
 
 		/// <summary>
@@ -337,7 +352,12 @@ namespace Microsoft.Xna.Framework.Storage
 				throw new ArgumentNullException("Parameter searchPattern must contain a value.");
 			}
 
-			return Directory.GetFiles(storagePath, searchPattern);
+			string[] names = Directory.GetFiles(storagePath, searchPattern);
+			for (int i = 0; i < names.Length; i += 1)
+			{
+				names[i] = names[i].Substring(storagePath.Length + 1);
+			}
+			return names;
 		}
 
 		#endregion
