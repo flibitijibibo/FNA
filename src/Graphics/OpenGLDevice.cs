@@ -506,7 +506,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		private IntPtr currentTechnique = IntPtr.Zero;
 		private uint currentPass = 0;
 
-		private int flipViewport;
+		private int flipViewport = 1;
 
 		private bool effectApplied = false;
 
@@ -1766,7 +1766,6 @@ namespace Microsoft.Xna.Framework.Graphics
 			ref MojoShader.MOJOSHADER_effectStateChanges stateChanges
 		) {
 			effectApplied = true;
-			flipViewport = (currentDrawFramebuffer == targetFramebuffer) ? -1 : 1;
 			IntPtr glEffectData = (effect as OpenGLEffect).GLEffectData;
 			if (glEffectData == currentEffect)
 			{
@@ -1915,11 +1914,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 
 			MojoShader.MOJOSHADER_glProgramReady();
-			if (flipViewport != 0)
-			{
-				MojoShader.MOJOSHADER_glProgramViewportFlip(flipViewport);
-				flipViewport = 0;
-			}
+			MojoShader.MOJOSHADER_glProgramViewportFlip(flipViewport);
 		}
 
 		public void ApplyVertexAttributes(
@@ -1989,11 +1984,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 
 			MojoShader.MOJOSHADER_glProgramReady();
-			if (flipViewport != 0)
-			{
-				MojoShader.MOJOSHADER_glProgramViewportFlip(flipViewport);
-				flipViewport = 0;
-			}
+			MojoShader.MOJOSHADER_glProgramViewportFlip(flipViewport);
 		}
 
 		private void FlushGLVertexAttributes()
