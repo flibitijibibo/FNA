@@ -23,34 +23,12 @@ namespace Microsoft.Xna.Framework.Input
 			{
 				return left;
 			}
-			internal set
-			{
-				if (value.LengthSquared() > 1f)
-				{
-					left = Vector2.Normalize(value);
-				}
-				else
-				{
-					left = value;
-				}
-			}
 		}
 		public Vector2 Right
 		{
 			get
 			{
 				return right;
-			}
-			internal set
-			{
-				if (value.LengthSquared() > 1f)
-				{
-					right = Vector2.Normalize(value);
-				}
-				else
-				{
-					right = value;
-				}
 			}
 		}
 
@@ -65,10 +43,11 @@ namespace Microsoft.Xna.Framework.Input
 
 		#region Public Constructor
 
-		public GamePadThumbSticks(Vector2 leftPosition, Vector2 rightPosition) : this()
+		public GamePadThumbSticks(Vector2 leftPosition, Vector2 rightPosition)
 		{
-			Left = leftPosition;
-			Right = rightPosition;
+			left = leftPosition;
+			right = rightPosition;
+			ApplySquareClamp();
 		}
 
 		#endregion
@@ -79,7 +58,7 @@ namespace Microsoft.Xna.Framework.Input
 			Vector2 leftPosition,
 			Vector2 rightPosition,
 			GamePadDeadZone deadZoneMode
-		) : this() {
+		) {
 			/* XNA applies dead zones before rounding/clamping values.
 			 * The public constructor does not allow this because the
 			 * dead zone must be known first.
@@ -87,8 +66,14 @@ namespace Microsoft.Xna.Framework.Input
 			left = leftPosition;
 			right = rightPosition;
 			ApplyDeadZone(deadZoneMode);
-			Left = left;
-			Right = right;
+			if (deadZoneMode == GamePadDeadZone.Circular)
+			{
+				ApplyCircularClamp();
+			}
+			else
+			{
+				ApplySquareClamp();
+			}
 		}
 
 		#endregion
@@ -115,6 +100,26 @@ namespace Microsoft.Xna.Framework.Input
 					left = ExcludeCircularDeadZone(left, leftThumbDeadZone);
 					right = ExcludeCircularDeadZone(right, rightThumbDeadZone);
 					break;
+			}
+		}
+
+		private void ApplySquareClamp()
+		{
+			left.X = MathHelper.Clamp(left.X, -1.0f, 1.0f);
+			left.Y = MathHelper.Clamp(left.Y, -1.0f, 1.0f);
+			right.X = MathHelper.Clamp(right.X, -1.0f, 1.0f);
+			right.Y = MathHelper.Clamp(right.Y, -1.0f, 1.0f);
+		}
+
+		private void ApplyCircularClamp()
+		{
+			if (left.LengthSquared() > 1.0f)
+			{
+				left.Normalize();
+			}
+			if (right.LengthSquared() > 1.0f)
+			{
+				right.Normalize();
 			}
 		}
 
