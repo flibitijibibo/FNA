@@ -4063,6 +4063,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			public void Dispose()
 			{
 				uint handle = Handle;
+				glDevice.BindFramebuffer(0);
 				glDevice.glDeleteFramebuffers(1, ref handle);
 				glDevice.glDeleteRenderbuffers(1, ref colorAttachment);
 				if (depthStencilAttachment != 0)
