@@ -59,7 +59,8 @@ namespace Microsoft.Xna.Framework.Graphics
 		#region Private Variables
 
 		private Dictionary<string, EffectParameter> samplerMap = new Dictionary<string, EffectParameter>();
-		private MojoShader.MOJOSHADER_effectStateChanges stateChanges = new MojoShader.MOJOSHADER_effectStateChanges();
+		private MojoShader.MOJOSHADER_effectStateChanges stateChanges;
+		private GCHandle stateChangesHandle;
 
 		#endregion
 
@@ -251,6 +252,13 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			// The default technique is the first technique.
 			CurrentTechnique = Techniques[0];
+
+			// Pin the state changes so .NET doesn't move it around
+			stateChanges = new MojoShader.MOJOSHADER_effectStateChanges();
+			stateChanges.render_state_change_count = 0;
+			stateChanges.sampler_state_change_count = 0;
+			stateChanges.vertex_sampler_state_change_count = 0;
+			stateChangesHandle = GCHandle.Alloc(stateChanges, GCHandleType.Pinned);
 		}
 
 		#endregion
@@ -277,6 +285,13 @@ namespace Microsoft.Xna.Framework.Graphics
 					CurrentTechnique = Techniques[i];
 				}
 			}
+
+			// Pin the state changes so .NET doesn't move it around
+			stateChanges = new MojoShader.MOJOSHADER_effectStateChanges();
+			stateChanges.render_state_change_count = 0;
+			stateChanges.sampler_state_change_count = 0;
+			stateChanges.vertex_sampler_state_change_count = 0;
+			stateChangesHandle = GCHandle.Alloc(stateChanges, GCHandleType.Pinned);
 		}
 
 		#endregion
@@ -297,6 +312,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			if (!IsDisposed && disposing)
 			{
 				GraphicsDevice.GLDevice.AddDisposeEffect(glEffect);
+				stateChangesHandle.Free();
 			}
 			base.Dispose(disposing);
 		}
