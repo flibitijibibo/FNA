@@ -58,5 +58,14 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			get;
 		}
+
+		/// <summary>
+		/// Gets the handle of the color buffer.
+		/// </summary>
+		/// <value>The color buffer handle.</value>
+		IGLRenderbuffer ColorBuffer
+		{
+			get;
+		}
 	}
 }

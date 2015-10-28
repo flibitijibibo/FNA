@@ -56,11 +56,21 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		}
 
+		/// <inheritdoc/>
+		IGLRenderbuffer IRenderTarget.ColorBuffer
+		{
+			get
+			{
+				return glColorBuffer;
+			}
+		}
+
 		#endregion
 
 		#region Private Variables
 
 		private IGLRenderbuffer glDepthStencilBuffer;
+		private IGLRenderbuffer glColorBuffer;
 
 		#endregion
 
@@ -133,6 +143,13 @@ namespace Microsoft.Xna.Framework.Graphics
 			);
 			RenderTargetUsage = usage;
 
+			glColorBuffer = graphicsDevice.GLDevice.GenRenderbuffer(
+				width,
+				height,
+				Format,
+				MultiSampleCount
+			);
+
 			// If we don't need a depth buffer then we're done.
 			if (preferredDepthFormat == DepthFormat.None)
 			{
@@ -142,7 +159,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			glDepthStencilBuffer = graphicsDevice.GLDevice.GenRenderbuffer(
 				width,
 				height,
-				preferredDepthFormat
+				preferredDepthFormat,
+				MultiSampleCount
 			);
 		}
 

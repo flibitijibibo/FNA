@@ -738,12 +738,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				// Generate mipmaps for previous targets, if needed
 				for (int i = 0; i < RenderTargetCount; i += 1)
 				{
-					if (renderTargetBindings[i].RenderTarget.LevelCount > 1)
-					{
-						GLDevice.GenerateTargetMipmaps(
-							renderTargetBindings[i].RenderTarget.texture
-						);
-					}
+					GLDevice.ResolveTarget(renderTargetBindings[i]);
 				}
 				Array.Clear(renderTargetBindings, 0, renderTargetBindings.Length);
 				RenderTargetCount = 0;
@@ -765,25 +760,21 @@ namespace Microsoft.Xna.Framework.Graphics
 				// Generate mipmaps for previous targets, if needed
 				for (int i = 0; i < RenderTargetCount; i += 1)
 				{
-					if (renderTargetBindings[i].RenderTarget.LevelCount > 1)
+					// We only need to gen mipmaps if the target is no longer bound.
+					bool stillBound = false;
+					for (int j = 0; j < renderTargets.Length; j += 1)
 					{
-						// We only need to gen mipmaps if the target is no longer bound.
-						bool stillBound = false;
-						for (int j = 0; j < renderTargets.Length; j += 1)
+						if (renderTargetBindings[i].RenderTarget == renderTargets[j].RenderTarget)
 						{
-							if (renderTargetBindings[i].RenderTarget == renderTargets[j].RenderTarget)
-							{
-								stillBound = true;
-								break;
-							}
-						}
-						if (!stillBound)
-						{
-							GLDevice.GenerateTargetMipmaps(
-								renderTargetBindings[i].RenderTarget.texture
-							);
+							stillBound = true;
+							break;
 						}
 					}
+					if (stillBound)
+					{
+						continue;
+					}
+					GLDevice.ResolveTarget(renderTargetBindings[i]);
 				}
 				Array.Clear(renderTargetBindings, 0, renderTargetBindings.Length);
 				Array.Copy(renderTargets, renderTargetBindings, renderTargets.Length);

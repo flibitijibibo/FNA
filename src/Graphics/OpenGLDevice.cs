@@ -401,8 +401,9 @@ namespace Microsoft.Xna.Framework.Graphics
 		private uint currentReadFramebuffer = 0;
 		private uint currentDrawFramebuffer = 0;
 		private uint targetFramebuffer = 0;
+		private uint resolveFramebufferRead = 0;
+		private uint resolveFramebufferDraw = 0;
 		private uint[] currentAttachments;
-		private GLenum[] currentAttachmentFaces;
 		private int currentDrawBuffers;
 		private GLenum[] drawBuffersArray;
 		private uint currentRenderbuffer;
@@ -740,18 +741,18 @@ namespace Microsoft.Xna.Framework.Graphics
 			int numAttachments;
 			glGetIntegerv(GLenum.GL_MAX_DRAW_BUFFERS, out numAttachments);
 			currentAttachments = new uint[numAttachments];
-			currentAttachmentFaces = new GLenum[numAttachments];
 			drawBuffersArray = new GLenum[numAttachments];
 			for (int i = 0; i < numAttachments; i += 1)
 			{
 				currentAttachments[i] = 0;
-				currentAttachmentFaces[i] = GLenum.GL_TEXTURE_2D;
 				drawBuffersArray[i] = GLenum.GL_COLOR_ATTACHMENT0 + i;
 			}
 			currentDrawBuffers = 0;
 			currentRenderbuffer = 0;
 			currentDepthStencilFormat = DepthFormat.None;
 			glGenFramebuffers(1, out targetFramebuffer);
+			glGenFramebuffers(1, out resolveFramebufferRead);
+			glGenFramebuffers(1, out resolveFramebufferDraw);
 
 			// Generate and bind a VAO, to shut Core up
 			if (useCoreProfile)
@@ -772,6 +773,10 @@ namespace Microsoft.Xna.Framework.Graphics
 				glBindVertexArray(0);
 				glDeleteVertexArrays(1, ref vao);
 			}
+			glDeleteFramebuffers(1, ref resolveFramebufferRead);
+			resolveFramebufferRead = 0;
+			glDeleteFramebuffers(1, ref resolveFramebufferDraw);
+			resolveFramebufferDraw = 0;
 			glDeleteFramebuffers(1, ref targetFramebuffer);
 			targetFramebuffer = 0;
 			if (Backbuffer is OpenGLBackbuffer)
@@ -3221,14 +3226,66 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
-		#region glGenerateMipmap Method
+		#region RenderTarget->Texture Method
 
-		public void GenerateTargetMipmaps(IGLTexture target)
+		public void ResolveTarget(RenderTargetBinding target)
 		{
-			OpenGLTexture prevTex = Textures[0];
-			BindTexture(target);
-			glGenerateMipmap((target as OpenGLTexture).Target);
-			BindTexture(prevTex);
+			uint prevBuffer = currentDrawFramebuffer;
+
+			// Set up the texture framebuffer
+			GLenum textureTarget;
+			int width, height;
+			if (target.RenderTarget is RenderTarget2D)
+			{
+				textureTarget = GLenum.GL_TEXTURE_2D;
+				Texture2D target2D = (target.RenderTarget as Texture2D);
+				width = target2D.Width;
+				height = target2D.Height;
+			}
+			else
+			{
+				textureTarget = GLenum.GL_TEXTURE_CUBE_MAP_POSITIVE_X + (int) target.CubeMapFace;
+				TextureCube targetCube = (target.RenderTarget as TextureCube);
+				width = targetCube.Size;
+				height = targetCube.Size;
+			}
+			BindFramebuffer(resolveFramebufferDraw);
+			glFramebufferTexture2D(
+				GLenum.GL_FRAMEBUFFER,
+				GLenum.GL_COLOR_ATTACHMENT0,
+				textureTarget,
+				(target.RenderTarget.texture as OpenGLTexture).Handle,
+				0
+			);
+
+			// Set up the renderbuffer framebuffer
+			BindFramebuffer(resolveFramebufferRead);
+			glFramebufferRenderbuffer(
+				GLenum.GL_FRAMEBUFFER,
+				GLenum.GL_COLOR_ATTACHMENT0,
+				GLenum.GL_RENDERBUFFER,
+				((target.RenderTarget as IRenderTarget).ColorBuffer as OpenGLRenderbuffer).Handle
+			);
+
+			// Blit!
+			BindDrawFramebuffer(resolveFramebufferDraw);
+			glBlitFramebuffer(
+				0, 0, width, height,
+				0, 0, width, height,
+				GLenum.GL_COLOR_BUFFER_BIT,
+				GLenum.GL_LINEAR
+			);
+
+			BindFramebuffer(prevBuffer);
+
+			// If the target has mipmaps, regenerate them now
+			if (target.RenderTarget.LevelCount > 1)
+			{
+				OpenGLTexture prevTex = Textures[0];
+				BindTexture(target.RenderTarget.texture);
+				glGenerateMipmap((target.RenderTarget.texture as OpenGLTexture).Target);
+				BindTexture(prevTex);
+			}
 		}
 
 		#endregion
@@ -3294,7 +3351,8 @@ namespace Microsoft.Xna.Framework.Graphics
 		public IGLRenderbuffer GenRenderbuffer(
 			int width,
 			int height,
-			DepthFormat format
+			SurfaceFormat format,
+			int multiSampleCount
 		) {
 			uint handle = 0;
 
@@ -3307,12 +3365,73 @@ namespace Microsoft.Xna.Framework.Graphics
 				GLenum.GL_RENDERBUFFER,
 				handle
 			);
-			glRenderbufferStorage(
+			if (multiSampleCount > 0)
+			{
+				glRenderbufferStorageMultisample(
+					GLenum.GL_RENDERBUFFER,
+					multiSampleCount,
+					XNAToGL.TextureFormat[(int) format],
+					width,
+					height
+				);
+			}
+			else
+			{
+				glRenderbufferStorage(
+					GLenum.GL_RENDERBUFFER,
+					XNAToGL.TextureFormat[(int) format],
+					width,
+					height
+				);
+			}
+			glBindRenderbuffer(
 				GLenum.GL_RENDERBUFFER,
-				XNAToGL.DepthStorage[(int) format],
-				width,
-				height
+				0
 			);
+
+#if !DISABLE_THREADING
+			});
+#endif
+
+			return new OpenGLRenderbuffer(handle);
+		}
+
+		public IGLRenderbuffer GenRenderbuffer(
+			int width,
+			int height,
+			DepthFormat format,
+			int multiSampleCount
+		) {
+			uint handle = 0;
+
+#if !DISABLE_THREADING
+			ForceToMainThread(() => {
+#endif
+
+			glGenRenderbuffers(1, out handle);
+			glBindRenderbuffer(
+				GLenum.GL_RENDERBUFFER,
+				handle
+			);
+			if (multiSampleCount > 0)
+			{
+				glRenderbufferStorageMultisample(
+					GLenum.GL_RENDERBUFFER,
+					multiSampleCount,
+					XNAToGL.DepthStorage[(int) format],
+					width,
+					height
+				);
+			}
+			else
+			{
+				glRenderbufferStorage(
+					GLenum.GL_RENDERBUFFER,
+					XNAToGL.DepthStorage[(int) format],
+					width,
+					height
+				);
+			}
 			glBindRenderbuffer(
 				GLenum.GL_RENDERBUFFER,
 				0
@@ -3475,50 +3594,36 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			int i;
 			uint[] attachments = new uint[renderTargets.Length];
-			GLenum[] textureTargets = new GLenum[renderTargets.Length];
 			for (i = 0; i < renderTargets.Length; i += 1)
 			{
-				attachments[i] = (renderTargets[i].RenderTarget.texture as OpenGLTexture).Handle;
-				if (renderTargets[i].RenderTarget is RenderTarget2D)
-				{
-					textureTargets[i] = GLenum.GL_TEXTURE_2D;
-				}
-				else
-				{
-					textureTargets[i] = GLenum.GL_TEXTURE_CUBE_MAP_POSITIVE_X + (int) renderTargets[i].CubeMapFace;
-				}
+				attachments[i] = ((renderTargets[i].RenderTarget as IRenderTarget).ColorBuffer as OpenGLRenderbuffer).Handle;
 			}
 
 			// Update the color attachments, DrawBuffers state
 			for (i = 0; i < attachments.Length; i += 1)
 			{
-				if (	attachments[i] != currentAttachments[i] ||
-					textureTargets[i] != currentAttachmentFaces[i]	)
+				if (attachments[i] != currentAttachments[i])
 				{
-					glFramebufferTexture2D(
+					glFramebufferRenderbuffer(
 						GLenum.GL_FRAMEBUFFER,
 						GLenum.GL_COLOR_ATTACHMENT0 + i,
-						textureTargets[i],
-						attachments[i],
-						0
+						GLenum.GL_RENDERBUFFER,
+						attachments[i]
 					);
 					currentAttachments[i] = attachments[i];
-					currentAttachmentFaces[i] = textureTargets[i];
 				}
 			}
 			while (i < currentAttachments.Length)
 			{
 				if (currentAttachments[i] != 0)
 				{
-					glFramebufferTexture2D(
+					glFramebufferRenderbuffer(
 						GLenum.GL_FRAMEBUFFER,
 						GLenum.GL_COLOR_ATTACHMENT0 + i,
-						currentAttachmentFaces[i],
-						0,
+						GLenum.GL_RENDERBUFFER,
 						0
 					);
 					currentAttachments[i] = 0;
-					currentAttachmentFaces[i] = GLenum.GL_TEXTURE_2D;
 				}
 				i += 1;
 			}

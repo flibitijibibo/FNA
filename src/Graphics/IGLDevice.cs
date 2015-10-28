@@ -146,7 +146,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			IGLRenderbuffer renderbuffer,
 			DepthFormat depthFormat
 		);
-		void GenerateTargetMipmaps(IGLTexture target);
+		void ResolveTarget(RenderTargetBinding target);
 
 		void ReadBackbuffer<T>(
 			T[] data,
@@ -241,7 +241,14 @@ namespace Microsoft.Xna.Framework.Graphics
 		IGLRenderbuffer GenRenderbuffer(
 			int width,
 			int height,
-			DepthFormat format
+			SurfaceFormat format,
+			int multiSampleCount
+		);
+		IGLRenderbuffer GenRenderbuffer(
+			int width,
+			int height,
+			DepthFormat format,
+			int multiSampleCount
 		);
 		void AddDisposeRenderbuffer(IGLRenderbuffer renderbuffer);
 
