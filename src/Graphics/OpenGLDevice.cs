@@ -747,6 +747,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			for (int i = 0; i < numAttachments; i += 1)
 			{
 				currentAttachments[i] = 0;
+				currentAttachmentTypes[i] = GLenum.GL_TEXTURE_2D;
 				drawBuffersArray[i] = GLenum.GL_COLOR_ATTACHMENT0 + i;
 			}
 			currentDrawBuffers = 0;
@@ -3627,26 +3628,29 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				if (attachments[i] != currentAttachments[i])
 				{
-					if (	attachmentTypes[i] != GLenum.GL_RENDERBUFFER &&
-						currentAttachmentTypes[i] == GLenum.GL_RENDERBUFFER	)
+					if (currentAttachments[i] != 0)
 					{
-						glFramebufferRenderbuffer(
-							GLenum.GL_FRAMEBUFFER,
-							GLenum.GL_COLOR_ATTACHMENT0 + i,
-							GLenum.GL_RENDERBUFFER,
-							0
-						);
-					}
-					else if (	attachmentTypes[i] == GLenum.GL_RENDERBUFFER &&
-							currentAttachmentTypes[i] != GLenum.GL_RENDERBUFFER	)
-					{
-						glFramebufferTexture2D(
-							GLenum.GL_FRAMEBUFFER,
-							GLenum.GL_COLOR_ATTACHMENT0 + i,
-							currentAttachmentTypes[i],
-							0,
-							0
-						);
+						if (	attachmentTypes[i] != GLenum.GL_RENDERBUFFER &&
+							currentAttachmentTypes[i] == GLenum.GL_RENDERBUFFER	)
+						{
+							glFramebufferRenderbuffer(
+								GLenum.GL_FRAMEBUFFER,
+								GLenum.GL_COLOR_ATTACHMENT0 + i,
+								GLenum.GL_RENDERBUFFER,
+								0
+							);
+						}
+						else if (	attachmentTypes[i] == GLenum.GL_RENDERBUFFER &&
+								currentAttachmentTypes[i] != GLenum.GL_RENDERBUFFER	)
+						{
+							glFramebufferTexture2D(
+								GLenum.GL_FRAMEBUFFER,
+								GLenum.GL_COLOR_ATTACHMENT0 + i,
+								currentAttachmentTypes[i],
+								0,
+								0
+							);
+						}
 					}
 					if (attachmentTypes[i] == GLenum.GL_RENDERBUFFER)
 					{
