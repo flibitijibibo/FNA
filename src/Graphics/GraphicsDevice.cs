@@ -760,7 +760,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				// Generate mipmaps for previous targets, if needed
 				for (int i = 0; i < RenderTargetCount; i += 1)
 				{
-					// We only need to gen mipmaps if the target is no longer bound.
+					// We only need to resolve if the target is no longer bound.
 					bool stillBound = false;
 					for (int j = 0; j < renderTargets.Length; j += 1)
 					{

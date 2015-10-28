@@ -67,5 +67,10 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			get;
 		}
+
+		int MultiSampleCount
+		{
+			get;
+		}
 	}
 }

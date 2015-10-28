@@ -404,6 +404,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		private uint resolveFramebufferRead = 0;
 		private uint resolveFramebufferDraw = 0;
 		private uint[] currentAttachments;
+		private GLenum[] currentAttachmentTypes;
 		private int currentDrawBuffers;
 		private GLenum[] drawBuffersArray;
 		private uint currentRenderbuffer;
@@ -741,6 +742,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			int numAttachments;
 			glGetIntegerv(GLenum.GL_MAX_DRAW_BUFFERS, out numAttachments);
 			currentAttachments = new uint[numAttachments];
+			currentAttachmentTypes = new GLenum[numAttachments];
 			drawBuffersArray = new GLenum[numAttachments];
 			for (int i = 0; i < numAttachments; i += 1)
 			{
@@ -3230,53 +3232,56 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public void ResolveTarget(RenderTargetBinding target)
 		{
-			uint prevBuffer = currentDrawFramebuffer;
-
-			// Set up the texture framebuffer
-			GLenum textureTarget;
-			int width, height;
-			if (target.RenderTarget is RenderTarget2D)
+			if ((target.RenderTarget as IRenderTarget).MultiSampleCount > 0)
 			{
-				textureTarget = GLenum.GL_TEXTURE_2D;
-				Texture2D target2D = (target.RenderTarget as Texture2D);
-				width = target2D.Width;
-				height = target2D.Height;
+				uint prevBuffer = currentDrawFramebuffer;
+
+				// Set up the texture framebuffer
+				GLenum textureTarget;
+				int width, height;
+				if (target.RenderTarget is RenderTarget2D)
+				{
+					textureTarget = GLenum.GL_TEXTURE_2D;
+					Texture2D target2D = (target.RenderTarget as Texture2D);
+					width = target2D.Width;
+					height = target2D.Height;
+				}
+				else
+				{
+					textureTarget = GLenum.GL_TEXTURE_CUBE_MAP_POSITIVE_X + (int) target.CubeMapFace;
+					TextureCube targetCube = (target.RenderTarget as TextureCube);
+					width = targetCube.Size;
+					height = targetCube.Size;
+				}
+				BindFramebuffer(resolveFramebufferDraw);
+				glFramebufferTexture2D(
+					GLenum.GL_FRAMEBUFFER,
+					GLenum.GL_COLOR_ATTACHMENT0,
+					textureTarget,
+					(target.RenderTarget.texture as OpenGLTexture).Handle,
+					0
+				);
+
+				// Set up the renderbuffer framebuffer
+				BindFramebuffer(resolveFramebufferRead);
+				glFramebufferRenderbuffer(
+					GLenum.GL_FRAMEBUFFER,
+					GLenum.GL_COLOR_ATTACHMENT0,
+					GLenum.GL_RENDERBUFFER,
+					((target.RenderTarget as IRenderTarget).ColorBuffer as OpenGLRenderbuffer).Handle
+				);
+
+				// Blit!
+				BindDrawFramebuffer(resolveFramebufferDraw);
+				glBlitFramebuffer(
+					0, 0, width, height,
+					0, 0, width, height,
+					GLenum.GL_COLOR_BUFFER_BIT,
+					GLenum.GL_LINEAR
+				);
+
+				BindFramebuffer(prevBuffer);
 			}
-			else
-			{
-				textureTarget = GLenum.GL_TEXTURE_CUBE_MAP_POSITIVE_X + (int) target.CubeMapFace;
-				TextureCube targetCube = (target.RenderTarget as TextureCube);
-				width = targetCube.Size;
-				height = targetCube.Size;
-			}
-			BindFramebuffer(resolveFramebufferDraw);
-			glFramebufferTexture2D(
-				GLenum.GL_FRAMEBUFFER,
-				GLenum.GL_COLOR_ATTACHMENT0,
-				textureTarget,
-				(target.RenderTarget.texture as OpenGLTexture).Handle,
-				0
-			);
-
-			// Set up the renderbuffer framebuffer
-			BindFramebuffer(resolveFramebufferRead);
-			glFramebufferRenderbuffer(
-				GLenum.GL_FRAMEBUFFER,
-				GLenum.GL_COLOR_ATTACHMENT0,
-				GLenum.GL_RENDERBUFFER,
-				((target.RenderTarget as IRenderTarget).ColorBuffer as OpenGLRenderbuffer).Handle
-			);
-
-			// Blit!
-			BindDrawFramebuffer(resolveFramebufferDraw);
-			glBlitFramebuffer(
-				0, 0, width, height,
-				0, 0, width, height,
-				GLenum.GL_COLOR_BUFFER_BIT,
-				GLenum.GL_LINEAR
-			);
-
-			BindFramebuffer(prevBuffer);
 
 			// If the target has mipmaps, regenerate them now
 			if (target.RenderTarget.LevelCount > 1)
@@ -3594,9 +3599,27 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			int i;
 			uint[] attachments = new uint[renderTargets.Length];
+			GLenum[] attachmentTypes = new GLenum[renderTargets.Length];
 			for (i = 0; i < renderTargets.Length; i += 1)
 			{
-				attachments[i] = ((renderTargets[i].RenderTarget as IRenderTarget).ColorBuffer as OpenGLRenderbuffer).Handle;
+				IGLRenderbuffer colorBuffer = (renderTargets[i].RenderTarget as IRenderTarget).ColorBuffer;
+				if (colorBuffer != null)
+				{
+					attachments[i] = (colorBuffer as OpenGLRenderbuffer).Handle;
+					attachmentTypes[i] = GLenum.GL_RENDERBUFFER;
+				}
+				else
+				{
+					attachments[i] = (renderTargets[i].RenderTarget.texture as OpenGLTexture).Handle;
+					if (renderTargets[i].RenderTarget is RenderTarget2D)
+					{
+						attachmentTypes[i] = GLenum.GL_TEXTURE_2D;
+					}
+					else
+					{
+						attachmentTypes[i] = GLenum.GL_TEXTURE_CUBE_MAP_POSITIVE_X + (int) renderTargets[i].CubeMapFace;
+					}
+				}
 			}
 
 			// Update the color attachments, DrawBuffers state
@@ -3604,26 +3627,87 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				if (attachments[i] != currentAttachments[i])
 				{
-					glFramebufferRenderbuffer(
+					if (	attachmentTypes[i] != GLenum.GL_RENDERBUFFER &&
+						currentAttachmentTypes[i] == GLenum.GL_RENDERBUFFER	)
+					{
+						glFramebufferRenderbuffer(
+							GLenum.GL_FRAMEBUFFER,
+							GLenum.GL_COLOR_ATTACHMENT0 + i,
+							GLenum.GL_RENDERBUFFER,
+							0
+						);
+					}
+					else if (	attachmentTypes[i] == GLenum.GL_RENDERBUFFER &&
+							currentAttachmentTypes[i] != GLenum.GL_RENDERBUFFER	)
+					{
+						glFramebufferTexture2D(
+							GLenum.GL_FRAMEBUFFER,
+							GLenum.GL_COLOR_ATTACHMENT0 + i,
+							currentAttachmentTypes[i],
+							0,
+							0
+						);
+					}
+					if (attachmentTypes[i] == GLenum.GL_RENDERBUFFER)
+					{
+						glFramebufferRenderbuffer(
+							GLenum.GL_FRAMEBUFFER,
+							GLenum.GL_COLOR_ATTACHMENT0 + i,
+							GLenum.GL_RENDERBUFFER,
+							attachments[i]
+						);
+					}
+					else
+					{
+						glFramebufferTexture2D(
+							GLenum.GL_FRAMEBUFFER,
+							GLenum.GL_COLOR_ATTACHMENT0 + i,
+							attachmentTypes[i],
+							attachments[i],
+							0
+						);
+					}
+					currentAttachments[i] = attachments[i];
+					currentAttachmentTypes[i] = attachmentTypes[i];
+				}
+				else if (attachmentTypes[i] != currentAttachmentTypes[i])
+				{
+					// Texture cube face change!
+					glFramebufferTexture2D(
 						GLenum.GL_FRAMEBUFFER,
 						GLenum.GL_COLOR_ATTACHMENT0 + i,
-						GLenum.GL_RENDERBUFFER,
-						attachments[i]
+						attachmentTypes[i],
+						attachments[i],
+						0
 					);
-					currentAttachments[i] = attachments[i];
+					currentAttachmentTypes[i] = attachmentTypes[i];
 				}
 			}
 			while (i < currentAttachments.Length)
 			{
 				if (currentAttachments[i] != 0)
 				{
-					glFramebufferRenderbuffer(
-						GLenum.GL_FRAMEBUFFER,
-						GLenum.GL_COLOR_ATTACHMENT0 + i,
-						GLenum.GL_RENDERBUFFER,
-						0
-					);
+					if (currentAttachmentTypes[i] == GLenum.GL_RENDERBUFFER)
+					{
+						glFramebufferRenderbuffer(
+							GLenum.GL_FRAMEBUFFER,
+							GLenum.GL_COLOR_ATTACHMENT0 + i,
+							GLenum.GL_RENDERBUFFER,
+							0
+						);
+					}
+					else
+					{
+						glFramebufferTexture2D(
+							GLenum.GL_FRAMEBUFFER,
+							GLenum.GL_COLOR_ATTACHMENT0 + i,
+							currentAttachmentTypes[i],
+							0,
+							0
+						);
+					}
 					currentAttachments[i] = 0;
+					currentAttachmentTypes[i] = GLenum.GL_TEXTURE_2D;
 				}
 				i += 1;
 			}

@@ -143,12 +143,15 @@ namespace Microsoft.Xna.Framework.Graphics
 			);
 			RenderTargetUsage = usage;
 
-			glColorBuffer = graphicsDevice.GLDevice.GenRenderbuffer(
-				width,
-				height,
-				Format,
-				MultiSampleCount
-			);
+			if (MultiSampleCount > 0)
+			{
+				glColorBuffer = graphicsDevice.GLDevice.GenRenderbuffer(
+					width,
+					height,
+					Format,
+					MultiSampleCount
+				);
+			}
 
 			// If we don't need a depth buffer then we're done.
 			if (preferredDepthFormat == DepthFormat.None)
