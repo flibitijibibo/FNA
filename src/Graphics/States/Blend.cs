@@ -29,7 +29,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		SourceColor,
 		/// <summary>
 		/// Each component of the color is multiplied by the inverse of the source color.
-		/// {1 − Rs, 1 − Gs, 1 − Bs, 1 − As}, where Rs, Gs, Bs, As are color source values.
+		/// {1 - Rs, 1 - Gs, 1 - Bs, 1 - As}, where Rs, Gs, Bs, As are color source values.
 		/// </summary>
 		InverseSourceColor,
 		/// <summary>
@@ -39,7 +39,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		SourceAlpha,
 		/// <summary>
 		/// Each component of the color is multiplied by the inverse of the alpha value of the source.
-		/// {1 − As, 1 − As, 1 − As, 1 − As}, where As is the source alpha value.
+		/// {1 - As, 1 - As, 1 - As, 1 - As}, where As is the source alpha value.
 		/// </summary>
 		InverseSourceAlpha,
 		/// <summary>
@@ -49,7 +49,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		DestinationColor,
 		/// <summary>
 		/// Each component of the color is multiplied by the inversed destination color.
-		/// {1 − Rd, 1 − Gd, 1 − Bd, 1 − Ad}, where Rd, Gd, Bd, Ad are color destination values.
+		/// {1 - Rd, 1 - Gd, 1 - Bd, 1 - Ad}, where Rd, Gd, Bd, Ad are color destination values.
 		/// </summary>
 		InverseDestinationColor,
 		/// <summary>
@@ -59,7 +59,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		DestinationAlpha,
 		/// <summary>
 		/// Each component of the color is multiplied by the inversed alpha value of the destination.
-		/// {1 − Ad, 1 − Ad, 1 − Ad, 1 − Ad}, where Ad is the destination alpha value.
+		/// {1 - Ad, 1 - Ad, 1 - Ad, 1 - Ad}, where Ad is the destination alpha value.
 		/// </summary>
 		InverseDestinationAlpha,
 		/// <summary>
@@ -72,7 +72,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		InverseBlendFactor,
 		/// <summary>
 		/// Each component of the color is multiplied by either the alpha of the source color, or the inverse of the alpha of the source color, whichever is greater.
-		/// {f, f, f, 1}, where f = min(As, 1 − As), where As is the source alpha value.
+		/// {f, f, f, 1}, where f = min(As, 1 - As), where As is the source alpha value.
 		/// </summary>
 		SourceAlphaSaturation,
 	}

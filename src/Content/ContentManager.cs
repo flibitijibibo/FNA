@@ -290,7 +290,7 @@ namespace Microsoft.Xna.Framework.Content
 			}
 			catch (Exception e)
 			{
-				// Okay, so we couldn’t open it. Maybe it needs a different extension?
+				// Okay, so we couldn't open it. Maybe it needs a different extension?
 				// FIXME: Normalizing checks for a file on the disk, what about custom streams? -flibit
 				modifiedAssetName = FileHelpers.NormalizeFilePathSeparators(
 					Path.Combine(RootDirectoryFullPath, assetName)
@@ -316,10 +316,10 @@ namespace Microsoft.Xna.Framework.Content
 					modifiedAssetName = VideoReader.Normalize(modifiedAssetName);
 				}
 
-				// Did we get anything…?
+				// Did we get anything...?
 				if (String.IsNullOrEmpty(modifiedAssetName))
 				{
-					// Nope, nothing we’re aware of!
+					// Nope, nothing we're aware of!
 					throw new ContentLoadException(
 						"Could not load asset " + assetName + "! Error: " + e.Message,
 						e
