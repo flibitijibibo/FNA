@@ -925,6 +925,23 @@ namespace Microsoft.Xna.Framework.Graphics
 					 * -flibit
 					 */
 					OpenGLBackbuffer glBack = Backbuffer as OpenGLBackbuffer;
+					if (glBack.Texture == 0)
+					{
+						glGenTextures(1, out glBack.Texture);
+						glBindTexture(GLenum.GL_TEXTURE_2D, glBack.Texture);
+						glTexImage2D(
+							GLenum.GL_TEXTURE_2D,
+							0,
+							(int) GLenum.GL_RGBA,
+							glBack.Width,
+							glBack.Height,
+							0,
+							GLenum.GL_RGBA,
+							GLenum.GL_UNSIGNED_BYTE,
+							IntPtr.Zero
+						);
+						glBindTexture(Textures[0].Target, Textures[0].Handle);
+					}
 					BindFramebuffer(resolveFramebufferDraw);
 					glFramebufferTexture2D(
 						GLenum.GL_FRAMEBUFFER,
@@ -4210,6 +4227,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				glDevice = device;
 				DepthFormat = depthFormat;
 				MultiSampleCount = multiSampleCount;
+				Texture = 0;
 
 				// Generate and bind the FBO.
 				uint handle;
@@ -4229,19 +4247,6 @@ namespace Microsoft.Xna.Framework.Graphics
 						width,
 						height
 					);
-					glDevice.glGenTextures(1, out Texture);
-					glDevice.glBindTexture(GLenum.GL_TEXTURE_2D, Texture);
-					glDevice.glTexImage2D(
-						GLenum.GL_TEXTURE_2D,
-						0,
-						(int) GLenum.GL_RGBA,
-						width,
-						height,
-						0,
-						GLenum.GL_RGBA,
-						GLenum.GL_UNSIGNED_BYTE,
-						IntPtr.Zero
-					);
 				}
 				else
 				{
@@ -4251,7 +4256,6 @@ namespace Microsoft.Xna.Framework.Graphics
 						width,
 						height
 					);
-					Texture = 0;
 				}
 				glDevice.glFramebufferRenderbuffer(
 					GLenum.GL_FRAMEBUFFER,
@@ -4340,6 +4344,11 @@ namespace Microsoft.Xna.Framework.Graphics
 
 				DepthFormat depthFormat = presentationParameters.DepthStencilFormat;
 				MultiSampleCount = presentationParameters.MultiSampleCount;
+				if (Texture != 0)
+				{
+					glDevice.glDeleteTextures(1, ref Texture);
+					Texture = 0;
+				}
 
 				if (renderTargetBound)
 				{
@@ -4390,22 +4399,6 @@ namespace Microsoft.Xna.Framework.Graphics
 						Width,
 						Height
 					);
-					if (Texture != 0)
-					{
-						glDevice.glGenTextures(1, out Texture);
-					}
-					glDevice.glBindTexture(GLenum.GL_TEXTURE_2D, Texture);
-					glDevice.glTexImage2D(
-						GLenum.GL_TEXTURE_2D,
-						0,
-						(int) GLenum.GL_RGBA,
-						Width,
-						Height,
-						0,
-						GLenum.GL_RGBA,
-						GLenum.GL_UNSIGNED_BYTE,
-						IntPtr.Zero
-					);
 				}
 				else
 				{
@@ -4415,11 +4408,6 @@ namespace Microsoft.Xna.Framework.Graphics
 						Width,
 						Height
 					);
-					if (Texture != 0)
-					{
-						glDevice.glDeleteTextures(1, ref Texture);
-						Texture = 0;
-					}
 				}
 				glDevice.glFramebufferRenderbuffer(
 					GLenum.GL_FRAMEBUFFER,
