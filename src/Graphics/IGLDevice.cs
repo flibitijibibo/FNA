@@ -378,6 +378,11 @@ namespace Microsoft.Xna.Framework.Graphics
 			get;
 		}
 
+		int MultiSampleCount
+		{
+			get;
+		}
+
 		void ResetFramebuffer(
 			PresentationParameters presentationParameters,
 			bool renderTargetBound

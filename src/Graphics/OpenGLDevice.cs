@@ -916,7 +916,36 @@ namespace Microsoft.Xna.Framework.Graphics
 					glDisable(GLenum.GL_SCISSOR_TEST);
 				}
 
-				BindReadFramebuffer((Backbuffer as OpenGLBackbuffer).Handle);
+				if (	Backbuffer.MultiSampleCount > 0 &&
+					(srcX != dstX || srcY != dstY || srcW != dstW || srcH != dstH)	)
+				{
+					/* We have to resolve the renderbuffer to a texture first.
+					 * For whatever reason, we can't blit a multisample renderbuffer
+					 * to the backbuffer. Not sure why, but oh well.
+					 * -flibit
+					 */
+					OpenGLBackbuffer glBack = Backbuffer as OpenGLBackbuffer;
+					BindFramebuffer(resolveFramebufferDraw);
+					glFramebufferTexture2D(
+						GLenum.GL_FRAMEBUFFER,
+						GLenum.GL_COLOR_ATTACHMENT0,
+						GLenum.GL_TEXTURE_2D,
+						glBack.Texture,
+						0
+					);
+					BindReadFramebuffer(glBack.Handle);
+					glBlitFramebuffer(
+						0, 0, glBack.Width, glBack.Height,
+						0, 0, glBack.Width, glBack.Height,
+						GLenum.GL_COLOR_BUFFER_BIT,
+						GLenum.GL_LINEAR
+					);
+					BindReadFramebuffer(resolveFramebufferDraw);
+				}
+				else
+				{
+					BindReadFramebuffer((Backbuffer as OpenGLBackbuffer).Handle);
+				}
 				BindDrawFramebuffer(0);
 
 				glBlitFramebuffer(
@@ -3273,6 +3302,10 @@ namespace Microsoft.Xna.Framework.Graphics
 				);
 
 				// Blit!
+				if (scissorTestEnable)
+				{
+					glDisable(GLenum.GL_SCISSOR_TEST);
+				}
 				BindDrawFramebuffer(resolveFramebufferDraw);
 				glBlitFramebuffer(
 					0, 0, width, height,
@@ -3280,6 +3313,10 @@ namespace Microsoft.Xna.Framework.Graphics
 					GLenum.GL_COLOR_BUFFER_BIT,
 					GLenum.GL_LINEAR
 				);
+				if (scissorTestEnable)
+				{
+					glEnable(GLenum.GL_SCISSOR_TEST);
+				}
 
 				BindFramebuffer(prevBuffer);
 			}
@@ -4148,6 +4185,14 @@ namespace Microsoft.Xna.Framework.Graphics
 				private set;
 			}
 
+			public int MultiSampleCount
+			{
+				get;
+				private set;
+			}
+
+			public uint Texture;
+
 			private uint colorAttachment;
 			private uint depthStencilAttachment;
 			private OpenGLDevice glDevice;
@@ -4164,6 +4209,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 				glDevice = device;
 				DepthFormat = depthFormat;
+				MultiSampleCount = multiSampleCount;
 
 				// Generate and bind the FBO.
 				uint handle;
@@ -4183,6 +4229,19 @@ namespace Microsoft.Xna.Framework.Graphics
 						width,
 						height
 					);
+					glDevice.glGenTextures(1, out Texture);
+					glDevice.glBindTexture(GLenum.GL_TEXTURE_2D, Texture);
+					glDevice.glTexImage2D(
+						GLenum.GL_TEXTURE_2D,
+						0,
+						(int) GLenum.GL_RGBA,
+						width,
+						height,
+						0,
+						GLenum.GL_RGBA,
+						GLenum.GL_UNSIGNED_BYTE,
+						IntPtr.Zero
+					);
 				}
 				else
 				{
@@ -4192,6 +4251,7 @@ namespace Microsoft.Xna.Framework.Graphics
 						width,
 						height
 					);
+					Texture = 0;
 				}
 				glDevice.glFramebufferRenderbuffer(
 					GLenum.GL_FRAMEBUFFER,
@@ -4263,6 +4323,10 @@ namespace Microsoft.Xna.Framework.Graphics
 				{
 					glDevice.glDeleteRenderbuffers(1, ref depthStencilAttachment);
 				}
+				if (Texture != 0)
+				{
+					glDevice.glDeleteTextures(1, ref Texture);
+				}
 				glDevice = null;
 				Handle = 0;
 			}
@@ -4275,7 +4339,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				Height = presentationParameters.BackBufferHeight;
 
 				DepthFormat depthFormat = presentationParameters.DepthStencilFormat;
-				int multiSampleCount = presentationParameters.MultiSampleCount;
+				MultiSampleCount = presentationParameters.MultiSampleCount;
 
 				if (renderTargetBound)
 				{
@@ -4317,14 +4381,30 @@ namespace Microsoft.Xna.Framework.Graphics
 					GLenum.GL_RENDERBUFFER,
 					colorAttachment
 				);
-				if (multiSampleCount > 0)
+				if (MultiSampleCount > 0)
 				{
 					glDevice.glRenderbufferStorageMultisample(
 						GLenum.GL_RENDERBUFFER,
-						multiSampleCount,
+						MultiSampleCount,
 						GLenum.GL_RGBA,
 						Width,
 						Height
+					);
+					if (Texture != 0)
+					{
+						glDevice.glGenTextures(1, out Texture);
+					}
+					glDevice.glBindTexture(GLenum.GL_TEXTURE_2D, Texture);
+					glDevice.glTexImage2D(
+						GLenum.GL_TEXTURE_2D,
+						0,
+						(int) GLenum.GL_RGBA,
+						Width,
+						Height,
+						0,
+						GLenum.GL_RGBA,
+						GLenum.GL_UNSIGNED_BYTE,
+						IntPtr.Zero
 					);
 				}
 				else
@@ -4335,6 +4415,11 @@ namespace Microsoft.Xna.Framework.Graphics
 						Width,
 						Height
 					);
+					if (Texture != 0)
+					{
+						glDevice.glDeleteTextures(1, ref Texture);
+						Texture = 0;
+					}
 				}
 				glDevice.glFramebufferRenderbuffer(
 					GLenum.GL_FRAMEBUFFER,
@@ -4370,11 +4455,11 @@ namespace Microsoft.Xna.Framework.Graphics
 						GLenum.GL_RENDERBUFFER,
 						depthStencilAttachment
 					);
-					if (multiSampleCount > 0)
+					if (MultiSampleCount > 0)
 					{
 						glDevice.glRenderbufferStorageMultisample(
 							GLenum.GL_RENDERBUFFER,
-							multiSampleCount,
+							MultiSampleCount,
 							XNAToGL.DepthStorage[(int)depthFormat],
 							Width,
 							Height
@@ -4444,6 +4529,15 @@ namespace Microsoft.Xna.Framework.Graphics
 				{
 					// Constant, per SDL2_GameWindow
 					return DepthFormat.Depth24Stencil8;
+				}
+			}
+
+			public int MultiSampleCount
+			{
+				get
+				{
+					// Constant, per SDL2_GameWindow
+					return 0;
 				}
 			}
 
