@@ -735,7 +735,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				newHeight = PresentationParameters.BackBufferHeight;
 				clearTarget = PresentationParameters.RenderTargetUsage;
 
-				// Generate mipmaps for previous targets, if needed
+				// Resolve previous targets, if needed
 				for (int i = 0; i < RenderTargetCount; i += 1)
 				{
 					GLDevice.ResolveTarget(renderTargetBindings[i]);
@@ -757,7 +757,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				newHeight = target.Height;
 				clearTarget = target.RenderTargetUsage;
 
-				// Generate mipmaps for previous targets, if needed
+				// Resolve previous targets, if needed
 				for (int i = 0; i < RenderTargetCount; i += 1)
 				{
 					// We only need to resolve if the target is no longer bound.
