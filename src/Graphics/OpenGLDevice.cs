@@ -605,21 +605,13 @@ namespace Microsoft.Xna.Framework.Graphics
 			// Initialize entry points
 			LoadGLEntryPoints();
 
-			if (useES2)
-			{
-				// Force #version 110, ES2 is incompatible with #version 120
-				shaderProfile = MojoShader.MOJOSHADER_PROFILE_GLSL;
-			}
-			else
-			{
-				shaderProfile = MojoShader.MOJOSHADER_glBestProfile(
-					GLGetProcAddress,
-					IntPtr.Zero,
-					null,
-					null,
-					IntPtr.Zero
-				);
-			}
+			shaderProfile = MojoShader.MOJOSHADER_glBestProfile(
+				GLGetProcAddress,
+				IntPtr.Zero,
+				null,
+				null,
+				IntPtr.Zero
+			);
 			shaderContext = MojoShader.MOJOSHADER_glCreateContext(
 				shaderProfile,
 				GLGetProcAddress,
