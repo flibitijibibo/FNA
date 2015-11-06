@@ -309,7 +309,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		protected override void Dispose(bool disposing)
 		{
-			if (!IsDisposed && disposing)
+			if (!IsDisposed)
 			{
 				GraphicsDevice.GLDevice.AddDisposeEffect(glEffect);
 				stateChangesHandle.Free();
