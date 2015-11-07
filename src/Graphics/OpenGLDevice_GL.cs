@@ -534,6 +534,14 @@ namespace Microsoft.Xna.Framework.Graphics
 		private delegate IntPtr MapBuffer(GLenum target, GLenum access);
 		private MapBuffer glMapBuffer;
 
+		private delegate IntPtr MapBufferRange(
+			GLenum target,
+			IntPtr offset,
+			IntPtr length,
+			GLenum access
+		);
+		private MapBufferRange glMapBufferRange;
+
 		private delegate void UnmapBuffer(GLenum target);
 		private UnmapBuffer glUnmapBuffer;
 
@@ -1062,6 +1070,51 @@ namespace Microsoft.Xna.Framework.Graphics
 				glDepthRange = DepthRangeFloat;
 			}
 
+			// MapBuffer can be a bit flexible... -flibit
+			IntPtr mbr = SDL.SDL_GL_GetProcAddress("glMapBufferRange");
+			if (mbr != IntPtr.Zero)
+			{
+				glMapBufferRange = (MapBufferRange) Marshal.GetDelegateForFunctionPointer(
+					mbr,
+					typeof(MapBufferRange)
+				);
+			}
+			else
+			{
+				// Fall back to glMapBuffer full
+				mbr = SDL.SDL_GL_GetProcAddress("glMapBuffer");
+				if (mbr == IntPtr.Zero)
+				{
+					// What... okay, maybe OES?
+					mbr = SDL.SDL_GL_GetProcAddress("glMapBufferOES");
+					if (mbr == IntPtr.Zero)
+					{
+						// We can't help you!
+						throw new NoSuitableGraphicsDeviceException(baseErrorString);
+					}
+				}
+				glMapBuffer = (MapBuffer) Marshal.GetDelegateForFunctionPointer(
+					mbr,
+					typeof(MapBuffer)
+				);
+				glMapBufferRange = MapBufferFull;
+			}
+			mbr = SDL.SDL_GL_GetProcAddress("glUnmapBuffer");
+			if (mbr == IntPtr.Zero)
+			{
+				// What... okay, maybe OES?
+				mbr = SDL.SDL_GL_GetProcAddress("glUnmapBufferOES");
+				if (mbr == IntPtr.Zero)
+				{
+					// We can't help you!
+					throw new NoSuitableGraphicsDeviceException(baseErrorString);
+				}
+			}
+			glUnmapBuffer = (UnmapBuffer) Marshal.GetDelegateForFunctionPointer(
+				mbr,
+				typeof(UnmapBuffer)
+			);
+
 			// Silently fail if using GLES. You didn't need these, right...? >_>
 			try
 			{
@@ -1080,15 +1133,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				glGetTexImage = (GetTexImage) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glGetTexImage"),
 					typeof(GetTexImage)
-				);
-				// FIXME: glMapBufferRange might be more common in ES? -flibit
-				glMapBuffer = (MapBuffer) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glMapBuffer"),
-					typeof(MapBuffer)
-				);
-				glUnmapBuffer = (UnmapBuffer) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glUnmapBuffer"),
-					typeof(UnmapBuffer)
 				);
 				glGenQueries = (GenQueries) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glGenQueries"),
@@ -1336,6 +1380,20 @@ namespace Microsoft.Xna.Framework.Graphics
 		private void DepthRangeFloat(double near, double far)
 		{
 			glDepthRangef((float) near, (float) far);
+		}
+
+		private IntPtr MapBufferFull(
+			GLenum target,
+			IntPtr offset,
+			IntPtr length,
+			GLenum access
+		) {
+			return new IntPtr(
+				glMapBuffer(
+					target,
+					access
+				).ToInt64() + offset.ToInt64()
+			);
 		}
 
 		#endregion

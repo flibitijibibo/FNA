@@ -2263,10 +2263,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			BindVertexBuffer(buffer);
 
-			IntPtr ptr = glMapBuffer(GLenum.GL_ARRAY_BUFFER, GLenum.GL_READ_ONLY);
-
-			// Pointer to the start of data to read in the index buffer
-			ptr = new IntPtr(ptr.ToInt64() + offsetInBytes);
+			IntPtr ptr = glMapBufferRange(
+				GLenum.GL_ARRAY_BUFFER,
+				(IntPtr) offsetInBytes,
+				(IntPtr) (elementCount * vertexStride),
+				GLenum.GL_READ_ONLY
+			);
 
 			if (typeof(T) == typeof(byte))
 			{
@@ -2279,7 +2281,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			else
 			{
 				// Temporary buffer to store the copied section of data
-				byte[] temp = new byte[elementCount * vertexStride - offsetInBytes];
+				byte[] temp = new byte[elementCount * vertexStride];
 
 				// Copy from the vertex buffer to the temporary buffer
 				Marshal.Copy(ptr, temp, 0, temp.Length);
@@ -2326,10 +2328,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			BindIndexBuffer(buffer);
 
-			IntPtr ptr = glMapBuffer(GLenum.GL_ELEMENT_ARRAY_BUFFER, GLenum.GL_READ_ONLY);
-
-			// Pointer to the start of data to read in the index buffer
-			ptr = new IntPtr(ptr.ToInt64() + offsetInBytes);
+			IntPtr ptr = glMapBufferRange(
+				GLenum.GL_ELEMENT_ARRAY_BUFFER,
+				(IntPtr) offsetInBytes,
+				(IntPtr) (elementCount * Marshal.SizeOf(typeof(T))),
+				GLenum.GL_READ_ONLY
+			);
 
 			/* If data is already a byte[] we can skip the temporary buffer.
 			 * Copy from the index buffer to the destination array.
