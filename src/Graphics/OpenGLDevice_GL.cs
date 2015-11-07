@@ -560,6 +560,9 @@ namespace Microsoft.Xna.Framework.Graphics
 		private delegate void ClearDepth(double depth);
 		private ClearDepth glClearDepth;
 
+		private delegate void ClearDepthf(float depth);
+		private ClearDepthf glClearDepthf;
+
 		private delegate void ClearStencil(int s);
 		private ClearStencil glClearStencil;
 
@@ -997,13 +1000,13 @@ namespace Microsoft.Xna.Framework.Graphics
 					SDL.SDL_GL_GetProcAddress("glBufferSubData"),
 					typeof(BufferSubData)
 				);
+				glUnmapBuffer = (UnmapBuffer) Marshal.GetDelegateForFunctionPointer(
+					TryGetEPEXT("glUnmapBuffer", "OES"),
+					typeof(UnmapBuffer)
+				);
 				glClearColor = (ClearColor) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glClearColor"),
 					typeof(ClearColor)
-				);
-				glClearDepth = (ClearDepth) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glClearDepth"),
-					typeof(ClearDepth)
 				);
 				glClearStencil = (ClearStencil) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glClearStencil"),
@@ -1069,6 +1072,27 @@ namespace Microsoft.Xna.Framework.Graphics
 				);
 				glDepthRange = DepthRangeFloat;
 			}
+			drPtr = SDL.SDL_GL_GetProcAddress("glClearDepth");
+			if (drPtr != IntPtr.Zero)
+			{
+				glClearDepth = (ClearDepth) Marshal.GetDelegateForFunctionPointer(
+					drPtr,
+					typeof(ClearDepth)
+				);
+			}
+			else
+			{
+				drPtr = SDL.SDL_GL_GetProcAddress("glClearDepthf");
+				if (drPtr == IntPtr.Zero)
+				{
+					throw new NoSuitableGraphicsDeviceException(baseErrorString);
+				}
+				glClearDepthf = (ClearDepthf) Marshal.GetDelegateForFunctionPointer(
+					drPtr,
+					typeof(ClearDepthf)
+				);
+				glClearDepth = ClearDepthFloat;
+			}
 
 			// MapBuffer can be a bit flexible... -flibit
 			IntPtr mbr = SDL.SDL_GL_GetProcAddress("glMapBufferRange");
@@ -1082,38 +1106,19 @@ namespace Microsoft.Xna.Framework.Graphics
 			else
 			{
 				// Fall back to glMapBuffer full
-				mbr = SDL.SDL_GL_GetProcAddress("glMapBuffer");
-				if (mbr == IntPtr.Zero)
+				try
 				{
-					// What... okay, maybe OES?
-					mbr = SDL.SDL_GL_GetProcAddress("glMapBufferOES");
-					if (mbr == IntPtr.Zero)
-					{
-						// We can't help you!
-						throw new NoSuitableGraphicsDeviceException(baseErrorString);
-					}
+					glMapBuffer = (MapBuffer) Marshal.GetDelegateForFunctionPointer(
+						TryGetEPEXT("glMapBuffer", "OES"),
+						typeof(MapBuffer)
+					);
 				}
-				glMapBuffer = (MapBuffer) Marshal.GetDelegateForFunctionPointer(
-					mbr,
-					typeof(MapBuffer)
-				);
-				glMapBufferRange = MapBufferFull;
-			}
-			mbr = SDL.SDL_GL_GetProcAddress("glUnmapBuffer");
-			if (mbr == IntPtr.Zero)
-			{
-				// What... okay, maybe OES?
-				mbr = SDL.SDL_GL_GetProcAddress("glUnmapBufferOES");
-				if (mbr == IntPtr.Zero)
+				catch
 				{
-					// We can't help you!
 					throw new NoSuitableGraphicsDeviceException(baseErrorString);
 				}
+				glMapBufferRange = MapBufferFull;
 			}
-			glUnmapBuffer = (UnmapBuffer) Marshal.GetDelegateForFunctionPointer(
-				mbr,
-				typeof(UnmapBuffer)
-			);
 
 			// Silently fail if using GLES. You didn't need these, right...? >_>
 			try
@@ -1171,43 +1176,43 @@ namespace Microsoft.Xna.Framework.Graphics
 			try
 			{
 				glGenFramebuffers = (GenFramebuffers) Marshal.GetDelegateForFunctionPointer(
-					TryGetFramebufferEP("glGenFramebuffers"),
+					TryGetEPEXT("glGenFramebuffers"),
 					typeof(GenFramebuffers)
 				);
 				glDeleteFramebuffers = (DeleteFramebuffers) Marshal.GetDelegateForFunctionPointer(
-					TryGetFramebufferEP("glDeleteFramebuffers"),
+					TryGetEPEXT("glDeleteFramebuffers"),
 					typeof(DeleteFramebuffers)
 				);
 				glBindFramebuffer = (G_BindFramebuffer) Marshal.GetDelegateForFunctionPointer(
-					TryGetFramebufferEP("glBindFramebuffer"),
+					TryGetEPEXT("glBindFramebuffer"),
 					typeof(G_BindFramebuffer)
 				);
 				glFramebufferTexture2D = (FramebufferTexture2D) Marshal.GetDelegateForFunctionPointer(
-					TryGetFramebufferEP("glFramebufferTexture2D"),
+					TryGetEPEXT("glFramebufferTexture2D"),
 					typeof(FramebufferTexture2D)
 				);
 				glFramebufferRenderbuffer = (FramebufferRenderbuffer) Marshal.GetDelegateForFunctionPointer(
-					TryGetFramebufferEP("glFramebufferRenderbuffer"),
+					TryGetEPEXT("glFramebufferRenderbuffer"),
 					typeof(FramebufferRenderbuffer)
 				);
 				glGenerateMipmap = (GenerateMipmap) Marshal.GetDelegateForFunctionPointer(
-					TryGetFramebufferEP("glGenerateMipmap"),
+					TryGetEPEXT("glGenerateMipmap"),
 					typeof(GenerateMipmap)
 				);
 				glGenRenderbuffers = (GenRenderbuffers) Marshal.GetDelegateForFunctionPointer(
-					TryGetFramebufferEP("glGenRenderbuffers"),
+					TryGetEPEXT("glGenRenderbuffers"),
 					typeof(GenRenderbuffers)
 				);
 				glDeleteRenderbuffers = (DeleteRenderbuffers) Marshal.GetDelegateForFunctionPointer(
-					TryGetFramebufferEP("glDeleteRenderbuffers"),
+					TryGetEPEXT("glDeleteRenderbuffers"),
 					typeof(DeleteRenderbuffers)
 				);
 				glBindRenderbuffer = (BindRenderbuffer) Marshal.GetDelegateForFunctionPointer(
-					TryGetFramebufferEP("glBindRenderbuffer"),
+					TryGetEPEXT("glBindRenderbuffer"),
 					typeof(BindRenderbuffer)
 				);
 				glRenderbufferStorage = (RenderbufferStorage) Marshal.GetDelegateForFunctionPointer(
-					TryGetFramebufferEP("glRenderbufferStorage"),
+					TryGetEPEXT("glRenderbufferStorage"),
 					typeof(RenderbufferStorage)
 				);
 			}
@@ -1221,7 +1226,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			try
 			{
 				glBlitFramebuffer = (BlitFramebuffer) Marshal.GetDelegateForFunctionPointer(
-					TryGetFramebufferEP("glBlitFramebuffer"),
+					TryGetEPEXT("glBlitFramebuffer"),
 					typeof(BlitFramebuffer)
 				);
 			}
@@ -1266,7 +1271,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			try
 			{
 				glRenderbufferStorageMultisample = (RenderbufferStorageMultisample) Marshal.GetDelegateForFunctionPointer(
-					TryGetFramebufferEP("glRenderbufferStorageMultisample"),
+					TryGetEPEXT("glRenderbufferStorageMultisample"),
 					typeof(RenderbufferStorageMultisample)
 				);
 				glSampleMaski = (SampleMaski) Marshal.GetDelegateForFunctionPointer(
@@ -1367,12 +1372,12 @@ namespace Microsoft.Xna.Framework.Graphics
 #endif
 		}
 
-		private IntPtr TryGetFramebufferEP(string ep)
+		private IntPtr TryGetEPEXT(string ep, string ext = "EXT")
 		{
 			IntPtr result = SDL.SDL_GL_GetProcAddress(ep);
 			if (result == IntPtr.Zero)
 			{
-				result = SDL.SDL_GL_GetProcAddress(ep + "EXT");
+				result = SDL.SDL_GL_GetProcAddress(ep + ext);
 			}
 			return result;
 		}
@@ -1380,6 +1385,11 @@ namespace Microsoft.Xna.Framework.Graphics
 		private void DepthRangeFloat(double near, double far)
 		{
 			glDepthRangef((float) near, (float) far);
+		}
+
+		private void ClearDepthFloat(double depth)
+		{
+			glClearDepthf((float) depth);
 		}
 
 		private IntPtr MapBufferFull(
