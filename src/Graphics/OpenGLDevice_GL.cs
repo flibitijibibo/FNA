@@ -746,12 +746,12 @@ namespace Microsoft.Xna.Framework.Graphics
 		private delegate void EndQuery(GLenum target);
 		private EndQuery glEndQuery;
 
-		private delegate void GetQueryObjectiv(
+		private delegate void GetQueryObjectuiv(
 			uint id,
 			GLenum pname,
-			out int param
+			out uint param
 		);
-		private GetQueryObjectiv glGetQueryObjectiv;
+		private GetQueryObjectuiv glGetQueryObjectuiv;
 
 		/* END QUERY FUNCTIONS */
 
@@ -1155,9 +1155,9 @@ namespace Microsoft.Xna.Framework.Graphics
 					SDL.SDL_GL_GetProcAddress("glEndQuery"),
 					typeof(EndQuery)
 				);
-				glGetQueryObjectiv = (GetQueryObjectiv) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glGetQueryObjectiv"),
-					typeof(GetQueryObjectiv)
+				glGetQueryObjectuiv = (GetQueryObjectuiv) Marshal.GetDelegateForFunctionPointer(
+					SDL.SDL_GL_GetProcAddress("glGetQueryObjectuiv"),
+					typeof(GetQueryObjectuiv)
 				);
 			}
 			catch

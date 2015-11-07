@@ -3856,8 +3856,8 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public bool QueryComplete(IGLQuery query)
 		{
-			int result;
-			glGetQueryObjectiv(
+			uint result;
+			glGetQueryObjectuiv(
 				(query as OpenGLQuery).Handle,
 				GLenum.GL_QUERY_RESULT_AVAILABLE,
 				out result
@@ -3867,13 +3867,13 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public int QueryPixelCount(IGLQuery query)
 		{
-			int result;
-			glGetQueryObjectiv(
+			uint result;
+			glGetQueryObjectuiv(
 				(query as OpenGLQuery).Handle,
 				GLenum.GL_QUERY_RESULT,
 				out result
 			);
-			return result;
+			return (int) result;
 		}
 
 		#endregion
