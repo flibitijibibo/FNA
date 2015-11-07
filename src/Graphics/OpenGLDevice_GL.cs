@@ -255,6 +255,12 @@ namespace Microsoft.Xna.Framework.Graphics
 		);
 		private DepthRange glDepthRange;
 
+		private delegate void DepthRangef(
+			float near_val,
+			float far_val
+		);
+		private DepthRangef glDepthRangef;
+
 		private delegate void Scissor(
 			int x,
 			int y,
@@ -825,6 +831,17 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		private void LoadGLEntryPoints()
 		{
+			string baseErrorString;
+			if (useES2)
+			{
+				baseErrorString = "OpenGL ES 2.0";
+			}
+			else
+			{
+				baseErrorString = "OpenGL 2.1";
+			}
+			baseErrorString += " support is required!";
+
 			/* Basic entry points. If you don't have these, you're screwed. */
 			try
 			{
@@ -847,10 +864,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				glViewport = (G_Viewport) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glViewport"),
 					typeof(G_Viewport)
-				);
-				glDepthRange = (DepthRange) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glDepthRange"),
-					typeof(DepthRange)
 				);
 				glScissor = (Scissor) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glScissor"),
@@ -1023,7 +1036,30 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			catch
 			{
-				throw new NoSuitableGraphicsDeviceException("OpenGL 2.1 support is required!");
+				throw new NoSuitableGraphicsDeviceException(baseErrorString);
+			}
+
+			// We need _some_ form of depth range, ES...
+			IntPtr drPtr = SDL.SDL_GL_GetProcAddress("glDepthRange");
+			if (drPtr != IntPtr.Zero)
+			{
+				glDepthRange = (DepthRange) Marshal.GetDelegateForFunctionPointer(
+					drPtr,
+					typeof(DepthRange)
+				);
+			}
+			else
+			{
+				drPtr = SDL.SDL_GL_GetProcAddress("glDepthRangef");
+				if (drPtr == IntPtr.Zero)
+				{
+					throw new NoSuitableGraphicsDeviceException(baseErrorString);
+				}
+				glDepthRangef = (DepthRangef) Marshal.GetDelegateForFunctionPointer(
+					drPtr,
+					typeof(DepthRangef)
+				);
+				glDepthRange = DepthRangeFloat;
 			}
 
 			// Silently fail if using GLES. You didn't need these, right...? >_>
@@ -1083,7 +1119,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				}
 				else
 				{
-					throw new NoSuitableGraphicsDeviceException("OpenGL 2.1 support is required!");
+					throw new NoSuitableGraphicsDeviceException(baseErrorString);
 				}
 			}
 
@@ -1295,6 +1331,11 @@ namespace Microsoft.Xna.Framework.Graphics
 				result = SDL.SDL_GL_GetProcAddress(ep + "EXT");
 			}
 			return result;
+		}
+
+		private void DepthRangeFloat(double near, double far)
+		{
+			glDepthRangef((float) near, (float) far);
 		}
 
 		#endregion
