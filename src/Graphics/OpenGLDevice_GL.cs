@@ -908,10 +908,6 @@ namespace Microsoft.Xna.Framework.Graphics
 					SDL.SDL_GL_GetProcAddress("glFrontFace"),
 					typeof(FrontFace)
 				);
-				glPolygonMode = (PolygonMode) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glPolygonMode"),
-					typeof(PolygonMode)
-				);
 				glPolygonOffset = (PolygonOffset) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glPolygonOffset"),
 					typeof(PolygonOffset)
@@ -943,18 +939,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				glCompressedTexSubImage2D = (CompressedTexSubImage2D) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glCompressedTexSubImage2D"),
 					typeof(CompressedTexSubImage2D)
-				);
-				glTexImage3D = (TexImage3D) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glTexImage3D"),
-					typeof(TexImage3D)
-				);
-				glTexSubImage3D = (TexSubImage3D) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glTexSubImage3D"),
-					typeof(TexSubImage3D)
-				);
-				glGetTexImage = (GetTexImage) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glGetTexImage"),
-					typeof(GetTexImage)
 				);
 				glTexParameteri = (TexParameteri) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glTexParameteri"),
@@ -991,14 +975,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				glBufferSubData = (BufferSubData) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glBufferSubData"),
 					typeof(BufferSubData)
-				);
-				glMapBuffer = (MapBuffer) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glMapBuffer"),
-					typeof(MapBuffer)
-				);
-				glUnmapBuffer = (UnmapBuffer) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glUnmapBuffer"),
-					typeof(UnmapBuffer)
 				);
 				glClearColor = (ClearColor) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glClearColor"),
@@ -1044,6 +1020,40 @@ namespace Microsoft.Xna.Framework.Graphics
 					SDL.SDL_GL_GetProcAddress("glDrawArrays"),
 					typeof(DrawArrays)
 				);
+			}
+			catch
+			{
+				throw new NoSuitableGraphicsDeviceException("OpenGL 2.1 support is required!");
+			}
+
+			// Silently fail if using GLES. You didn't need these, right...? >_>
+			try
+			{
+				glPolygonMode = (PolygonMode) Marshal.GetDelegateForFunctionPointer(
+					SDL.SDL_GL_GetProcAddress("glPolygonMode"),
+					typeof(PolygonMode)
+				);
+				glTexImage3D = (TexImage3D) Marshal.GetDelegateForFunctionPointer(
+					SDL.SDL_GL_GetProcAddress("glTexImage3D"),
+					typeof(TexImage3D)
+				);
+				glTexSubImage3D = (TexSubImage3D) Marshal.GetDelegateForFunctionPointer(
+					SDL.SDL_GL_GetProcAddress("glTexSubImage3D"),
+					typeof(TexSubImage3D)
+				);
+				glGetTexImage = (GetTexImage) Marshal.GetDelegateForFunctionPointer(
+					SDL.SDL_GL_GetProcAddress("glGetTexImage"),
+					typeof(GetTexImage)
+				);
+				// FIXME: glMapBufferRange might be more common in ES? -flibit
+				glMapBuffer = (MapBuffer) Marshal.GetDelegateForFunctionPointer(
+					SDL.SDL_GL_GetProcAddress("glMapBuffer"),
+					typeof(MapBuffer)
+				);
+				glUnmapBuffer = (UnmapBuffer) Marshal.GetDelegateForFunctionPointer(
+					SDL.SDL_GL_GetProcAddress("glUnmapBuffer"),
+					typeof(UnmapBuffer)
+				);
 				glGenQueries = (GenQueries) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glGenQueries"),
 					typeof(GenQueries)
@@ -1067,7 +1077,14 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			catch
 			{
-				throw new NoSuitableGraphicsDeviceException("OpenGL 2.1 support is required!");
+				if (useES2)
+				{
+					System.Console.WriteLine("Some non-ES functions failed to load. Beware...");
+				}
+				else
+				{
+					throw new NoSuitableGraphicsDeviceException("OpenGL 2.1 support is required!");
+				}
 			}
 
 			/* ARB_framebuffer_object. We're flexible, but not _that_ flexible. */
