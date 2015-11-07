@@ -2263,52 +2263,16 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			BindVertexBuffer(buffer);
 
-			IntPtr ptr = glMapBufferRange(
+			GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
+
+			glGetBufferSubData(
 				GLenum.GL_ARRAY_BUFFER,
 				(IntPtr) offsetInBytes,
 				(IntPtr) (elementCount * vertexStride),
-				GLenum.GL_READ_ONLY
+				dataHandle.AddrOfPinnedObject() + (startIndex * Marshal.SizeOf(typeof(T)))
 			);
 
-			if (typeof(T) == typeof(byte))
-			{
-				/* If data is already a byte[] we can skip the temporary buffer.
-				 * Copy from the vertex buffer to the destination array.
-				 */
-				byte[] buf = data as byte[];
-				Marshal.Copy(ptr, buf, 0, buf.Length);
-			}
-			else
-			{
-				// Temporary buffer to store the copied section of data
-				byte[] temp = new byte[elementCount * vertexStride];
-
-				// Copy from the vertex buffer to the temporary buffer
-				Marshal.Copy(ptr, temp, 0, temp.Length);
-
-				GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
-				IntPtr dataPtr = (IntPtr) (dataHandle.AddrOfPinnedObject().ToInt64() + startIndex * Marshal.SizeOf(typeof(T)));
-
-				// Copy from the temporary buffer to the destination array
-				int dataSize = Marshal.SizeOf(typeof(T));
-				if (dataSize == vertexStride)
-				{
-					Marshal.Copy(temp, 0, dataPtr, temp.Length);
-				}
-				else
-				{
-					// If the user is asking for a specific element within the vertex buffer, copy them one by one...
-					for (int i = 0; i < elementCount; i += 1)
-					{
-						Marshal.Copy(temp, i * vertexStride, dataPtr, dataSize);
-						dataPtr = (IntPtr)(dataPtr.ToInt64() + dataSize);
-					}
-				}
-
-				dataHandle.Free();
-			}
-
-			glUnmapBuffer(GLenum.GL_ARRAY_BUFFER);
+			dataHandle.Free();
 
 #if !DISABLE_THREADING
 			});
@@ -2328,30 +2292,17 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			BindIndexBuffer(buffer);
 
-			IntPtr ptr = glMapBufferRange(
+			GCHandle dataHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
+
+			int typeSize = Marshal.SizeOf(typeof(T));
+			glGetBufferSubData(
 				GLenum.GL_ELEMENT_ARRAY_BUFFER,
 				(IntPtr) offsetInBytes,
-				(IntPtr) (elementCount * Marshal.SizeOf(typeof(T))),
-				GLenum.GL_READ_ONLY
+				(IntPtr) (elementCount * typeSize),
+				dataHandle.AddrOfPinnedObject() + (startIndex * typeSize)
 			);
 
-			/* If data is already a byte[] we can skip the temporary buffer.
-			 * Copy from the index buffer to the destination array.
-			 */
-			if (typeof(T) == typeof(byte))
-			{
-				byte[] buf = data as byte[];
-				Marshal.Copy(ptr, buf, 0, buf.Length);
-			}
-			else
-			{
-				int elementSizeInBytes = Marshal.SizeOf(typeof(T));
-				byte[] temp = new byte[elementCount * elementSizeInBytes];
-				Marshal.Copy(ptr, temp, 0, temp.Length);
-				Buffer.BlockCopy(temp, 0, data, startIndex * elementSizeInBytes, elementCount * elementSizeInBytes);
-			}
-
-			glUnmapBuffer(GLenum.GL_ELEMENT_ARRAY_BUFFER);
+			dataHandle.Free();
 
 #if !DISABLE_THREADING
 			});

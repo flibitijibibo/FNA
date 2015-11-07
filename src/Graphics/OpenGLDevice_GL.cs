@@ -531,19 +531,13 @@ namespace Microsoft.Xna.Framework.Graphics
 		);
 		private BufferSubData glBufferSubData;
 
-		private delegate IntPtr MapBuffer(GLenum target, GLenum access);
-		private MapBuffer glMapBuffer;
-
-		private delegate IntPtr MapBufferRange(
+		private delegate void GetBufferSubData(
 			GLenum target,
 			IntPtr offset,
-			IntPtr length,
-			GLenum access
+			IntPtr size,
+			IntPtr data
 		);
-		private MapBufferRange glMapBufferRange;
-
-		private delegate void UnmapBuffer(GLenum target);
-		private UnmapBuffer glUnmapBuffer;
+		private GetBufferSubData glGetBufferSubData;
 
 		/* END BUFFER FUNCTIONS */
 
@@ -1000,10 +994,6 @@ namespace Microsoft.Xna.Framework.Graphics
 					SDL.SDL_GL_GetProcAddress("glBufferSubData"),
 					typeof(BufferSubData)
 				);
-				glUnmapBuffer = (UnmapBuffer) Marshal.GetDelegateForFunctionPointer(
-					TryGetEPEXT("glUnmapBuffer", "OES"),
-					typeof(UnmapBuffer)
-				);
 				glClearColor = (ClearColor) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glClearColor"),
 					typeof(ClearColor)
@@ -1094,32 +1084,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				glClearDepth = ClearDepthFloat;
 			}
 
-			// MapBuffer can be a bit flexible... -flibit
-			IntPtr mbr = SDL.SDL_GL_GetProcAddress("glMapBufferRange");
-			if (mbr != IntPtr.Zero)
-			{
-				glMapBufferRange = (MapBufferRange) Marshal.GetDelegateForFunctionPointer(
-					mbr,
-					typeof(MapBufferRange)
-				);
-			}
-			else
-			{
-				// Fall back to glMapBuffer full
-				try
-				{
-					glMapBuffer = (MapBuffer) Marshal.GetDelegateForFunctionPointer(
-						TryGetEPEXT("glMapBuffer", "OES"),
-						typeof(MapBuffer)
-					);
-				}
-				catch
-				{
-					throw new NoSuitableGraphicsDeviceException(baseErrorString);
-				}
-				glMapBufferRange = MapBufferFull;
-			}
-
 			// Silently fail if using GLES. You didn't need these, right...? >_>
 			try
 			{
@@ -1138,6 +1102,10 @@ namespace Microsoft.Xna.Framework.Graphics
 				glGetTexImage = (GetTexImage) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glGetTexImage"),
 					typeof(GetTexImage)
+				);
+				glGetBufferSubData = (GetBufferSubData) Marshal.GetDelegateForFunctionPointer(
+					SDL.SDL_GL_GetProcAddress("glGetBufferSubData"),
+					typeof(GetBufferSubData)
 				);
 				glGenQueries = (GenQueries) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glGenQueries"),
@@ -1390,20 +1358,6 @@ namespace Microsoft.Xna.Framework.Graphics
 		private void ClearDepthFloat(double depth)
 		{
 			glClearDepthf((float) depth);
-		}
-
-		private IntPtr MapBufferFull(
-			GLenum target,
-			IntPtr offset,
-			IntPtr length,
-			GLenum access
-		) {
-			return new IntPtr(
-				glMapBuffer(
-					target,
-					access
-				).ToInt64() + offset.ToInt64()
-			);
 		}
 
 		#endregion
