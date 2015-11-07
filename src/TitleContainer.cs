@@ -46,20 +46,13 @@ namespace Microsoft.Xna.Framework
 		/// <returns>A open stream or null if the file is not found.</returns>
 		public static Stream OpenStream(string name)
 		{
-			// Normalize the file path.
 			string safeName = FileHelpers.NormalizeFilePathSeparators(name);
 
-			// We do not accept absolute paths here.
 			if (Path.IsPathRooted(safeName))
 			{
-				throw new ArgumentException(
-					"Invalid filename. TitleContainer.OpenStream " +
-					"requires a relative path."
-				);
+				return File.OpenRead(safeName);
 			}
-
-			string absolutePath = Path.Combine(Location, safeName);
-			return File.OpenRead(absolutePath);
+			return File.OpenRead(Path.Combine(Location, safeName));
 		}
 
 		#endregion

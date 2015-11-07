@@ -239,10 +239,9 @@ namespace Microsoft.Xna.Framework.Content
 			Stream stream;
 			try
 			{
-				string assetPath = FileHelpers.NormalizeFilePathSeparators(
-					Path.Combine(RootDirectoryFullPath, assetName) + ".xnb"
+				stream = TitleContainer.OpenStream(
+					Path.Combine(RootDirectory, assetName) + ".xnb"
 				);
-				stream = File.OpenRead(assetPath);
 			}
 			catch (FileNotFoundException fileNotFound)
 			{
@@ -291,7 +290,7 @@ namespace Microsoft.Xna.Framework.Content
 			catch (Exception e)
 			{
 				// Okay, so we couldn't open it. Maybe it needs a different extension?
-				// FIXME: Normalizing checks for a file on the disk, what about custom streams? -flibit
+				// FIXME: This only works for files on the disk, what about custom streams? -flibit
 				modifiedAssetName = FileHelpers.NormalizeFilePathSeparators(
 					Path.Combine(RootDirectoryFullPath, assetName)
 				);
@@ -326,7 +325,7 @@ namespace Microsoft.Xna.Framework.Content
 					);
 				}
 
-				stream = File.OpenRead(modifiedAssetName);
+				stream = TitleContainer.OpenStream(modifiedAssetName);
 			}
 
 			// Check for XNB header
@@ -354,7 +353,6 @@ namespace Microsoft.Xna.Framework.Content
 				// FIXME: Assuming seekable streams! -flibit
 				stream.Seek(0, SeekOrigin.Begin);
 
-				// Try to load as a raw asset
 				if (typeof(T) == typeof(Texture2D) || typeof(T) == typeof(Texture))
 				{
 					Texture2D texture = Texture2D.FromStream(

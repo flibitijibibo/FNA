@@ -21,25 +21,10 @@ namespace Microsoft.Xna.Framework.Content
 {
 	internal class SpriteFontReader : ContentTypeReader<SpriteFont>
 	{
-		#region Private Supported File Extension Variable
-
-		static string[] supportedExtensions = new string[] { ".spritefont" };
-
-		#endregion
-
 		#region Internal Constructor
 
 		internal SpriteFontReader()
 		{
-		}
-
-		#endregion
-
-		#region Internal Filename Normalizer Method
-
-		internal static string Normalize(string fileName)
-		{
-			return Normalize(fileName, supportedExtensions);
 		}
 
 		#endregion
