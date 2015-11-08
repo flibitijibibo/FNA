@@ -1040,7 +1040,74 @@ namespace Microsoft.Xna.Framework.Graphics
 				throw new NoSuitableGraphicsDeviceException(baseErrorString);
 			}
 
-			// We need _some_ form of depth range, ES...
+			/* These functions are NOT supported in ES.
+			 * NVIDIA or desktop ES might, but real scenarios where you need ES
+			 * will certainly not have these.
+			 * -flibit
+			 */
+			if (useES2)
+			{
+				IntPtr ep = SDL.SDL_GL_GetProcAddress("glPolygonMode");
+				if (ep != IntPtr.Zero)
+				{
+					glPolygonMode = (PolygonMode) Marshal.GetDelegateForFunctionPointer(
+						ep,
+						typeof(PolygonMode)
+					);
+				}
+				else
+				{
+					glPolygonMode = PolygonModeESError;
+				}
+				ep = SDL.SDL_GL_GetProcAddress("glGetTexImage");
+				if (ep != IntPtr.Zero)
+				{
+					glGetTexImage = (GetTexImage) Marshal.GetDelegateForFunctionPointer(
+						ep,
+						typeof(GetTexImage)
+					);
+				}
+				else
+				{
+					glGetTexImage = GetTexImageESError;
+				}
+				ep = SDL.SDL_GL_GetProcAddress("glGetBufferSubData");
+				if (ep != IntPtr.Zero)
+				{
+					glGetBufferSubData = (GetBufferSubData) Marshal.GetDelegateForFunctionPointer(
+						ep,
+						typeof(GetBufferSubData)
+					);
+				}
+				else
+				{
+					glGetBufferSubData = GetBufferSubDataESError;
+				}
+			}
+			else
+			{
+				try
+				{
+					glPolygonMode = (PolygonMode) Marshal.GetDelegateForFunctionPointer(
+						SDL.SDL_GL_GetProcAddress("glPolygonMode"),
+						typeof(PolygonMode)
+					);
+					glGetTexImage = (GetTexImage) Marshal.GetDelegateForFunctionPointer(
+						SDL.SDL_GL_GetProcAddress("glGetTexImage"),
+						typeof(GetTexImage)
+					);
+					glGetBufferSubData = (GetBufferSubData) Marshal.GetDelegateForFunctionPointer(
+						SDL.SDL_GL_GetProcAddress("glGetBufferSubData"),
+						typeof(GetBufferSubData)
+					);
+				}
+				catch
+				{
+					throw new NoSuitableGraphicsDeviceException(baseErrorString);
+				}
+			}
+
+			/* We need _some_ form of depth range, ES... */
 			IntPtr drPtr = SDL.SDL_GL_GetProcAddress("glDepthRange");
 			if (drPtr != IntPtr.Zero)
 			{
@@ -1084,28 +1151,16 @@ namespace Microsoft.Xna.Framework.Graphics
 				glClearDepth = ClearDepthFloat;
 			}
 
-			// Silently fail if using GLES. You didn't need these, right...? >_>
+			/* Silently fail if using GLES. You didn't need these, right...? >_> */
 			try
 			{
-				glPolygonMode = (PolygonMode) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glPolygonMode"),
-					typeof(PolygonMode)
-				);
 				glTexImage3D = (TexImage3D) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glTexImage3D"),
+					TryGetEPEXT("glTexImage3D", "OES"),
 					typeof(TexImage3D)
 				);
 				glTexSubImage3D = (TexSubImage3D) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glTexSubImage3D"),
+					TryGetEPEXT("glTexSubImage3D", "OES"),
 					typeof(TexSubImage3D)
-				);
-				glGetTexImage = (GetTexImage) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glGetTexImage"),
-					typeof(GetTexImage)
-				);
-				glGetBufferSubData = (GetBufferSubData) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glGetBufferSubData"),
-					typeof(GetBufferSubData)
 				);
 				glGenQueries = (GenQueries) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glGenQueries"),
@@ -1358,6 +1413,30 @@ namespace Microsoft.Xna.Framework.Graphics
 		private void ClearDepthFloat(double depth)
 		{
 			glClearDepthf((float) depth);
+		}
+
+		private void PolygonModeESError(GLenum face, GLenum mode)
+		{
+			throw new NotSupportedException("glPolygonMode is not available in ES!");
+		}
+
+		private void GetTexImageESError(
+			GLenum target,
+			int level,
+			GLenum format,
+			GLenum type,
+			IntPtr pixels
+		) {
+			throw new NotSupportedException("glGetTexImage is not available in ES!");
+		}
+
+		private void GetBufferSubDataESError(
+			GLenum target,
+			IntPtr offset,
+			IntPtr size,
+			IntPtr data
+		) {
+			throw new NotSupportedException("glGetBufferSubData is not available in ES!");
 		}
 
 		#endregion
