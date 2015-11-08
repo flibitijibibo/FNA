@@ -3167,14 +3167,12 @@ namespace Microsoft.Xna.Framework.Graphics
 			T[] data,
 			Rectangle? rect
 		) where T : struct {
-			if (	currentDrawBuffers != 1 ||
-				currentAttachments[0] != (texture as OpenGLTexture).Handle	)
+			bool texUnbound = (	currentDrawBuffers != 1 ||
+						currentAttachments[0] != (texture as OpenGLTexture).Handle	);
+			if (texUnbound && !useES2)
 			{
 				return false;
 			}
-
-			uint prevReadBuffer = currentReadFramebuffer;
-			BindReadFramebuffer(targetFramebuffer);
 
 			int x;
 			int y;
@@ -3193,6 +3191,24 @@ namespace Microsoft.Xna.Framework.Graphics
 				y = 0;
 				w = width;
 				h = height;
+			}
+
+			uint prevReadBuffer = currentReadFramebuffer;
+			uint prevWriteBuffer = currentDrawFramebuffer;
+			if (texUnbound)
+			{
+				BindFramebuffer(resolveFramebufferRead);
+				glFramebufferTexture2D(
+					GLenum.GL_FRAMEBUFFER,
+					GLenum.GL_COLOR_ATTACHMENT0,
+					GLenum.GL_TEXTURE_2D,
+					(texture as OpenGLTexture).Handle,
+					level
+				);
+			}
+			else
+			{
+				BindReadFramebuffer(targetFramebuffer);
 			}
 
 			/* glReadPixels should be faster than reading
@@ -3216,7 +3232,22 @@ namespace Microsoft.Xna.Framework.Graphics
 				handle.Free();
 			}
 
-			BindReadFramebuffer(prevReadBuffer);
+			if (texUnbound)
+			{
+				if (prevReadBuffer == prevWriteBuffer)
+				{
+					BindFramebuffer(prevReadBuffer);
+				}
+				else
+				{
+					BindReadFramebuffer(prevReadBuffer);
+					BindDrawFramebuffer(prevWriteBuffer);
+				}
+			}
+			else
+			{
+				BindReadFramebuffer(prevReadBuffer);
+			}
 			return true;
 		}
 
