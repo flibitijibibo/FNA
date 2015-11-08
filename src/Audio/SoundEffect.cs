@@ -112,7 +112,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region Internal Variables
 
-		internal List<SoundEffectInstance> Instances = new List<SoundEffectInstance>();
+		internal List<WeakReference> Instances = new List<WeakReference>();
 		internal IALBuffer INTERNAL_buffer;
 
 		#endregion
@@ -217,7 +217,7 @@ namespace Microsoft.Xna.Framework.Audio
 			{
 				while (Instances.Count > 0)
 				{
-					Instances[0].Dispose();
+					(Instances[0].Target as IDisposable).Dispose();
 				}
 				Instances = null;
 				if (INTERNAL_buffer != null)

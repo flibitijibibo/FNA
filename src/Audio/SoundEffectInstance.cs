@@ -128,6 +128,7 @@ namespace Microsoft.Xna.Framework.Audio
 		#region Private Variables: XNA Implementation
 
 		private SoundEffect INTERNAL_parentEffect;
+		private WeakReference selfReference;
 
 		/* FNA' XACT runtime wraps around SoundEffect for audio output.
 		 * Only problem: XACT pitch has no boundaries, SoundEffect does.
@@ -161,7 +162,8 @@ namespace Microsoft.Xna.Framework.Audio
 			INTERNAL_parentEffect = parent;
 			if (INTERNAL_parentEffect != null)
 			{
-				INTERNAL_parentEffect.Instances.Add(this);
+				selfReference = new WeakReference(this);
+				INTERNAL_parentEffect.Instances.Add(selfReference);
 			}
 		}
 
@@ -185,7 +187,8 @@ namespace Microsoft.Xna.Framework.Audio
 				Stop(true);
 				if (INTERNAL_parentEffect != null)
 				{
-					INTERNAL_parentEffect.Instances.Remove(this);
+					INTERNAL_parentEffect.Instances.Remove(selfReference);
+					selfReference = null;
 				}
 				IsDisposed = true;
 			}
