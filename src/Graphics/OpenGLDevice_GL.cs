@@ -717,6 +717,14 @@ namespace Microsoft.Xna.Framework.Graphics
 		);
 		private DrawRangeElements glDrawRangeElements;
 
+		private delegate void DrawElements(
+			GLenum mode,
+			int count,
+			GLenum type,
+			IntPtr indices
+		);
+		private DrawElements glDrawElements;
+
 		private delegate void DrawArrays(
 			GLenum mode,
 			int first,
@@ -1026,10 +1034,6 @@ namespace Microsoft.Xna.Framework.Graphics
 					SDL.SDL_GL_GetProcAddress("glDisableVertexAttribArray"),
 					typeof(DisableVertexAttribArray)
 				);
-				glDrawRangeElements = (DrawRangeElements) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glDrawRangeElements"),
-					typeof(DrawRangeElements)
-				);
 				glDrawArrays = (DrawArrays) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glDrawArrays"),
 					typeof(DrawArrays)
@@ -1040,6 +1044,29 @@ namespace Microsoft.Xna.Framework.Graphics
 				throw new NoSuitableGraphicsDeviceException(baseErrorString);
 			}
 
+			/* DrawRangeElements is better, but some ES2 targets don't have it. */
+			IntPtr ep = SDL.SDL_GL_GetProcAddress("glDrawRangeElements");
+			if (ep != IntPtr.Zero)
+			{
+				glDrawRangeElements = (DrawRangeElements) Marshal.GetDelegateForFunctionPointer(
+					ep,
+					typeof(DrawRangeElements)
+				);
+			}
+			else
+			{
+				ep = SDL.SDL_GL_GetProcAddress("glDrawElements");
+				if (ep == IntPtr.Zero)
+				{
+					throw new NoSuitableGraphicsDeviceException(baseErrorString);
+				}
+				glDrawElements = (DrawElements) Marshal.GetDelegateForFunctionPointer(
+					ep,
+					typeof(DrawElements)
+				);
+				glDrawRangeElements = DrawRangeElementsUnchecked;
+			}
+
 			/* These functions are NOT supported in ES.
 			 * NVIDIA or desktop ES might, but real scenarios where you need ES
 			 * will certainly not have these.
@@ -1047,7 +1074,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			 */
 			if (useES2)
 			{
-				IntPtr ep = SDL.SDL_GL_GetProcAddress("glPolygonMode");
+				ep = SDL.SDL_GL_GetProcAddress("glPolygonMode");
 				if (ep != IntPtr.Zero)
 				{
 					glPolygonMode = (PolygonMode) Marshal.GetDelegateForFunctionPointer(
@@ -1403,6 +1430,22 @@ namespace Microsoft.Xna.Framework.Graphics
 				result = SDL.SDL_GL_GetProcAddress(ep + ext);
 			}
 			return result;
+		}
+
+		private void DrawRangeElementsUnchecked(
+			GLenum mode,
+			int start,
+			int end,
+			int count,
+			GLenum type,
+			IntPtr indices
+		) {
+			glDrawElements(
+				mode,
+				count,
+				type,
+				indices
+			);
 		}
 
 		private void DepthRangeFloat(double near, double far)
