@@ -48,8 +48,8 @@ namespace Microsoft.Xna.Framework.Media
 		{
 			freqList = new List<float>(Size);
 			sampList = new List<float>(Size);
-			freqList.AddRange(new float[256]);
-			sampList.AddRange(new float[256]);
+			freqList.AddRange(new float[Size]);
+			sampList.AddRange(new float[Size]);
 			Frequencies = new ReadOnlyCollection<float>(freqList);
 			Samples = new ReadOnlyCollection<float>(sampList);
 		}
