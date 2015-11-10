@@ -168,7 +168,6 @@ namespace Microsoft.Xna.Framework.Graphics
 			GL_ELEMENT_ARRAY_BUFFER =		0x8893,
 			GL_STREAM_DRAW =			0x88E0,
 			GL_STATIC_DRAW =			0x88E4,
-			GL_READ_ONLY =				0x88B8,
 			GL_MAX_VERTEX_ATTRIBS =			0x8869,
 			// Render targets
 			GL_FRAMEBUFFER =			0x8D40,
