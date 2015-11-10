@@ -344,6 +344,7 @@
     <Compile Include="src\Design\Vector4Converter.cs" />
     <Compile Include="src\Design\VectorConversion.cs" />
     <Compile Include="src\NamespaceDocs.cs" />
+    <Compile Include="src\Media\VisualizationData.cs" />
     <Compile Include="lib\SDL2-CS\src\SDL2.cs" />
     <Compile Include="lib\SDL2-CS\src\SDL2_image.cs" />
     <Compile Include="lib\SDL2-CS\src\LPUtf8StrMarshaler.cs" />

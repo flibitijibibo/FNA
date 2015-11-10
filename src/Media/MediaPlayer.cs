@@ -119,6 +119,12 @@ namespace Microsoft.Xna.Framework.Media
 			}
 		}
 
+		public static bool IsVisualizationEnabled
+		{
+			get;
+			set;
+		}
+
 		#endregion
 
 		#region Public Static Variables
@@ -146,6 +152,7 @@ namespace Microsoft.Xna.Framework.Media
 		static MediaPlayer()
 		{
 			Queue = new MediaQueue();
+			IsVisualizationEnabled = false;
 		}
 
 		#endregion
@@ -240,6 +247,11 @@ namespace Microsoft.Xna.Framework.Media
 			}
 
 			State = MediaState.Stopped;
+		}
+
+		public static void GetVisualizationData(VisualizationData data)
+		{
+			data.CalculateData(Queue.ActiveSong);
 		}
 
 		#endregion
