@@ -21,18 +21,14 @@ namespace Microsoft.Xna.Framework.Media
 
 		public ReadOnlyCollection<float> Frequencies
 		{
-			get
-			{
-				return freqCollection;
-			}
+			get;
+			private set;
 		}
 
 		public ReadOnlyCollection<float> Samples
 		{
-			get
-			{
-				return sampCollection;
-			}
+			get;
+			private set;
 		}
 
 		#endregion
@@ -41,8 +37,6 @@ namespace Microsoft.Xna.Framework.Media
 
 		private const int Size = 256;
 
-		private ReadOnlyCollection<float> freqCollection;
-		private ReadOnlyCollection<float> sampCollection;
 		private List<float> freqList;
 		private List<float> sampList;
 
@@ -56,8 +50,8 @@ namespace Microsoft.Xna.Framework.Media
 			sampList = new List<float>(Size);
 			freqList.AddRange(new float[256]);
 			sampList.AddRange(new float[256]);
-			freqCollection = new ReadOnlyCollection<float>(freqList);
-			sampCollection = new ReadOnlyCollection<float>(sampList);
+			Frequencies = new ReadOnlyCollection<float>(freqList);
+			Samples = new ReadOnlyCollection<float>(sampList);
 		}
 
 		#endregion
