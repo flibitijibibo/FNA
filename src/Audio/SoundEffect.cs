@@ -215,11 +215,20 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			if (!IsDisposed)
 			{
-				while (Instances.Count > 0)
+				/* FIXME: Is it ironic that we're generating
+				 * garbage with ToArray while cleaning up after
+				 * the program's leaks?
+				 * -flibit
+				 */
+				foreach (WeakReference instance in Instances.ToArray())
 				{
-					(Instances[0].Target as IDisposable).Dispose();
+					object target = instance.Target;
+					if (target != null)
+					{
+						(target as IDisposable).Dispose();
+					}
 				}
-				Instances = null;
+				Instances.Clear();
 				if (INTERNAL_buffer != null)
 				{
 					AudioDevice.ALDevice.DeleteBuffer(INTERNAL_buffer);
