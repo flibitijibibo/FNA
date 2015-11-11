@@ -327,16 +327,13 @@ namespace Microsoft.Xna.Framework.Media
 				return;
 			}
 
-			if (MediaPlayer.IsVisualizationEnabled)
+			int tshort = total / 2;
+			if (bufferedSamples + tshort > visSamples.Length)
 			{
-				int tshort = total / 2;
-				if (bufferedSamples + tshort > visSamples.Length)
-				{
-					bufferedSamples = 0; // Ahh crap, just bail...
-				}
-				Marshal.Copy(bufferPtr, visSamples, bufferedSamples, tshort);
-				bufferedSamples += tshort;
+				bufferedSamples = 0; // Ahh crap, just bail...
 			}
+			Marshal.Copy(bufferPtr, visSamples, bufferedSamples, tshort);
+			bufferedSamples += tshort;
 
 			// Send the filled buffer to the stream.
 			soundStream.SubmitBuffer(
