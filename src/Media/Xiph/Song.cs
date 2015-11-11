@@ -131,6 +131,17 @@ namespace Microsoft.Xna.Framework.Media
 
 		#endregion
 
+		#region Internal Variables
+
+		// FIXME: Only alloc this when visualization is enabled! -flibit
+		internal static short[] visSamples = new short[MAX_SAMPLES * 2];
+		internal static int bufferedSamples = 0;
+
+		internal int chunkSize;
+		internal int chunkStep;
+
+		#endregion
+
 		#region Private Variables
 
 		/* FIXME: Ideally we'd be using the Vorbis offsets to track position,
@@ -181,6 +192,10 @@ namespace Microsoft.Xna.Framework.Media
 				(AudioChannels) fileInfo.channels
 			);
 
+			// FIXME: 60 is arbitrary for a 60Hz game -flibit
+			chunkSize = (int) (fileInfo.rate * fileInfo.channels / 60);
+			chunkStep = chunkSize / VisualizationData.Size;
+
 			IsDisposed = false;
 		}
 
@@ -230,6 +245,8 @@ namespace Microsoft.Xna.Framework.Media
 		{
 			eof = false;
 			soundStream.BufferNeeded += QueueBuffer;
+
+			bufferedSamples = 0;
 
 #if NO_STREAM_THREAD
 			soundStream.Play();
@@ -308,6 +325,17 @@ namespace Microsoft.Xna.Framework.Media
 				eof = true;
 				soundStream.BufferNeeded -= QueueBuffer;
 				return;
+			}
+
+			if (MediaPlayer.IsVisualizationEnabled)
+			{
+				int tshort = total / 2;
+				if (bufferedSamples + tshort > visSamples.Length)
+				{
+					bufferedSamples = 0; // Ahh crap, just bail...
+				}
+				Marshal.Copy(bufferPtr, visSamples, bufferedSamples, tshort);
+				bufferedSamples += tshort;
 			}
 
 			// Send the filled buffer to the stream.

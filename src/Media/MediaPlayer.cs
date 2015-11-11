@@ -251,7 +251,10 @@ namespace Microsoft.Xna.Framework.Media
 
 		public static void GetVisualizationData(VisualizationData data)
 		{
-			data.CalculateData(Queue.ActiveSong);
+			if (IsVisualizationEnabled)
+			{
+				data.CalculateData(Queue.ActiveSong);
+			}
 		}
 
 		#endregion
