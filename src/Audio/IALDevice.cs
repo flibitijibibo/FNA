@@ -69,6 +69,12 @@ namespace Microsoft.Xna.Framework.Audio
 			Queue<IALBuffer> errorCheck
 		);
 		int CheckProcessedBuffers(IALSource source);
+		void GetBufferData(
+			IALSource source,
+			IALBuffer[] buffer,
+			float[] samples,
+			AudioChannels channels
+		);
 
 		IALReverb GenReverb(DSPParameter[] parameters);
 		void DeleteReverb(IALReverb reverb);

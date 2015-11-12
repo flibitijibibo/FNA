@@ -133,10 +133,6 @@ namespace Microsoft.Xna.Framework.Media
 
 		#region Internal Variables
 
-		// FIXME: Only alloc this when visualization is enabled! -flibit
-		internal static short[] visSamples = new short[MAX_SAMPLES * 2];
-		internal static int bufferedSamples = 0;
-
 		internal int chunkSize;
 		internal int chunkStep;
 
@@ -246,8 +242,6 @@ namespace Microsoft.Xna.Framework.Media
 			eof = false;
 			soundStream.BufferNeeded += QueueBuffer;
 
-			bufferedSamples = 0;
-
 #if NO_STREAM_THREAD
 			soundStream.Play();
 #else
@@ -296,6 +290,11 @@ namespace Microsoft.Xna.Framework.Media
 			Vorbisfile.ov_time_seek(vorbisFile, 0.0);
 		}
 
+		internal void GetSamples(float[] samples)
+		{
+			soundStream.GetSamples(samples);
+		}
+
 		#endregion
 
 		#region Internal Event Handler Methods
@@ -326,14 +325,6 @@ namespace Microsoft.Xna.Framework.Media
 				soundStream.BufferNeeded -= QueueBuffer;
 				return;
 			}
-
-			int tshort = total / 2;
-			if (bufferedSamples + tshort > visSamples.Length)
-			{
-				bufferedSamples = 0; // Ahh crap, just bail...
-			}
-			Marshal.Copy(bufferPtr, visSamples, bufferedSamples, tshort);
-			bufferedSamples += tshort;
 
 			// Send the filled buffer to the stream.
 			soundStream.SubmitBuffer(

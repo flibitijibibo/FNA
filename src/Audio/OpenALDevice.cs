@@ -643,6 +643,77 @@ namespace Microsoft.Xna.Framework.Audio
 			return result;
 		}
 
+		public void GetBufferData(
+			IALSource source,
+			IALBuffer[] buffer,
+			float[] samples,
+			AudioChannels channels
+		) {
+			int copySize1 = samples.Length / (int) channels;
+			int copySize2 = 0;
+
+			// Where are we now?
+			int offset;
+			AL10.alGetSourcei(
+				(source as OpenALSource).Handle,
+				AL11.AL_SAMPLE_OFFSET,
+				out offset
+			);
+
+			// Is that longer than what the active buffer has left...?
+			uint buf = (buffer[0] as OpenALBuffer).Handle;
+			int len;
+			AL10.alGetBufferi(
+				buf,
+				AL10.AL_SIZE,
+				out len
+			);
+			len /= 2; // FIXME: Assuming 16-bit!
+			len /= (int) channels;
+			if (offset > len)
+			{
+				copySize2 = copySize1;
+				copySize1 = 0;
+				offset -= len;
+			}
+			else if (offset + copySize1 > len)
+			{
+				copySize2 = copySize1 - (len - offset);
+				copySize1 = (len - offset);
+			}
+
+			// Copy!
+			GCHandle handle = GCHandle.Alloc(samples, GCHandleType.Pinned);
+			if (copySize1 > 0)
+			{
+				ALEXT.alGetBufferSamplesSOFT(
+					buf,
+					offset,
+					copySize1,
+					channels == AudioChannels.Stereo ?
+						ALEXT.AL_STEREO_SOFT :
+						ALEXT.AL_MONO_SOFT,
+					ALEXT.AL_FLOAT_SOFT,
+					handle.AddrOfPinnedObject()
+				);
+				offset = 0;
+			}
+			if (buffer.Length > 1 && copySize2 > 0)
+			{
+				ALEXT.alGetBufferSamplesSOFT(
+					(buffer[1] as OpenALBuffer).Handle,
+					offset,
+					copySize2,
+					channels == AudioChannels.Stereo ?
+						ALEXT.AL_STEREO_SOFT :
+						ALEXT.AL_MONO_SOFT,
+					ALEXT.AL_FLOAT_SOFT,
+					handle.AddrOfPinnedObject() + (copySize1 * (int) channels)
+				);
+			}
+			handle.Free();
+		}
+
 		#endregion
 
 		#region OpenAL Reverb Effect Methods

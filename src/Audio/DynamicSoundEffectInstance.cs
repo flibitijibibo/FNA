@@ -325,6 +325,20 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#endregion
 
+		#region Internal Sample Data Retrieval Method
+
+		internal void GetSamples(float[] samples)
+		{
+			AudioDevice.ALDevice.GetBufferData(
+				INTERNAL_alSource,
+				queuedBuffers.ToArray(), // FIXME: Blech -flibit
+				samples,
+				channels
+			);
+		}
+
+		#endregion
+
 		#region Public FNA Extension Methods
 
 		/* THIS IS AN EXTENSION OF THE XNA4 API! */

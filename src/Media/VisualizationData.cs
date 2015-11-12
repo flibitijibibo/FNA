@@ -84,6 +84,10 @@ namespace Microsoft.Xna.Framework.Media
 			 * -flibit
 			 */
 
+			// Get samples from the AL source
+			float[] samples = new float[curSong.chunkSize];
+			curSong.GetSamples(samples);
+
 			// The frequency data will be 256, but we need more data than that
 			int signalSize = (Size - 1) * 2;
 
@@ -102,7 +106,7 @@ namespace Microsoft.Xna.Framework.Media
 			for (int i = 0; i < signalSize; i += 1)
 			{
 				// The 2 is because we're assuming stereo data!
-				windowedSignal[i] = Song.visSamples[i * 2] / 32768.0f * window[i];
+				windowedSignal[i] = samples[i * 2] * window[i];
 			}
 
 			// FFT!
@@ -113,11 +117,9 @@ namespace Microsoft.Xna.Framework.Media
 
 			for (int i = 0; i < Size; i += 1)
 			{
-				sampList[i] = Song.visSamples[i * curSong.chunkStep] / 32768.0f;
+				sampList[i] = samples[i * curSong.chunkStep];
 				freqList[i] = (float) (Math.Sqrt(cx_out[i].r * cx_out[i].r + cx_out[i].i * cx_out[i].i) * normalizer);
 			}
-			Array.Copy(Song.visSamples, curSong.chunkSize, Song.visSamples, 0, Song.bufferedSamples - curSong.chunkSize);
-			Song.bufferedSamples -= curSong.chunkSize;
 		}
 
 		#endregion

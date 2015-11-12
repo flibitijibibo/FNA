@@ -350,6 +350,7 @@
     <Compile Include="lib\SDL2-CS\src\LPUtf8StrMarshaler.cs" />
     <Compile Include="lib\OpenAL-CS\src\ALC10.cs" />
     <Compile Include="lib\OpenAL-CS\src\AL10.cs" />
+    <Compile Include="lib\OpenAL-CS\src\AL11.cs" />
     <Compile Include="lib\OpenAL-CS\src\ALEXT.cs" />
     <Compile Include="lib\OpenAL-CS\src\EFX.cs" />
     <Compile Include="lib\MojoShader-CS\MojoShader.cs" />

@@ -206,6 +206,15 @@ namespace Microsoft.Xna.Framework.Audio
 			return 0;
 		}
 
+		public void GetBufferData(
+			IALSource source,
+			IALBuffer[] buffer,
+			float[] samples,
+			AudioChannels channels
+		) {
+			// No-op, duh.
+		}
+
 		public IALReverb GenReverb(DSPParameter[] parameters)
 		{
 			return new NullReverb();
