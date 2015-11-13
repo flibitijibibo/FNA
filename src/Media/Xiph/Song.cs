@@ -133,6 +133,7 @@ namespace Microsoft.Xna.Framework.Media
 
 		#region Internal Variables
 
+		internal float[] chunk;
 		internal int chunkSize;
 		internal int chunkStep;
 
@@ -290,9 +291,14 @@ namespace Microsoft.Xna.Framework.Media
 			Vorbisfile.ov_time_seek(vorbisFile, 0.0);
 		}
 
-		internal void GetSamples(float[] samples)
+		internal float[] GetSamples()
 		{
-			soundStream.GetSamples(samples);
+			if (chunk == null)
+			{
+				chunk = new float[chunkSize];
+			}
+			soundStream.GetSamples(chunk);
+			return chunk;
 		}
 
 		#endregion
