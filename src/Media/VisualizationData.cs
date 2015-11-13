@@ -118,7 +118,7 @@ namespace Microsoft.Xna.Framework.Media
 			for (int i = 0; i < Size; i += 1)
 			{
 				sampList[i] = samples[i * curSong.chunkStep];
-				freqList[i] = (float) (Math.Sqrt(cx_out[i].r * cx_out[i].r + cx_out[i].i * cx_out[i].i) * normalizer);
+				freqList[i] = (float) (Math.Sqrt(cx_out[i].r * cx_out[i].r + cx_out[i].i * cx_out[i].i) * normalizer * Math.Pow(Math.Log(i + 2), 1.75));
 			}
 		}
 
