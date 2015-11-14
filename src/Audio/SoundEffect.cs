@@ -327,6 +327,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 				if (audio_format == 1)
 				{
+					System.Diagnostics.Debug.Assert(bitDepth == 8 || bitDepth == 16);
 					formatParameter = (uint) (bitDepth / 16); // 1 for 16, 0 for 8
 				}
 				else if (audio_format != 2)
