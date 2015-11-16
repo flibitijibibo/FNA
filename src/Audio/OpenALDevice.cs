@@ -280,6 +280,12 @@ namespace Microsoft.Xna.Framework.Audio
 				AL10.AL_BITS,
 				out bits
 			);
+			if (bufLen == 0 || bits == 0)
+			{
+				throw new InvalidOperationException(
+					"OpenAL buffer allocation failed!"
+				);
+			}
 			TimeSpan resultDur = TimeSpan.FromSeconds(
 				bufLen /
 				(bits / 8) /
