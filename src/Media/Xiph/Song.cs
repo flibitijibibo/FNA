@@ -205,7 +205,7 @@ namespace Microsoft.Xna.Framework.Media
 			 * you, just remove the XNB file and we'll read the OGG straight up.
 			 * -flibit
 			 */
-			if (Math.Abs(Duration.Milliseconds - durationMS) > 1)
+			if (Math.Abs(Duration.Milliseconds - durationMS) > 1000)
 			{
 				throw new Exception("XNB/OGG duration mismatch!");
 			}
