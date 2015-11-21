@@ -1561,37 +1561,35 @@ namespace Microsoft.Xna.Framework.Graphics
 				);
 			}
 
-			if (zEnable)
+			// FIXME: Floating point equality comparisons used for speed -flibit
+			float realDepthBias = rasterizerState.DepthBias * XNAToGL.DepthBiasScale[
+				renderTargetBound ?
+					(int) currentDepthStencilFormat :
+					(int) Backbuffer.DepthFormat
+			];
+			if (	realDepthBias != depthBias ||
+				rasterizerState.SlopeScaleDepthBias != slopeScaleDepthBias	)
 			{
-				float realDepthBias = rasterizerState.DepthBias * XNAToGL.DepthBiasScale[
-					renderTargetBound ?
-						(int) currentDepthStencilFormat :
-						(int) Backbuffer.DepthFormat
-				];
-				if (	realDepthBias != depthBias ||
-					rasterizerState.SlopeScaleDepthBias != slopeScaleDepthBias	)
+				if (	realDepthBias == 0.0f &&
+					rasterizerState.SlopeScaleDepthBias == 0.0f)
 				{
-					if (	realDepthBias == 0.0f &&
-						rasterizerState.SlopeScaleDepthBias == 0.0f)
-					{
-						// We're changing to disabled bias, disable!
-						glDisable(GLenum.GL_POLYGON_OFFSET_FILL);
-					}
-					else
-					{
-						if (depthBias == 0.0f && slopeScaleDepthBias == 0.0f)
-						{
-							// We're changing away from disabled bias, enable!
-							glEnable(GLenum.GL_POLYGON_OFFSET_FILL);
-						}
-						glPolygonOffset(
-							rasterizerState.SlopeScaleDepthBias,
-							realDepthBias
-						);
-					}
-					depthBias = realDepthBias;
-					slopeScaleDepthBias = rasterizerState.SlopeScaleDepthBias;
+					// We're changing to disabled bias, disable!
+					glDisable(GLenum.GL_POLYGON_OFFSET_FILL);
 				}
+				else
+				{
+					if (depthBias == 0.0f && slopeScaleDepthBias == 0.0f)
+					{
+						// We're changing away from disabled bias, enable!
+						glEnable(GLenum.GL_POLYGON_OFFSET_FILL);
+					}
+					glPolygonOffset(
+						rasterizerState.SlopeScaleDepthBias,
+						realDepthBias
+					);
+				}
+				depthBias = realDepthBias;
+				slopeScaleDepthBias = rasterizerState.SlopeScaleDepthBias;
 			}
 		}
 
