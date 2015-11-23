@@ -99,10 +99,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region Events
 
-		// TODO: Hook this up! -flibit
-#pragma warning disable 0067
 		public event EventHandler<EventArgs> BufferReady;
-#pragma warning restore 0067
 
 		#endregion
 
@@ -190,6 +187,7 @@ namespace Microsoft.Xna.Framework.Audio
 				{
 					throw new NoMicrophoneConnectedException(Name);
 				}
+				AudioDevice.ActiveMics.Add(this);
 				State = MicrophoneState.Started;
 			}
 		}
@@ -198,9 +196,23 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			if (State == MicrophoneState.Started)
 			{
+				AudioDevice.ActiveMics.Remove(this);
 				AudioDevice.ALDevice.StopDeviceCapture(nativeMic);
 				nativeMic = IntPtr.Zero;
 				State = MicrophoneState.Stopped;
+			}
+		}
+
+		#endregion
+
+		#region Internal Methods
+
+		internal void CheckBuffer()
+		{
+			if (	BufferReady != null &&
+				AudioDevice.ALDevice.CaptureHasSamples(nativeMic)	)
+			{
+				BufferReady(this, EventArgs.Empty);
 			}
 		}
 

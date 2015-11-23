@@ -361,5 +361,10 @@ namespace Microsoft.Xna.Framework.Audio
 		{
 			return 0;
 		}
+
+		public bool CaptureHasSamples(IntPtr handle)
+		{
+			return false;
+		}
 	}
 }

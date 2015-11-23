@@ -106,6 +106,7 @@ namespace Microsoft.Xna.Framework.Audio
 		IntPtr StartDeviceCapture(string name, int sampleRate, int bufSize);
 		void StopDeviceCapture(IntPtr handle);
 		int CaptureSamples(IntPtr handle, IntPtr buffer, int count);
+		bool CaptureHasSamples(IntPtr handle);
 	}
 
 	internal interface IALBuffer

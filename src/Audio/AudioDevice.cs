@@ -42,6 +42,15 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#endregion
 
+		#region Microphone Management Variables
+
+		// FIXME: readonly? -flibit
+
+		// Used to store Microphones that are currently recording
+		public static List<Microphone> ActiveMics;
+
+		#endregion
+
 		#region Public Static Initialize Method
 
 		public static void Initialize()
@@ -87,10 +96,12 @@ namespace Microsoft.Xna.Framework.Audio
 
 				InstancePool = new List<SoundEffectInstance>();
 				DynamicInstancePool = new List<DynamicSoundEffectInstance>();
+				ActiveMics = new List<Microphone>();
 			}
 			else
 			{
 				Renderers = new ReadOnlyCollection<RendererDetail>(new List<RendererDetail>());
+				Microphone.All = new ReadOnlyCollection<Microphone>(new List<Microphone>());
 			}
 		}
 
@@ -136,6 +147,11 @@ namespace Microsoft.Xna.Framework.Audio
 						DynamicInstancePool.RemoveAt(i);
 						i -= 1;
 					}
+				}
+
+				foreach (Microphone mic in ActiveMics)
+				{
+					mic.CheckBuffer();
 				}
 			}
 		}

@@ -1083,6 +1083,18 @@ namespace Microsoft.Xna.Framework.Audio
 			return samples[0] * 2;
 		}
 
+		public bool CaptureHasSamples(IntPtr handle)
+		{
+			int[] samples = new int[1] { 0 };
+			ALC10.alcGetIntegerv(
+				handle,
+				ALC11.ALC_CAPTURE_SAMPLES,
+				(IntPtr) 1,
+				samples
+			);
+			return samples[0] > 0;
+		}
+
 		#endregion
 
 		#region Private OpenAL Error Check Methods
