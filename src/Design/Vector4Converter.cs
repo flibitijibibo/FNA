@@ -19,10 +19,6 @@ namespace Microsoft.Xna.Framework.Design
 	{
 		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
 		{
-			if (VectorConversion.CanConvertTo(context, destinationType))
-			{
-				return true;
-			}
 			if (destinationType == typeof(string))
 			{
 				return true;
@@ -34,11 +30,6 @@ namespace Microsoft.Xna.Framework.Design
 		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
 		{
 			Vector4 vec = (Vector4) value;
-
-			if (VectorConversion.CanConvertTo(context, destinationType))
-			{
-				return VectorConversion.ConvertToFromVector4(context, culture, vec, destinationType);
-			}
 
 			if (destinationType == typeof(string))
 			{
