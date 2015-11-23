@@ -16,7 +16,7 @@ using System.Globalization;
 
 namespace Microsoft.Xna.Framework.Design
 {
-	public class PointConverter : TypeConverter
+	public class PointConverter : MathTypeConverter
 	{
 		#region Public Constructor
 

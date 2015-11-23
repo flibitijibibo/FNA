@@ -16,7 +16,7 @@ using System.Globalization;
 
 namespace Microsoft.Xna.Framework.Design
 {
-	public class Vector2Converter : TypeConverter
+	public class Vector2Converter : MathTypeConverter
 	{
 		#region Public Constructor
 
