@@ -1069,7 +1069,7 @@ namespace Microsoft.Xna.Framework.Audio
 				(IntPtr) 1,
 				samples
 			);
-			samples[0] = Math.Min(samples[0], count);
+			samples[0] = Math.Min(samples[0], count / 2);
 			if (samples[0] > 0)
 			{
 				ALC11.alcCaptureSamples(handle, buffer, (IntPtr) samples[0]);
@@ -1080,7 +1080,7 @@ namespace Microsoft.Xna.Framework.Audio
 				throw new InvalidOperationException("AL device error!");
 			}
 #endif
-			return samples[0];
+			return samples[0] * 2;
 		}
 
 		#endregion
