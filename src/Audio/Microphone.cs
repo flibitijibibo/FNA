@@ -156,7 +156,6 @@ namespace Microsoft.Xna.Framework.Audio
 				count
 			);
 			handle.Free();
-			System.Console.WriteLine(read);
 			return read;
 		}
 
