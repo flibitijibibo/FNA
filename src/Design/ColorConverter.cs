@@ -9,29 +9,32 @@
 
 #region Using Statements
 using System;
+using System.Collections;
 using System.ComponentModel;
+using System.Globalization;
 #endregion
 
 namespace Microsoft.Xna.Framework.Design
 {
-	public class ColorConverter : TypeConverter
+	public class ColorConverter : MathTypeConverter
 	{
-		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+		#region Public Constructor
+
+		public ColorConverter() : base()
 		{
-			if (sourceType == typeof(string))
-			{
-				return true;
-			}
-			return base.CanConvertFrom(context, sourceType);
+			// FIXME: Initialize propertyDescriptions... how? -flibit
 		}
+
+		#endregion
+
+		#region Public Methods
 
 		public override object ConvertFrom(
 			ITypeDescriptorContext context,
-			System.Globalization.CultureInfo culture,
+			CultureInfo culture,
 			object value
 		) {
 			string s = value as string;
-
 			if (s != null)
 			{
 				string[] v = s.Split(
@@ -49,20 +52,39 @@ namespace Microsoft.Xna.Framework.Design
 
 		public override object ConvertTo(
 			ITypeDescriptorContext context,
-			System.Globalization.CultureInfo culture,
+			CultureInfo culture,
 			object value,
 			Type destinationType
 		) {
 			if (destinationType == typeof(string))
 			{
 				Color src = (Color) value;
-				string sep = culture.NumberFormat.NumberGroupSeparator;
-				return src.R.ToString(culture) +
-					sep + src.B.ToString(culture) +
-					sep + src.B.ToString(culture) +
-					sep + src.A.ToString(culture);
+				return string.Join(
+					culture.NumberFormat.NumberGroupSeparator,
+					new string[]
+					{
+						src.R.ToString(culture),
+						src.G.ToString(culture),
+						src.B.ToString(culture),
+						src.A.ToString(culture)
+					}
+				);
 			}
 			return base.ConvertTo(context, culture, value, destinationType);
 		}
+
+		public override object CreateInstance(
+			ITypeDescriptorContext context,
+			IDictionary propertyValues
+		) {
+			return (object) new Color(
+				(float) propertyValues["R"],
+				(float) propertyValues["G"],
+				(float) propertyValues["B"],
+				(float) propertyValues["A"]
+			);
+		}
+
+		#endregion
 	}
 }

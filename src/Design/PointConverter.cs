@@ -9,29 +9,32 @@
 
 #region Using Statements
 using System;
+using System.Collections;
 using System.ComponentModel;
+using System.Globalization;
 #endregion
 
 namespace Microsoft.Xna.Framework.Design
 {
 	public class PointConverter : TypeConverter
 	{
-		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+		#region Public Constructor
+
+		public PointConverter() : base()
 		{
-			if (sourceType == typeof(string))
-			{
-				return true;
-			}
-			return base.CanConvertFrom(context, sourceType);
+			// FIXME: Initialize propertyDescriptions... how? -flibit
 		}
+
+		#endregion
+
+		#region Public Methods
 
 		public override object ConvertFrom(
 			ITypeDescriptorContext context,
-			System.Globalization.CultureInfo culture,
+			CultureInfo culture,
 			object value
 		) {
 			string s = value as string;
-
 			if (s != null)
 			{
 				string[] v = s.Split(
@@ -53,14 +56,29 @@ namespace Microsoft.Xna.Framework.Design
 		) {
 			if (destinationType == typeof(string))
 			{
-				Point src = (Point) value;
-				return (
-					src.X.ToString(culture) +
-					culture.NumberFormat.NumberGroupSeparator +
-					src.Y.ToString(culture)
+				Point pt = (Point) value;
+				return string.Join(
+					culture.NumberFormat.NumberGroupSeparator,
+					new string[]
+					{
+						pt.X.ToString(culture),
+						pt.Y.ToString(culture)
+					}
 				);
 			}
 			return base.ConvertTo(context, culture, value, destinationType);
 		}
+
+		public override object CreateInstance(
+			ITypeDescriptorContext context,
+			IDictionary propertyValues
+		) {
+			return (object) new Point(
+				(int) propertyValues["X"],
+				(int) propertyValues["Y"]
+			);
+		}
+
+		#endregion
 	}
 }

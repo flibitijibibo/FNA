@@ -9,6 +9,7 @@
 
 #region Using Statements
 using System;
+using System.Collections;
 using System.ComponentModel;
 using System.Globalization;
 #endregion
@@ -17,61 +18,70 @@ namespace Microsoft.Xna.Framework.Design
 {
 	public class Vector3Converter : TypeConverter
 	{
-		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
-		{
-			if (destinationType == typeof(string))
-			{
-				return true;
-			}
+		#region Public Constructor
 
-			return base.CanConvertTo(context, destinationType);
+		public Vector3Converter() : base()
+		{
+			// FIXME: Initialize propertyDescriptions... how? -flibit
 		}
 
-		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
-		{
-			Vector3 vec = (Vector3) value;
+		#endregion
 
+		#region Public Methods
+
+		public override object ConvertFrom(
+			ITypeDescriptorContext context,
+			CultureInfo culture,
+			object value
+		) {
+			string s = value as string;
+			if (s != null)
+			{
+				string[] v = s.Split(
+					culture.NumberFormat.NumberGroupSeparator.ToCharArray()
+				);
+				return new Vector3(
+					float.Parse(v[0], culture),
+					float.Parse(v[1], culture),
+					float.Parse(v[2], culture)
+				);
+			}
+			return base.ConvertFrom(context, culture, value);
+		}
+
+		public override object ConvertTo(
+			ITypeDescriptorContext context,
+			CultureInfo culture,
+			object value,
+			Type destinationType
+		) {
 			if (destinationType == typeof(string))
 			{
-				string[] terms = new string[3];
-				terms[0] = vec.X.ToString(culture);
-				terms[1] = vec.Y.ToString(culture);
-				terms[2] = vec.Z.ToString(culture);
-
-				return string.Join(culture.NumberFormat.NumberGroupSeparator, terms);
+				Vector3 vec = (Vector3) value;
+				return string.Join(
+					culture.NumberFormat.NumberGroupSeparator,
+					new string[]
+					{
+						vec.X.ToString(culture),
+						vec.Y.ToString(culture),
+						vec.Z.ToString(culture)
+					}
+				);
 			}
-
 			return base.ConvertTo(context, culture, value, destinationType);
 		}
 
-		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
-		{
-			if (sourceType == typeof(string))
-			{
-				return true;
-			}
-
-			return base.CanConvertFrom(context, sourceType);
+		public override object CreateInstance(
+			ITypeDescriptorContext context,
+			IDictionary propertyValues
+		) {
+			return (object) new Vector3(
+				(float) propertyValues["X"],
+				(float) propertyValues["Y"],
+				(float) propertyValues["Z"]
+			);
 		}
 
-		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
-		{
-			Type sourceType = value.GetType();
-			Vector3 vec = Vector3.Zero;
-
-			if (sourceType == typeof(string))
-			{
-				string str = (string) value;
-				string[] words = str.Split(culture.NumberFormat.NumberGroupSeparator.ToCharArray());
-
-				vec.X = float.Parse(words[0], culture);
-				vec.Y = float.Parse(words[1], culture);
-				vec.Z = float.Parse(words[2], culture);
-
-				return vec;
-			}
-
-			return base.ConvertFrom(context, culture, value);
-		}
+		#endregion
 	}
 }
