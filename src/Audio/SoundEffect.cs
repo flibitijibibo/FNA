@@ -382,6 +382,7 @@ namespace Microsoft.Xna.Framework.Audio
 			int sampleRate,
 			AudioChannels channels
 		) {
+			sizeInBytes /= 2; // 16-bit PCM!
 			int ms = (int) (
 				(sizeInBytes / (int) channels) /
 				(sampleRate / 1000.0f)
@@ -397,7 +398,8 @@ namespace Microsoft.Xna.Framework.Audio
 			return (int) (
 				duration.TotalSeconds *
 				sampleRate *
-				(int) channels
+				(int) channels *
+				2 // 16-bit PCM!
 			);
 		}
 

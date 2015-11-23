@@ -59,6 +59,13 @@ namespace Microsoft.Xna.Framework.Audio
 			);
 		}
 
+		public ReadOnlyCollection<Microphone> GetCaptureDevices()
+		{
+			return new ReadOnlyCollection<Microphone>(
+				new List<Microphone>()
+			);
+		}
+
 		public IALBuffer GenBuffer()
 		{
 			return new NullBuffer();
@@ -338,6 +345,21 @@ namespace Microsoft.Xna.Framework.Audio
 		public void SetReverbWetDryMix(IALReverb reverb, float value)
 		{
 			// No-op, duh.
+		}
+
+		public IntPtr StartDeviceCapture(string name, int sampleRate, int bufSize)
+		{
+			return IntPtr.Zero;
+		}
+
+		public void StopDeviceCapture(IntPtr handle)
+		{
+			// No-op, duh.
+		}
+
+		public int CaptureSamples(IntPtr handle, IntPtr buffer, int count)
+		{
+			return 0;
 		}
 	}
 }

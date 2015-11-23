@@ -43,6 +43,9 @@
     <Compile Include="src\Graphics\ResourceCreatedEventArgs.cs" />
     <Compile Include="src\Graphics\ResourceDestroyedEventArgs.cs" />
     <Compile Include="src\Audio\NoAudioHardwareException.cs" />
+    <Compile Include="src\Audio\Microphone.cs" />
+    <Compile Include="src\Audio\MicrophoneState.cs" />
+    <Compile Include="src\Audio\NoMicrophoneConnectedException.cs" />
     <Compile Include="src\Content\ContentExtensions.cs" />
     <Compile Include="src\BoundingBox.cs" />
     <Compile Include="src\BoundingFrustum.cs" />
@@ -356,6 +359,7 @@
     <Compile Include="lib\SDL2-CS\src\SDL2_image.cs" />
     <Compile Include="lib\SDL2-CS\src\LPUtf8StrMarshaler.cs" />
     <Compile Include="lib\OpenAL-CS\src\ALC10.cs" />
+    <Compile Include="lib\OpenAL-CS\src\ALC11.cs" />
     <Compile Include="lib\OpenAL-CS\src\AL10.cs" />
     <Compile Include="lib\OpenAL-CS\src\AL11.cs" />
     <Compile Include="lib\OpenAL-CS\src\ALEXT.cs" />

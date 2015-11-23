@@ -83,6 +83,7 @@ namespace Microsoft.Xna.Framework.Audio
 			if (ALDevice != null)
 			{
 				Renderers = ALDevice.GetDevices();
+				Microphone.All = ALDevice.GetCaptureDevices();
 
 				InstancePool = new List<SoundEffectInstance>();
 				DynamicInstancePool = new List<DynamicSoundEffectInstance>();

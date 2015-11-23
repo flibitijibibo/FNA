@@ -20,6 +20,7 @@ namespace Microsoft.Xna.Framework.Audio
 		void Update();
 		void Dispose();
 		ReadOnlyCollection<RendererDetail> GetDevices();
+		ReadOnlyCollection<Microphone> GetCaptureDevices();
 
 		IALBuffer GenBuffer();
 		IALBuffer GenBuffer(
@@ -101,6 +102,10 @@ namespace Microsoft.Xna.Framework.Audio
 		void SetReverbDensity(IALReverb reverb, float value);
 		void SetReverbRoomSize(IALReverb reverb, float value);
 		void SetReverbWetDryMix(IALReverb reverb, float value);
+
+		IntPtr StartDeviceCapture(string name, int sampleRate, int bufSize);
+		void StopDeviceCapture(IntPtr handle);
+		int CaptureSamples(IntPtr handle, IntPtr buffer, int count);
 	}
 
 	internal interface IALBuffer

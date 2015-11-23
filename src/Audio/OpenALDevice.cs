@@ -1028,6 +1028,63 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#endregion
 
+		#region OpenAL Capture Methods
+
+		public IntPtr StartDeviceCapture(string name, int sampleRate, int bufSize)
+		{
+			IntPtr result = ALC11.alcCaptureOpenDevice(
+				name,
+				(uint) sampleRate,
+				AL10.AL_FORMAT_MONO16,
+				(IntPtr) bufSize
+			);
+			ALC11.alcCaptureStart(result);
+#if VERBOSE_AL_DEBUGGING
+			if (CheckALCError())
+			{
+				throw new InvalidOperationException("AL device error!");
+			}
+#endif
+			return result;
+		}
+
+		public void StopDeviceCapture(IntPtr handle)
+		{
+			ALC11.alcCaptureStop(handle);
+			ALC11.alcCaptureCloseDevice(handle);
+#if VERBOSE_AL_DEBUGGING
+			if (CheckALCError())
+			{
+				throw new InvalidOperationException("AL device error!");
+			}
+#endif
+		}
+
+		public int CaptureSamples(IntPtr handle, IntPtr buffer, int count)
+		{
+			int[] samples = new int[1] { 0 };
+			ALC10.alcGetIntegerv(
+				handle,
+				ALC11.ALC_CAPTURE_SAMPLES,
+				(IntPtr) 1,
+				samples
+			);
+			samples[0] = Math.Min(samples[0], count);
+			if (samples[0] > 0)
+			{
+				ALC11.alcCaptureSamples(handle, buffer, (IntPtr) samples[0]);
+			}
+#if VERBOSE_AL_DEBUGGING
+			if (CheckALCError())
+			{
+				throw new InvalidOperationException("AL device error!");
+			}
+#endif
+			return samples[0];
+		}
+
+		#endregion
+
 		#region Private OpenAL Error Check Methods
 
 		private void CheckALError()
@@ -1078,11 +1135,11 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#endregion
 
-		#region OpenAL Device Enumerator
+		#region OpenAL Device Enumerators
 
 		public ReadOnlyCollection<RendererDetail> GetDevices()
 		{
-			IntPtr deviceList = ALC10.alcGetString(IntPtr.Zero, ALEXT.ALC_ALL_DEVICES_SPECIFIER);
+			IntPtr deviceList = ALC10.alcGetString(IntPtr.Zero, ALC11.ALC_ALL_DEVICES_SPECIFIER);
 			List<RendererDetail> renderers = new List<RendererDetail>();
 
 			int i = 0;
@@ -1099,6 +1156,22 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 
 			return new ReadOnlyCollection<RendererDetail>(renderers);
+		}
+
+		public ReadOnlyCollection<Microphone> GetCaptureDevices()
+		{
+			IntPtr deviceList = ALC10.alcGetString(IntPtr.Zero, ALC11.ALC_CAPTURE_DEVICE_SPECIFIER);
+			List<Microphone> microphones = new List<Microphone>();
+
+			string curString = Marshal.PtrToStringAnsi(deviceList);
+			while (!String.IsNullOrEmpty(curString))
+			{
+				microphones.Add(new Microphone(curString));
+				deviceList += curString.Length + 1;
+				curString = Marshal.PtrToStringAnsi(deviceList);
+			}
+
+			return new ReadOnlyCollection<Microphone>(microphones);
 		}
 
 		#endregion
