@@ -13,12 +13,16 @@
 
 #region Using Statements
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
+
+using Microsoft.Xna.Framework.Design;
 #endregion
 
 namespace Microsoft.Xna.Framework
 {
 	[Serializable]
+	[TypeConverter(typeof(RayConverter))]
 	[DebuggerDisplay("{DebugDisplayString,nq}")]
 	public struct Ray : IEquatable<Ray>
 	{
@@ -39,8 +43,8 @@ namespace Microsoft.Xna.Framework
 
 		#region Public Fields
 
-		public Vector3 Direction;
 		public Vector3 Position;
+		public Vector3 Direction;
 
 		#endregion
 

@@ -337,8 +337,15 @@
     <Compile Include="src\Graphics\Effect\StockEffects\EnvironmentMapEffect.cs" />
     <Compile Include="src\Graphics\Effect\StockEffects\SkinnedEffect.cs" />
     <Compile Include="src\Graphics\Effect\StockEffects\SpriteEffect.cs" />
+    <Compile Include="src\Design\BoundingBoxConverter.cs" />
+    <Compile Include="src\Design\BoundingSphereConverter.cs" />
     <Compile Include="src\Design\ColorConverter.cs" />
+    <Compile Include="src\Design\MatrixConverter.cs" />
+    <Compile Include="src\Design\PlaneConverter.cs" />
     <Compile Include="src\Design\PointConverter.cs" />
+    <Compile Include="src\Design\QuaternionConverter.cs" />
+    <Compile Include="src\Design\RayConverter.cs" />
+    <Compile Include="src\Design\RectangleConverter.cs" />
     <Compile Include="src\Design\Vector2Converter.cs" />
     <Compile Include="src\Design\Vector3Converter.cs" />
     <Compile Include="src\Design\Vector4Converter.cs" />

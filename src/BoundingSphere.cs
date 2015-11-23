@@ -14,7 +14,10 @@
 #region Using Statements
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
+
+using Microsoft.Xna.Framework.Design;
 #endregion
 
 namespace Microsoft.Xna.Framework
@@ -23,6 +26,7 @@ namespace Microsoft.Xna.Framework
 	/// Describes a sphere in 3D-space for bounding operations.
 	/// </summary>
 	[Serializable]
+	[TypeConverter(typeof(BoundingSphereConverter))]
 	[DebuggerDisplay("{DebugDisplayString,nq}")]
 	public struct BoundingSphere : IEquatable<BoundingSphere>
 	{

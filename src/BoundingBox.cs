@@ -14,12 +14,16 @@
 #region Using Statements
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
+
+using Microsoft.Xna.Framework.Design;
 #endregion
 
 namespace Microsoft.Xna.Framework
 {
 	[Serializable]
+	[TypeConverter(typeof(BoundingBoxConverter))]
 	[DebuggerDisplay("{DebugDisplayString,nq}")]
 	public struct BoundingBox : IEquatable<BoundingBox>
 	{

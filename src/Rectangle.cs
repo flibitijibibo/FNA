@@ -13,7 +13,10 @@
 
 #region Using Statements
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
+
+using Microsoft.Xna.Framework.Design;
 #endregion
 
 namespace Microsoft.Xna.Framework
@@ -22,6 +25,7 @@ namespace Microsoft.Xna.Framework
 	/// Describes a 2D-rectangle.
 	/// </summary>
 	[Serializable]
+	[TypeConverter(typeof(RectangleConverter))]
 	[DebuggerDisplay("{DebugDisplayString,nq}")]
 	public struct Rectangle : IEquatable<Rectangle>
 	{

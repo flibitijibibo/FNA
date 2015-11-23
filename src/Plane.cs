@@ -13,12 +13,16 @@
 
 #region Using Statements
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
+
+using Microsoft.Xna.Framework.Design;
 #endregion
 
 namespace Microsoft.Xna.Framework
 {
 	[Serializable]
+	[TypeConverter(typeof(PlaneConverter))]
 	[DebuggerDisplay("{DebugDisplayString,nq}")]
 	public struct Plane : IEquatable<Plane>
 	{
@@ -39,8 +43,8 @@ namespace Microsoft.Xna.Framework
 
 		#region Public Fields
 
-		public float D;
 		public Vector3 Normal;
+		public float D;
 
 		#endregion
 

@@ -13,7 +13,10 @@
 
 #region Using Statements
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
+
+using Microsoft.Xna.Framework.Design;
 #endregion
 
 namespace Microsoft.Xna.Framework
@@ -22,6 +25,7 @@ namespace Microsoft.Xna.Framework
 	/// Represents the right-handed 4x4 floating point matrix, which can store translation, scale and rotation information.
 	/// </summary>
 	[Serializable]
+	[TypeConverter(typeof(MatrixConverter))]
 	[DebuggerDisplay("{DebugDisplayString,nq}")]
 	public struct Matrix : IEquatable<Matrix>
 	{
