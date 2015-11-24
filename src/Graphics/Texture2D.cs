@@ -240,7 +240,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#endregion
 
-		#region Public Static Texture2D Load Method
+		#region Public Static Texture2D Load Methods
 
 		public static Texture2D FromStream(GraphicsDevice graphicsDevice, Stream stream)
 		{
@@ -254,6 +254,36 @@ namespace Microsoft.Xna.Framework.Graphics
 				graphicsDevice,
 				width,
 				height
+			);
+			result.SetData(pixels);
+			return result;
+		}
+
+		public static Texture2D FromStream(
+			GraphicsDevice graphicsDevice,
+			Stream stream,
+			int width,
+			int height,
+			bool zoom
+		) {
+			// Read the image data from the stream
+			int realWidth, realHeight;
+			byte[] pixels;
+			TextureDataFromStreamEXT(
+				stream,
+				out realWidth,
+				out realHeight,
+				out pixels,
+				width,
+				height,
+				zoom
+			);
+
+			// Create the Texture2D from the raw pixel data
+			Texture2D result = new Texture2D(
+				graphicsDevice,
+				realWidth,
+				realHeight
 			);
 			result.SetData(pixels);
 			return result;
@@ -275,17 +305,26 @@ namespace Microsoft.Xna.Framework.Graphics
 		/// <param name="width">Outputs the width of the image.</param>
 		/// <param name="height">Outputs the height of the image.</param>
 		/// <param name="pixels">Outputs the pixel data of the image, in non-premultiplied RGBA format.</param>
+		/// <param name="requestedWidth">Preferred width of the resulting image data</param>
+		/// <param name="requestedHeight">Preferred height of the resulting image data</param>
+		/// <param name="zoom">false to maintain aspect ratio, true to crop image</param>
 		public static void TextureDataFromStreamEXT(
 			Stream stream,
 			out int width,
 			out int height,
-			out byte[] pixels
+			out byte[] pixels,
+			int requestedWidth = -1,
+			int requestedHeight = -1,
+			bool zoom = false
 		) {
 			Game.Instance.Platform.TextureDataFromStream(
 				stream,
 				out width,
 				out height,
-				out pixels
+				out pixels,
+				requestedWidth,
+				requestedHeight,
+				zoom
 			);
 		}
 

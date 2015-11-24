@@ -292,7 +292,10 @@ namespace Microsoft.Xna.Framework
 			Stream stream,
 			out int width,
 			out int height,
-			out byte[] pixels
+			out byte[] pixels,
+			int reqWidth = -1,
+			int reqHeight = -1,
+			bool zoom = false
 		);
 
 		internal abstract void SavePNG(

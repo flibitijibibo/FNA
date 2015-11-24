@@ -674,7 +674,10 @@ namespace Microsoft.Xna.Framework
 			Stream stream,
 			out int width,
 			out int height,
-			out byte[] pixels
+			out byte[] pixels,
+			int reqWidth = -1,
+			int reqHeight = -1,
+			bool zoom = false
 		) {
 			// Load the Stream into an SDL_RWops*
 			byte[] mem = new byte[stream.Length];
@@ -684,6 +687,7 @@ namespace Microsoft.Xna.Framework
 
 			// Load the SDL_Surface* from RWops, get the image data
 			IntPtr surface = SDL_image.IMG_Load_RW(rwops, 1);
+			handle.Free();
 			if (surface == IntPtr.Zero)
 			{
 				// File not found, supported, etc.
@@ -693,6 +697,107 @@ namespace Microsoft.Xna.Framework
 				return;
 			}
 			surface = INTERNAL_convertSurfaceFormat(surface);
+
+			// Image scaling, if applicable
+			if (reqWidth != -1 && reqHeight != -1)
+			{
+				// Get the file surface dimensions now...
+				int rw;
+				int rh;
+				unsafe
+				{
+					SDL_Surface* surPtr = (SDL_Surface*) surface;
+					rw = surPtr->w;
+					rh = surPtr->h;
+				}
+
+				// Calculate the image scale factor
+				bool scaleWidth;
+				if (zoom)
+				{
+					scaleWidth = rw < rh;
+				}
+				else
+				{
+					scaleWidth = rw > rh;
+				}
+				float scale;
+				if (scaleWidth)
+				{
+					scale = reqWidth / (float) rw;
+				}
+				else
+				{
+					scale = reqHeight / (float) rh;
+				}
+
+				// Calculate the scaled image size, crop if zoomed
+				int resultWidth;
+				int resultHeight;
+				SDL.SDL_Rect crop = new SDL.SDL_Rect();
+				if (zoom)
+				{
+					resultWidth = reqWidth;
+					resultHeight = reqHeight;
+					if (scaleWidth)
+					{
+						crop.x = 0;
+						crop.w = rw;
+						crop.y = (int) (rh / 2 - (reqHeight / scale) / 2);
+						crop.h = (int) (reqHeight / scale);
+					}
+					else
+					{
+						crop.y = 0;
+						crop.h = rh;
+						crop.x = (int) (rw / 2 - (reqWidth / scale) / 2);
+						crop.w = (int) (reqWidth / scale);
+					}
+				}
+				else
+				{
+					resultWidth = (int) (rw * scale);
+					resultHeight = (int) (rh * scale);
+				}
+
+				// Alloc surface, blit!
+				IntPtr newSurface = SDL.SDL_CreateRGBSurface(
+					0,
+					resultWidth,
+					resultHeight,
+					32,
+					0x000000FF,
+					0x0000FF00,
+					0x00FF0000,
+					0xFF000000
+				);
+				SDL.SDL_SetSurfaceBlendMode(
+					surface,
+					SDL.SDL_BlendMode.SDL_BLENDMODE_NONE
+				);
+				if (zoom)
+				{
+					SDL.SDL_BlitScaled(
+						surface,
+						ref crop,
+						newSurface,
+						IntPtr.Zero
+					);
+				}
+				else
+				{
+					SDL.SDL_BlitScaled(
+						surface,
+						IntPtr.Zero,
+						newSurface,
+						IntPtr.Zero
+					);
+				}
+				SDL.SDL_FreeSurface(surface);
+				surface = newSurface;
+			}
+
+			// Copy surface data to output managed byte array
 			unsafe
 			{
 				SDL_Surface* surPtr = (SDL_Surface*) surface;
@@ -702,7 +807,6 @@ namespace Microsoft.Xna.Framework
 				Marshal.Copy(surPtr->pixels, pixels, 0, pixels.Length);
 			}
 			SDL.SDL_FreeSurface(surface);
-			handle.Free();
 
 			/* Ensure that the alpha pixels are... well, actual alpha.
 			 * You think this looks stupid, but be assured: Your paint program is
