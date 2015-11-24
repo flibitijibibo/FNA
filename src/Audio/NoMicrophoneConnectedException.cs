@@ -16,7 +16,7 @@ namespace Microsoft.Xna.Framework.Audio
 {
 	// http://msdn.microsoft.com/en-us/library/microsoft.xna.framework.audio.nomicrophoneconnectedexception.aspx
 	[Serializable]
-	public sealed class NoMicrophoneConnectedException : ExternalException
+	public sealed class NoMicrophoneConnectedException : Exception
 	{
 		public NoMicrophoneConnectedException()
 		{
