@@ -23,6 +23,7 @@ namespace Microsoft.Xna.Framework.Design
 		public MatrixConverter() : base()
 		{
 			// FIXME: Initialize propertyDescriptions... how? -flibit
+			supportStringConvert = false;
 		}
 
 		#endregion
@@ -35,32 +36,7 @@ namespace Microsoft.Xna.Framework.Design
 			object value,
 			Type destinationType
 		) {
-			if (destinationType == typeof(string))
-			{
-				Matrix mat = (Matrix) value;
-				return string.Join(
-					culture.NumberFormat.NumberGroupSeparator,
-					new string[]
-					{
-						mat.M11.ToString(culture),
-						mat.M12.ToString(culture),
-						mat.M13.ToString(culture),
-						mat.M14.ToString(culture),
-						mat.M21.ToString(culture),
-						mat.M22.ToString(culture),
-						mat.M23.ToString(culture),
-						mat.M24.ToString(culture),
-						mat.M31.ToString(culture),
-						mat.M32.ToString(culture),
-						mat.M33.ToString(culture),
-						mat.M34.ToString(culture),
-						mat.M41.ToString(culture),
-						mat.M42.ToString(culture),
-						mat.M43.ToString(culture),
-						mat.M44.ToString(culture)
-					}
-				);
-			}
+			// FIXME: This method exists in the spec, but... why?! -flibit
 			return base.ConvertTo(context, culture, value, destinationType);
 		}
 

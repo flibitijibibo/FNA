@@ -23,6 +23,7 @@ namespace Microsoft.Xna.Framework.Design
 		public RectangleConverter() : base()
 		{
 			// FIXME: Initialize propertyDescriptions... how? -flibit
+			supportStringConvert = false;
 		}
 
 		#endregion
@@ -35,20 +36,7 @@ namespace Microsoft.Xna.Framework.Design
 			object value,
 			Type destinationType
 		) {
-			if (destinationType == typeof(string))
-			{
-				Rectangle rect = (Rectangle) value;
-				return string.Join(
-					culture.NumberFormat.NumberGroupSeparator,
-					new string[]
-					{
-						rect.X.ToString(culture),
-						rect.Y.ToString(culture),
-						rect.Width.ToString(culture),
-						rect.Height.ToString(culture)
-					}
-				);
-			}
+			// FIXME: This method exists in the spec, but... why?! -flibit
 			return base.ConvertTo(context, culture, value, destinationType);
 		}
 

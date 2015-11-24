@@ -23,6 +23,7 @@ namespace Microsoft.Xna.Framework.Design
 		public PlaneConverter() : base()
 		{
 			// FIXME: Initialize propertyDescriptions... how? -flibit
+			supportStringConvert = false;
 		}
 
 		#endregion
@@ -35,10 +36,7 @@ namespace Microsoft.Xna.Framework.Design
 			object value,
 			Type destinationType
 		) {
-			if (destinationType == typeof(string))
-			{
-				throw new NotImplementedException("Plane->string!");
-			}
+			// FIXME: This method exists in the spec, but... why?! -flibit
 			return base.ConvertTo(context, culture, value, destinationType);
 		}
 

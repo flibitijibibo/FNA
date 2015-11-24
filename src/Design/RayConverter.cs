@@ -23,6 +23,7 @@ namespace Microsoft.Xna.Framework.Design
 		public RayConverter() : base()
 		{
 			// FIXME: Initialize propertyDescriptions... how? -flibit
+			supportStringConvert = false;
 		}
 
 		#endregion
@@ -34,11 +35,7 @@ namespace Microsoft.Xna.Framework.Design
 			CultureInfo culture,
 			object value
 		) {
-			string s = value as string;
-			if (s != null)
-			{
-				throw new NotImplementedException("string->Ray!");
-			}
+			// FIXME: This method exists in the spec, but... why?! -flibit
 			return base.ConvertFrom(context, culture, value);
 		}
 
@@ -48,10 +45,7 @@ namespace Microsoft.Xna.Framework.Design
 			object value,
 			Type destinationType
 		) {
-			if (destinationType == typeof(string))
-			{
-				throw new NotImplementedException("Ray->string!");
-			}
+			// FIXME: This method exists in the spec, but... why?! -flibit
 			return base.ConvertTo(context, culture, value, destinationType);
 		}
 
