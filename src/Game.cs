@@ -37,7 +37,6 @@ using System.Reflection;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input.Touch;
 #endregion
 
 namespace Microsoft.Xna.Framework
@@ -816,11 +815,6 @@ namespace Microsoft.Xna.Framework
 				AudioDevice.Update();
 
 				Update(gameTime);
-
-				/* The TouchPanel needs to know the time for when
-				 * touches arrive.
-				 */
-				TouchPanelState.CurrentTimestamp = gameTime.TotalGameTime;
 			}
 #if BASIC_PROFILER
 			updateTime = _gameTimer.ElapsedTicks - updateStart;

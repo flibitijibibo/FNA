@@ -12,7 +12,6 @@ using System;
 using System.ComponentModel;
 
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Input.Touch;
 #endregion
 
 namespace Microsoft.Xna.Framework
@@ -84,12 +83,6 @@ namespace Microsoft.Xna.Framework
 
 		#endregion
 
-		#region Internal Variables
-
-		internal TouchPanelState TouchPanelState;
-
-		#endregion
-
 		#region Private Variables
 
 		private string _title;
@@ -100,7 +93,6 @@ namespace Microsoft.Xna.Framework
 
 		protected GameWindow()
 		{
-			TouchPanelState = new TouchPanelState(this);
 		}
 
 		#endregion

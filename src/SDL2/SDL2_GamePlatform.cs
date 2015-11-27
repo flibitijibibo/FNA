@@ -43,7 +43,6 @@ using SDL2;
 
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Input.Touch;
 #endregion
 
 namespace Microsoft.Xna.Framework
@@ -330,41 +329,6 @@ namespace Microsoft.Xna.Framework
 					{
 						// 120 units per notch. Because reasons.
 						Mouse.INTERNAL_MouseWheel += evt.wheel.y * 120;
-					}
-
-					// Touch Input
-					else if (evt.type == SDL.SDL_EventType.SDL_FINGERDOWN)
-					{
-						TouchPanel.AddEvent(
-							(int) evt.tfinger.touchId,
-							TouchLocationState.Pressed,
-							new Vector2(
-								evt.tfinger.x,
-								evt.tfinger.y
-							)
-						);
-					}
-					else if (evt.type == SDL.SDL_EventType.SDL_FINGERUP)
-					{
-						TouchPanel.AddEvent(
-							(int) evt.tfinger.touchId,
-							TouchLocationState.Released,
-							new Vector2(
-								evt.tfinger.x,
-								evt.tfinger.y
-							)
-						);
-					}
-					else if (evt.type == SDL.SDL_EventType.SDL_FINGERMOTION)
-					{
-						TouchPanel.AddEvent(
-							(int) evt.tfinger.touchId,
-							TouchLocationState.Moved,
-							new Vector2(
-								evt.tfinger.x,
-								evt.tfinger.y
-							)
-						);
 					}
 
 					// Various Window Events...

@@ -11,7 +11,6 @@
 using System;
 
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input.Touch;
 #endregion
 
 namespace Microsoft.Xna.Framework
@@ -273,9 +272,6 @@ namespace Microsoft.Xna.Framework
 
 			// We just reset a device, notify the application.
 			OnDeviceReset(this, EventArgs.Empty);
-
-			// FIXME: When does this actually happen?
-			UpdateTouchPanel();
 		}
 
 		public void ToggleFullScreen()
@@ -329,9 +325,6 @@ namespace Microsoft.Xna.Framework
 
 				// We just reset a device, notify the application.
 				OnDeviceReset(this, EventArgs.Empty);
-
-				// FIXME: When does this actually happen?
-				UpdateTouchPanel();
 			}
 		}
 
@@ -383,22 +376,6 @@ namespace Microsoft.Xna.Framework
 
 		#endregion
 
-		#region Private Methods
-
-		private void UpdateTouchPanel()
-		{
-			/* TODO: In XNA this seems to be done as part of the
-			 * GraphicsDevice.DeviceReset event... we need to get
-			 * those working. -MonoGame
-			 */
-			TouchPanel.DisplayWidth =
-				graphicsDevice.PresentationParameters.BackBufferWidth;
-			TouchPanel.DisplayHeight =
-				graphicsDevice.PresentationParameters.BackBufferHeight;
-		}
-
-		#endregion
-
 		#region IGraphicsDeviceManager Methods
 
 		void IGraphicsDeviceManager.CreateDevice()
@@ -430,15 +407,6 @@ namespace Microsoft.Xna.Framework
 				gdi.PresentationParameters
 			);
 			ApplyChanges();
-
-			/* Set the new display orientation on the touch panel.
-			 *
-			 * TODO: In XNA this seems to be done as part of the
-			 * GraphicsDevice.DeviceReset event... we need to get
-			 * those working.
-			 */
-			TouchPanel.DisplayOrientation =
-				graphicsDevice.PresentationParameters.DisplayOrientation;
 
 			// Call the DeviceCreated Event
 			OnDeviceCreated(this, EventArgs.Empty);
