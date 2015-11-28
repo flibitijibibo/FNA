@@ -22,102 +22,102 @@ namespace Microsoft.Xna.Framework.Input
 		/// <summary>
 		/// Directional pad down.
 		/// </summary>
-		DPadUp = 1,
+		DPadUp =		0x00000001,
 		/// <summary>
 		/// Directional pad up.
 		/// </summary>
-		DPadDown = 2,
+		DPadDown =		0x00000002,
 		/// <summary>
 		/// Directional pad left.
 		/// </summary>
-		DPadLeft = 4,
+		DPadLeft =		0x00000004,
 		/// <summary>
 		/// Directional pad right.
 		/// </summary>
-		DPadRight = 8,
+		DPadRight =		0x00000008,
 		/// <summary>
 		/// START button.
 		/// </summary>
-		Start = 16,
+		Start =			0x00000010,
 		/// <summary>
 		/// BACK button.
 		/// </summary>
-		Back = 32,
+		Back =			0x00000020,
 		/// <summary>
 		/// Left stick button (pressing the left stick).
 		/// </summary>
-		LeftStick = 64,
+		LeftStick =		0x00000040,
 		/// <summary>
 		/// Right stick button (pressing the right stick).
 		/// </summary>
-		RightStick = 128,
+		RightStick =		0x00000080,
 		/// <summary>
 		/// Left bumper (shoulder) button.
 		/// </summary>
-		LeftShoulder = 256,
+		LeftShoulder =		0x00000100,
 		/// <summary>
 		/// Right bumper (shoulder) button.
 		/// </summary>
-		RightShoulder = 512,
+		RightShoulder =		0x00000200,
 		/// <summary>
 		/// Big button.
 		/// </summary>
-		BigButton = 2048,
+		BigButton =		0x00000800,
 		/// <summary>
 		/// A button.
 		/// </summary>
-		A = 4096,
+		A =			0x00001000,
 		/// <summary>
 		/// B button.
 		/// </summary>
-		B = 8192,
+		B =			0x00002000,
 		/// <summary>
 		/// X button.
 		/// </summary>
-		X = 16384,
+		X =			0x00004000,
 		/// <summary>
 		/// Y button.
 		/// </summary>
-		Y = 32768,
+		Y =			0x00008000,
 		/// <summary>
 		/// Left stick is towards the left.
 		/// </summary>
-		LeftThumbstickLeft = 2097152,
+		LeftThumbstickLeft =	0x00200000,
 		/// <summary>
 		/// Right trigger.
 		/// </summary>
-		RightTrigger = 4194304,
+		RightTrigger =		0x00400000,
 		/// <summary>
 		/// Left trigger.
 		/// </summary>
-		LeftTrigger = 8388608,
+		LeftTrigger =		0x00800000,
 		/// <summary>
 		/// Right stick is towards up.
 		/// </summary>
-		RightThumbstickUp = 16777216,
+		RightThumbstickUp =	0x01000000,
 		/// <summary>
 		/// Right stick is towards down.
 		/// </summary>
-		RightThumbstickDown = 33554432,
+		RightThumbstickDown =	0x02000000,
 		/// <summary>
 		/// Right stick is towards the right.
 		/// </summary>
-		RightThumbstickRight = 67108864,
+		RightThumbstickRight =	0x04000000,
 		/// <summary>
 		/// Right stick is towards the left.
 		/// </summary>
-		RightThumbstickLeft = 134217728,
+		RightThumbstickLeft =	0x08000000,
 		/// <summary>
 		/// Left stick is towards up.
 		/// </summary>
-		LeftThumbstickUp = 268435456,
+		LeftThumbstickUp =	0x10000000,
 		/// <summary>
 		/// Left stick is towards down.
 		/// </summary>
-		LeftThumbstickDown = 536870912,
+		LeftThumbstickDown =	0x20000000,
 		/// <summary>
 		/// Left stick is towards the right.
 		/// </summary>
-		LeftThumbstickRight = 1073741824
+		LeftThumbstickRight =	0x40000000
 	}
 }
