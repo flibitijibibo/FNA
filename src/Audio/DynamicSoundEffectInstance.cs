@@ -71,6 +71,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 			PendingBufferCount = 0;
 
+			isDynamic = true;
 			queuedBuffers = new Queue<IALBuffer>();
 			buffersToQueue = new Queue<IALBuffer>();
 			availableBuffers = new Queue<IALBuffer>();
@@ -175,6 +176,12 @@ namespace Microsoft.Xna.Framework.Audio
 					newBuf
 				);
 				queuedBuffers.Enqueue(newBuf);
+
+				// If the source stopped, reboot it now.
+				if (AudioDevice.ALDevice.GetSourceState(INTERNAL_alSource) == SoundState.Stopped)
+				{
+					AudioDevice.ALDevice.PlaySource(INTERNAL_alSource);
+				}
 			}
 			else
 			{
@@ -270,17 +277,8 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region Internal Update Method
 
-		internal bool Update()
+		internal void Update()
 		{
-			if (State == SoundState.Stopped)
-			{
-				/* If we've stopped, remove ourselves from the list.
-				 * Do NOT do anything else, Play/Stop/Dispose do this!
-				 * -flibit
-				 */
-				return false;
-			}
-
 			// Get the number of processed buffers.
 			int finishedBuffers = AudioDevice.ALDevice.CheckProcessedBuffers(
 				INTERNAL_alSource
@@ -288,7 +286,7 @@ namespace Microsoft.Xna.Framework.Audio
 			if (finishedBuffers == 0)
 			{
 				// Nothing to do... yet.
-				return true;
+				return;
 			}
 
 			// Dequeue the processed buffers, error checking as needed.
@@ -319,8 +317,6 @@ namespace Microsoft.Xna.Framework.Audio
 			) {
 				BufferNeeded(this, null);
 			}
-
-			return true;
 		}
 
 		#endregion
@@ -372,6 +368,12 @@ namespace Microsoft.Xna.Framework.Audio
 					newBuf
 				);
 				queuedBuffers.Enqueue(newBuf);
+
+				// If the source stopped, reboot it now.
+				if (AudioDevice.ALDevice.GetSourceState(INTERNAL_alSource) == SoundState.Stopped)
+				{
+					AudioDevice.ALDevice.PlaySource(INTERNAL_alSource);
+				}
 			}
 			else
 			{

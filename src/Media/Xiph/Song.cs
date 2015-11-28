@@ -349,20 +349,11 @@ namespace Microsoft.Xna.Framework.Media
 		{
 			while (!exitThread)
 			{
-				if (!soundStream.Update())
+				soundStream.Update();
+				if (eof && soundStream.PendingBufferCount == 0)
 				{
-					if (eof)
-					{
-						exitThread = true;
-					}
-					else
-					{
-						System.Console.WriteLine(
-							"Stopped playing Song before EOF!" +
-							" Hastily rebooting playback, expect jitteriness!"
-						);
-						soundStream.Play(false);
-					}
+					soundStream.Stop();
+					exitThread = true;
 				}
 				// Arbitrarily 1 frame in a 15Hz game -flibit
 				Thread.Sleep(67);

@@ -93,7 +93,15 @@ namespace Microsoft.Xna.Framework.Audio
 				{
 					return SoundState.Stopped;
 				}
-				return AudioDevice.ALDevice.GetSourceState(INTERNAL_alSource);
+				SoundState result = AudioDevice.ALDevice.GetSourceState(
+					INTERNAL_alSource
+				);
+				if (result == SoundState.Stopped && isDynamic)
+				{
+					// Force playing at all times for DSFI!
+					return SoundState.Playing;
+				}
+				return result;
 			}
 		}
 
@@ -130,6 +138,8 @@ namespace Microsoft.Xna.Framework.Audio
 		private SoundEffect INTERNAL_parentEffect;
 		private WeakReference selfReference;
 
+		internal bool isDynamic;
+
 		/* FNA' XACT runtime wraps around SoundEffect for audio output.
 		 * Only problem: XACT pitch has no boundaries, SoundEffect does.
 		 * So, we're going to use this to tell the pitch clamp to STFU.
@@ -165,6 +175,7 @@ namespace Microsoft.Xna.Framework.Audio
 				selfReference = new WeakReference(this);
 				INTERNAL_parentEffect.Instances.Add(selfReference);
 			}
+			isDynamic = false;
 		}
 
 		#endregion
@@ -317,6 +328,11 @@ namespace Microsoft.Xna.Framework.Audio
 				if (AudioDevice.ALDevice != null)
 				{
 					AudioDevice.ALDevice.StopAndDisposeSource(INTERNAL_alSource);
+					DynamicSoundEffectInstance dsfi = this as DynamicSoundEffectInstance;
+					if (dsfi != null && AudioDevice.DynamicInstancePool.Contains(dsfi))
+					{
+						AudioDevice.DynamicInstancePool.Remove(dsfi);
+					}
 				}
 				INTERNAL_alSource = null;
 			}

@@ -140,13 +140,9 @@ namespace Microsoft.Xna.Framework.Audio
 					}
 				}
 
-				for (int i = 0; i < DynamicInstancePool.Count; i += 1)
+				foreach (DynamicSoundEffectInstance sfi in DynamicInstancePool)
 				{
-					if (!DynamicInstancePool[i].Update())
-					{
-						DynamicInstancePool.RemoveAt(i);
-						i -= 1;
-					}
+					sfi.Update();
 				}
 
 				foreach (Microphone mic in ActiveMics)
