@@ -3888,19 +3888,19 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			public static readonly GLenum[] TextureInternalFormat = new GLenum[]
 			{
-				GLenum.GL_RGBA,					// SurfaceFormat.Color
-				GLenum.GL_RGB,					// SurfaceFormat.Bgr565
-				GLenum.GL_RGBA,					// SurfaceFormat.Bgra5551
+				GLenum.GL_RGBA8,				// SurfaceFormat.Color
+				GLenum.GL_RGB8,					// SurfaceFormat.Bgr565
+				GLenum.GL_RGBA8,				// SurfaceFormat.Bgra5551
 				GLenum.GL_RGBA4,				// SurfaceFormat.Bgra4444
 				GLenum.GL_COMPRESSED_RGBA_S3TC_DXT1_EXT,	// SurfaceFormat.Dxt1
 				GLenum.GL_COMPRESSED_RGBA_S3TC_DXT3_EXT,	// SurfaceFormat.Dxt3
 				GLenum.GL_COMPRESSED_RGBA_S3TC_DXT5_EXT,	// SurfaceFormat.Dxt5
-				GLenum.GL_RG,					// SurfaceFormat.NormalizedByte2
-				GLenum.GL_RGBA,					// SurfaceFormat.NormalizedByte4
+				GLenum.GL_RG8,					// SurfaceFormat.NormalizedByte2
+				GLenum.GL_RGBA8,				// SurfaceFormat.NormalizedByte4
 				GLenum.GL_RGB10_A2_EXT,				// SurfaceFormat.Rgba1010102
 				GLenum.GL_RG16,					// SurfaceFormat.Rg32
 				GLenum.GL_RGBA16,				// SurfaceFormat.Rgba64
-				GLenum.GL_LUMINANCE,				// SurfaceFormat.Alpha8
+				GLenum.GL_LUMINANCE8,				// SurfaceFormat.Alpha8
 				GLenum.GL_R32F,					// SurfaceFormat.Single
 				GLenum.GL_RG32F,				// SurfaceFormat.Vector2
 				GLenum.GL_RGBA32F,				// SurfaceFormat.Vector4
@@ -4219,7 +4219,7 @@ namespace Microsoft.Xna.Framework.Graphics
 					glDevice.glRenderbufferStorageMultisample(
 						GLenum.GL_RENDERBUFFER,
 						multiSampleCount,
-						GLenum.GL_RGBA,
+						GLenum.GL_RGBA8,
 						width,
 						height
 					);
@@ -4228,7 +4228,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				{
 					glDevice.glRenderbufferStorage(
 						GLenum.GL_RENDERBUFFER,
-						GLenum.GL_RGBA,
+						GLenum.GL_RGBA8,
 						width,
 						height
 					);
@@ -4268,7 +4268,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				{
 					glDevice.glRenderbufferStorage(
 						GLenum.GL_RENDERBUFFER,
-						GLenum.GL_DEPTH24_STENCIL8,
+						XNAToGL.DepthStorage[(int) depthFormat],
 						width,
 						height
 					);
@@ -4371,7 +4371,7 @@ namespace Microsoft.Xna.Framework.Graphics
 					glDevice.glRenderbufferStorageMultisample(
 						GLenum.GL_RENDERBUFFER,
 						MultiSampleCount,
-						GLenum.GL_RGBA,
+						GLenum.GL_RGBA8,
 						Width,
 						Height
 					);
@@ -4380,7 +4380,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				{
 					glDevice.glRenderbufferStorage(
 						GLenum.GL_RENDERBUFFER,
-						GLenum.GL_RGBA,
+						GLenum.GL_RGBA8,
 						Width,
 						Height
 					);
