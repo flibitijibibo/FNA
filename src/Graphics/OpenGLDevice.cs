@@ -3890,7 +3890,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				GLenum.GL_RGBA8,				// SurfaceFormat.Color
 				GLenum.GL_RGB8,					// SurfaceFormat.Bgr565
-				GLenum.GL_RGBA8,				// SurfaceFormat.Bgra5551
+				GLenum.GL_RGB5_A1,				// SurfaceFormat.Bgra5551
 				GLenum.GL_RGBA4,				// SurfaceFormat.Bgra4444
 				GLenum.GL_COMPRESSED_RGBA_S3TC_DXT1_EXT,	// SurfaceFormat.Dxt1
 				GLenum.GL_COMPRESSED_RGBA_S3TC_DXT3_EXT,	// SurfaceFormat.Dxt3

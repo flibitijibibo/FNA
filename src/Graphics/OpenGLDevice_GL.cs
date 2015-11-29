@@ -130,6 +130,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			GL_RGB8 =				0x8051,
 			GL_RGBA8 =				0x8058,
 			GL_RGBA4 =				0x8056,
+			GL_RGB5_A1 =				0x8057,
 			GL_RGB10_A2_EXT =			0x8059,
 			GL_RGBA16 =				0x805B,
 			GL_BGRA =				0x80E1,
