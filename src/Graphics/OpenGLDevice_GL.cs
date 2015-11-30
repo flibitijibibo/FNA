@@ -367,9 +367,6 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		/* BEGIN RASTERIZER STATE FUNCTIONS */
 
-		private delegate void CullFace(GLenum mode);
-		private CullFace glCullFace;
-
 		private delegate void FrontFace(GLenum mode);
 		private FrontFace glFrontFace;
 
@@ -930,10 +927,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				glStencilOp = (StencilOp) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glStencilOp"),
 					typeof(StencilOp)
-				);
-				glCullFace = (CullFace) Marshal.GetDelegateForFunctionPointer(
-					SDL.SDL_GL_GetProcAddress("glCullFace"),
-					typeof(CullFace)
 				);
 				glFrontFace = (FrontFace) Marshal.GetDelegateForFunctionPointer(
 					SDL.SDL_GL_GetProcAddress("glFrontFace"),

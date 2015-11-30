@@ -1561,11 +1561,6 @@ namespace Microsoft.Xna.Framework.Graphics
 				if ((actualMode == CullMode.None) != (cullFrontFace == CullMode.None))
 				{
 					ToggleGLState(GLenum.GL_CULL_FACE, actualMode != CullMode.None);
-					if (actualMode != CullMode.None)
-					{
-						// FIXME: XNA/FNA-specific behavior? -flibit
-						glCullFace(GLenum.GL_BACK);
-					}
 				}
 				cullFrontFace = actualMode;
 				if (cullFrontFace != CullMode.None)
