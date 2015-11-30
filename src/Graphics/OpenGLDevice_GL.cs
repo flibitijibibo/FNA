@@ -191,6 +191,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			GL_SAMPLES_PASSED =			0x8914,
 			// Multisampling
 			GL_MAX_SAMPLES =			0x8D57,
+			GL_SAMPLE_MASK =			0x8E51,
 			// 3.2 Core Profile
 			GL_NUM_EXTENSIONS =			0x821D,
 			// Source Enum Values

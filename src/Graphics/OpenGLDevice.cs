@@ -254,9 +254,20 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				if (value != multisampleMask && supportsMultisampling)
 				{
+					if (value == -1)
+					{
+						glDisable(GLenum.GL_SAMPLE_MASK);
+					}
+					else
+					{
+						if (multisampleMask == -1)
+						{
+							glEnable(GLenum.GL_SAMPLE_MASK);
+						}
+						// FIXME: index...? -flibit
+						glSampleMaski(0, (uint) value);
+					}
 					multisampleMask = value;
-					// FIXME: index...? -flibit
-					glSampleMaski(0, (uint) multisampleMask);
 				}
 			}
 		}
@@ -1392,9 +1403,20 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			if (blendState.MultiSampleMask != multisampleMask && supportsMultisampling)
 			{
+				if (blendState.MultiSampleMask == -1)
+				{
+					glDisable(GLenum.GL_SAMPLE_MASK);
+				}
+				else
+				{
+					if (multisampleMask == -1)
+					{
+						glEnable(GLenum.GL_SAMPLE_MASK);
+					}
+					// FIXME: index...? -flibit
+					glSampleMaski(0, (uint) blendState.MultiSampleMask);
+				}
 				multisampleMask = blendState.MultiSampleMask;
-				// FIXME: index...? -flibit
-				glSampleMaski(0, (uint) multisampleMask);
 			}
 		}
 
