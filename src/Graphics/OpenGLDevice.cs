@@ -2514,7 +2514,7 @@ namespace Microsoft.Xna.Framework.Graphics
 					(int) glInternalFormat,
 					Math.Max(width >> i, 1),
 					Math.Max(height >> i, 1),
-					depth,
+					Math.Max(depth >> i, 1),
 					0,
 					glFormat,
 					glType,
