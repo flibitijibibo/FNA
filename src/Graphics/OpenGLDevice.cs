@@ -3423,7 +3423,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				glRenderbufferStorageMultisample(
 					GLenum.GL_RENDERBUFFER,
 					multiSampleCount,
-					XNAToGL.TextureFormat[(int) format],
+					XNAToGL.TextureInternalFormat[(int) format],
 					width,
 					height
 				);
@@ -3432,7 +3432,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				glRenderbufferStorage(
 					GLenum.GL_RENDERBUFFER,
-					XNAToGL.TextureFormat[(int) format],
+					XNAToGL.TextureInternalFormat[(int) format],
 					width,
 					height
 				);
