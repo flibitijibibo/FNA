@@ -359,6 +359,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		private FillMode fillMode = FillMode.Solid;
 		private float depthBias = 0.0f;
 		private float slopeScaleDepthBias = 0.0f;
+		private bool multiSampleEnable = true;
 
 		#endregion
 
@@ -1607,6 +1608,21 @@ namespace Microsoft.Xna.Framework.Graphics
 				}
 				depthBias = realDepthBias;
 				slopeScaleDepthBias = rasterizerState.SlopeScaleDepthBias;
+			}
+
+			/* FIXME: This doesn't actually work on like 99% of setups!
+			 * For whatever reason people decided that they didn't have to obey
+			 * GL_MULTISAMPLE's value when it was disabled.
+			 *
+			 * If they could do it for D3D9 I fail to see why they couldn't for
+			 * OpenGL. Idiots.
+			 *
+			 * -flibit
+			 */
+			if (rasterizerState.MultiSampleAntiAlias != multiSampleEnable)
+			{
+				multiSampleEnable = rasterizerState.MultiSampleAntiAlias;
+				ToggleGLState(GLenum.GL_MULTISAMPLE, multiSampleEnable);
 			}
 		}
 
