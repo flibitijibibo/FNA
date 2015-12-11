@@ -708,7 +708,7 @@ namespace Microsoft.Xna.Framework.Audio
 			{
 				ALEXT.alGetBufferSamplesSOFT(
 					(buffer[1] as OpenALBuffer).Handle,
-					offset,
+					0,
 					copySize2,
 					channels == AudioChannels.Stereo ?
 						ALEXT.AL_STEREO_SOFT :

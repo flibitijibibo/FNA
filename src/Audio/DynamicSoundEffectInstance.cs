@@ -325,7 +325,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 		internal void GetSamples(float[] samples)
 		{
-			if (INTERNAL_alSource != null)
+			if (INTERNAL_alSource != null && queuedBuffers.Count > 0)
 			{
 				AudioDevice.ALDevice.GetBufferData(
 					INTERNAL_alSource,
@@ -333,6 +333,10 @@ namespace Microsoft.Xna.Framework.Audio
 					samples,
 					channels
 				);
+			}
+			else
+			{
+				Array.Clear(samples, 0, samples.Length);
 			}
 		}
 
