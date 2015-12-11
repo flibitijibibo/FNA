@@ -325,12 +325,15 @@ namespace Microsoft.Xna.Framework.Audio
 
 		internal void GetSamples(float[] samples)
 		{
-			AudioDevice.ALDevice.GetBufferData(
-				INTERNAL_alSource,
-				queuedBuffers.ToArray(), // FIXME: Blech -flibit
-				samples,
-				channels
-			);
+			if (INTERNAL_alSource != null)
+			{
+				AudioDevice.ALDevice.GetBufferData(
+					INTERNAL_alSource,
+					queuedBuffers.ToArray(), // FIXME: Blech -flibit
+					samples,
+					channels
+				);
+			}
 		}
 
 		#endregion
