@@ -1,37 +1,6 @@
-This is FNA, an XNA4 reimplementation that focuses solely on developing a fully
-accurate XNA4 runtime for the desktop.
+This was the old repository for FNA. The new repository can be found here:
 
-Project Website: http://fna-xna.github.io/
+https://github.com/FNA-XNA/FNA/
 
-About This Repository
----------------------
-This repository is still based on the MonoGame project's Git history. For the
-first official release of FNA, we will be starting a brand new history with a
-new repository at this GitHub organization:
-
-https://github.com/FNA-XNA/
-
-License
--------
-FNA is released under the Microsoft Public License. See LICENSE for details.
-
-FNA uses LzxDecoder.cs, released under a dual MSPL/LGPL license.
-See lzxdecoder.LICENSE for details.
-
-FNA uses code from the unxwb project, specially released under the MonoGame
-project license. See unxwb.LICENSE for details.
-
-FNA uses code from the Mono.Xna project, released under the MIT license.
-See monoxna.LICENSE for details.
-
-Documentation
--------------
-Documentation for FNA can be found on the FNA wiki:
-
-https://github.com/flibitijibibo/FNA/wiki
-
-Roadmap
--------
-To see the current roadmap for FNA, see the Github issues page:
-
-https://github.com/flibitijibibo/FNA/issues
+This repository is the archive of FNA before version 15.12.21, which used the
+MonoGame project Git history.
