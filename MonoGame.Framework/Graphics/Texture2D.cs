@@ -387,64 +387,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			byte[] data = new byte[Width * Height * 4];
 			GetData(data);
 
-			// Create an SDL_Surface*, write the pixel data
-			IntPtr surface = SDL.SDL_CreateRGBSurface(
-				0,
-				Width,
-				Height,
-				32,
-				0x000000FF,
-				0x0000FF00,
-				0x00FF0000,
-				0xFF000000
-			);
-			SDL.SDL_LockSurface(surface);
-			Marshal.Copy(
-				data,
-				0,
-				INTERNAL_getSurfacePixels(surface),
-				data.Length
-			);
-			SDL.SDL_UnlockSurface(surface);
-			data = null; // We're done with the original pixel data.
-
-			// Blit to a scaled surface of the size we want, if needed.
-			if (width != Width || height != Height)
-			{
-				IntPtr scaledSurface = SDL.SDL_CreateRGBSurface(
-					0,
-					width,
-					height,
-					32,
-					0x000000FF,
-					0x0000FF00,
-					0x00FF0000,
-					0xFF000000
-				);
-				SDL.SDL_BlitScaled(
-					surface,
-					IntPtr.Zero,
-					scaledSurface,
-					IntPtr.Zero
-				);
-				SDL.SDL_FreeSurface(surface);
-				surface = scaledSurface;
-			}
-
-			// Create an SDL_RWops*, save PNG to RWops
-			byte[] pngOut = new byte[width * height * 4]; // Max image size
-			IntPtr dst = SDL.SDL_RWFromMem(pngOut, pngOut.Length);
-			SDL_image.IMG_SavePNG_RW(surface, dst, 1);
-			SDL.SDL_FreeSurface(surface); // We're done with the surface.
-
-			// Get PNG size, write to Stream
-			int size = (
-				(pngOut[33] << 24) |
-				(pngOut[34] << 16) |
-				(pngOut[35] << 8) |
-				(pngOut[36])
-			) + 41 + 57; // 41 - header, 57 - footer
-			stream.Write(pngOut, 0, size);
+			TextureDataToPNGEXT(stream, data, Width, Height, width, height);
 		}
 
 		#endregion
@@ -513,6 +456,98 @@ namespace Microsoft.Xna.Framework.Graphics
 					pixels[i + 2] = 0;
 				}
 			}
+		}
+
+		/// <summary>
+		/// Saves the given texture data as a PNG image to the given stream.
+		/// </summary>
+		/// <remarks>
+		/// This is an extension of XNA 4 and is not compatible with XNA. It exists to allow for more optimized saving
+		/// of image files, particularly of screenshots. Having this method allows games to use GraphicsDevice.GetBackBufferData
+		/// and directly save the resulting data array as a PNG without having to create or update an existing Texture2D instance.
+		/// </remarks>
+		/// <param name="stream">The stream to which the PNG data is saved.</param>
+		/// <param name="data">The texture data to save.</param>
+		/// <param name="width">The width of the texture data (in pixels; it is assumed to be 32bit RGBA).</param>
+		/// <param name="height">The height of the texture data (in pixels; it is assumed to be 32bit RGBA).</param>
+		public static void TextureDataToPNGEXT(Stream stream, byte[] data, int width, int height)
+		{
+			TextureDataToPNGEXT(stream, data, width, height, width, height);
+		}
+
+		/// <summary>
+		/// Saves the given texture data as a PNG image to the given stream, optionally resizing it in the process.
+		/// </summary>
+		/// <remarks>
+		/// This is an extension of XNA 4 and is not compatible with XNA. It exists to allow for more optimized saving
+		/// of image files, particularly of screenshots. Having this method allows games to use GraphicsDevice.GetBackBufferData
+		/// and directly save the resulting data array as a PNG without having to create or update an existing Texture2D instance.
+		/// </remarks>
+		/// <param name="stream">The stream to which the PNG data is saved.</param>
+		/// <param name="data">The texture data to save.</param>
+		/// <param name="realWidth">The real width of the texture data (in pixels; it is assumed to be 32bit RGBA).</param>
+		/// <param name="realHeight">The real height of the texture data (in pixels; it is assumed to be 32bit RGBA).</param>
+		/// <param name="desiredWidth">The desired width of the PNG image.</param>
+		/// <param name="desiredHeight">The desired height of the PNG image.</param>
+		public static void TextureDataToPNGEXT(Stream stream, byte[] data, int realWidth, int realHeight, int desiredWidth, int desiredHeight)
+		{ 
+			// Create an SDL_Surface*, write the pixel data
+			IntPtr surface = SDL.SDL_CreateRGBSurface(
+				0,
+				realWidth,
+				realHeight,
+				32,
+				0x000000FF,
+				0x0000FF00,
+				0x00FF0000,
+				0xFF000000
+			);
+			SDL.SDL_LockSurface(surface);
+			Marshal.Copy(
+				data,
+				0,
+				INTERNAL_getSurfacePixels(surface),
+				data.Length
+			);
+			SDL.SDL_UnlockSurface(surface);
+
+			// Blit to a scaled surface of the size we want, if needed.
+			if (desiredWidth != realWidth || desiredHeight != realHeight)
+			{
+				IntPtr scaledSurface = SDL.SDL_CreateRGBSurface(
+					0,
+					desiredWidth,
+					desiredHeight,
+					32,
+					0x000000FF,
+					0x0000FF00,
+					0x00FF0000,
+					0xFF000000
+				);
+				SDL.SDL_BlitScaled(
+					surface,
+					IntPtr.Zero,
+					scaledSurface,
+					IntPtr.Zero
+				);
+				SDL.SDL_FreeSurface(surface);
+				surface = scaledSurface;
+			}
+
+			// Create an SDL_RWops*, save PNG to RWops
+			byte[] pngOut = new byte[desiredWidth * desiredHeight * 4]; // Max image size
+			IntPtr dst = SDL.SDL_RWFromMem(pngOut, pngOut.Length);
+			SDL_image.IMG_SavePNG_RW(surface, dst, 1);
+			SDL.SDL_FreeSurface(surface); // We're done with the surface.
+
+			// Get PNG size, write to Stream
+			int size = (
+				(pngOut[33] << 24) |
+				(pngOut[34] << 16) |
+				(pngOut[35] << 8) |
+				(pngOut[36])
+			) + 41 + 57; // 41 - header, 57 - footer
+			stream.Write(pngOut, 0, size);
 		}
 
 		#endregion
