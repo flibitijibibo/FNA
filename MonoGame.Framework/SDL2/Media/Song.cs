@@ -37,6 +37,9 @@ namespace Microsoft.Xna.Framework.Media
 		{
 			if (initialized)
 			{
+                // Stop the media player first
+                MediaPlayer.Stop();
+
 				SDL_mixer.Mix_CloseAudio();
 				initialized = false;
 			}
